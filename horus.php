@@ -1,0 +1,333 @@
+<?php
+
+//if (extension_loaded('oci8'))
+//    require_once "database_oci.php";
+//else
+//    require_once "database_pdo.php";
+
+function echoerror($exception){
+    ob_clean();
+    die('Error ' . $exception->getMessage());
+}
+
+function libxml_display_error($error)
+{
+    $return = "";
+    switch ($error->level) {
+        case LIBXML_ERR_WARNING:
+            $return .= "Warning $error->code : ";
+            break;
+        case LIBXML_ERR_ERROR:
+            $return .= "Error $error->code : ";
+            break;
+        case LIBXML_ERR_FATAL:
+            $return .= "Fatal Error $error->code : ";
+            break;
+    }
+    $return .= trim($error->message);
+    $return .= " on line $error->line\n";
+
+    return $return;
+}
+
+function libxml_display_errors() {
+    $ret = "";
+    $errors = libxml_get_errors();
+    foreach ($errors as $error) {
+        $ret .= libxml_display_error($error);
+    }
+    libxml_clear_errors();
+    return $ret;
+}
+
+
+function findMatch($matches,$request,$field){
+    return $matches[$request][$field];
+}
+
+function locate($matches,$found,$value){
+    $selected = -1;
+    foreach($matches as $id=>$match){
+//	print_r($match);
+        if($match['query']===$found){
+            if($match['queryMatch']!=''){
+                //echo('/' . $match['queryMatch'] . '/' . "\n");
+                if(preg_match('/' . $match['queryMatch'] . '/',$value)===1){
+                    $selected = $id;
+                    //echo('found ' . $id . "\n");
+                }else{
+                    //echo('not found' . "\n");
+                }
+            }else
+                $selected = $id;
+        }
+    }
+    //echo "Selected = $selected\n";
+    return $selected;
+}
+
+function formMultiPart($file,$data,$mime_boundary,$eol,$content_type) { 
+	$cc = '';
+	$cc .= '--' . $mime_boundary . $eol;
+	$cc .= "Content-Disposition: form-data; name=\"$file\"; filename=\"$file\"" . $eol;
+	$cc .= 'Content-Type: ' . $content_type . $eol;
+	$cc .= 'Content-Transfer-Encoding: base64' . $eol . $eol;
+	$cc .= chunk_split(base64_encode($data)) . $eol;
+
+	return $cc;
+}
+
+function decodeJsonError($errnum){
+    switch ($errnum) {
+        case JSON_ERROR_NONE:
+            $message = 'No errors';
+        break;
+        case JSON_ERROR_DEPTH:
+            $message = 'Maximum stack depth exceeded';
+        break;
+        case JSON_ERROR_STATE_MISMATCH:
+            $message = 'Underflow or the modes mismatch';
+        break;
+        case JSON_ERROR_CTRL_CHAR:
+            $message = 'Unexpected control character found';
+        break;
+        case JSON_ERROR_SYNTAX:
+            $message = 'Syntax error, malformed JSON';
+        break;
+        case JSON_ERROR_UTF8:
+            $message = 'Malformed UTF-8 characters, possibly incorrectly encoded';
+        break;
+        default:
+            $message = 'Unknown error';
+        break;
+    }
+
+    return $message;
+}
+
+function extractPayload($content_type,$body,$errorTemplate,$errorFormat){
+    if($content_type=="application/json"){
+        $json = json_decode($body,true);
+        if (json_last_error()!= JSON_ERROR_NONE) {
+            returnGenericError($errorFormat,$errorTemplate,'JSON Malformed : ' . decodeJsonError(json_last_error()));
+        }else{
+            if($json['payload']!=null)
+                return $json['payload'];
+            else
+            returnGenericError($content_type,$errorTemplate,'Empty JSON Payload');
+        }
+    }else
+        return $body;
+}
+
+function returnGenericError($format,$template,$errorMessage){
+
+    ob_start();
+    include $template;
+    $errorOutput = ob_get_contents();
+    ob_end_clean();
+
+    returnWithContentType($errorOutput,$format,400);
+
+}
+
+function returnWithContentType($data,$content_type,$status,$forward=null,$exitafter=true){
+    switch($status){
+        case 200:
+            header("HTTP/1.1 200 OK",TRUE,200);
+            break;
+        case 400:
+            header("HTTP/1.1 400 MALFORMED URL",TRUE,400);
+            break;
+        case 404:
+            header("HTTP/1.1 404 NOT FOUND",TRUE,404);
+            break;
+        case 500:
+            header("HTTP/1.1 500 SERVER ERROR",TRUE,500);
+            break;
+    }
+
+    if($forward !== null){
+        $handle = curl_init($forward);
+        curl_setopt($handle, CURLOPT_RETURNTRANSFER,1);
+        curl_setopt($handle, CURLOPT_POST, TRUE);
+        curl_setopt($handle, CURLOPT_HTTPHEADER, array('Content-type: ' . $content_type, 'Accept: application/json'));
+        curl_setopt($handle, CURLOPT_POSTFIELDS, convertOutData($data,$content_type));
+        $response = curl_exec($handle);
+        header("Content-type: $content_type");
+        //echo "Horus sending to " . $forward . "\n";
+        //echo "Horus Content Type : " . $content_type . "\n";
+        //echo "Response received : " . $response . "\n";
+        //die(print_r(curl_getinfo($handle),true));
+        echo $response . "\n";
+    }else{
+        header("Content-type: $content_type");
+
+        echo convertOutData($data,$content_type);
+    }
+    if ($exitafter===true)
+        exit;
+}
+
+function convertOutData($data,$content_type){
+    if($content_type == 'application/json'){
+        $dataJSON = array('payload' => $data);
+        return json_encode($dataJSON);
+    }else{
+        return $data;
+    }
+}
+
+function setReturnType($accept,$default){
+
+    if ($accept == null)
+        return $default;
+    else {
+        $types = explode(',',$accept);
+        foreach ($types as $type){
+            if(stripos($type,'application/xml')!==FALSE)
+                return 'application/xml';
+            else if(stripos($type,'application/json')!==FALSE)
+                return 'application/json';
+        }
+        returnWithContentType('Supported output types are only application/xml and application/json','text/plain',400);
+    }
+}        
+    
+
+//var_dump($_GET);
+
+$matches = json_decode(file_get_contents('horusParams.json'),true);
+$genericError = 'templates/' . $matches["errorTemplate"];
+$errorFormat = $matches['errorFormat'];
+
+$preferredType = setReturnType($_SERVER['HTTP_ACCEPT'],$errorFormat);
+//echo "Preferred mime type : " . $preferredType . "\n";
+$matches = $matches["pacs"];
+//print_r($matches);
+$reqbody = file_get_contents('php://input');
+$content_type = $_SERVER['CONTENT_TYPE'];
+$request_headers = apache_request_headers();
+$proxy_mode = $request_headers['X_DESTINATION_URL'] . $request_headers['x_destination_url'];
+$request_type = $_GET["type"];
+
+if ("inject" === $request_type){
+    $reqparams = json_decode($reqbody,true);
+    $template = 'templates/' . $reqparams['template'];
+    $vars=array();
+    foreach($reqparams['attr'] as $key => $value)
+        $vars[$key] = $value;
+    for($i=0;$i<$reqparams['repeat'];$i++){
+        ob_start();
+        include $template;
+        $output = ob_get_contents();
+        ob_end_clean();
+        $outputxml = new DOMDocument();
+        $outputxml->loadXML(preg_replace('/\s*(<[^>]*>)\s*/','$1',$output));
+        $outputxml->formatOutput=false;
+        $outputxml->preserveWhiteSpace = false;
+
+        returnWithContentType($outputxml->saveXML(),$preferredType,200,$proxy_mode,false);
+    }
+}else{
+    $input = extractPayload($content_type,$reqbody,$genericError,$preferredType);
+    $query = simplexml_load_string($input);
+
+    $namespaces = $query->getDocNamespaces();
+    $query->registerXPathNamespace('u',$namespaces[""]);
+
+    $namespace = array_pop(explode(':',$namespaces[""]));
+    //echo $namespace . "\n";
+    $domelement = dom_import_simplexml($query);
+    $domdoc = $domelement->ownerDocument;
+
+    $valid = false;
+    $selectedXsd = "";
+    foreach (scandir('xsd') as $schema){
+        if(!(strpos($schema,$namespace)===false)){
+            libxml_use_internal_errors(true);
+            if($domdoc->schemaValidate('xsd/' . $schema)){
+		//echo "matched $schema\n";
+		$valid = true;
+	        $selectedXsd = $schema;
+		//break;
+	    }else{
+            //echo "Not validated with : $schema\n";
+            }
+        }else{
+	//echo "skipping $schema\n";
+        }
+    }
+//echo "schema=$selectedXsd\n";
+    if($valid){
+        $selected = locate($matches,$selectedXsd,$input);
+        if($selected == -1){
+            $errorMessage = "Found match, but filtered out\n";
+            $errorMessage .= "XSD = $selectedXsd";
+            returnGenericError($preferredType,$genericError,$errorMessage);
+        }
+        $vars = array();
+        foreach(findMatch($matches,$selected,"parameters") as $param=>$path){
+            $query->registerXPathNamespace('u',$namespaces[""]);
+            $rr = ($query->xpath($path)); 
+            $vars[$param] = (string) $rr[0];
+        }
+        $vars = array_merge($vars, $_GET);
+        //var_dump($vars);
+        //var_dump(findMatch($matches,$selected,"responseTemplate"));
+        $errorTemplate = findMatch($matches,$selected,"errorTemplate");
+        $errorTemplate = ( ($errorTemplate==null) ? $genericError : $errorTemplate);
+        $errorTemplate = 'templates/' . $errorTemplate;
+        if(findMatch($matches,$selected,"displayError")==="On"){
+            //echo trim(preg_replace('/\s+/', ' ', $errorOutput));
+            returnGenericError($preferredType,$errorTemplate,"Requested error");
+        }
+        $response = '';
+        $multiple = false;
+        if(!is_array(findMatch($matches,$selected,"responseTemplate"))){
+            $templates = array(findMatch($matches,$selected,"responseTemplate"));
+            $formats = array(findMatch($matches,$selected,"responseFormat"));
+        }else{
+            $templates = findMatch($matches,$selected,"responseTemplate");
+	    $formats = findMatch($matches,$selected,"responseFormat");
+            $multiple = true;
+        }
+        $eol = "\r\n";
+        $mime_boundary=md5(time());
+        $nrep = 0;
+        foreach($templates as $template){    
+            $respxml = 'templates/' . $template;
+            ob_start();
+            include $respxml;
+            $output = ob_get_contents();
+            ob_end_clean();
+            $outputxml = new DOMDocument();
+            $outputxml->loadXML(preg_replace('/\s*(<[^>]*>)\s*/','$1',$output));
+            // $outputxml->loadXML($output);
+            //die(print_r($output,true));
+            if(!($outputxml->schemaValidate('xsd/' . $formats[$nrep]))){
+                $errorMessage = "Could not validate output with " . $formats[$nrep] . "\n";
+                $errorMessage .= libxml_display_errors();
+                returnGenericError($preferredType,$errorTemplate,$errorMessage);
+            }
+            $outputxml->formatOutput=false;
+            $outputxml->preserveWhiteSpace = false;
+            if($multiple)
+                $response .= formMultiPart($template,convertOutData($outputxml->saveXML(),$preferredType),$mime_boundary,$eoli,$preferredType);
+            else
+                $response = $outputxml->saveXML();
+            $nrep++;
+        }
+
+        if($multiple){
+            returnWithContentType($response . "--" . $mime_boundary . "--" . $eol . $eol,"multipart/form-data; boundary=$mime_boundary",200);
+        }else{  
+            returnWithContentType($response,$preferredType,200,$proxy_mode);
+        }
+    }else{
+        $errorMessage = "Unable to find appropriate response.\n";
+        $errorMessage .= libxml_display_errors();
+        returnGenericError($preferredType,$genericError,$errorMessage);
+    }
+}
+ 

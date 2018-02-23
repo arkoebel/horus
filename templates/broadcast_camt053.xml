@@ -1,0 +1,7 @@
+<Document xmlns="urn:isis:generic">
+    <ResponseType>camt054_debit</ResponseType>
+    <QueryParams>
+        <Param name="id">123456</Param>
+        <Param name="bic">BNPAFRPPXXX</Param>
+    </QueryParams>
+</Document>

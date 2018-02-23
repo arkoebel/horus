@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Horus Injector</title>
+        <script type='text/javascript' src='jquery.js'></script>
+        <script type='text/javascript' src='FileSaver.js'></script>
+        <script type='text/javascript' src='Blob.js'></script>
+        <script type='text/javascript'>
+        var horusTemplates = {};
+        jQuery(document).ready(function(){
+          $.get('getHorusDestinations.php',null,getTemplates,'json');     
+          $("#select").change(selectTemplate);
+          $("#go").click(getOutput);
+          $("#save").click(save);
+          $("#restore").click(retrieve);
+          $("#fileselect").change(getFileName);
+        });
+
+        function getTemplates(res){
+            horusTemplates = res;
+            var option = '<option value="-1">Select</option>';
+            $.each(res,function(i,d){
+                //option += '<option>'+d.name+'<\/option>';
+                option += '<option value="' + i + '">'+i+'<\/option>';
+            });
+            $("#select").html(option);
+
+        };
+
+        function selectTemplate(){
+            var opt = $("#select option:selected").text();
+            for (var i = 0; i<Object.keys(horusTemplates).length; i++){
+                if (Object.keys(horusTemplates)[i]===opt){
+                    var table = '<table><tr><th>Variable</th><th>Value</th></tr>';
+                    var indx = Object.keys(horusTemplates)[i];
+                    for (var j=0;j<horusTemplates[indx].length; j++){
+                        var indxj = horusTemplates[indx][j];
+                        table += '<tr><td>'+indxj+'</td><td id="'+indxj+'"><input id="val_'+indxj+'"></input></td></tr>';
+                    }
+                    $("#tab").html(table);
+                }
+            }
+        }
+
+         function getOutput(){
+            var output = {attr: {}};
+            output.template = $("#select option:selected").text();
+            output.repeat = $("#number").attr("value");
+            $("#tab tr td input").each(function(){
+                 output.attr[$(this).attr("id").substring(4)] = $(this).attr("value");
+            });
+            $.ajaxSetup({
+                contentType: "application/json; charset=utf-8",
+                headers: {'x_destination_url': $("#destination").attr("value")}
+            });
+            $.post($("#proxy").attr("value"),JSON.stringify(output),function(res){alert(res)},"json");
+         };
+
+         function save(){
+             //$("#fileselect").trigger("click");
+             //alert($("#fileselect").attr("value"));
+             var output = {attr: {}};
+             output.template = $("#select option:selected").text();
+             output.repeat = $("#number").attr("value");
+             $("#tab tr td input").each(function(){
+                  output.attr[$(this).attr("id").substring(4)] = $(this).attr("value");
+             });
+             output.proxy = $("#proxy").attr("value");
+             output.destination = $("#destination").attr("value");
+             saveAs(new Blob([(JSON.stringify(output))]),$("#saveas").attr("value"));
+
+         };
+
+         function retrieve(){
+             $("#fileselect").trigger("click");
+         }
+
+        function getFileName(){
+            var reader = new FileReader();
+            reader.onload = (function(theFile) {
+                return function(e) {
+                    var res = JSON.parse(e.target.result);
+                    $("#select").val(res.template);
+                    selectTemplate();
+                    $("#proxy").val(res.proxy);
+                    $("#destination").val(res.destination);
+                    $("#number").val(res.repeat);
+                    $.each(res.attr,function(index,item){
+                        $("#val_"+index).val(item);
+                    });
+            };})($("#fileselect").get(0).files[0]);
+            reader.readAsText($("#fileselect").get(0).files[0]);
+                
+
+        }; 
+        </script>
+    </head>
+    <body>
+        <table>
+            <tr>
+                <td>Template: </td><td colspan="2"><select id="select"/></td>
+            </tr>
+            <tr>
+                <td>Transformation Url: </td><td><input id="proxy"/></td>
+            </tr>
+            <tr>
+                <td>Endpoint Url: </td><td><input id="destination"/></td>
+            </tr>
+            <tr>
+                <td colspan="2">
+                    <table id="tab"></table>
+                </td>
+            </tr>
+            <tr>
+                <td>Repeat Number : </td>
+                <td><input id="number" value="1"/></td>
+            </tr>
+            <tr>
+                <td><button id="go">Send</button></td>
+                <td><button id="save">Save</button><input type="text" id="saveas" value="horus_injector_export.json"/></td>
+                <td><button id="restore">Retrieve</button></td>
+                <input type="file" style="display: none" id="fileselect"/>
+            </tr>
+        </table>
+    </body>
+</html>
+
+

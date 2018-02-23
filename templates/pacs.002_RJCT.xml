@@ -1,0 +1,51 @@
+<Document xmlns="urn:iso:std:iso:20022:tech:xsd:pacs.002.001.03"> 
+  <FIToFIPmtStsRpt>
+    <GrpHdr>
+      <MsgId>RE<?= substr($vars["id"],2)?></MsgId>
+      <CreDtTm><?= gmdate("Y-m-d\TH:i:s")?></CreDtTm>
+      <InstgAgt>
+        <FinInstnId>
+          <BIC><?= substr($vars["frombic"],0,8)?></BIC>
+        </FinInstnId>
+      </InstgAgt>
+      <InstdAgt>
+        <FinInstnId>
+          <BIC><?= substr($vars["tobic"],0,8)?></BIC>
+        </FinInstnId>
+      </InstdAgt>
+    </GrpHdr>
+    <OrgnlGrpInfAndSts>
+      <OrgnlMsgId><?= $vars["id"]?></OrgnlMsgId>
+      <OrgnlMsgNmId>pacs.008</OrgnlMsgNmId>
+      <GrpSts>RJCT</GrpSts>
+      <StsRsnInf>
+        <Orgtr><Nm>RT1</Nm></Orgtr>
+        <Rsn><Cd>FF01</Cd></Rsn>
+      </StsRsnInf>
+    </OrgnlGrpInfAndSts>
+    <TxInfAndSts>
+      <StsId><?= $vars["txid"] ?></StsId>
+      <OrgnlEndToEndId><?= $vars["endtoendid"]?></OrgnlEndToEndId>
+      <OrgnlTxId><?= $vars["txid"] ?></OrgnlTxId>
+      <AccptncDtTm><?= $vars["txdt"] ?></AccptncDtTm>
+      <OrgnlTxRef>
+        <PmtTpInf>
+          <SvcLvl>
+            <Cd>SEPA</Cd>
+          </SvcLvl>
+          <LclInstrm>
+            <Cd>INST</Cd>
+          </LclInstrm>
+          <CtgyPurp>
+            <Cd>PURP</Cd>
+          </CtgyPurp>
+        </PmtTpInf>
+        <DbtrAgt>
+          <FinInstnId>
+            <BIC><?= $vars["frombic"]?></BIC>
+          </FinInstnId>
+        </DbtrAgt>
+      </OrgnlTxRef>
+    </TxInfAndSts>
+  </FIToFIPmtStsRpt>
+</Document>

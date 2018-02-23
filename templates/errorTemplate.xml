@@ -1,0 +1,21 @@
+<Document xmlns="urn:swift:xsd:camt.998.001.02">
+  <PrtryMsg>
+    <MsgId>
+      <Ref>RPT<?= substr($vars["id"],3)?></Ref>
+    </MsgId>
+    <Rltd>
+      <Ref><?= $vars["id"]?></Ref>
+    </Rltd>
+    <PrtryData>
+      <Tp>ReturnSystemTime</Tp>
+      <SspPrtryDt>
+        <OprlErr>
+          <Err>
+            <Prtry>T098</Prtry>
+          </Err>
+          <Desc>Undelivered message - <?= $errorMessage ?></Desc>
+        </OprlErr>
+      </SspPrtryDt>
+    </PrtryData>
+  </PrtryMsg>
+</Document>

@@ -1,0 +1,17 @@
+<Document xmlns="urn:iso:std:iso:20022:tech:xsd:DRAFT2admi.007.001.01">
+	<RctAck>
+		<MsgId>
+			<MsgId><?= rand(0,1000000000000000)?></MsgId>
+		</MsgId>
+		<Rpt>
+			<RltdRef>
+				<Ref>UNKNOWN</Ref>
+			</RltdRef>
+			<ReqHdlg>
+				<StsCd>T098</StsCd>
+				<Desc><?= $errorMessage?></Desc>
+			</ReqHdlg>
+		</Rpt>
+	</RctAck>
+</Document>
+

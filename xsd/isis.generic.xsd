@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" attributeFormDefault="unqualified" elementFormDefault="qualified" targetNamespace="urn:isis:generic">
+  <xs:element xmlns:urn="urn:isis:generic" name="Document" type="urn:DocumentType"/>
+  <xs:complexType name="ParamType">
+    <xs:simpleContent>
+      <xs:extension base="xs:string">
+        <xs:attribute type="xs:string" name="name" use="optional"/>
+      </xs:extension>
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:complexType name="QueryParamsType">
+    <xs:sequence>
+      <xs:element xmlns:urn="urn:isis:generic" type="urn:ParamType" name="Param" maxOccurs="unbounded" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="DocumentType">
+    <xs:sequence>
+      <xs:element type="xs:string" name="ResponseType"/>
+      <xs:element xmlns:urn="urn:isis:generic" type="urn:QueryParamsType" name="QueryParams"/>
+    </xs:sequence>
+  </xs:complexType>
+</xs:schema>
+

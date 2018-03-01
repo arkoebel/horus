@@ -131,6 +131,65 @@ function returnGenericError($format,$template,$errorMessage){
 
 }
 
+function returnArrayWithContentType($data,$content_type,$status,$forward=null,$exitafter=true){
+    switch($status){
+        case 200:
+            header("HTTP/1.1 200 OK",TRUE,200);
+            break;
+        case 400:
+            header("HTTP/1.1 400 MALFORMED URL",TRUE,400);
+            break;
+        case 404:
+            header("HTTP/1.1 404 NOT FOUND",TRUE,404);
+            break;
+        case 500:
+            header("HTTP/1.1 500 SERVER ERROR",TRUE,500);
+            break;
+    }
+
+    if($forward !== null){
+        $mh = curl_multi_init();
+        $ch = array();
+        foreach($data as $i => $content){
+            $ch[$i] = curl_init($forward);
+            curl_setopt($ch[$i], CURLOPT_RETURNTRANSFER,1);
+            curl_setopt($ch[$i], CURLOPT_POST, TRUE);
+            curl_setopt($ch[$i], CURLOPT_HTTPHEADER, array('Content-type: ' . $content_type, 'Accept: application/json'));
+            curl_setopt($ch[$i], CURLOPT_POSTFIELDS, convertOutData($content,$content_type));
+            curl_setopt($ch[$i], CURLOPT_SSL_VERIFY_PEER, False);
+            curl_multi_add_handle($mh, $ch[$i]);
+        }
+        do {
+            $execReturnValue = curl_multi_exec($mh,$runningHandles);
+        } while ($execReturnValue == CURLM_CALL_MULTI_PERFORM);
+        while( $runningHandles && $execReturnValue == CURLM_OK){
+            $numberReady = curl_multi_select($mh);
+            if ($numberReady != -1){
+                do {
+                    $execReturnValue = curl_multi_exec($mh,$runningHandles);
+                } while ($execReturnValue == CURLM_CALL_MULTI_PERFORM);
+            }
+        }
+        $response = array();
+        foreach($data as $i => $content){
+            $curlError = curl_error($ch[$i]);
+            if($curlError == ""){
+                $response[$i] = curl_multi_getcontent($ch[$i]);
+            }else{
+                $response[$i] = "Error loop $i $curlError\n";
+            }
+            curl_multi_remove_handle($mh,$ch[$i]);
+            curl_close($ch[$i]);
+        }
+        curl_multi_close($mh);
+
+        echo implode("\n",$response);
+    }
+
+    if ($exitafter===true)
+        exit;
+}
+
 function returnWithContentType($data,$content_type,$status,$forward=null,$exitafter=true){
     switch($status){
         case 200:
@@ -153,6 +212,7 @@ function returnWithContentType($data,$content_type,$status,$forward=null,$exitaf
         curl_setopt($handle, CURLOPT_POST, TRUE);
         curl_setopt($handle, CURLOPT_HTTPHEADER, array('Content-type: ' . $content_type, 'Accept: application/json'));
         curl_setopt($handle, CURLOPT_POSTFIELDS, convertOutData($data,$content_type));
+        curl_setopt($handle, CURLOPT_SSL_VERIFY_PEER, False);
         $response = curl_exec($handle);
         header("Content-type: $content_type");
         //echo "Horus sending to " . $forward . "\n";
@@ -217,6 +277,8 @@ if ("inject" === $request_type){
     $vars=array();
     foreach($reqparams['attr'] as $key => $value)
         $vars[$key] = $value;
+    $content = array();
+
     for($i=0;$i<$reqparams['repeat'];$i++){
         ob_start();
         include $template;
@@ -226,9 +288,10 @@ if ("inject" === $request_type){
         $outputxml->loadXML(preg_replace('/\s*(<[^>]*>)\s*/','$1',$output));
         $outputxml->formatOutput=false;
         $outputxml->preserveWhiteSpace = false;
-
-        returnWithContentType($outputxml->saveXML(),$preferredType,200,$proxy_mode,false);
+        $content[] = $outputxml->saveXML();
     }
+    returnArrayWithContentType($content,$preferredType,200,$proxy_mode,false);
+    
 }else{
     $input = extractPayload($content_type,$reqbody,$genericError,$preferredType);
     $query = simplexml_load_string($input);

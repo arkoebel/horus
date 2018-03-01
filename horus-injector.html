@@ -1,10 +1,16 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
     <head>
+        <meta charset="utf-8"/>
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"/>
         <title>Horus Injector</title>
-        <script type='text/javascript' src='jquery.js'></script>
+        <script type='text/javascript' src='js/jquery-3.2.1.min.js'></script>
+        <script type='text/javascript' src='js/popper.min.js'></script>
         <script type='text/javascript' src='FileSaver.js'></script>
         <script type='text/javascript' src='Blob.js'></script>
+        <script type='text/javascript' src='js/bootstrap.bundle.js'></script>
+        <link rel="stylesheet" type="text/css" href="css/bootstrap.css" />
+        <link rel="stylesheet" type="text/css" href="css/bootstrap-theme.css" />
         <script type='text/javascript'>
         var horusTemplates = {};
         jQuery(document).ready(function(){
@@ -45,15 +51,15 @@
          function getOutput(){
             var output = {attr: {}};
             output.template = $("#select option:selected").text();
-            output.repeat = $("#number").attr("value");
+            output.repeat = $("#number").val();
             $("#tab tr td input").each(function(){
-                 output.attr[$(this).attr("id").substring(4)] = $(this).attr("value");
+                 output.attr[$(this).attr("id").substring(4)] = $(this).val();
             });
             $.ajaxSetup({
                 contentType: "application/json; charset=utf-8",
-                headers: {'x_destination_url': $("#destination").attr("value")}
+                headers: {'x_destination_url': $("#destination").val()}
             });
-            $.post($("#proxy").attr("value"),JSON.stringify(output),function(res){alert(res)},"json");
+            $.post($("#proxy").val(),JSON.stringify(output),function(res){alert(res)},"json");
          };
 
          function save(){
@@ -61,13 +67,13 @@
              //alert($("#fileselect").attr("value"));
              var output = {attr: {}};
              output.template = $("#select option:selected").text();
-             output.repeat = $("#number").attr("value");
+             output.repeat = $("#number").val();
              $("#tab tr td input").each(function(){
-                  output.attr[$(this).attr("id").substring(4)] = $(this).attr("value");
+                  output.attr[$(this).attr("id").substring(4)] = $(this).val();
              });
-             output.proxy = $("#proxy").attr("value");
-             output.destination = $("#destination").attr("value");
-             saveAs(new Blob([(JSON.stringify(output))]),$("#saveas").attr("value"));
+             output.proxy = $("#proxy").val();
+             output.destination = $("#destination").val();
+             saveAs(new Blob([(JSON.stringify(output))]),$("#saveas").val());
 
          };
 
@@ -96,32 +102,45 @@
         </script>
     </head>
     <body>
-        <table>
-            <tr>
-                <td>Template: </td><td colspan="2"><select id="select"/></td>
-            </tr>
-            <tr>
-                <td>Transformation Url: </td><td><input id="proxy"/></td>
-            </tr>
-            <tr>
-                <td>Endpoint Url: </td><td><input id="destination"/></td>
-            </tr>
-            <tr>
-                <td colspan="2">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="input-group mb-3">
+                    <span class="input-group-text">Template:</span>
+                    <div class=""><select class="form-control" id="select"></select></div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="mb-3">
                     <table id="tab"></table>
-                </td>
-            </tr>
-            <tr>
-                <td>Repeat Number : </td>
-                <td><input id="number" value="1"/></td>
-            </tr>
-            <tr>
-                <td><button id="go">Send</button></td>
-                <td><button id="save">Save</button><input type="text" id="saveas" value="horus_injector_export.json"/></td>
-                <td><button id="restore">Retrieve</button></td>
+                </div>
+            </div>
+            <div class="row">
+                <div class="input-group col-md-auto">
+                    <span class="input-group-text">Transformation Url:</span>
+		    <div class=""><textarea class="form-control" id="proxy"></textarea></div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="input-group mb-6">
+                    <span class="input-group-text">Endpoint Url: </span>
+                    <div class=""><textarea class="form-control" id="destination"></textarea></div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="input-group mb-3">
+                    <span class="input-group-text">Repeat Number :</span>
+                    <div><input class="form-control" id="number" value="1"/></div>
+                </div>
+            </div>
+            <div class="row">
+		<div class="input-group mb-3"><div class="input-group-prepend"><button class="btn" id="save">Save</button></div><input type="text" id="saveas" value="horus_injector_export.json"/></div>
+                <div class=""><button class="btn" id="restore">Retrieve</button></div>
                 <input type="file" style="display: none" id="fileselect"/>
-            </tr>
-        </table>
+            </div>
+            <div class="row">
+                <div class=""><button class="btn" id="go">Send</button></div>
+            </div>
+        </div>
     </body>
 </html>
 

@@ -59,7 +59,7 @@
                 contentType: "application/json; charset=utf-8",
                 headers: {'x_destination_url': $("#destination").val()}
             });
-            $.post($("#proxy").val(),JSON.stringify(output),function(res){alert(res)},"json");
+            $.post($("#proxy").val(),JSON.stringify(output),function(res){alert(JSON.stringify(res))},"json");
          };
 
          function save(){
@@ -85,6 +85,7 @@
             var reader = new FileReader();
             reader.onload = (function(theFile) {
                 return function(e) {
+                    $("#saveas").val($("#fileselect").get(0).files[0].name);
                     var res = JSON.parse(e.target.result);
                     $("#select").val(res.template);
                     selectTemplate();
@@ -102,44 +103,47 @@
         </script>
     </head>
     <body>
-        <div class="container-fluid">
-            <div class="row">
-                <div class="input-group mb-3">
-                    <span class="input-group-text">Template:</span>
-                    <div class=""><select class="form-control" id="select"></select></div>
-                </div>
+        <div class="container">
+        <!--form-->
+            <div class="form-group row">
+                <div class="input-group"><div class="input-group-prepend"><button class="btn" id="save">Save</button></div><input type="text" id="saveas" value="horus_injector_export.json"/>
+                <div class="input-group-append"><button class="btn" id="restore">Retrieve</button></div></div>
+                <input type="file" style="display: none" id="fileselect"/>
             </div>
-            <div class="row">
-                <div class="mb-3">
+
+            <div class="form-group row">
+                <!--div class="input-group"-->
+                    <label for="select" class="col-sm-2 col-form-label">Template:</label>
+                    <div class="col-sm-10"><select class="form-control" id="select"></select></div>
+                <!--/div-->
+            </div>
+            <div class="form-group row">
+                <div class="col-sm-12">
                     <table id="tab"></table>
                 </div>
             </div>
-            <div class="row">
-                <div class="input-group col-md-auto">
-                    <span class="input-group-text">Transformation Url:</span>
-		    <div class=""><textarea class="form-control" id="proxy"></textarea></div>
-                </div>
+            <div class="form-group row">
+                <!--div class="input-group"-->
+                    <label for="proxy" class="col-sm-2 col-form-label">Transformation Url:</label>
+		    <div class="col-sm-10"><textarea class="form-control" id="proxy"></textarea></div>
+                <!--/div-->
             </div>
-            <div class="row">
-                <div class="input-group mb-6">
-                    <span class="input-group-text">Endpoint Url: </span>
-                    <div class=""><textarea class="form-control" id="destination"></textarea></div>
-                </div>
+            <div class="form-group row">
+                <!--div class="input-group"-->
+                    <label for="destination" class="col-sm-2 col-form-label">Endpoint Url:</label>
+                    <div class="col-sm-10"><textarea class="form-control" id="destination"></textarea></div>
+                <!--/div-->
             </div>
-            <div class="row">
-                <div class="input-group mb-3">
-                    <span class="input-group-text">Repeat Number :</span>
-                    <div><input class="form-control" id="number" value="1"/></div>
-                </div>
+            <div class="form-group row">
+                <!--div class="input-group"-->
+                    <label for="number" class="col-sm-2 col-form-label">Number of messages:</label>
+                    <div class="col-sm-10"><input class="form-control" id="number" value="1"/></div>
+                <!--/div-->
             </div>
-            <div class="row">
-		<div class="input-group mb-3"><div class="input-group-prepend"><button class="btn" id="save">Save</button></div><input type="text" id="saveas" value="horus_injector_export.json"/></div>
-                <div class=""><button class="btn" id="restore">Retrieve</button></div>
-                <input type="file" style="display: none" id="fileselect"/>
-            </div>
-            <div class="row">
+            <div class="form-group row">
                 <div class=""><button class="btn" id="go">Send</button></div>
             </div>
+        <!--/form-->
         </div>
     </body>
 </html>

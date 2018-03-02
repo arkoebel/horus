@@ -156,7 +156,7 @@ function returnArrayWithContentType($data,$content_type,$status,$forward=null,$e
             curl_setopt($ch[$i], CURLOPT_POST, TRUE);
             curl_setopt($ch[$i], CURLOPT_HTTPHEADER, array('Content-type: ' . $content_type, 'Accept: application/json'));
             curl_setopt($ch[$i], CURLOPT_POSTFIELDS, convertOutData($content,$content_type));
-            curl_setopt($ch[$i], CURLOPT_SSL_VERIFY_PEER, False);
+            curl_setopt($ch[$i], CURLOPT_SSL_VERIFYPEER, False);
             curl_multi_add_handle($mh, $ch[$i]);
         }
         do {
@@ -212,7 +212,7 @@ function returnWithContentType($data,$content_type,$status,$forward=null,$exitaf
         curl_setopt($handle, CURLOPT_POST, TRUE);
         curl_setopt($handle, CURLOPT_HTTPHEADER, array('Content-type: ' . $content_type, 'Accept: application/json'));
         curl_setopt($handle, CURLOPT_POSTFIELDS, convertOutData($data,$content_type));
-        curl_setopt($handle, CURLOPT_SSL_VERIFY_PEER, False);
+        curl_setopt($handle, CURLOPT_SSL_VERIFYPEER, False);
         $response = curl_exec($handle);
         header("Content-type: $content_type");
         //echo "Horus sending to " . $forward . "\n";
@@ -280,6 +280,7 @@ if ("inject" === $request_type){
     $content = array();
 
     for($i=0;$i<$reqparams['repeat'];$i++){
+        $vars['loop_index'] = $i;
         ob_start();
         include $template;
         $output = ob_get_contents();

@@ -1,0 +1,18 @@
+[{
+    "name": "Boite Bleue",
+    "url": "http://192.168.1.126:8080/horustojms",
+    "description": "Send to queue RECEIVE_Q"
+},{
+    "name": "Horus injector mode",
+    "url": "http://192.168.1.113/horus/horus.php?type=inject",
+    "description": "Send to Horus in Injector mode"
+},{
+    "name": "Horus proxy mode",
+    "url": "http://192.168.1.113/horus/horus.php",
+    "description": "Send to Horus in Proxy mode"
+},{
+    "name": "Horus Router source1",
+    "url": "http://192.168.1.113/horus/horusRouter.php?source=singlesource",
+    "description": "Send to Horus Router; singlesource"
+}
+]

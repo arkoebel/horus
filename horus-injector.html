@@ -15,6 +15,7 @@
         var horusTemplates = {};
         jQuery(document).ready(function(){
           $.get('getHorusDestinations.php',null,getTemplates,'json');     
+          $.get('endpoints.json',null,getEndpoints,'json');     
           $("#select").change(selectTemplate);
           $("#go").click(getOutput);
           $("#save").click(save);
@@ -32,6 +33,29 @@
             $("#select").html(option);
 
         };
+
+        function getEndpoints(res){
+            var option = '<option value="-1">Select</option>';
+            $.each(res,function(i,d){
+                option += '<option value="' + d.url + '">'+d.name+'</option>';
+            });
+            $("#selectDestination").html(option);
+            $("#selectDestination").change(selectDestination);
+            $("#selectProxy").html(option);
+            $("#selectProxy").change(selectProxy);
+        };
+
+
+        function selectDestination(){
+            var opt = $("#selectDestination option:selected").val();
+            $("#destination").val(opt);
+        };
+
+        function selectProxy(){
+            var opt = $("#selectProxy option:selected").val();
+            $("#proxy").val(opt);
+        };
+
 
         function selectTemplate(){
             var opt = $("#select option:selected").text();
@@ -106,7 +130,7 @@
         <div class="container">
         <!--form-->
             <div class="form-group row">
-                <div class="input-group"><div class="input-group-prepend"><button class="btn" id="save">Save</button></div><input type="text" id="saveas" value="horus_injector_export.json"/>
+                <div class="input-group col-sm-8"><div class="input-group-prepend"><button class="btn" id="save">Save</button></div><input class="col-sm-6" type="text" id="saveas" value="horus_injector_export.json"/>
                 <div class="input-group-append"><button class="btn" id="restore">Retrieve</button></div></div>
                 <input type="file" style="display: none" id="fileselect"/>
             </div>
@@ -125,13 +149,13 @@
             <div class="form-group row">
                 <!--div class="input-group"-->
                     <label for="proxy" class="col-sm-2 col-form-label">Transformation Url:</label>
-		    <div class="col-sm-10"><textarea class="form-control" id="proxy"></textarea></div>
+		    <div class="col-sm-10"></textarea><select class="form-control" id="selectProxy"></select><textarea class="form-control" id="proxy"></textarea></div>
                 <!--/div-->
             </div>
             <div class="form-group row">
                 <!--div class="input-group"-->
                     <label for="destination" class="col-sm-2 col-form-label">Endpoint Url:</label>
-                    <div class="col-sm-10"><textarea class="form-control" id="destination"></textarea></div>
+                    <div class="col-sm-10"><select class="form-control" id="selectDestination"></select><textarea class="form-control" id="destination"></textarea></div>
                 <!--/div-->
             </div>
             <div class="form-group row">

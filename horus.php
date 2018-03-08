@@ -157,24 +157,39 @@ function returnArrayWithContentType($data,$content_type,$status,$forward=null,$e
             curl_setopt($ch[$i], CURLOPT_HTTPHEADER, array('Content-type: ' . $content_type, 'Accept: application/json'));
             curl_setopt($ch[$i], CURLOPT_POSTFIELDS, convertOutData($content,$content_type));
             curl_setopt($ch[$i], CURLOPT_SSL_VERIFYPEER, False);
+            curl_setopt($ch[$i], CURLOPT_VERBOSE, True);
+            curl_setopt($ch[$i], CURLOPT_HEADER, True);
+            //curl_setopt($ch[$i], CURLINFO_HEADER_OUT, True);
             curl_multi_add_handle($mh, $ch[$i]);
         }
+
+        $running = NULL;
         do {
-            $execReturnValue = curl_multi_exec($mh,$runningHandles);
-        } while ($execReturnValue == CURLM_CALL_MULTI_PERFORM);
-        while( $runningHandles && $execReturnValue == CURLM_OK){
-            $numberReady = curl_multi_select($mh);
-            if ($numberReady != -1){
-                do {
-                    $execReturnValue = curl_multi_exec($mh,$runningHandles);
-                } while ($execReturnValue == CURLM_CALL_MULTI_PERFORM);
-            }
-        }
+            curl_multi_exec($mh,$running);
+            curl_multi_select($mh,10);
+        } while($running > 0);
+       
+        $json = false;
+
         $response = array();
         foreach($data as $i => $content){
             $curlError = curl_error($ch[$i]);
+            //var_dump(curl_getinfo($ch[$i]));
+            $content_length = curl_getinfo($ch[$i],CURLINFO_HEADER_SIZE);
             if($curlError == ""){
-                $response[$i] = curl_multi_getcontent($ch[$i]);
+                $bbody = curl_multi_getcontent($ch[$i]);
+                $bheader = explode("\n",substr($bbody, 0, $content_length));
+                $response_headers = array();
+                foreach($bheader as $header){
+                    $exp = preg_split("/\:\s/",$header);
+                    $response_headers[$exp[0]]=$exp[1];
+                }
+                if(stripos($response_headers["Content-Type"],'json')>0){
+                    $json = true;
+                    $response[$i] = json_decode(substr($bbody, $content_length),true);
+                }else{ 
+                    $response[$i] = substr($bbody, $content_length);
+                }
             }else{
                 $response[$i] = "Error loop $i $curlError\n";
             }
@@ -183,7 +198,11 @@ function returnArrayWithContentType($data,$content_type,$status,$forward=null,$e
         }
         curl_multi_close($mh);
 
-        echo implode("\n",$response);
+        if($json){
+            echo json_encode($response);
+        }else{
+            echo implode("\n",$response);
+        }
     }
 
     if ($exitafter===true)

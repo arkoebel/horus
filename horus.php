@@ -44,7 +44,15 @@ function libxml_display_errors() {
 
 
 function findMatch($matches,$request,$field){
-    return $matches[$request][$field];
+    if(array_key_exists($request,$matches)){
+        if(array_key_exists($field, $matches[$request])){
+            return $matches[$request][$field];
+        }else{
+            return '';
+        }
+    }else{
+        return '';
+    }
 }
 
 function locate($matches,$found,$value){
@@ -52,7 +60,7 @@ function locate($matches,$found,$value){
     foreach($matches as $id=>$match){
 //	print_r($match);
         if($match['query']===$found){
-            if($match['queryMatch']!=''){
+            if(array_key_exists('queryMatch',$match) && $match['queryMatch']!=''){
                 //echo('/' . $match['queryMatch'] . '/' . "\n");
                 if(preg_match('/' . $match['queryMatch'] . '/',$value)===1){
                     $selected = $id;
@@ -305,7 +313,10 @@ if (array_key_exists('X_DESTINATION_URL',$request_headers)){
     }
 }
 
-$request_type = $_GET["type"];
+if(array_key_exists('type',$_GET))
+    $request_type = $_GET["type"];
+else 
+    $request_type = '';
 
 if ("inject" === $request_type){
     $reqparams = json_decode($reqbody,true);
@@ -337,7 +348,9 @@ if ("inject" === $request_type){
     $namespaces = $query->getDocNamespaces();
     $query->registerXPathNamespace('u',$namespaces[""]);
 
-    $namespace = array_pop(explode(':',$namespaces[""]));
+    $mnamespaces = explode(':',$namespaces[""]);
+
+    $namespace = array_pop($mnamespaces);
     //echo $namespace . "\n";
     $domelement = dom_import_simplexml($query);
     $domdoc = $domelement->ownerDocument;

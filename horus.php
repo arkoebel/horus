@@ -1,5 +1,7 @@
 <?php
 
+$mytime = microtime(true);
+
 //if (extension_loaded('oci8'))
 //    require_once "database_oci.php";
 //else
@@ -131,7 +133,7 @@ function returnGenericError($format,$template,$errorMessage){
 
 }
 
-function returnArrayWithContentType($data,$content_type,$status,$forward=null,$exitafter=true){
+function returnArrayWithContentType($data,$content_type,$status,$forward=null,$exitafter=true,$mytime){
     switch($status){
         case 200:
             header("HTTP/1.1 200 OK",TRUE,200);
@@ -148,6 +150,7 @@ function returnArrayWithContentType($data,$content_type,$status,$forward=null,$e
     }
 
     if($forward !== null){
+        error_log('Generate Curl calls at '. (microtime(true) - $mytime)*1000);
         $mh = curl_multi_init();
         $ch = array();
         foreach($data as $i => $content){
@@ -162,7 +165,7 @@ function returnArrayWithContentType($data,$content_type,$status,$forward=null,$e
             //curl_setopt($ch[$i], CURLINFO_HEADER_OUT, True);
             curl_multi_add_handle($mh, $ch[$i]);
         }
-
+        error_log('Curl calls generated at ' . (microtime(true) - $mytime)*1000);
         $running = NULL;
         do {
             curl_multi_exec($mh,$running);
@@ -170,6 +173,7 @@ function returnArrayWithContentType($data,$content_type,$status,$forward=null,$e
         } while($running > 0);
        
         $json = false;
+        error_log('Got all curl responses at ' . (microtime(true) - $mytime)*1000);
 
         $response = array();
         foreach($data as $i => $content){
@@ -182,7 +186,8 @@ function returnArrayWithContentType($data,$content_type,$status,$forward=null,$e
                 $response_headers = array();
                 foreach($bheader as $header){
                     $exp = preg_split("/\:\s/",$header);
-                    $response_headers[$exp[0]]=$exp[1];
+                    if(count($exp)>1)
+                        $response_headers[$exp[0]]=$exp[1];
                 }
                 if(stripos($response_headers["Content-Type"],'json')>0){
                     $json = true;
@@ -197,6 +202,7 @@ function returnArrayWithContentType($data,$content_type,$status,$forward=null,$e
             curl_close($ch[$i]);
         }
         curl_multi_close($mh);
+        error_log('Got all responses at ' . (microtime(true) - $mytime)*1000);
 
         if($json){
             echo json_encode($response);
@@ -286,8 +292,19 @@ $matches = $matches["pacs"];
 //print_r($matches);
 $reqbody = file_get_contents('php://input');
 $content_type = $_SERVER['CONTENT_TYPE'];
+error_log("Request : " . print_r($_SERVER,true));
+error_log("Received Data to post:\n" . $reqbody);
 $request_headers = apache_request_headers();
-$proxy_mode = $request_headers['X_DESTINATION_URL'] . $request_headers['x_destination_url'];
+if (array_key_exists('X_DESTINATION_URL',$request_headers)){
+    $proxy_mode = $request_headers['X_DESTINATION_URL'];
+}else{
+     if (array_key_exists('x_destination_url',$request_headers)){
+        $proxy_mode =  $request_headers['x_destination_url'];
+    }else{
+        $proxy_mode = '';
+    }
+}
+
 $request_type = $_GET["type"];
 
 if ("inject" === $request_type){
@@ -297,7 +314,7 @@ if ("inject" === $request_type){
     foreach($reqparams['attr'] as $key => $value)
         $vars[$key] = $value;
     $content = array();
-
+    error_log("Received request at " . (microtime(true) - $mytime)*1000);
     for($i=0;$i<$reqparams['repeat'];$i++){
         $vars['loop_index'] = $i;
         ob_start();
@@ -310,7 +327,8 @@ if ("inject" === $request_type){
         $outputxml->preserveWhiteSpace = false;
         $content[] = $outputxml->saveXML();
     }
-    returnArrayWithContentType($content,$preferredType,200,$proxy_mode,false);
+    error_log("Generated XML at " . (microtime(true) - $mytime)*1000);
+    returnArrayWithContentType($content,$preferredType,200,$proxy_mode,false,$mytime);
     
 }else{
     $input = extractPayload($content_type,$reqbody,$genericError,$preferredType);

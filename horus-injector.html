@@ -83,7 +83,7 @@
                 contentType: "application/json; charset=utf-8",
                 headers: {'x_destination_url': $("#destination").val()}
             });
-            $.post($("#proxy").val(),JSON.stringify(output),function(res){alert(JSON.stringify(res))},"json");
+            $.post($("#proxy").val(),JSON.stringify(output),function(res){alert("OK")},"json");
          };
 
          function save(){
@@ -96,7 +96,9 @@
                   output.attr[$(this).attr("id").substring(4)] = $(this).val();
              });
              output.proxy = $("#proxy").val();
+             output.proxyname = $("#selectProxy option:selected").text();
              output.destination = $("#destination").val();
+             output.destinationname = $("#selectDestination option:selected").text();
              saveAs(new Blob([(JSON.stringify(output))]),$("#saveas").val());
 
          };
@@ -112,6 +114,8 @@
                     $("#saveas").val($("#fileselect").get(0).files[0].name);
                     var res = JSON.parse(e.target.result);
                     $("#select").val(res.template);
+                    $("#selectProxy").val(res.proxy);
+                    $("#selectDestination").val(res.destination);
                     selectTemplate();
                     $("#proxy").val(res.proxy);
                     $("#destination").val(res.destination);

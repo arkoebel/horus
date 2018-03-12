@@ -84,7 +84,7 @@ foreach($route['destinations'] as $destination){
     //echo "Final destination : " . $destination['destination'] . $dest_query . "\n";
     //echo "Content-type : " . $content_type . "\n";
 
-    $headers = array('Content-type: ' . $content_type, 'Accept: application/json');
+    $headers = array('Content-type: ' . $content_type, 'Accept: application/json', 'Expect: ');
 
     if ($destination['proxy']==""){
         $dest_url = $destination['destination'] . $dest_query;

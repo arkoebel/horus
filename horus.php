@@ -165,7 +165,7 @@ function returnArrayWithContentType($data,$content_type,$status,$forward=null,$e
             $ch[$i] = curl_init($forward);
             curl_setopt($ch[$i], CURLOPT_RETURNTRANSFER,1);
             curl_setopt($ch[$i], CURLOPT_POST, TRUE);
-            curl_setopt($ch[$i], CURLOPT_HTTPHEADER, array('Content-type: ' . $content_type, 'Accept: application/json'));
+            curl_setopt($ch[$i], CURLOPT_HTTPHEADER, array('Content-type: ' . $content_type, 'Accept: application/json', 'Expect: '));
             curl_setopt($ch[$i], CURLOPT_POSTFIELDS, convertOutData($content,$content_type));
             curl_setopt($ch[$i], CURLOPT_SSL_VERIFYPEER, False);
             curl_setopt($ch[$i], CURLOPT_VERBOSE, True);
@@ -243,7 +243,7 @@ function returnWithContentType($data,$content_type,$status,$forward=null,$exitaf
         $handle = curl_init($forward);
         curl_setopt($handle, CURLOPT_RETURNTRANSFER,1);
         curl_setopt($handle, CURLOPT_POST, TRUE);
-        curl_setopt($handle, CURLOPT_HTTPHEADER, array('Content-type: ' . $content_type, 'Accept: application/json'));
+        curl_setopt($handle, CURLOPT_HTTPHEADER, array('Content-type: ' . $content_type, 'Accept: application/json', 'Expect: '));
         curl_setopt($handle, CURLOPT_POSTFIELDS, convertOutData($data,$content_type));
         curl_setopt($handle, CURLOPT_SSL_VERIFYPEER, False);
         $response = curl_exec($handle);

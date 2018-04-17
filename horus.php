@@ -141,7 +141,7 @@ function returnGenericError($format,$template,$errorMessage){
 
 }
 
-function returnArrayWithContentType($data,$content_type,$status,$forward=null,$exitafter=true,$mytime){
+function returnArrayWithContentType($data,$content_type,$status,$forward='',$exitafter=true,$mytime){
     switch($status){
         case 200:
             header("HTTP/1.1 200 OK",TRUE,200);
@@ -157,7 +157,10 @@ function returnArrayWithContentType($data,$content_type,$status,$forward=null,$e
             break;
     }
 
-    if($forward !== null){
+   if($forward === null)
+        $forward = '';
+
+    if($forward !== ''){
         error_log('Generate Curl calls at '. (microtime(true) - $mytime)*1000);
         $mh = curl_multi_init();
         $ch = array();
@@ -223,7 +226,7 @@ function returnArrayWithContentType($data,$content_type,$status,$forward=null,$e
         exit;
 }
 
-function returnWithContentType($data,$content_type,$status,$forward=null,$exitafter=true){
+function returnWithContentType($data,$content_type,$status,$forward='',$exitafter=true){
     switch($status){
         case 200:
             header("HTTP/1.1 200 OK",TRUE,200);
@@ -238,8 +241,10 @@ function returnWithContentType($data,$content_type,$status,$forward=null,$exitaf
             header("HTTP/1.1 500 SERVER ERROR",TRUE,500);
             break;
     }
+    if($forward === null)
+        $forward = '';
 
-    if($forward !== null){
+    if($forward !== ''){
         $handle = curl_init($forward);
         curl_setopt($handle, CURLOPT_RETURNTRANSFER,1);
         curl_setopt($handle, CURLOPT_POST, TRUE);

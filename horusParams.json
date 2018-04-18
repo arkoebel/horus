@@ -1,49 +1,90 @@
 {
-        "errorTemplate": "genericError.xml",
-        "errorFormat": "application/json",
+	"errorTemplate": "genericError.xml",
+	"errorFormat": "application/json",
 	"pacs": [{
-                "query": "pacs.008.001.02.xsd",
-                "queryMatch": "JSNXCHSBS",
-                "responseFormat": "pacs.002.001.03.xsd",
-                "responseTemplate": "pacs.002_ACCP.xml",
-		"errorTemplate": "errorTemplate.xml",
-                "parameters": {
-                        "id": "/u:Document/u:FIToFICstmrCdtTrf/u:GrpHdr/u:MsgId",
-                        "tobic": "/u:Document/u:FIToFICstmrCdtTrf/u:CdtTrfTxInf/u:DbtrAgt/u:FinInstnId/u:BIC",
-                        "frombic": "/u:Document/u:FIToFICstmrCdtTrf/u:CdtTrfTxInf/u:CdtrAgt/u:FinInstnId/u:BIC",
-                        "txid": "/u:Document/u:FIToFICstmrCdtTrf/u:CdtTrfTxInf/u:PmtId/u:TxId",
-                        "endtoendid": "/u:Document/u:FIToFICstmrCdtTrf/u:CdtTrfTxInf/u:PmtId/u:EndToEndId",
-                        "txdt": "/u:Document/u:FIToFICstmrCdtTrf/u:CdtTrfTxInf/u:AccptncDtTm"
-                }
-        },
-        {
-                "query": "pacs.008.001.02.xsd",
-                "queryMatch": "JSNXCHSBX",
-                "responseFormat": "pacs.002.001.03.xsd",
-                "responseTemplate": "pacs.002_RJCT.xml",
-                "errorTemplate": "errorTemplate.xml",
-                "parameters": {
-                        "id": "/u:Document/u:FIToFICstmrCdtTrf/u:GrpHdr/u:MsgId",
-                        "tobic": "/u:Document/u:FIToFICstmrCdtTrf/u:CdtTrfTxInf/u:DbtrAgt/u:FinInstnId/u:BIC",
-                        "frombic": "/u:Document/u:FIToFICstmrCdtTrf/u:CdtTrfTxInf/u:CdtrAgt/u:FinInstnId/u:BIC",
-                        "txid": "/u:Document/u:FIToFICstmrCdtTrf/u:CdtTrfTxInf/u:PmtId/u:TxId",
-                        "endtoendid": "/u:Document/u:FIToFICstmrCdtTrf/u:CdtTrfTxInf/u:PmtId/u:EndToEndId",
-                        "txdt": "/u:Document/u:FIToFICstmrCdtTrf/u:CdtTrfTxInf/u:AccptncDtTm"
-                }
-        },
-        {
-                "query": "pacs.002.001.03.xsd",
-                "responseFormat": "pacs.002.001.03.xsd",
-                "responseTemplate": "pacs.002_ACCP.xml",
-                "errorTemplate": "errorTemplate.xml",
-                "parameters": {
-                        "id": "/u:Document/u:FIToFIPmtStsRpt/u:GrpHdr/u:MsgId",
-                        "tobic": "/u:Document/u:FIToFIPmtStsRpt/u:TxInfAndSts/u:OrgnlTxRef/u:DbtrAgt/u:FinInstnId/u:BIC",
-                        "frombic": "/u:Document/u:FIToFIPmtStsRpt/u:GrpHdr/u:InstdAgt/u:FinInstnId/u:BIC",
-                        "txid": "/u:Document/u:FIToFIPmtStsRpt/u:TxInfAndSts/u:OrgnlTxId",
-                        "endtoendid": "/u:Document/u:FIToFIPmtStsRpt/u:TxInfAndSts/u:OrgnlEndToEndId",
-                        "txdt": "/u:Document/u:FIToFIPmtStsRpt/u:TxInfAndSts/u:AccptncDtTm"
-                }
-       }
-]
+			"query": "pacs.008.001.02.xsd",
+			"queryMatch": "JSNXCHSBS",
+			"responseFormat": "pacs.002.001.03.xsd",
+			"responseTemplate": "pacs.002_ACCP.xml",
+			"errorTemplate": "errorTemplate.xml",
+			"parameters": {
+				"id": "/u:Document/u:FIToFICstmrCdtTrf/u:GrpHdr/u:MsgId",
+				"tobic": "/u:Document/u:FIToFICstmrCdtTrf/u:CdtTrfTxInf/u:DbtrAgt/u:FinInstnId/u:BIC",
+				"frombic": "/u:Document/u:FIToFICstmrCdtTrf/u:CdtTrfTxInf/u:CdtrAgt/u:FinInstnId/u:BIC",
+				"txid": "/u:Document/u:FIToFICstmrCdtTrf/u:CdtTrfTxInf/u:PmtId/u:TxId",
+				"endtoendid": "/u:Document/u:FIToFICstmrCdtTrf/u:CdtTrfTxInf/u:PmtId/u:EndToEndId",
+				"txdt": "/u:Document/u:FIToFICstmrCdtTrf/u:CdtTrfTxInf/u:AccptncDtTm"
+			}
+		}, {
+			"query": "pacs.008.001.02.xsd",
+			"queryMatch": "JSNXCHSBX",
+			"responseFormat": "pacs.002.001.03.xsd",
+			"responseTemplate": "pacs.002_RJCT.xml",
+			"errorTemplate": "errorTemplate.xml",
+			"parameters": {
+				"id": "/u:Document/u:FIToFICstmrCdtTrf/u:GrpHdr/u:MsgId",
+				"tobic": "/u:Document/u:FIToFICstmrCdtTrf/u:CdtTrfTxInf/u:DbtrAgt/u:FinInstnId/u:BIC",
+				"frombic": "/u:Document/u:FIToFICstmrCdtTrf/u:CdtTrfTxInf/u:CdtrAgt/u:FinInstnId/u:BIC",
+				"txid": "/u:Document/u:FIToFICstmrCdtTrf/u:CdtTrfTxInf/u:PmtId/u:TxId",
+				"endtoendid": "/u:Document/u:FIToFICstmrCdtTrf/u:CdtTrfTxInf/u:PmtId/u:EndToEndId",
+				"txdt": "/u:Document/u:FIToFICstmrCdtTrf/u:CdtTrfTxInf/u:AccptncDtTm"
+			}
+		}, {
+			"query": "pacs.002.001.03.xsd",
+			"responseFormat": "pacs.002.001.03.xsd",
+			"responseTemplate": "pacs.002_ACCP.xml",
+			"errorTemplate": "errorTemplate.xml",
+			"parameters": {
+				"id": "/u:Document/u:FIToFIPmtStsRpt/u:GrpHdr/u:MsgId",
+				"tobic": "/u:Document/u:FIToFIPmtStsRpt/u:TxInfAndSts/u:OrgnlTxRef/u:DbtrAgt/u:FinInstnId/u:BIC",
+				"frombic": "/u:Document/u:FIToFIPmtStsRpt/u:GrpHdr/u:InstdAgt/u:FinInstnId/u:BIC",
+				"txid": "/u:Document/u:FIToFIPmtStsRpt/u:TxInfAndSts/u:OrgnlTxId",
+				"endtoendid": "/u:Document/u:FIToFIPmtStsRpt/u:TxInfAndSts/u:OrgnlEndToEndId",
+				"txdt": "/u:Document/u:FIToFIPmtStsRpt/u:TxInfAndSts/u:AccptncDtTm"
+			}
+		}
+	],
+	"simplejson": [{
+			"query": {
+				"key": "msgType",
+				"value": "PositionMessageQueryCRT"
+			},
+			"queryMatch": "AZERTY",
+			"responseTemplate": "position_msg_response.json",
+			"errorTemplate": "error_template.json",
+			"parameters": {
+				"msgref": "msgRef",
+				"ipsystem": "IPSystem",
+				"ipparticipant": "IPParticipant",
+				"ipaccountid": "IPAccountId"
+			}
+		}, {
+			"query": {
+				"key": "msgType",
+				"value": "PositionMessageQueryCRT"
+			},
+			"queryMatch": "QWERTY",
+			"responseTemplate": "position_msg_response_error.json",
+			"errorTemplate": "error_template.json",
+			"parameters": {
+				"msgref": "msgRef",
+				"ipsystem": "IPSystem",
+				"ipparticipant": "IPParticipant",
+				"ipaccountid": "IPAccountId"
+			}
+		}, {
+			"query": {
+				"key": "datatype",
+				"value": "camtip2"
+			},
+			"queryMatch": "AZERTY",
+			"responseTemplate": "json_resp3.json",
+			"errorTemplate": "error_template.json",
+			"parameters": {
+				"datatype": "datatype",
+				"frombic": "bic_emet",
+				"tobic": "bic_recep"
+			}
+		}
+	]
 }

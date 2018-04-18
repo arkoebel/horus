@@ -1,0 +1,13 @@
+{
+"msgType":"PositionMessageResponseCRT",
+"msgRef":"<?= $vars['msgref'] ?>",
+"originalMsgRef":"<?= $vars['msgref'] ?>",
+"creDtTm":"<?= gmdate('Y-m-d\TH:i:s') ?>",
+"IPSystem":"<?= $vars['ipsystem'] ?>",
+"IPParticipant":"<?= $vars['ipparticipant'] ?>",
+"IPAccountId":"<?= $vars['ipaccountid'] ?>",
+"currency":"EUR",
+"amount":"<?= rand(0,10000000000)/100 ?>",
+"crdtDbtInd":"<?= rand(0,100)>30?'CRDT':'DBIT'?>",
+"statusCode":"0000"
+}

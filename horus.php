@@ -76,6 +76,27 @@ function locate($matches,$found,$value){
     return $selected;
 }
 
+function locateJson($matches,$input){
+    $selected = -1;
+    foreach($matches as $id=>$match){
+        if(array_key_exists($match['query']['key'],$input)){
+            if($input[$match['query']['key']]===$match['query']['value']){
+                if(array_key_exists('queryMatch',$match) && $match['queryMatch']!=''){
+                    if(preg_match('/' . $match['queryMatch'] . '/',json_encode($input))===1){
+                        $selected = $id;
+                    }
+                }else{
+                    $selected = $id;
+                }
+            }
+        }        
+
+    }
+
+    return $selected;
+
+}
+
 function formMultiPart($file,$data,$mime_boundary,$eol,$content_type) { 
 	$cc = '';
 	$cc .= '--' . $mime_boundary . $eol;
@@ -130,6 +151,10 @@ function extractPayload($content_type,$body,$errorTemplate,$errorFormat){
         return $body;
 }
 
+function extractSimpleJsonPayload($body){
+    return json_decode($body,true);
+}
+
 function returnGenericError($format,$template,$errorMessage){
 
     ob_start();
@@ -141,7 +166,20 @@ function returnGenericError($format,$template,$errorMessage){
 
 }
 
-function returnArrayWithContentType($data,$content_type,$status,$forward='',$exitafter=true,$mytime){
+function returnGenericJsonError($format,$template,$errorMessage){
+
+    ob_start();
+    include $template;
+    $errorOutput = ob_get_contents();
+    ob_end_clean();
+
+error_log("JSON=" . $errorOutput);
+
+    returnWithContentType($errorOutput,$format,400,'',true,true);
+
+}
+
+function returnArrayWithContentType($data,$content_type,$status,$forward='',$exitafter=true,$mytime,$no_conversion=false){
     switch($status){
         case 200:
             header("HTTP/1.1 200 OK",TRUE,200);
@@ -169,7 +207,7 @@ function returnArrayWithContentType($data,$content_type,$status,$forward='',$exi
             curl_setopt($ch[$i], CURLOPT_RETURNTRANSFER,1);
             curl_setopt($ch[$i], CURLOPT_POST, TRUE);
             curl_setopt($ch[$i], CURLOPT_HTTPHEADER, array('Content-type: ' . $content_type, 'Accept: application/json', 'Expect: '));
-            curl_setopt($ch[$i], CURLOPT_POSTFIELDS, convertOutData($content,$content_type));
+            curl_setopt($ch[$i], CURLOPT_POSTFIELDS, convertOutData($content,$content_type,$no_conversion));
             curl_setopt($ch[$i], CURLOPT_SSL_VERIFYPEER, False);
             curl_setopt($ch[$i], CURLOPT_VERBOSE, True);
             curl_setopt($ch[$i], CURLOPT_HEADER, True);
@@ -226,7 +264,8 @@ function returnArrayWithContentType($data,$content_type,$status,$forward='',$exi
         exit;
 }
 
-function returnWithContentType($data,$content_type,$status,$forward='',$exitafter=true){
+function returnWithContentType($data,$content_type,$status,$forward='',$exitafter=true, $no_conversion=false){
+    error_log("no_conversion:" . $no_conversion);
     switch($status){
         case 200:
             header("HTTP/1.1 200 OK",TRUE,200);
@@ -249,7 +288,7 @@ function returnWithContentType($data,$content_type,$status,$forward='',$exitafte
         curl_setopt($handle, CURLOPT_RETURNTRANSFER,1);
         curl_setopt($handle, CURLOPT_POST, TRUE);
         curl_setopt($handle, CURLOPT_HTTPHEADER, array('Content-type: ' . $content_type, 'Accept: application/json', 'Expect: '));
-        curl_setopt($handle, CURLOPT_POSTFIELDS, convertOutData($data,$content_type));
+        curl_setopt($handle, CURLOPT_POSTFIELDS, convertOutData($data,$content_type, $no_conversion));
         curl_setopt($handle, CURLOPT_SSL_VERIFYPEER, False);
         $response = curl_exec($handle);
         header("Content-type: $content_type");
@@ -261,17 +300,24 @@ function returnWithContentType($data,$content_type,$status,$forward='',$exitafte
     }else{
         header("Content-type: $content_type");
 
-        echo convertOutData($data,$content_type);
+        echo convertOutData($data,$content_type,$no_conversion);
     }
     if ($exitafter===true)
         exit;
 }
 
-function convertOutData($data,$content_type){
-    if($content_type == 'application/json'){
-        $dataJSON = array('payload' => $data);
-        return json_encode($dataJSON);
+function convertOutData($data,$content_type,$no_conversion=false){
+    error_log("Convert: no_conversion=" . $no_conversion);
+    if(!$no_conversion){
+        error_log("Conversion");
+        if($content_type == 'application/json'){
+            $dataJSON = array('payload' => $data);
+            return json_encode($dataJSON);
+        }else{
+            return $data;
+        }
     }else{
+        error_log("No Conversion");
         return $data;
     }
 }
@@ -295,13 +341,14 @@ function setReturnType($accept,$default){
 
 //var_dump($_GET);
 
-$matches = json_decode(file_get_contents('horusParams.json'),true);
-$genericError = 'templates/' . $matches["errorTemplate"];
-$errorFormat = $matches['errorFormat'];
-
+$mmatches = json_decode(file_get_contents('horusParams.json'),true);
+$genericError = 'templates/' . $mmatches["errorTemplate"];
+$errorFormat = $mmatches['errorFormat'];
 $preferredType = setReturnType($_SERVER['HTTP_ACCEPT'],$errorFormat);
 //echo "Preferred mime type : " . $preferredType . "\n";
-$matches = $matches["pacs"];
+$simpleJsonMatches = $mmatches['simplejson'];
+$matches = $mmatches["pacs"];
+
 //print_r($matches);
 $reqbody = file_get_contents('php://input');
 $content_type = $_SERVER['CONTENT_TYPE'];
@@ -346,6 +393,64 @@ if ("inject" === $request_type){
     error_log("Generated XML at " . (microtime(true) - $mytime)*1000);
     returnArrayWithContentType($content,$preferredType,200,$proxy_mode,false,$mytime);
     
+}else if (("simplejson" === $request_type)&&("application/json" === $content_type)){
+    $input = extractSimpleJsonPayload($reqbody);
+    if($input === null){
+        $error_message = "JSON Error " . decodeJsonError(json_last_error());
+        returnGenericJsonError($preferredType,'templates/generic_error.json',$error_message);
+    }
+    error_log("XJSON=" . print_r($simpleJsonMatches,true));
+    $selected = locateJson($simpleJsonMatches,$input);
+    if ($selected == -1){
+        $error_message = "No match found";
+        returnGenericJsonError($preferredType,'templates/generic_error.json',$errorMessage);
+    }else{
+        error_log('Selected : ' . $selected);
+    }
+    $vars = array();
+    foreach(findMatch($simpleJsonMatches,$selected,"parameters") as $param=>$path){
+        $vars[$param] = $input[$path];
+    }
+    $vars = array_merge($vars, $_GET);
+
+    $errorTemplate = findMatch($simpleJsonMatches,$selected,"errorTemplate");
+    $errorTemplate = ( ($errorTemplate==null) ? 'generic_error.json' : $errorTemplate);
+    $errorTemplate = 'templates/' . $errorTemplate;
+    if(findMatch($simpleJsonMatches,$selected,"displayError")==="On"){
+        //echo trim(preg_replace('/\s+/', ' ', $errorOutput));
+        returnGenericJsonError($preferredType,$errorTemplate,"Requested error");
+    }
+    $response = '';
+    $multiple = false;
+    if(!is_array(findMatch($simpleJsonMatches,$selected,"responseTemplate"))){
+        $templates = array(findMatch($simpleJsonMatches,$selected,"responseTemplate"));
+        $formats = array(findMatch($simpleJsonMatches,$selected,"responseFormat"));
+    }else{
+        $templates = findMatch($simpleJsonMatches,$selected,"responseTemplate");
+        $formats = findMatch($simpleJsonMatches,$selected,"responseFormat");
+        $multiple = true;
+    }
+    $eol = "\r\n";
+    $mime_boundary=md5(time());
+    $nrep = 0;
+    foreach($templates as $template){
+        $respxml = 'templates/' . $template;
+        ob_start();
+        include $respxml;
+        $output = ob_get_contents();
+        ob_end_clean();
+        if($multiple)
+            $response .= formMultiPart($template,convertOutData($output,$preferredType,true),$mime_boundary,$eoli,$preferredType);
+        else
+            $response = $output;
+        $nrep++;
+    }
+    if($multiple){
+        returnWithContentType($response . "--" . $mime_boundary . "--" . $eol . $eol,"multipart/form-data; boundary=$mime_boundary",200,$proxy_mode,true,true);
+    }else{
+        returnWithContentType($response,$preferredType,200,$proxy_mode,true,true);
+    }
+
 }else{
     $input = extractPayload($content_type,$reqbody,$genericError,$preferredType);
     $query = simplexml_load_string($input);

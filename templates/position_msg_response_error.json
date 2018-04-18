@@ -1,0 +1,14 @@
+{
+"msgType":"PositionMessageResponseCRT",
+"msgRef":"<?= $vars['msgref']?>",
+"originalMsgRef":"<?= $vars['msgref']?>",
+"creDtTm":"<?= gmdate('Y-m-d\TH:i:s')?>",
+"IPSystem":"<?= $vars['ipsystem']?>",
+"IPParticipant":"<?= $vars['ipparticipant']?>",
+"IPAccountId":"<?= $vars['ipaccountid']?>",
+"currency":"EUR",
+"amount":"1000.33",
+"crdtDbtInd":"CRDT",
+"statusCode":"0001"
+}
+

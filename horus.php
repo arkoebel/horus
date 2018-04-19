@@ -178,8 +178,8 @@ error_log("JSON=" . $errorOutput);
     returnWithContentType($errorOutput,$format,400,'',true,true);
 
 }
-
 function returnArrayWithContentType($data,$content_type,$status,$forward='',$exitafter=true,$mytime,$no_conversion=false){
+    error_log('RAWC: no_conversion = ' . $no_conversion);
     switch($status){
         case 200:
             header("HTTP/1.1 200 OK",TRUE,200);
@@ -397,8 +397,13 @@ if ("inject" === $request_type){
             $content[] = $output;
         }
     }
+    $convert = false;
+    if(("application/xml" === $reqparams['sourcetype'])&&("application/json" === $reqparams['destinationcontent'])){
+        error_log("=== Conversion XML -> JSON ===");
+        $convert = true;
+    }
     error_log("Generated all data at " . (microtime(true) - $mytime)*1000);
-    returnArrayWithContentType($content,$reqparams['destinationcontent'],200,$proxy_mode,false,$mytime);
+    returnArrayWithContentType($content,$reqparams['destinationcontent'],200,$proxy_mode,false,$mytime, !$convert);
     
 }else if (("simplejson" === $request_type)&&("application/json" === $content_type)){
     $input = extractSimpleJsonPayload($reqbody);

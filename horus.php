@@ -384,14 +384,21 @@ if ("inject" === $request_type){
         include $template;
         $output = ob_get_contents();
         ob_end_clean();
-        $outputxml = new DOMDocument();
-        $outputxml->loadXML(preg_replace('/\s*(<[^>]*>)\s*/','$1',$output));
-        $outputxml->formatOutput=false;
-        $outputxml->preserveWhiteSpace = false;
-        $content[] = $outputxml->saveXML();
+        if("application/xml" === $reqparams['sourcetype']){
+            $outputxml = new DOMDocument();
+            $outputxml->loadXML(preg_replace('/\s*(<[^>]*>)\s*/','$1',$output));
+            $outputxml->formatOutput=false;
+            $outputxml->preserveWhiteSpace = false;
+            $content[] = $outputxml->saveXML();
+        } else if ("application/json" === $reqparams['sourcetype']){
+            $outputjson = json_decode($output);
+            $content[] = json_encode($outputjson);
+        } else {
+            $content[] = $output;
+        }
     }
-    error_log("Generated XML at " . (microtime(true) - $mytime)*1000);
-    returnArrayWithContentType($content,$preferredType,200,$proxy_mode,false,$mytime);
+    error_log("Generated all data at " . (microtime(true) - $mytime)*1000);
+    returnArrayWithContentType($content,$reqparams['destinationcontent'],200,$proxy_mode,false,$mytime);
     
 }else if (("simplejson" === $request_type)&&("application/json" === $content_type)){
     $input = extractSimpleJsonPayload($reqbody);

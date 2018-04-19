@@ -1,18 +1,49 @@
 [{
     "name": "Boite Bleue",
+    "transformation": "false",
+    "endpoint": "true",
+    "contenttype": "application/json",
     "url": "http://192.168.1.126:8080/horustojms",
     "description": "Send to queue RECEIVE_Q"
 },{
     "name": "Horus injector mode",
+    "transformation": "true",
+    "endpoint": "false",
     "url": "http://192.168.1.113/horus/horus.php?type=inject",
     "description": "Send to Horus in Injector mode"
 },{
     "name": "Horus proxy mode",
+    "transformation": "true",
+    "endpoint": "false",
     "url": "http://192.168.1.113/horus/horus.php",
     "description": "Send to Horus in Proxy mode"
 },{
     "name": "Horus Router source1",
+    "transformation": "true",
+    "endpoint": "true",
+    "contenttype": "application/json",
     "url": "http://192.168.1.113/horus/horusRouter.php?source=singlesource",
     "description": "Send to Horus Router; singlesource"
+},{
+    "name": "Boite Bleue Echo Json",
+    "transformation": "false",
+    "endpoint": "true",
+    "contenttype": "application/json",
+    "url": "http://192.168.1.113/echo.php",
+    "description": "Echo test Json"
+},{
+    "name": "Boite Bleue Echo Xml",
+    "transformation": "false",
+    "endpoint": "true",
+    "contenttype": "application/xml",
+    "url": "http://192.168.1.113/echo.php",
+    "description": "Echo test Xml"
+},{
+    "name": "Boite Bleue Echo Text",
+    "transformation": "false",
+    "endpoint": "true",
+    "contenttype": "text/plain",
+    "url": "http://192.168.1.113/echo.php",
+    "description": "Echo test Text"
 }
 ]

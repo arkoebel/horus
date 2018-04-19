@@ -35,13 +35,19 @@
         };
 
         function getEndpoints(res){
-            var option = '<option value="-1">Select</option>';
+            var optionProxy = '<option value="-1">Select</option>';
+            var optionDestination = '<option value="-1">Select</option>';
             $.each(res,function(i,d){
-                option += '<option value="' + d.url + '">'+d.name+'</option>';
+                if (d.transformation === "true"){
+                    optionProxy += '<option value="' + d.url + '">'+d.name+'</option>';
+                }
+                if (d.endpoint === 'true'){
+                    optionDestination += '<option value="' + d.url + '" class="' + d.contenttype + '">'+d.name+'</option>';
+                }
             });
-            $("#selectDestination").html(option);
+            $("#selectDestination").html(optionDestination);
             $("#selectDestination").change(selectDestination);
-            $("#selectProxy").html(option);
+            $("#selectProxy").html(optionProxy);
             $("#selectProxy").change(selectProxy);
         };
 
@@ -62,9 +68,10 @@
             for (var i = 0; i<Object.keys(horusTemplates).length; i++){
                 if (Object.keys(horusTemplates)[i]===opt){
                     var table = '<table><tr><th>Variable</th><th>Value</th></tr>';
-                    var indx = Object.keys(horusTemplates)[i];
-                    for (var j=0;j<horusTemplates[indx].length; j++){
-                        var indxj = horusTemplates[indx][j];
+                    var indx = (Object.entries(horusTemplates)[i])[1].params;
+                    $("#sourcetype").val((Object.entries(horusTemplates)[i])[1].type);
+                    for (var j=0;j<indx.length; j++){
+                        var indxj = indx[j];
                         table += '<tr><td>'+indxj+'</td><td id="'+indxj+'"><input id="val_'+indxj+'"></input></td></tr>';
                     }
                     $("#tab").html(table);
@@ -76,6 +83,8 @@
             var output = {attr: {}};
             output.template = $("#select option:selected").text();
             output.repeat = $("#number").val();
+            output.sourcetype = $("#sourcetype").val();
+            output.destinationcontent = $("#selectDestination option:selected").attr("class");
             $("#tab tr td input").each(function(){
                  output.attr[$(this).attr("id").substring(4)] = $(this).val();
             });
@@ -83,7 +92,13 @@
                 contentType: "application/json; charset=utf-8",
                 headers: {'x_destination_url': $("#destination").val()}
             });
-            $.post($("#proxy").val(),JSON.stringify(output),function(res){alert("OK")},"json");
+            if ($("#proxy").val() !== ""){
+                $.post($("#proxy").val(),JSON.stringify(output),function(res){alert("OK")},"json");
+            } else if ($("#destination").val() != "") {
+               $.post($("#destination").val(),JSON.stringify(output),function(res){alert("OK")},"json");
+            }else{
+               alert("You must choose a destination");
+            }
          };
 
          function save(){
@@ -146,6 +161,8 @@
                 <!--/div-->
             </div>
             <div class="form-group row">
+                <label for="sourcetype" class="col-sm-2 col-form-label">Template Content-Type:</label>
+                <div class="col-sm-10"><input class="form-control" id="sourcetype" disabled></input></div>
                 <div class="col-sm-12">
                     <table id="tab"></table>
                 </div>

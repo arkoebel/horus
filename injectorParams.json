@@ -1,0 +1,94 @@
+{
+	"pacs.008_1.xml": {
+		"type": "application/xml",
+		"params": []
+	},
+	"Rpacs008IP-01-RT1.xml": {
+		"type": "application/xml",
+		"params": []
+	},
+	"pacs.008_2.xml": {
+		"type": "application/xml",
+		"params": ["id", "frombic", "tobic"]
+	},
+	"pacs.008_recep.xml": {
+		"type": "application/xml",
+		"params": ["frombic", "tobic"]
+	},
+	"pacs.002_ACCP.xml": {
+		"type": "application/xml",
+		"params": ["id", "frombic", "tobic", "txid", "endtoendid", "dbtrAgt", "cdtrAgt", "txdt"]
+	},
+	"pacs.002_BBNegativeConfirmation_AC01.xml": {
+		"type": "application/xml",
+		"params": ["id", "frombic", "tobic", "txid", "endtoendid", "dbtrAgt", "cdtrAgt", "txdt"]
+	},
+	"pacs.002_SCTNegativeConfirmation_AB07.xml": {
+		"type": "application/xml",
+		"params": ["id", "frombic", "tobic", "txid", "endtoendid", "dbtrAgt", "cdtrAgt", "txdt"]
+	},
+	"pacs.002_SCTTimeOut.xml": {
+		"type": "application/xml",
+		"params": ["id", "frombic", "tobic", "txid", "endtoendid", "dbtrAgt", "txdt"]
+	},
+	"pacs.002_RJCT.xml": {
+		"type": "application/xml",
+		"params": ["id", "frombic", "tobic", "txid", "endtoendid", "dbtrAgt", "txdt"]
+	},
+	"pacs.002_on_pacs.002_ACCP.xml": {
+		"type": "application/xml",
+		"params": ["id", "frombic", "tobic", "txid", "endtoendid", "txdt", "dbtrAgt"]
+	},
+	"pacs.002_on_pacs.002_RJCT.xml": {
+		"type": "application/xml",
+		"params": ["id", "frombic", "tobic", "txid", "endtoendid", "txdt", "dbtrAgt"]
+	},
+	"pacs.004_Ustr.xml": {
+		"type": "application/xml",
+		"params": ["id", "frombic", "tobic", "amnt", "date", "cxid", "msgid", "instrid", "endtoendid", "txid", "OrgnlDt", "RmtInf1", "RmtInf2", "RmtInf3", "RmtInf4", "RmtInf5", "RmtInf6", "RmtInf7", "RmtInf8", "RmtInf9", "RmtInf10", "UltmtDbtrNm", "UltmtDbtrBIC", "DbtrNm", "DbtrPstlCy", "DbtrPstlAdr1", "DbtrPstlAdr2", "DbtrBIC", "DbtrAcct", "DbtrAgt", "CdtrAgt", "CdtrNm", "CdtrBIC", "CdtrPstlCy", "CdtrPstlAdr1", "CdtrPstlAdr2", "CdtrAcct", "UltmtCdtrNm", "UltmtCdtrBIC"]
+	},
+	"camt.029.xml": {
+		"type": "application/xml",
+		"params": ["id", "frombic", "tobic", "amnt", "date", "cxid", "msgid", "instrid", "endtoendid", "txid", "OrgnlDt", "RmtInf1", "RmtInf2", "RmtInf3", "RmtInf4", "RmtInf5", "RmtInf6", "RmtInf7", "RmtInf8", "RmtInf9", "RmtInf10", "UltmtDbtrNm", "UltmtDbtrBIC", "DbtrNm", "DbtrPstlCy", "DbtrPstlAdr1", "DbtrPstlAdr2", "DbtrBIC", "DbtrAcct", "DbtrAgt", "CdtrAgt", "CdtrNm", "CdtrBIC", "CdtrPstlCy", "CdtrPstlAdr1", "CdtrPstlAdr2", "CdtrAcct", "UltmtCdtrNm", "UltmtCdtrBIC"]
+	},
+	"pacs.002_on_camt.056_RJCT.xml": {
+		"type": "application/xml",
+		"params": ["id", "frombic", "tobic", "cxid", "msgid", "instrid", "endtoendid"]
+	},
+	"pacs.002_on_camt.029_RJCT.xml": {
+		"type": "application/xml",
+		"params": ["id", "frombic", "tobic", "cxid", "msgid", "instrid", "endtoendid"]
+	},
+	"pacs.002_on_pacs.028_ACCP.xml": {
+		"type": "application/xml",
+		"params": ["id", "frombic", "tobic", "msgid", "instrid", "txid", "dbtrAgt", "cdtrAgt", "endtoendid"]
+	},
+	"pacs.002_on_pacs.028_RJCT.xml": {
+		"type": "application/xml",
+		"params": ["id", "frombic", "tobic", "msgid", "instrid", "endtoendid"]
+	},
+	"position_msg_response.json": {
+		"type": "application/json",
+		"params": ["msgref", "ipsystem", "ipparticipant", "ipaccountid"]
+	},
+	"position_msg_response_crdt.json": {
+		"type": "application/json",
+		"params": ["msgref", "ipsystem", "ipparticipant", "ipaccountid"]
+	},
+	"position_msg_response_ccdt.json": {
+		"type": "application/json",
+		"params": ["msgref", "ipsystem", "ipparticipant", "ipaccountid"]
+	},
+	"position_msg_response_dbit.json": {
+		"type": "application/json",
+		"params": ["msgref", "ipsystem", "ipparticipant", "ipaccountid"]
+	},
+	"position_msg_response_error.json": {
+		"type": "application/json",
+		"params": ["msgref", "ipsystem", "ipparticipant", "ipaccountid"]
+	},
+	"swift_example.txt": {
+		"type": "text/plain",
+		"params": ["swiftbic1", "swiftbic2"]
+	}
+}

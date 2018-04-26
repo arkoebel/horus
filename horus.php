@@ -155,19 +155,21 @@ function extractSimpleJsonPayload($body){
     return json_decode($body,true);
 }
 
-function returnGenericError($format,$template,$errorMessage){
+function returnGenericError($format,$template,$errorMessage,$forward=''){
 
+    error_log("Error being generated. Cause: $errorMessage");
     ob_start();
     include $template;
     $errorOutput = ob_get_contents();
     ob_end_clean();
 
-    returnWithContentType($errorOutput,$format,400);
+    returnWithContentType($errorOutput,$format,400,$forward);
 
 }
 
-function returnGenericJsonError($format,$template,$errorMessage){
+function returnGenericJsonError($format,$template,$errorMessage,$forward=''){
 
+    error_log("Error JSON being generated. Cause: $errorMessage");
     ob_start();
     include $template;
     $errorOutput = ob_get_contents();
@@ -175,7 +177,7 @@ function returnGenericJsonError($format,$template,$errorMessage){
 
 error_log("JSON=" . $errorOutput);
 
-    returnWithContentType($errorOutput,$format,400,'',true,true);
+    returnWithContentType($errorOutput,$format,400,$forward,true,true);
 
 }
 function returnArrayWithContentType($data,$content_type,$status,$forward='',$exitafter=true,$mytime,$no_conversion=false){
@@ -265,7 +267,7 @@ function returnArrayWithContentType($data,$content_type,$status,$forward='',$exi
 }
 
 function returnWithContentType($data,$content_type,$status,$forward='',$exitafter=true, $no_conversion=false){
-    error_log("no_conversion:" . $no_conversion);
+    error_log("RWCT no_conversion:" . ($no_conversion ? 'TRUE':'FALSE'));
     switch($status){
         case 200:
             header("HTTP/1.1 200 OK",TRUE,200);
@@ -307,7 +309,7 @@ function returnWithContentType($data,$content_type,$status,$forward='',$exitafte
 }
 
 function convertOutData($data,$content_type,$no_conversion=false){
-    error_log("Convert: no_conversion=" . $no_conversion);
+    error_log("Convert: no_conversion=" . ($no_conversion ? 'TRUE':'FALSE'));
     if(!$no_conversion){
         error_log("Conversion");
         if($content_type == 'application/json'){
@@ -345,10 +347,9 @@ $mmatches = json_decode(file_get_contents('horusParams.json'),true);
 $genericError = 'templates/' . $mmatches["errorTemplate"];
 $errorFormat = $mmatches['errorFormat'];
 $preferredType = setReturnType($_SERVER['HTTP_ACCEPT'],$errorFormat);
-//echo "Preferred mime type : " . $preferredType . "\n";
+error_log("Preferred mime type : " . $preferredType);
 $simpleJsonMatches = $mmatches['simplejson'];
 $matches = $mmatches["pacs"];
-
 //print_r($matches);
 $reqbody = file_get_contents('php://input');
 $content_type = $_SERVER['CONTENT_TYPE'];
@@ -409,13 +410,13 @@ if ("inject" === $request_type){
     $input = extractSimpleJsonPayload($reqbody);
     if($input === null){
         $error_message = "JSON Error " . decodeJsonError(json_last_error());
-        returnGenericJsonError($preferredType,'templates/generic_error.json',$error_message);
+        returnGenericJsonError($preferredType,'templates/generic_error.json',$error_message,$proxy_mode);
     }
-    error_log("XJSON=" . print_r($simpleJsonMatches,true));
+    //error_log("XJSON=" . print_r($simpleJsonMatches,true));
     $selected = locateJson($simpleJsonMatches,$input);
     if ($selected == -1){
         $error_message = "No match found";
-        returnGenericJsonError($preferredType,'templates/generic_error.json',$errorMessage);
+        returnGenericJsonError($preferredType,'templates/generic_error.json',$errorMessage,$proxy_mode);
     }else{
         error_log('Selected : ' . $selected);
     }
@@ -430,7 +431,7 @@ if ("inject" === $request_type){
     $errorTemplate = 'templates/' . $errorTemplate;
     if(findMatch($simpleJsonMatches,$selected,"displayError")==="On"){
         //echo trim(preg_replace('/\s+/', ' ', $errorOutput));
-        returnGenericJsonError($preferredType,$errorTemplate,"Requested error");
+        returnGenericJsonError($preferredType,$errorTemplate,"Requested error",$proxy_mode);
     }
     $response = '';
     $multiple = false;
@@ -465,7 +466,16 @@ if ("inject" === $request_type){
 
 }else{
     $input = extractPayload($content_type,$reqbody,$genericError,$preferredType);
+    
+    libxml_use_internal_errors(true);
     $query = simplexml_load_string($input);
+    
+    if($query===FALSE){
+        $errorMessage = "Input XML not properly formatted.\n";
+        $errorMessage .= libxml_display_errors();
+        returnGenericError($preferredType,$genericError,$errorMessage,$proxy_mode);
+    }
+        
 
     $namespaces = $query->getDocNamespaces();
     $query->registerXPathNamespace('u',$namespaces[""]);
@@ -500,7 +510,7 @@ if ("inject" === $request_type){
         if($selected == -1){
             $errorMessage = "Found match, but filtered out\n";
             $errorMessage .= "XSD = $selectedXsd";
-            returnGenericError($preferredType,$genericError,$errorMessage);
+            returnGenericError($preferredType,$genericError,$errorMessage,$proxy_mode);
         }
         $vars = array();
         foreach(findMatch($matches,$selected,"parameters") as $param=>$path){
@@ -516,7 +526,7 @@ if ("inject" === $request_type){
         $errorTemplate = 'templates/' . $errorTemplate;
         if(findMatch($matches,$selected,"displayError")==="On"){
             //echo trim(preg_replace('/\s+/', ' ', $errorOutput));
-            returnGenericError($preferredType,$errorTemplate,"Requested error");
+            returnGenericError($preferredType,$errorTemplate,"Requested error",$proxy_mode);
         }
         $response = '';
         $multiple = false;
@@ -544,7 +554,7 @@ if ("inject" === $request_type){
             if(!($outputxml->schemaValidate('xsd/' . $formats[$nrep]))){
                 $errorMessage = "Could not validate output with " . $formats[$nrep] . "\n";
                 $errorMessage .= libxml_display_errors();
-                returnGenericError($preferredType,$errorTemplate,$errorMessage);
+                returnGenericError($preferredType,$errorTemplate,$errorMessage,$proxy_mode);
             }
             $outputxml->formatOutput=false;
             $outputxml->preserveWhiteSpace = false;
@@ -563,7 +573,7 @@ if ("inject" === $request_type){
     }else{
         $errorMessage = "Unable to find appropriate response.\n";
         $errorMessage .= libxml_display_errors();
-        returnGenericError($preferredType,$genericError,$errorMessage);
+        returnGenericError($preferredType,$genericError,$errorMessage,$proxy_mode);
     }
 }
  

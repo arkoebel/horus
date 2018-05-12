@@ -1,196 +1,184 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-    <head>
-        <meta charset="utf-8"/>
-        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"/>
-        <title>Horus Injector</title>
-        <script type='text/javascript' src='js/jquery-3.2.1.min.js'></script>
-        <script type='text/javascript' src='js/popper.min.js'></script>
-        <script type='text/javascript' src='FileSaver.js'></script>
-        <script type='text/javascript' src='Blob.js'></script>
-        <script type='text/javascript' src='js/bootstrap.bundle.js'></script>
-        <link rel="stylesheet" type="text/css" href="css/bootstrap.css" />
-        <link rel="stylesheet" type="text/css" href="css/bootstrap-theme.css" />
-        <script type='text/javascript'>
-        var horusTemplates = {};
-        jQuery(document).ready(function(){
-          $.get('getHorusDestinations.php',null,getTemplates,'json');     
-          $.get('endpoints.json',null,getEndpoints,'json');     
-          $("#select").change(selectTemplate);
-          $("#go").click(getOutput);
-          $("#save").click(save);
-          $("#restore").click(retrieve);
-          $("#fileselect").change(getFileName);
-        });
+	<head>
+		<!-- Required meta tags -->
+		<meta charset="utf-8"/>
+		<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"/>
 
-        function getTemplates(res){
-            horusTemplates = res;
-            var option = '<option value="-1">Select</option>';
-            $.each(res,function(i,d){
-                //option += '<option>'+d.name+'<\/option>';
-                option += '<option value="' + i + '">'+i+'<\/option>';
-            });
-            $("#select").html(option);
+		<!-- Bootstrap CSS -->
+		<meta content="IE=edge" http-equiv="X-UA-Compatible"> 
+		<style>
+		.bs-example {
+    position: relative;
+    padding: 45px 15px 15px;
+    margin: 0 -15px 15px;
+    border-color: #e5e5e5 #eee #eee;
+    border-style: solid;
+    border-width: 1px 0;
+    -webkit-box-shadow: inset 0 3px 6px rgba(0,0,0,.05);
+    box-shadow: inset 0 3px 6px rgba(0,0,0,.05)
+}
 
-        };
+.bs-example:after {
+    position: absolute;
+    top: 15px;
+    left: 15px;
+    font-size: 12px;
+    font-weight: 700;
+    color: #959595;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    content: " "
+}
+.bs-example .container {
+    width: auto
+}
 
-        function getEndpoints(res){
-            var optionProxy = '<option value="-1">Select</option>';
-            var optionDestination = '<option value="-1">Select</option>';
-            $.each(res,function(i,d){
-                if (d.transformation === "true"){
-                    optionProxy += '<option value="' + d.url + '">'+d.name+'</option>';
-                }
-                if (d.endpoint === 'true'){
-                    optionDestination += '<option value="' + d.url + '" class="' + d.contenttype + '">'+d.name+'</option>';
-                }
-            });
-            $("#selectDestination").html(optionDestination);
-            $("#selectDestination").change(selectDestination);
-            $("#selectProxy").html(optionProxy);
-            $("#selectProxy").change(selectProxy);
-        };
+.bs-example>.alert:last-child,.bs-example>.form-control:last-child,.bs-example>.jumbotron:last-child,.bs-example>.list-group:last-child,.bs-example>.navbar:last-child,.bs-example>.panel:last-child,.bs-example>.progress:last-child,.bs-example>.table-responsive:last-child>.table,.bs-example>.table:last-child,.bs-example>.well:last-child,.bs-example>blockquote:last-child,.bs-example>ol:last-child,.bs-example>p:last-child,.bs-example>ul:last-child {
+    margin-bottom: 0
+}
 
+.bs-example>p>.close {
+    float: none
+}
+.bs-example>.img-circle,.bs-example>.img-rounded,.bs-example>.img-thumbnail {
+    margin: 5px
+}
 
-        function selectDestination(){
-            var opt = $("#selectDestination option:selected").val();
-            $("#destination").val(opt);
-        };
+.bs-example>.table-responsive>.table {
+    background-color: #fff
+}
 
-        function selectProxy(){
-            var opt = $("#selectProxy option:selected").val();
-            $("#proxy").val(opt);
-        };
+.bs-example>.btn,.bs-example>.btn-group {
+    margin-top: 5px;
+    margin-bottom: 5px
+}
 
+.bs-example>.btn-toolbar+.btn-toolbar {
+    margin-top: 10px
+}
+.bs-example>textarea.form-control {
+    resize: vertical
+}
 
-        function selectTemplate(){
-            var opt = $("#select option:selected").text();
-            for (var i = 0; i<Object.keys(horusTemplates).length; i++){
-                if (Object.keys(horusTemplates)[i]===opt){
-                    var table = '<table><tr><th>Variable</th><th>Value</th></tr>';
-                    var indx = (Object.entries(horusTemplates)[i])[1].params;
-                    $("#sourcetype").val((Object.entries(horusTemplates)[i])[1].type);
-                    for (var j=0;j<indx.length; j++){
-                        var indxj = indx[j];
-                        table += '<tr><td>'+indxj+'</td><td id="'+indxj+'"><input id="val_'+indxj+'"></input></td></tr>';
-                    }
-                    $("#tab").html(table);
-                }
-            }
-        }
+.bs-example>.list-group {
+    max-width: 400px
+}
 
-         function getOutput(){
-            var output = {attr: {}};
-            output.template = $("#select option:selected").text();
-            output.repeat = $("#number").val();
-            output.sourcetype = $("#sourcetype").val();
-            output.destinationcontent = $("#selectDestination option:selected").attr("class");
-            $("#tab tr td input").each(function(){
-                 output.attr[$(this).attr("id").substring(4)] = $(this).val();
-            });
-            $.ajaxSetup({
-                contentType: "application/json; charset=utf-8",
-                headers: {'x_destination_url': $("#destination").val()}
-            });
-            if ($("#proxy").val() !== ""){
-                $.post($("#proxy").val(),JSON.stringify(output),function(res){alert("OK")},"json");
-            } else if ($("#destination").val() != "") {
-               $.post($("#destination").val(),JSON.stringify(output),function(res){alert("OK")},"json");
-            }else{
-               alert("You must choose a destination");
-            }
-         };
+.bs-example .navbar:last-child {
+    margin-bottom: 0
+}
 
-         function save(){
-             //$("#fileselect").trigger("click");
-             //alert($("#fileselect").attr("value"));
-             var output = {attr: {}};
-             output.template = $("#select option:selected").text();
-             output.repeat = $("#number").val();
-             $("#tab tr td input").each(function(){
-                  output.attr[$(this).attr("id").substring(4)] = $(this).val();
-             });
-             output.proxy = $("#proxy").val();
-             output.proxyname = $("#selectProxy option:selected").text();
-             output.destination = $("#destination").val();
-             output.destinationname = $("#selectDestination option:selected").text();
-             saveAs(new Blob([(JSON.stringify(output))]),$("#saveas").val());
-
-         };
-
-         function retrieve(){
-             $("#fileselect").trigger("click");
-         }
-
-        function getFileName(){
-            var reader = new FileReader();
-            reader.onload = (function(theFile) {
-                return function(e) {
-                    $("#saveas").val($("#fileselect").get(0).files[0].name);
-                    var res = JSON.parse(e.target.result);
-                    $("#select").val(res.template);
-                    $("#selectProxy").val(res.proxy);
-                    $("#selectDestination").val(res.destination);
-                    selectTemplate();
-                    $("#proxy").val(res.proxy);
-                    $("#destination").val(res.destination);
-                    $("#number").val(res.repeat);
-                    $.each(res.attr,function(index,item){
-                        $("#val_"+index).val(item);
-                    });
-            };})($("#fileselect").get(0).files[0]);
-            reader.readAsText($("#fileselect").get(0).files[0]);
-                
-
-        }; 
-        </script>
-    </head>
-    <body>
-        <div class="container">
-        <!--form-->
+.bs-example-tabs .nav-tabs {
+    margin-bottom: 15px
+}
+		</style>
+		<link href="bootstrap-4/css/bootstrap.min.css" rel="stylesheet">
+		<!--link href="bootstrap-4/css/docs.min.css" rel="stylesheet"--> 
+		<title>Horus Injector</title>
+	</head>
+	<body>
+		<h1>Horus Injector</h1>
+		<div class=bs-docs-section>
             <div class="form-group row">
-                <div class="input-group col-sm-8"><div class="input-group-prepend"><button class="btn" id="save">Save</button></div><input class="col-sm-6" type="text" id="saveas" value="horus_injector_export.json"/>
-                <div class="input-group-append"><button class="btn" id="restore">Retrieve</button></div></div>
-                <input type="file" style="display: none" id="fileselect"/>
-            </div>
-
-            <div class="form-group row">
-                <!--div class="input-group"-->
-                    <label for="select" class="col-sm-2 col-form-label">Template:</label>
-                    <div class="col-sm-10"><select class="form-control" id="select"></select></div>
-                <!--/div-->
-            </div>
-            <div class="form-group row">
-                <label for="sourcetype" class="col-sm-2 col-form-label">Template Content-Type:</label>
-                <div class="col-sm-10"><input class="form-control" id="sourcetype" disabled></input></div>
-                <div class="col-sm-12">
-                    <table id="tab"></table>
-                </div>
-            </div>
-            <div class="form-group row">
-                <!--div class="input-group"-->
-                    <label for="proxy" class="col-sm-2 col-form-label">Transformation Url:</label>
-		    <div class="col-sm-10"></textarea><select class="form-control" id="selectProxy"></select><textarea class="form-control" id="proxy"></textarea></div>
-                <!--/div-->
-            </div>
-            <div class="form-group row">
-                <!--div class="input-group"-->
-                    <label for="destination" class="col-sm-2 col-form-label">Endpoint Url:</label>
-                    <div class="col-sm-10"><select class="form-control" id="selectDestination"></select><textarea class="form-control" id="destination"></textarea></div>
-                <!--/div-->
-            </div>
-            <div class="form-group row">
-                <!--div class="input-group"-->
-                    <label for="number" class="col-sm-2 col-form-label">Number of messages:</label>
-                    <div class="col-sm-10"><input class="form-control" id="number" value="1"/></div>
-                <!--/div-->
-            </div>
-            <div class="form-group row">
-                <div class=""><button class="btn" id="go">Send</button></div>
-            </div>
-        <!--/form-->
-        </div>
-    </body>
+					<div class="input-group col-sm-8">
+						<div class="input-group-prepend">
+							<button class="btn" id="save">Save</button>
+						</div>
+						<input class="col-sm-6" type="text" id="saveas" value="horus_injector_export.json"/>
+						<div class="input-group-append">
+							<button class="btn" id="restore">Retrieve</button>
+						</div>
+					</div>
+					<input type="file" style="display: none" id="fileselect"/>
+				</div>
+				
+			<h2 id=tabs-examples>Mode Select</h2>
+			
+			<div class="bs-example">
+				<ul class="nav nav-pills" id="myTabs" role="tablist">
+					<li role="presentation" class="nav-item">
+						<a href="#home" class="nav-link active" id="home-tab" role="tab" data-toggle="pill" aria-controls="home" aria-expanded="true" aria-selected="true">Template</a>
+					</li>
+					<li role="presentation" class="nav-item">
+						<a href="#profile" class="nav-link" role="tab" id="profile-tab" data-toggle="pill" aria-controls="profile" aria-expanded="false">Free Form</a>
+					</li>
+				</ul>
+				<div class="tab-content" id="myTabContent">
+					<div class="tab-pane fade active show" role="tabpanel" id="home" aria-labelledby="home-tab">
+						<div class="form-group" id="templateslist">
+								<label for="select" class="col-sm-2 col-form-label">Template:</label>
+								<div class="col-sm-10">
+									<select class="form-control" id="select"></select>
+								</div>
+							</div>
+							<div class="form-group" id="templatescontenttype">
+								<label for="sourcetype" class="col-sm-2 col-form-label">Template Content-Type:</label>
+								<div class="col-sm-10">
+									<input class="form-control" id="sourcetype" disabled="true"></input>
+								</div>
+								<div class="col-sm-12">
+									<table id="tab"></table>
+								</div>
+							</div>
+							<div class="form-group">
+								<label for="number" class="col-sm-2 col-form-label">Number of messages:</label>
+								<div class="col-sm-10">
+									<input class="form-control" id="number" value="1"/>
+								</div>
+							</div>
+					</div>
+					<div class="tab-pane fade" role="tabpanel" id="profile" aria-labelledby="profile-tab">
+						<div class="form-group" id="querycontent">
+								<label for="freecontent" class="col-sm-2 col-form-label">Content-Type:</label>
+								<div class="col-sm-10">
+									<select class="form-control" id="freecontent">
+										<option value="text/plain" selected="true">text/plain</option>
+										<option value="application/json">application/json</option>
+										<option value="application/xml">application/xml</option>
+									</select>
+								</div>
+							</div>
+							<div class="form-group" id="querytext">
+								<label for="freetext" class="col-sm-2 col-form-label">Data to send:</label>
+								<div class="col-sm-10">
+									<textarea class="form-control" id="freetext" rows="10"></textarea>
+								</div>
+							</div>
+					</div>
+				</div>
+			</div> 
+		</div>
+		<h2>Destinations</h2>
+		<div class="container">
+			<div class="form-group row">
+				<label for="proxy" class="col-sm-2 col-form-label">Transformation Url:</label>
+				<div class="col-sm-10">
+					<select class="form-control" id="selectProxy"></select>
+					<textarea class="form-control" id="proxy"></textarea>
+				</div>
+			</div>
+			<div class="form-group row">
+				<label for="destination" class="col-sm-2 col-form-label">Endpoint Url:</label>
+				<div class="col-sm-10">
+					<select class="form-control" id="selectDestination"></select>
+					<textarea class="form-control" id="destination"></textarea>
+				</div>
+			</div>
+			
+			<div class="form-group row">
+				<div class="">
+					<button class="btn" id="go">Send</button>
+				</div>
+			</div>
+		</div>
+		<!-- Optional JavaScript -->
+		<!-- jQuery first, then Popper.js, then Bootstrap JS -->
+		<script src="js/jquery-3.2.1.min.js"></script>
+		<script src="js/popper.min.js"></script>
+		<script type='text/javascript' src='FileSaver.js'></script>
+		<script type='text/javascript' src='Blob.js'></script>
+		<script src="bootstrap-4/js/bootstrap.min.js"></script>
+		<script src="horus-injector.js"></script>
+	</body>
 </html>
-
-

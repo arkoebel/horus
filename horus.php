@@ -533,9 +533,11 @@ if ("inject" === $request_type){
         if(!is_array(findMatch($matches,$selected,"responseTemplate"))){
             $templates = array(findMatch($matches,$selected,"responseTemplate"));
             $formats = array(findMatch($matches,$selected,"responseFormat"));
+            $forwardparams = array( findMatch($matches,$selected,"destParameters"));
         }else{
             $templates = findMatch($matches,$selected,"responseTemplate");
 	    $formats = findMatch($matches,$selected,"responseFormat");
+            $forwardparams = findMatch($matches,$selected,"destParameters");
             $multiple = true;
         }
         $eol = "\r\n";
@@ -563,6 +565,22 @@ if ("inject" === $request_type){
             else
                 $response = $outputxml->saveXML();
             $nrep++;
+        }
+
+        if ($forwardparams!==null && $forwardparams != "" && count($forwardparams[0])>0){
+            error_log('params forward : ' . print_r($forwardparams,true));
+            $fwd_params = array();
+            foreach ($forwardparams[0] as $forwardparam){
+                $key = urlencode($forwardparam['key']);
+                $value = urlencode($forwardparam['value']);
+                $fwd_params[] = $key . '=' . $value;
+            }
+            error_log('query out : ' . print_r($fwd_params,true));
+            if(stripos($proxy_mode,'?')===FALSE)
+                $proxy_mode .= '?';
+            else
+                $proxy_mode .= '&';
+            $proxy_mode .= implode('&',$fwd_params);
         }
 
         if($multiple){

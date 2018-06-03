@@ -44,6 +44,7 @@
                 "responseFormat": "pacs.002.001.03.xsd",
                 "responseTemplate": "pacs.002_ACCP.xml",
                 "errorTemplate": "errorTemplate.xml",
+                "destParameters": [{"key": "source", "value":"router1"}],
                 "parameters": {
                         "id": "/u:Document/u:FIToFICstmrCdtTrf/u:GrpHdr/u:MsgId",
 			            "frombic": "/u:Document/u:FIToFICstmrCdtTrf/u:GrpHdr/u:InstgAgt/u:FinInstnId/u:BIC",

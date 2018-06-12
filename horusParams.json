@@ -329,7 +329,9 @@
 	"simplejson": [{
 			"query": {
 				"key": "msgType",
-				"value": "PositionMessageQueryCRT"
+				"value": "PositionMessageQueryCRT",
+                                "queryKey": "interfaceType",
+                                "queryValue": "FIN"
 			},
 			"responseTemplate": "position_msg_response.json",
 			"errorTemplate": "error_template.json",

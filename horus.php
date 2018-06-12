@@ -76,17 +76,38 @@ function locate($matches,$found,$value){
     return $selected;
 }
 
-function locateJson($matches,$input){
+function locateJson($matches,$input, $queryParams = null){
     $selected = -1;
     foreach($matches as $id=>$match){
         if(array_key_exists($match['query']['key'],$input)){
-            if($input[$match['query']['key']]===$match['query']['value']){
-                if(array_key_exists('queryMatch',$match) && $match['queryMatch']!=''){
-                    if(preg_match('/' . $match['queryMatch'] . '/',json_encode($input))===1){
-                        $selected = $id;
+            if(array_key_exists('queryKey',$match['query'])){
+                if( array_key_exists($match['query']['queryKey'],$queryParams) && $match['query']['queryValue'] === $queryParams[$match['query']['queryKey']]){
+                    error_log($id . ': trying -- Matched query param');
+                    if($input[$match['query']['key']]===$match['query']['value']){
+                        if(array_key_exists('queryMatch',$match) && $match['queryMatch']!=''){
+                            if(preg_match('/' . $match['queryMatch'] . '/',json_encode($input))===1){
+                                error_log($id . ': matched -- querymatch, query param');
+                                $selected = $id;
+                            }  
+                        }else{
+                            error_log($id . ': matched -- no query match, query param');
+                            $selected = $id;
+                        }
                     }
                 }else{
-                    $selected = $id;
+                    error_log($id . ': trying -- Query param wasn\'t a match');
+                }
+            }else{
+                if($input[$match['query']['key']]===$match['query']['value']){
+                    if(array_key_exists('queryMatch',$match) && $match['queryMatch']!=''){
+                        if(preg_match('/' . $match['queryMatch'] . '/',json_encode($input))===1){
+                            error_log($id . ': matched -- querymatch, no query param');
+                            $selected = $id;
+                        }
+                    }else{
+                        error_log($id . ': matched -- no query match');
+                        $selected = $id;
+                    }
                 }
             }
         }        
@@ -413,7 +434,7 @@ if ("inject" === $request_type){
         returnGenericJsonError($preferredType,'templates/generic_error.json',$error_message,$proxy_mode);
     }
     //error_log("XJSON=" . print_r($simpleJsonMatches,true));
-    $selected = locateJson($simpleJsonMatches,$input);
+    $selected = locateJson($simpleJsonMatches,$input,$_GET);
     if ($selected == -1){
         $error_message = "No match found";
         returnGenericJsonError($preferredType,'templates/generic_error.json',$errorMessage,$proxy_mode);

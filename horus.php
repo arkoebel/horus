@@ -374,9 +374,15 @@ $matches = $mmatches["pacs"];
 //print_r($matches);
 $reqbody = file_get_contents('php://input');
 $content_type = $_SERVER['CONTENT_TYPE'];
-error_log("Request : " . print_r($_SERVER,true));
-error_log("Received Data to post:\n" . $reqbody);
-$request_headers = apache_request_headers();
+error_log("Request : " . print_r($_SERVER,true) . "\n");
+//error_log("Received Data to post:\n" . $reqbody . "\n");
+
+if (function_exists('apache_request_headers')){
+    $request_headers = apache_request_headers();
+}else{
+    $request_headers = $_SERVER;
+}
+
 if (array_key_exists('X_DESTINATION_URL',$request_headers)){
     $proxy_mode = $request_headers['X_DESTINATION_URL'];
 }else{
@@ -386,6 +392,7 @@ if (array_key_exists('X_DESTINATION_URL',$request_headers)){
         $proxy_mode = '';
     }
 }
+
 
 if(array_key_exists('type',$_GET))
     $request_type = $_GET["type"];
@@ -487,10 +494,8 @@ if ("inject" === $request_type){
 
 }else{
     $input = extractPayload($content_type,$reqbody,$genericError,$preferredType);
-    
     libxml_use_internal_errors(true);
     $query = simplexml_load_string($input);
-    
     if($query===FALSE){
         $errorMessage = "Input XML not properly formatted.\n";
         $errorMessage .= libxml_display_errors();
@@ -525,23 +530,33 @@ if ("inject" === $request_type){
 	//echo "skipping $schema\n";
         }
     }
-//echo "schema=$selectedXsd\n";
+   error_log("schema=$selectedXsd\n");
     if($valid){
         $selected = locate($matches,$selectedXsd,$input);
         if($selected == -1){
             $errorMessage = "Found match, but filtered out\n";
             $errorMessage .= "XSD = $selectedXsd";
+            error_log($errorMessage . "\n");
             returnGenericError($preferredType,$genericError,$errorMessage,$proxy_mode);
         }
         $vars = array();
+        error_log("Match comment : " . findMatch($matches,$selected,"comment") . "\n");
         foreach(findMatch($matches,$selected,"parameters") as $param=>$path){
             $query->registerXPathNamespace('u',$namespaces[""]);
             $rr = ($query->xpath($path)); 
-            $vars[$param] = (string) $rr[0];
+            if(! ($rr===FALSE)){
+                $rr0 = $rr[0];
+                if ( $rr0->count()!=0) {
+                    $vars[$param] = $rr0->asXml();
+                }else{
+                    $vars[$param] = (string) $rr0;
+                }
+            }
         }
         $vars = array_merge($vars, $_GET);
-        //var_dump($vars);
-        //var_dump(findMatch($matches,$selected,"responseTemplate"));
+        error_log("Variables: " . print_r($vars,true). "\n");
+        error_log("Selected template : " . findMatch($matches,$selected,"responseTemplate") . "\n");
+
         $errorTemplate = findMatch($matches,$selected,"errorTemplate");
         $errorTemplate = ( ($errorTemplate==null) ? $genericError : $errorTemplate);
         $errorTemplate = 'templates/' . $errorTemplate;
@@ -573,10 +588,11 @@ if ("inject" === $request_type){
             $outputxml = new DOMDocument();
             $outputxml->loadXML(preg_replace('/\s*(<[^>]*>)\s*/','$1',$output));
             // $outputxml->loadXML($output);
-            //die(print_r($output,true));
+            // die(print_r($output,true));
             if(!($outputxml->schemaValidate('xsd/' . $formats[$nrep]))){
                 $errorMessage = "Could not validate output with " . $formats[$nrep] . "\n";
                 $errorMessage .= libxml_display_errors();
+                error_log($errorMessage . "\n");
                 returnGenericError($preferredType,$errorTemplate,$errorMessage,$proxy_mode);
             }
             $outputxml->formatOutput=false;
@@ -591,17 +607,19 @@ if ("inject" === $request_type){
         if ($forwardparams!==null && $forwardparams != "" && count($forwardparams[0])>0){
             error_log('params forward : ' . print_r($forwardparams,true));
             $fwd_params = array();
-            foreach ($forwardparams[0] as $forwardparam){
-                $key = urlencode($forwardparam['key']);
-                $value = urlencode($forwardparam['value']);
-                $fwd_params[] = $key . '=' . $value;
+            if(is_array($forwardparams[0])){
+                foreach ($forwardparams[0] as $forwardparam){
+                    $key = urlencode($forwardparam['key']);
+                    $value = urlencode($forwardparam['value']);
+                    $fwd_params[] = $key . '=' . $value;
+                }
+                error_log('query out : ' . print_r($fwd_params,true));
+                if(stripos($proxy_mode,'?')===FALSE)
+                    $proxy_mode .= '?';
+                else
+                    $proxy_mode .= '&';
+                $proxy_mode .= implode('&',$fwd_params);
             }
-            error_log('query out : ' . print_r($fwd_params,true));
-            if(stripos($proxy_mode,'?')===FALSE)
-                $proxy_mode .= '?';
-            else
-                $proxy_mode .= '&';
-            $proxy_mode .= implode('&',$fwd_params);
         }
 
         if($multiple){
@@ -612,6 +630,7 @@ if ("inject" === $request_type){
     }else{
         $errorMessage = "Unable to find appropriate response.\n";
         $errorMessage .= libxml_display_errors();
+        error_log($errorMessage . "\n");
         returnGenericError($preferredType,$genericError,$errorMessage,$proxy_mode);
     }
 }

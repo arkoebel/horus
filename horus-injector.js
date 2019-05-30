@@ -1,7 +1,7 @@
 var horusTemplates = {};
 jQuery(document).ready(function () {
 	$.get('getHorusDestinations.php', null, getTemplates, 'json');
-	$.get('endpoints.json', null, getEndpoints, 'json');
+	$.get('conf/endpoints.json', null, getEndpoints, 'json');
 	$("#select").change(selectTemplate);
 	$("#go").click(getOutput);
 	$("#save").click(save);

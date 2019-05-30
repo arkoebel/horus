@@ -123,7 +123,8 @@
                         "txid": "/u:Document/u:FIToFICstmrCdtTrf/u:CdtTrfTxInf/u:PmtId/u:TxId",
                         "endtoendid": "/u:Document/u:FIToFICstmrCdtTrf/u:CdtTrfTxInf/u:PmtId/u:EndToEndId",
 			"dbtrAgt": "/u:Document/u:FIToFICstmrCdtTrf/u:CdtTrfTxInf/u:DbtrAgt/u:FinInstnId/u:BIC",
-                        "txdt": "/u:Document/u:FIToFICstmrCdtTrf/u:CdtTrfTxInf/u:AccptncDtTm"
+                        "txdt": "/u:Document/u:FIToFICstmrCdtTrf/u:CdtTrfTxInf/u:AccptncDtTm",
+                        "whole": "/u:Document"
                 }
         },
 		{

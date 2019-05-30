@@ -364,7 +364,7 @@ function setReturnType($accept,$default){
 
 //var_dump($_GET);
 
-$mmatches = json_decode(file_get_contents('horusParams.json'),true);
+$mmatches = json_decode(file_get_contents('conf/horusParams.json'),true);
 $genericError = 'templates/' . $mmatches["errorTemplate"];
 $errorFormat = $mmatches['errorFormat'];
 $preferredType = setReturnType($_SERVER['HTTP_ACCEPT'],$errorFormat);

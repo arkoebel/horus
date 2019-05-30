@@ -1,6 +1,6 @@
 <?php
 
-$params = json_decode(file_get_contents('horusRouting.json'),true);
+$params = json_decode(file_get_contents('conf/horusRouting.json'),true);
 //echo print_r($params,true);
 $source = $_GET['source'];
 $data = file_get_contents('php://input');

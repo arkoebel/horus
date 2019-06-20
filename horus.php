@@ -27,8 +27,8 @@ function mlog($message,$log_level,$business_id = NULL,$format = 'TXT') {
    $alog = array_merge($alog,$json);
    $alog['orig_message'] = $message;
  }
- error_log(json_encode($alog)); 
- error_log(var_dump($alog));
+ error_log(json_encode($alog,JSON_UNESCAPED_SLASHES)); 
+ 
  if (json_last_error()!=0)  
    error_log(json_last_error_msg()); 
 }

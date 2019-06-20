@@ -247,6 +247,7 @@ function returnGenericJsonError($format,$template,$errorMessage,$forward=''){
 
 }
 function returnArrayWithContentType($data,$content_type,$status,$forward='',$exitafter=true,$mytime,$no_conversion=false){
+    global $business_id;
     mlog('RAWC: no_conversion = ' . $no_conversion,'DEBUG');
     switch($status){
         case 200:
@@ -274,7 +275,7 @@ function returnArrayWithContentType($data,$content_type,$status,$forward='',$exi
             $ch[$i] = curl_init($forward);
             curl_setopt($ch[$i], CURLOPT_RETURNTRANSFER,1);
             curl_setopt($ch[$i], CURLOPT_POST, TRUE);
-            curl_setopt($ch[$i], CURLOPT_HTTPHEADER, array('Content-type: ' . $content_type, 'Accept: application/json', 'Expect: '));
+            curl_setopt($ch[$i], CURLOPT_HTTPHEADER, array('Content-type: ' . $content_type, 'Accept: application/json', 'Expect: ','X_BUSINESS_ID: ' . $business_id));
             curl_setopt($ch[$i], CURLOPT_POSTFIELDS, convertOutData($content,$content_type,$no_conversion));
             curl_setopt($ch[$i], CURLOPT_SSL_VERIFYPEER, False);
             curl_setopt($ch[$i], CURLOPT_VERBOSE, True);
@@ -333,6 +334,7 @@ function returnArrayWithContentType($data,$content_type,$status,$forward='',$exi
 }
 
 function returnWithContentType($data,$content_type,$status,$forward='',$exitafter=true, $no_conversion=false){
+    global $business_id;
     mlog("RWCT no_conversion:" . ($no_conversion ? 'TRUE':'FALSE'),'DEBUG');
     switch($status){
         case 200:
@@ -355,7 +357,7 @@ function returnWithContentType($data,$content_type,$status,$forward='',$exitafte
         $handle = curl_init($forward);
         curl_setopt($handle, CURLOPT_RETURNTRANSFER,1);
         curl_setopt($handle, CURLOPT_POST, TRUE);
-        curl_setopt($handle, CURLOPT_HTTPHEADER, array('Content-type: ' . $content_type, 'Accept: application/json', 'Expect: '));
+        curl_setopt($handle, CURLOPT_HTTPHEADER, array('Content-type: ' . $content_type, 'Accept: application/json', 'Expect: ', 'X_BUSINESS_ID: ' . $business_id));
         curl_setopt($handle, CURLOPT_POSTFIELDS, convertOutData($data,$content_type, $no_conversion));
         curl_setopt($handle, CURLOPT_SSL_VERIFYPEER, False);
         $response = curl_exec($handle);

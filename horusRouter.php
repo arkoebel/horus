@@ -19,7 +19,73 @@ function findSource($source,$params){
 }
 //echo $source . "\n";
 
-$route = findSource($source, $params);
+function extractHeader($header){
+    if (function_exists('apache_request_headers')){
+        $request_headers = apache_request_headers();
+    }else{
+        $request_headers = $_SERVER;
+    }
+
+    if (array_key_exists(strtoupper($header),$request_headers)){
+        return $request_headers[strtoupper($header)];
+    }else{
+         if (array_key_exists(strtolower($header),$request_headers)){
+            return $request_headers[strtolower($header)];
+        }else{
+            return '';
+        }
+    }
+
+}
+
+function mlog($message,$log_level,$format = 'TXT') {
+
+    global $business_id;
+   
+    $alog = array(); 
+    $alog['timestamp'] = utc_time(5);
+    $alog['program'] = 'GREEN';
+    $alog['log_level'] = $log_level;
+    $alog['file'] = $_SERVER["PHP_SELF"];
+    $alog['business_id'] = $business_id;
+    if ($format === 'TXT') {
+      $alog['message'] = $message;
+    }else{
+      $json = $json_decode($message,true);
+      $alog = array_merge($alog,$json);
+      $alog['orig_message'] = $message;
+    }
+    error_log(json_encode($alog,JSON_UNESCAPED_SLASHES)); 
+    
+    if (json_last_error()!=0)  
+      error_log(json_last_error_msg()); 
+   }
+   
+   function utc_time($precision = 0)
+   {
+       $time = gettimeofday();
+   
+       if (is_int($precision) && $precision >= 0 && $precision <= 6) {
+           $total = (string) $time['sec'] . '.' . str_pad((string) $time['usec'], 6, '0', STR_PAD_LEFT);
+           $total_rounded = bcadd($total, '0.' . str_repeat('0', $precision) . '5', $precision);
+           @list($integer, $fraction) = explode('.', $total_rounded);
+           $format = $precision == 0
+               ? "Y-m-d\TH:i:s\Z"
+               : "Y-m-d\TH:i:s,".$fraction."\Z";
+           return gmdate($format, $integer);
+       }
+   
+       return false;
+   }
+   
+   function getNewBusinessId() {
+   
+       return md5(time());
+   }
+
+
+
+   $route = findSource($source, $params);
 
 //echo print_r($route,true);
 
@@ -44,7 +110,7 @@ $ii=0;
 
 foreach($route['destinations'] as $destination){
     $ii++;
-    echo "Destination : $ii " . $destination['comment'] . "\n";
+    mlog("Destination : $ii " . $destination['comment'] . "\n","INFO");
     $dest_parameters = $parameters;
 
     foreach($destination['destParameters'] as $dest_param){
@@ -80,11 +146,11 @@ foreach($route['destinations'] as $destination){
         }
     }
 
-    //echo "Send http request to " . $destination['proxy'] . $proxy_query . "\n";
-    //echo "Final destination : " . $destination['destination'] . $dest_query . "\n";
+    mlog("Send http request to " . $destination['proxy'] . $proxy_query . "\n",'DEBUG');
+    mlog("Final destination : " . $destination['destination'] . $dest_query . "\n",'DEBUG');
     //echo "Content-type : " . $content_type . "\n";
 
-    $headers = array('Content-type: ' . $content_type, 'Accept: application/json', 'Expect: ');
+    $headers = array('Content-type: ' . $content_type, 'Accept: application/json', 'Expect: ', 'X_BUSINESS_ID: ' . $business_id);
 
     if ($destination['proxy']==""){
         $dest_url = $destination['destination'] . $dest_query;

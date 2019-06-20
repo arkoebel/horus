@@ -12,6 +12,49 @@ function echoerror($exception){
     die('Error ' . $exception->getMessage());
 }
 
+function mlog($message,$log_level,$business_id = NULL,$format = 'TXT') {
+
+ $alog = array(); 
+ $alog['timestamp'] = utc_time(5);
+ $alog['program'] = 'GREEN';
+ $alog['log_level'] = $log_level;
+ $alog['file'] = $_SERVER["PHP_SELF"];
+ $alog['business_id'] = $business_id == NULL ? getNewBusinessId() : $business_id;
+ if ($format === 'TXT') {
+   $alog['message'] = $message;
+ }else{
+   $json = $json_decode($message,true);
+   $alog = array_merge($alog,$json);
+   $alog['orig_message'] = $message;
+ }
+ error_log(json_encode($alog)); 
+ error_log(var_dump($alog));
+ if (json_last_error()!=0)  
+   error_log(json_last_error_msg()); 
+}
+
+function utc_time($precision = 0)
+{
+    $time = gettimeofday();
+
+    if (is_int($precision) && $precision >= 0 && $precision <= 6) {
+        $total = (string) $time['sec'] . '.' . str_pad((string) $time['usec'], 6, '0', STR_PAD_LEFT);
+        $total_rounded = bcadd($total, '0.' . str_repeat('0', $precision) . '5', $precision);
+        @list($integer, $fraction) = explode('.', $total_rounded);
+        $format = $precision == 0
+            ? "Y-m-d\TH:i:s\Z"
+            : "Y-m-d\TH:i:s,".$fraction."\Z";
+        return gmdate($format, $integer);
+    }
+
+    return false;
+}
+
+function getNewBusinessId() {
+
+    return md5(time());
+}
+
 function libxml_display_error($error)
 {
     $return = "";
@@ -82,30 +125,30 @@ function locateJson($matches,$input, $queryParams = null){
         if(array_key_exists($match['query']['key'],$input)){
             if(array_key_exists('queryKey',$match['query'])){
                 if( array_key_exists($match['query']['queryKey'],$queryParams) && $match['query']['queryValue'] === $queryParams[$match['query']['queryKey']]){
-                    error_log($id . ': trying -- Matched query param');
+                    mlog($id . ': trying -- Matched query param','DEBUG');
                     if($input[$match['query']['key']]===$match['query']['value']){
                         if(array_key_exists('queryMatch',$match) && $match['queryMatch']!=''){
                             if(preg_match('/' . $match['queryMatch'] . '/',json_encode($input))===1){
-                                error_log($id . ': matched -- querymatch, query param');
+                                mlog($id . ': matched -- querymatch, query param','DEBUG');
                                 $selected = $id;
                             }  
                         }else{
-                            error_log($id . ': matched -- no query match, query param');
+                            mlog($id . ': matched -- no query match, query param','DEBUG');
                             $selected = $id;
                         }
                     }
                 }else{
-                    error_log($id . ': trying -- Query param wasn\'t a match');
+                    mlog($id . ': trying -- Query param wasn\'t a match','DEBUG');
                 }
             }else{
                 if($input[$match['query']['key']]===$match['query']['value']){
                     if(array_key_exists('queryMatch',$match) && $match['queryMatch']!=''){
                         if(preg_match('/' . $match['queryMatch'] . '/',json_encode($input))===1){
-                            error_log($id . ': matched -- querymatch, no query param');
+                            mlog($id . ': matched -- querymatch, no query param','DEBUG');
                             $selected = $id;
                         }
                     }else{
-                        error_log($id . ': matched -- no query match');
+                        mlog($id . ': matched -- no query match','DEBUG');
                         $selected = $id;
                     }
                 }
@@ -178,7 +221,7 @@ function extractSimpleJsonPayload($body){
 
 function returnGenericError($format,$template,$errorMessage,$forward=''){
 
-    error_log("Error being generated. Cause: $errorMessage");
+    mlog("Error being generated. Cause: $errorMessage",'INFO');
     ob_start();
     include $template;
     $errorOutput = ob_get_contents();
@@ -190,19 +233,19 @@ function returnGenericError($format,$template,$errorMessage,$forward=''){
 
 function returnGenericJsonError($format,$template,$errorMessage,$forward=''){
 
-    error_log("Error JSON being generated. Cause: $errorMessage");
+    mlog("Error JSON being generated. Cause: $errorMessage",'INFO');
     ob_start();
     include $template;
     $errorOutput = ob_get_contents();
     ob_end_clean();
 
-error_log("JSON=" . $errorOutput);
+    mlog($errorOutput,'DEBUG',NULL,'JSON');
 
     returnWithContentType($errorOutput,$format,400,$forward,true,true);
 
 }
 function returnArrayWithContentType($data,$content_type,$status,$forward='',$exitafter=true,$mytime,$no_conversion=false){
-    error_log('RAWC: no_conversion = ' . $no_conversion);
+    mlog('RAWC: no_conversion = ' . $no_conversion,'DEBUG');
     switch($status){
         case 200:
             header("HTTP/1.1 200 OK",TRUE,200);
@@ -222,7 +265,7 @@ function returnArrayWithContentType($data,$content_type,$status,$forward='',$exi
         $forward = '';
 
     if($forward !== ''){
-        error_log('Generate Curl calls at '. (microtime(true) - $mytime)*1000);
+        mlog('Generate Curl calls at '. (microtime(true) - $mytime)*1000,'INFO');
         $mh = curl_multi_init();
         $ch = array();
         foreach($data as $i => $content){
@@ -237,7 +280,7 @@ function returnArrayWithContentType($data,$content_type,$status,$forward='',$exi
             //curl_setopt($ch[$i], CURLINFO_HEADER_OUT, True);
             curl_multi_add_handle($mh, $ch[$i]);
         }
-        error_log('Curl calls generated at ' . (microtime(true) - $mytime)*1000);
+        mlog('Curl calls generated at ' . (microtime(true) - $mytime)*1000,'INFO');
         $running = NULL;
         do {
             curl_multi_exec($mh,$running);
@@ -245,7 +288,7 @@ function returnArrayWithContentType($data,$content_type,$status,$forward='',$exi
         } while($running > 0);
        
         $json = false;
-        error_log('Got all curl responses at ' . (microtime(true) - $mytime)*1000);
+        mlog('Got all curl responses at ' . (microtime(true) - $mytime)*1000,'INFO');
 
         $response = array();
         foreach($data as $i => $content){
@@ -274,7 +317,7 @@ function returnArrayWithContentType($data,$content_type,$status,$forward='',$exi
             curl_close($ch[$i]);
         }
         curl_multi_close($mh);
-        error_log('Got all responses at ' . (microtime(true) - $mytime)*1000);
+        mlog('Got all responses at ' . (microtime(true) - $mytime)*1000,'INFO');
 
         if($json){
             echo json_encode($response);
@@ -288,7 +331,7 @@ function returnArrayWithContentType($data,$content_type,$status,$forward='',$exi
 }
 
 function returnWithContentType($data,$content_type,$status,$forward='',$exitafter=true, $no_conversion=false){
-    error_log("RWCT no_conversion:" . ($no_conversion ? 'TRUE':'FALSE'));
+    mlog("RWCT no_conversion:" . ($no_conversion ? 'TRUE':'FALSE'),'DEBUG');
     switch($status){
         case 200:
             header("HTTP/1.1 200 OK",TRUE,200);
@@ -330,9 +373,9 @@ function returnWithContentType($data,$content_type,$status,$forward='',$exitafte
 }
 
 function convertOutData($data,$content_type,$no_conversion=false){
-    error_log("Convert: no_conversion=" . ($no_conversion ? 'TRUE':'FALSE'));
+    mlog("Convert: no_conversion=" . ($no_conversion ? 'TRUE':'FALSE'),'DEBUG');
     if(!$no_conversion){
-        error_log("Conversion");
+        mlog("Conversion",'DEBUG');
         if($content_type == 'application/json'){
             $dataJSON = array('payload' => $data);
             return json_encode($dataJSON);
@@ -340,7 +383,7 @@ function convertOutData($data,$content_type,$no_conversion=false){
             return $data;
         }
     }else{
-        error_log("No Conversion");
+        mlog("No Conversion",'DEBUG');
         return $data;
     }
 }
@@ -368,14 +411,14 @@ $mmatches = json_decode(file_get_contents('conf/horusParams.json'),true);
 $genericError = 'templates/' . $mmatches["errorTemplate"];
 $errorFormat = $mmatches['errorFormat'];
 $preferredType = setReturnType($_SERVER['HTTP_ACCEPT'],$errorFormat);
-error_log("Preferred mime type : " . $preferredType);
+mlog("Preferred mime type : " . $preferredType,'DEBUG');
 $simpleJsonMatches = $mmatches['simplejson'];
 $matches = $mmatches["pacs"];
 //print_r($matches);
 $reqbody = file_get_contents('php://input');
 $content_type = $_SERVER['CONTENT_TYPE'];
-error_log("Request : " . print_r($_SERVER,true) . "\n");
-//error_log("Received Data to post:\n" . $reqbody . "\n");
+mlog("Request : " . print_r($_SERVER,true) . "\n",'DEBUG');
+mlog("Received Data to post:\n" . $reqbody . "\n",'INFO');
 
 if (function_exists('apache_request_headers')){
     $request_headers = apache_request_headers();
@@ -406,7 +449,7 @@ if ("inject" === $request_type){
     foreach($reqparams['attr'] as $key => $value)
         $vars[$key] = $value;
     $content = array();
-    error_log("Received request at " . (microtime(true) - $mytime)*1000);
+    mlog("Received request at " . (microtime(true) - $mytime)*1000,'INFO');
     for($i=0;$i<$reqparams['repeat'];$i++){
         $vars['loop_index'] = $i;
         ob_start();
@@ -428,10 +471,10 @@ if ("inject" === $request_type){
     }
     $convert = false;
     if(("application/xml" === $reqparams['sourcetype'])&&("application/json" === $reqparams['destinationcontent'])){
-        error_log("=== Conversion XML -> JSON ===");
+        mlog("=== Conversion XML -> JSON ===",'DEBUG');
         $convert = true;
     }
-    error_log("Generated all data at " . (microtime(true) - $mytime)*1000);
+    mlog("Generated all data at " . (microtime(true) - $mytime)*1000,'INFO');
     returnArrayWithContentType($content,$reqparams['destinationcontent'],200,$proxy_mode,false,$mytime, !$convert);
     
 }else if (("simplejson" === $request_type)&&("application/json" === $content_type)){
@@ -446,7 +489,7 @@ if ("inject" === $request_type){
         $error_message = "No match found";
         returnGenericJsonError($preferredType,'templates/generic_error.json',$errorMessage,$proxy_mode);
     }else{
-        error_log('Selected : ' . $selected);
+        mlog('Selected : ' . $selected,'INFO');
     }
     $vars = array();
     foreach(findMatch($simpleJsonMatches,$selected,"parameters") as $param=>$path){
@@ -530,17 +573,17 @@ if ("inject" === $request_type){
 	//echo "skipping $schema\n";
         }
     }
-   error_log("schema=$selectedXsd\n");
+   mlog("schema=$selectedXsd\n",'DEBUG');
     if($valid){
         $selected = locate($matches,$selectedXsd,$input);
         if($selected == -1){
             $errorMessage = "Found match, but filtered out\n";
             $errorMessage .= "XSD = $selectedXsd";
-            error_log($errorMessage . "\n");
+            mlog($errorMessage . "\n",'INFO');
             returnGenericError($preferredType,$genericError,$errorMessage,$proxy_mode);
         }
         $vars = array();
-        error_log("Match comment : " . findMatch($matches,$selected,"comment") . "\n");
+        mlog("Match comment : " . findMatch($matches,$selected,"comment") . "\n",'INFO');
         foreach(findMatch($matches,$selected,"parameters") as $param=>$path){
             $query->registerXPathNamespace('u',$namespaces[""]);
             $rr = ($query->xpath($path)); 
@@ -554,8 +597,8 @@ if ("inject" === $request_type){
             }
         }
         $vars = array_merge($vars, $_GET);
-        error_log("Variables: " . print_r($vars,true). "\n");
-        error_log("Selected template : " . findMatch($matches,$selected,"responseTemplate") . "\n");
+        mlog("Variables: " . print_r($vars,true). "\n",'INFO');
+        mlog("Selected template : " . findMatch($matches,$selected,"responseTemplate") . "\n",'INFO');
 
         $errorTemplate = findMatch($matches,$selected,"errorTemplate");
         $errorTemplate = ( ($errorTemplate==null) ? $genericError : $errorTemplate);
@@ -592,7 +635,7 @@ if ("inject" === $request_type){
             if(!($outputxml->schemaValidate('xsd/' . $formats[$nrep]))){
                 $errorMessage = "Could not validate output with " . $formats[$nrep] . "\n";
                 $errorMessage .= libxml_display_errors();
-                error_log($errorMessage . "\n");
+                mlog($errorMessage . "\n",'ERROR');
                 returnGenericError($preferredType,$errorTemplate,$errorMessage,$proxy_mode);
             }
             $outputxml->formatOutput=false;
@@ -605,7 +648,7 @@ if ("inject" === $request_type){
         }
 
         if ($forwardparams!==null && $forwardparams != "" && count($forwardparams[0])>0){
-            error_log('params forward : ' . print_r($forwardparams,true));
+            mlog('params forward : ' . print_r($forwardparams,true),'INFO');
             $fwd_params = array();
             if(is_array($forwardparams[0])){
                 foreach ($forwardparams[0] as $forwardparam){
@@ -613,7 +656,7 @@ if ("inject" === $request_type){
                     $value = urlencode($forwardparam['value']);
                     $fwd_params[] = $key . '=' . $value;
                 }
-                error_log('query out : ' . print_r($fwd_params,true));
+                mlog('query out : ' . print_r($fwd_params,true),'INFO');
                 if(stripos($proxy_mode,'?')===FALSE)
                     $proxy_mode .= '?';
                 else
@@ -630,7 +673,7 @@ if ("inject" === $request_type){
     }else{
         $errorMessage = "Unable to find appropriate response.\n";
         $errorMessage .= libxml_display_errors();
-        error_log($errorMessage . "\n");
+        mlog($errorMessage . "\n",'ERROR');
         returnGenericError($preferredType,$genericError,$errorMessage,$proxy_mode);
     }
 }

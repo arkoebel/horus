@@ -12,14 +12,16 @@ function echoerror($exception){
     die('Error ' . $exception->getMessage());
 }
 
-function mlog($message,$log_level,$business_id = NULL,$format = 'TXT') {
+function mlog($message,$log_level,$format = 'TXT') {
+
+ global $business_id;
 
  $alog = array(); 
  $alog['timestamp'] = utc_time(5);
  $alog['program'] = 'GREEN';
  $alog['log_level'] = $log_level;
  $alog['file'] = $_SERVER["PHP_SELF"];
- $alog['business_id'] = $business_id == NULL ? getNewBusinessId() : $business_id;
+ $alog['business_id'] = $business_id;
  if ($format === 'TXT') {
    $alog['message'] = $message;
  }else{
@@ -239,7 +241,7 @@ function returnGenericJsonError($format,$template,$errorMessage,$forward=''){
     $errorOutput = ob_get_contents();
     ob_end_clean();
 
-    mlog($errorOutput,'DEBUG',NULL,'JSON');
+    mlog($errorOutput,'DEBUG','JSON');
 
     returnWithContentType($errorOutput,$format,400,$forward,true,true);
 
@@ -404,7 +406,24 @@ function setReturnType($accept,$default){
     }
 }        
     
+function extractHeader($header){
+    if (function_exists('apache_request_headers')){
+        $request_headers = apache_request_headers();
+    }else{
+        $request_headers = $_SERVER;
+    }
 
+    if (array_key_exists(strtoupper($header),$request_headers)){
+        return $request_headers[strtoupper($header)];
+    }else{
+         if (array_key_exists(strtolower($header),$request_headers)){
+            return $request_headers[strtolower($header)];
+        }else{
+            return '';
+        }
+    }
+
+}
 //var_dump($_GET);
 
 $mmatches = json_decode(file_get_contents('conf/horusParams.json'),true);
@@ -420,21 +439,12 @@ $content_type = $_SERVER['CONTENT_TYPE'];
 mlog("Request : " . print_r($_SERVER,true) . "\n",'DEBUG');
 mlog("Received Data to post:\n" . $reqbody . "\n",'INFO');
 
-if (function_exists('apache_request_headers')){
-    $request_headers = apache_request_headers();
-}else{
-    $request_headers = $_SERVER;
-}
+$proxy_mode = extractHeader('X_DESTINATION_URL');
 
-if (array_key_exists('X_DESTINATION_URL',$request_headers)){
-    $proxy_mode = $request_headers['X_DESTINATION_URL'];
-}else{
-     if (array_key_exists('x_destination_url',$request_headers)){
-        $proxy_mode =  $request_headers['x_destination_url'];
-    }else{
-        $proxy_mode = '';
-    }
-}
+$business_id = extractHeader('X_BUSINESS_ID');
+
+if ($business_id === '')
+    $business_id = getNewBusinessId();
 
 
 if(array_key_exists('type',$_GET))

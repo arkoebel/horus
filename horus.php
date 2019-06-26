@@ -29,7 +29,7 @@ function mlog($message,$log_level,$format = 'TXT') {
    $alog = array_merge($alog,$json);
    $alog['orig_message'] = $message;
  }
- error_log(json_encode($alog) . "\n",3,'/tmp/custom.log');
+ error_log(json_encode($alog,JSON_UNESCAPED_SLASHES)); 
  
  if (json_last_error()!=0)  
    error_log(json_last_error_msg()); 
@@ -275,7 +275,7 @@ function returnArrayWithContentType($data,$content_type,$status,$forward='',$exi
             $ch[$i] = curl_init($forward);
             curl_setopt($ch[$i], CURLOPT_RETURNTRANSFER,1);
             curl_setopt($ch[$i], CURLOPT_POST, TRUE);
-            curl_setopt($ch[$i], CURLOPT_HTTPHEADER, array('Content-type: ' . $content_type, 'Accept: application/json', 'Expect: ','X-BUSINESS-ID: ' . $business_id));
+            curl_setopt($ch[$i], CURLOPT_HTTPHEADER, array('Content-type: ' . $content_type, 'Accept: application/json', 'Expect: ','X_BUSINESS_ID: ' . $business_id));
             curl_setopt($ch[$i], CURLOPT_POSTFIELDS, convertOutData($content,$content_type,$no_conversion));
             curl_setopt($ch[$i], CURLOPT_SSL_VERIFYPEER, False);
             curl_setopt($ch[$i], CURLOPT_VERBOSE, True);
@@ -357,7 +357,7 @@ function returnWithContentType($data,$content_type,$status,$forward='',$exitafte
         $handle = curl_init($forward);
         curl_setopt($handle, CURLOPT_RETURNTRANSFER,1);
         curl_setopt($handle, CURLOPT_POST, TRUE);
-        curl_setopt($handle, CURLOPT_HTTPHEADER, array('Content-type: ' . $content_type, 'Accept: application/json', 'Expect: ', 'X-BUSINESS-ID: ' . $business_id));
+        curl_setopt($handle, CURLOPT_HTTPHEADER, array('Content-type: ' . $content_type, 'Accept: application/json', 'Expect: ', 'X_BUSINESS_ID: ' . $business_id));
         curl_setopt($handle, CURLOPT_POSTFIELDS, convertOutData($data,$content_type, $no_conversion));
         curl_setopt($handle, CURLOPT_SSL_VERIFYPEER, False);
         $response = curl_exec($handle);
@@ -412,28 +412,15 @@ function extractHeader($header){
     if (function_exists('apache_request_headers')){
         $request_headers = apache_request_headers();
     }else{
-        if (function_exists('getallheaders')){
-            $request_headers = getallheaders();
-        }else{
-            $request_headers = array();
-            foreach ($_SERVER as $name => $value) {
-            if (substr($name, 0, 5) == 'HTTP_') {
-                $request_headers[strtolower(str_replace(' ', '-', ucwords(strtolower(str_replace('_', ' ', substr($name, 5))))))] = $value;
-            }
-        }
-        }
+        $request_headers = $_SERVER;
     }
 
-    error_log(var_dump($request_headers,true));
     if (array_key_exists(strtoupper($header),$request_headers)){
-        error_log('found ' . strtoupper($header));
         return $request_headers[strtoupper($header)];
     }else{
          if (array_key_exists(strtolower($header),$request_headers)){
-            error_log('found ' . strtolower($header));
             return $request_headers[strtolower($header)];
         }else{
-            error_log($header . ' not found');
             return '';
         }
     }
@@ -456,7 +443,7 @@ mlog("Received Data to post:\n" . $reqbody . "\n",'INFO');
 
 $proxy_mode = extractHeader('X_DESTINATION_URL');
 
-$business_id = extractHeader('X-BUSINESS-ID');
+$business_id = extractHeader('X_BUSINESS_ID');
 
 if ($business_id === '')
     $business_id = getNewBusinessId();

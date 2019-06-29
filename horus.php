@@ -12,27 +12,31 @@ function echoerror($exception){
     die('Error ' . $exception->getMessage());
 }
 
-function mlog($message,$log_level,$format = 'TXT') {
+function mlog($message,$log_level,$format = 'TXT',$colourx = 'GREEN') {
 
  global $business_id;
+ global $colour;
 
- $alog = array(); 
+ $alog = array();
  $alog['timestamp'] = utc_time(5);
- $alog['program'] = 'GREEN';
+ $alog['program'] = $colour ;
  $alog['log_level'] = $log_level;
  $alog['file'] = $_SERVER["PHP_SELF"];
  $alog['business_id'] = $business_id;
+ $alog['pid'] = getmypid();
  if ($format === 'TXT') {
    $alog['message'] = $message;
  }else{
-   $json = $json_decode($message,true);
-   $alog = array_merge($alog,$json);
-   $alog['orig_message'] = $message;
+   //$json = json_decode($message,true);
+   //$alog = array_merge($alog,$json);
+   //$alog['orig_message'] = $message;
+   $alog['message'] = escapeJsonString($message);
  }
- error_log(json_encode($alog,JSON_UNESCAPED_SLASHES)); 
- 
- if (json_last_error()!=0)  
-   error_log(json_last_error_msg()); 
+ //error_log('{"timestamp":"' . $alog['timestamp'] . '","program":"' . $colour . '","log_level":"' . $log_level . '","file":"' . escapeJsonString($_SERVER["PHP_SELF"]) . '","business_id": "' . $business_id . '","message":"' . escapeJsonString($message) . '"}',3,'/TEMPO/test.log');
+ error_log(json_encode($alog) . "\n",3,'/var/log/horus/horus_http.log');
+
+ if (json_last_error()!=0)
+   error_log(json_last_error_msg());
 }
 
 function utc_time($precision = 0)
@@ -55,6 +59,15 @@ function utc_time($precision = 0)
 function getNewBusinessId() {
 
     return md5(time());
+}
+
+function escapeJsonString($value) {
+    //$escapers =     array("\\",   "/",   "\"",   "\n",  "\r",  "\t",  "\x08", "\x0c");
+    //$replacements = array("\\\\", "\\/", "\\\"", "\\n", "\\r", "\\t", "\\f", "\\b");
+    $escapers = array('"','/');
+    $replacements = array('\"','\/');
+    $result = str_replace($escapers, $replacements, $value);
+    return $result;
 }
 
 function libxml_display_error($error)
@@ -103,7 +116,7 @@ function findMatch($matches,$request,$field){
 function locate($matches,$found,$value){
     $selected = -1;
     foreach($matches as $id=>$match){
-//	print_r($match);
+//      print_r($match);
         if($match['query']===$found){
             if(array_key_exists('queryMatch',$match) && $match['queryMatch']!=''){
                 //echo('/' . $match['queryMatch'] . '/' . "\n");
@@ -133,7 +146,7 @@ function locateJson($matches,$input, $queryParams = null){
                             if(preg_match('/' . $match['queryMatch'] . '/',json_encode($input))===1){
                                 mlog($id . ': matched -- querymatch, query param','DEBUG');
                                 $selected = $id;
-                            }  
+                            }
                         }else{
                             mlog($id . ': matched -- no query match, query param','DEBUG');
                             $selected = $id;
@@ -155,7 +168,7 @@ function locateJson($matches,$input, $queryParams = null){
                     }
                 }
             }
-        }        
+        }
 
     }
 
@@ -163,15 +176,15 @@ function locateJson($matches,$input, $queryParams = null){
 
 }
 
-function formMultiPart($file,$data,$mime_boundary,$eol,$content_type) { 
-	$cc = '';
-	$cc .= '--' . $mime_boundary . $eol;
-	$cc .= "Content-Disposition: form-data; name=\"$file\"; filename=\"$file\"" . $eol;
-	$cc .= 'Content-Type: ' . $content_type . $eol;
-	$cc .= 'Content-Transfer-Encoding: base64' . $eol . $eol;
-	$cc .= chunk_split(base64_encode($data)) . $eol;
+function formMultiPart($file,$data,$mime_boundary,$eol,$content_type) {
+        $cc = '';
+        $cc .= '--' . $mime_boundary . $eol;
+        $cc .= "Content-Disposition: form-data; name=\"$file\"; filename=\"$file\"" . $eol;
+        $cc .= 'Content-Type: ' . $content_type . $eol;
+        $cc .= 'Content-Transfer-Encoding: base64' . $eol . $eol;
+        $cc .= chunk_split(base64_encode($data)) . $eol;
 
-	return $cc;
+        return $cc;
 }
 
 function decodeJsonError($errnum){
@@ -275,7 +288,7 @@ function returnArrayWithContentType($data,$content_type,$status,$forward='',$exi
             $ch[$i] = curl_init($forward);
             curl_setopt($ch[$i], CURLOPT_RETURNTRANSFER,1);
             curl_setopt($ch[$i], CURLOPT_POST, TRUE);
-            curl_setopt($ch[$i], CURLOPT_HTTPHEADER, array('Content-type: ' . $content_type, 'Accept: application/json', 'Expect: ','X_BUSINESS_ID: ' . $business_id));
+            curl_setopt($ch[$i], CURLOPT_HTTPHEADER, array('Content-type: ' . $content_type, 'Accept: application/json', 'Expect: ','X-Business-Id: ' . $business_id));
             curl_setopt($ch[$i], CURLOPT_POSTFIELDS, convertOutData($content,$content_type,$no_conversion));
             curl_setopt($ch[$i], CURLOPT_SSL_VERIFYPEER, False);
             curl_setopt($ch[$i], CURLOPT_VERBOSE, True);
@@ -289,7 +302,7 @@ function returnArrayWithContentType($data,$content_type,$status,$forward='',$exi
             curl_multi_exec($mh,$running);
             curl_multi_select($mh,10);
         } while($running > 0);
-       
+
         $json = false;
         mlog('Got all curl responses at ' . (microtime(true) - $mytime)*1000,'INFO');
 
@@ -310,7 +323,7 @@ function returnArrayWithContentType($data,$content_type,$status,$forward='',$exi
                 if(stripos($response_headers["Content-Type"],'json')>0){
                     $json = true;
                     $response[$i] = json_decode(substr($bbody, $content_length),true);
-                }else{ 
+                }else{
                     $response[$i] = substr($bbody, $content_length);
                 }
             }else{
@@ -357,7 +370,7 @@ function returnWithContentType($data,$content_type,$status,$forward='',$exitafte
         $handle = curl_init($forward);
         curl_setopt($handle, CURLOPT_RETURNTRANSFER,1);
         curl_setopt($handle, CURLOPT_POST, TRUE);
-        curl_setopt($handle, CURLOPT_HTTPHEADER, array('Content-type: ' . $content_type, 'Accept: application/json', 'Expect: ', 'X_BUSINESS_ID: ' . $business_id));
+        curl_setopt($handle, CURLOPT_HTTPHEADER, array('Content-type: ' . $content_type, 'Accept: application/json', 'Expect: ', 'X-Business-Id: ' . $business_id));
         curl_setopt($handle, CURLOPT_POSTFIELDS, convertOutData($data,$content_type, $no_conversion));
         curl_setopt($handle, CURLOPT_SSL_VERIFYPEER, False);
         $response = curl_exec($handle);
@@ -406,8 +419,8 @@ function setReturnType($accept,$default){
         }
         returnWithContentType('Supported output types are only application/xml and application/json','text/plain',400);
     }
-}        
-    
+}
+
 function extractHeader($header){
     if (function_exists('apache_request_headers')){
         $request_headers = apache_request_headers();
@@ -428,31 +441,33 @@ function extractHeader($header){
 }
 //var_dump($_GET);
 
+$business_id = extractHeader('X-Business-Id');
+
+if ($business_id === '')
+    $business_id = getNewBusinessId();
+
+if(array_key_exists('type',$_GET))
+    $request_type = $_GET["type"];
+else
+    $request_type = '';
+
+
+$colour = ("inject" === $request_type) ? 'YELLOW':'GREEN';
 $mmatches = json_decode(file_get_contents('conf/horusParams.json'),true);
 $genericError = 'templates/' . $mmatches["errorTemplate"];
 $errorFormat = $mmatches['errorFormat'];
 $preferredType = setReturnType($_SERVER['HTTP_ACCEPT'],$errorFormat);
-mlog("Preferred mime type : " . $preferredType,'DEBUG');
+mlog("Preferred mime type : " . $preferredType,'DEBUG','TXT',$colour);
 $simpleJsonMatches = $mmatches['simplejson'];
 $matches = $mmatches["pacs"];
 //print_r($matches);
 $reqbody = file_get_contents('php://input');
 $content_type = $_SERVER['CONTENT_TYPE'];
-mlog("Request : " . print_r($_SERVER,true) . "\n",'DEBUG');
-mlog("Received Data to post:\n" . $reqbody . "\n",'INFO');
+mlog("Request : " . print_r($_SERVER,true) . "\n",'DEBUG','TXT',$colour);
+mlog("Received Data to post: '" . $reqbody . "'",'INFO','TXT',$colour);
 
 $proxy_mode = extractHeader('X_DESTINATION_URL');
 
-$business_id = extractHeader('X_BUSINESS_ID');
-
-if ($business_id === '')
-    $business_id = getNewBusinessId();
-
-
-if(array_key_exists('type',$_GET))
-    $request_type = $_GET["type"];
-else 
-    $request_type = '';
 
 if ("inject" === $request_type){
     $reqparams = json_decode($reqbody,true);
@@ -461,7 +476,7 @@ if ("inject" === $request_type){
     foreach($reqparams['attr'] as $key => $value)
         $vars[$key] = $value;
     $content = array();
-    mlog("Received request at " . (microtime(true) - $mytime)*1000,'INFO');
+    mlog("Received request at " . (microtime(true) - $mytime)*1000,'INFO','TXT','YELLOW');
     for($i=0;$i<$reqparams['repeat'];$i++){
         $vars['loop_index'] = $i;
         ob_start();
@@ -474,21 +489,24 @@ if ("inject" === $request_type){
             $outputxml->formatOutput=false;
             $outputxml->preserveWhiteSpace = false;
             $content[] = $outputxml->saveXML();
+            mlog("Generated XML Content: " . $outputxml->saveXML(),'DEBUG','TXT','YELLOW');
         } else if ("application/json" === $reqparams['sourcetype']){
             $outputjson = json_decode($output);
             $content[] = json_encode($outputjson);
+            mlog('Generated JSON Content: "' . json_encode($outputjson) . '"','DEBUG','JSON','YELLOW');
         } else {
             $content[] = $output;
+            mlog("Generated TEXT Content: " . $output,'DEBUG','TXT','YELLOW');
         }
     }
     $convert = false;
     if(("application/xml" === $reqparams['sourcetype'])&&("application/json" === $reqparams['destinationcontent'])){
-        mlog("=== Conversion XML -> JSON ===",'DEBUG');
+        mlog("=== Conversion XML -> JSON ===",'DEBUG','TXT','YELLOW');
         $convert = true;
     }
-    mlog("Generated all data at " . (microtime(true) - $mytime)*1000,'INFO');
+    mlog("Generated all data at " . (microtime(true) - $mytime)*1000,'INFO','TXT','YELLOW');
     returnArrayWithContentType($content,$reqparams['destinationcontent'],200,$proxy_mode,false,$mytime, !$convert);
-    
+
 }else if (("simplejson" === $request_type)&&("application/json" === $content_type)){
     $input = extractSimpleJsonPayload($reqbody);
     if($input === null){
@@ -556,7 +574,7 @@ if ("inject" === $request_type){
         $errorMessage .= libxml_display_errors();
         returnGenericError($preferredType,$genericError,$errorMessage,$proxy_mode);
     }
-        
+
 
     $namespaces = $query->getDocNamespaces();
     $query->registerXPathNamespace('u',$namespaces[""]);
@@ -574,15 +592,15 @@ if ("inject" === $request_type){
         if(!(strpos($schema,$namespace)===false)){
             libxml_use_internal_errors(true);
             if($domdoc->schemaValidate('xsd/' . $schema)){
-		//echo "matched $schema\n";
-		$valid = true;
-	        $selectedXsd = $schema;
-		//break;
-	    }else{
+                //echo "matched $schema\n";
+                $valid = true;
+                $selectedXsd = $schema;
+                //break;
+            }else{
             //echo "Not validated with : $schema\n";
             }
         }else{
-	//echo "skipping $schema\n";
+        //echo "skipping $schema\n";
         }
     }
    mlog("schema=$selectedXsd\n",'DEBUG');
@@ -598,7 +616,7 @@ if ("inject" === $request_type){
         mlog("Match comment : " . findMatch($matches,$selected,"comment") . "\n",'INFO');
         foreach(findMatch($matches,$selected,"parameters") as $param=>$path){
             $query->registerXPathNamespace('u',$namespaces[""]);
-            $rr = ($query->xpath($path)); 
+            $rr = ($query->xpath($path));
             if(! ($rr===FALSE)){
                 $rr0 = $rr[0];
                 if ( $rr0->count()!=0) {
@@ -627,14 +645,14 @@ if ("inject" === $request_type){
             $forwardparams = array( findMatch($matches,$selected,"destParameters"));
         }else{
             $templates = findMatch($matches,$selected,"responseTemplate");
-	    $formats = findMatch($matches,$selected,"responseFormat");
+            $formats = findMatch($matches,$selected,"responseFormat");
             $forwardparams = findMatch($matches,$selected,"destParameters");
             $multiple = true;
         }
         $eol = "\r\n";
         $mime_boundary=md5(time());
         $nrep = 0;
-        foreach($templates as $template){    
+        foreach($templates as $template){
             $respxml = 'templates/' . $template;
             ob_start();
             include $respxml;
@@ -679,7 +697,7 @@ if ("inject" === $request_type){
 
         if($multiple){
             returnWithContentType($response . "--" . $mime_boundary . "--" . $eol . $eol,"multipart/form-data; boundary=$mime_boundary",200);
-        }else{  
+        }else{
             returnWithContentType($response,$preferredType,200,$proxy_mode);
         }
     }else{
@@ -689,4 +707,3 @@ if ("inject" === $request_type){
         returnGenericError($preferredType,$genericError,$errorMessage,$proxy_mode);
     }
 }
- 

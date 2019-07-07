@@ -270,7 +270,8 @@ function returnGenericJsonError($format,$template,$errorMessage,$forward=''){
 }
 function returnArrayWithContentType($data,$content_type,$status,$forward='',$exitafter=true,$mytime,$no_conversion=false){
     global $business_id;
-    mlog('RAWC: no_conversion = ' . $no_conversion,'DEBUG');
+    if ($no_conversion === FALSE)
+        mlog('Conversion forced','DEBUG');
     switch($status){
         case 200:
             header("HTTP/1.1 200 OK",TRUE,200);
@@ -318,7 +319,6 @@ function returnArrayWithContentType($data,$content_type,$status,$forward='',$exi
         $response = array();
         foreach($data as $i => $content){
             $curlError = curl_error($ch[$i]);
-            //var_dump(curl_getinfo($ch[$i]));
             $content_length = curl_getinfo($ch[$i],CURLINFO_HEADER_SIZE);
             if($curlError == ""){
                 $bbody = curl_multi_getcontent($ch[$i]);
@@ -336,6 +336,8 @@ function returnArrayWithContentType($data,$content_type,$status,$forward='',$exi
                     $response[$i] = substr($bbody, $content_length);
                 }
             }else{
+                mlog("Curl $i returned error: $curlError ","INFO");
+                mlog(var_dump(curl_getinfo($ch[$i]),true),'INFO');
                 $response[$i] = "Error loop $i $curlError\n";
             }
             curl_multi_remove_handle($mh,$ch[$i]);
@@ -357,7 +359,8 @@ function returnArrayWithContentType($data,$content_type,$status,$forward='',$exi
 
 function returnWithContentType($data,$content_type,$status,$forward='',$exitafter=true, $no_conversion=false){
     global $business_id;
-    mlog("RWCT no_conversion:" . ($no_conversion ? 'TRUE':'FALSE'),'DEBUG');
+    if ($no_conversion === 'FALSE')
+        mlog('Conversion forced','DEBUG');
     switch($status){
         case 200:
             header("HTTP/1.1 200 OK",TRUE,200);
@@ -384,10 +387,12 @@ function returnWithContentType($data,$content_type,$status,$forward='',$exitafte
         curl_setopt($handle, CURLOPT_SSL_VERIFYPEER, False);
         $response = curl_exec($handle);
         header("Content-type: $content_type");
-        //echo "Horus sending to " . $forward . "\n";
-        //echo "Horus Content Type : " . $content_type . "\n";
-        //echo "Response received : " . $response . "\n";
-        //die(print_r(curl_getinfo($handle),true));
+        mlog("Horus sending to " . $forward,'INFO');
+        mlog("Horus Content Type : " . $content_type,'INFO') ;
+        if (curl_error($handle)!=='') 
+            mlog("Curl Error: " . curl_error($handle),'ERROR');
+        mlog("Response received : " . $response,"DEBUG") ;
+        
         echo $response . "\n";
     }else{
         header("Content-type: $content_type");
@@ -399,9 +404,8 @@ function returnWithContentType($data,$content_type,$status,$forward='',$exitafte
 }
 
 function convertOutData($data,$content_type,$no_conversion=false){
-    mlog("Convert: no_conversion=" . ($no_conversion ? 'TRUE':'FALSE'),'DEBUG');
     if(!$no_conversion){
-        mlog("Conversion",'DEBUG');
+        mlog("Forced Conversion for $content_type",'DEBUG');
         if($content_type == 'application/json'){
             $dataJSON = array('payload' => $data);
             return json_encode($dataJSON);
@@ -409,7 +413,6 @@ function convertOutData($data,$content_type,$no_conversion=false){
             return $data;
         }
     }else{
-        mlog("No Conversion",'DEBUG');
         return $data;
     }
 }
@@ -471,7 +474,7 @@ $preferredType = setReturnType($_SERVER['HTTP_ACCEPT'],$errorFormat);
 mlog("Preferred mime type : " . $preferredType,'DEBUG','TXT',$colour);
 $simpleJsonMatches = $mmatches['simplejson'];
 $matches = $mmatches["pacs"];
-//print_r($matches);
+
 $reqbody = file_get_contents('php://input');
 $content_type = $_SERVER['CONTENT_TYPE'];
 mlog("Request : " . print_r($_SERVER,true) . "\n",'DEBUG','TXT',$colour);

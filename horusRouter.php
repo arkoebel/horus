@@ -1,23 +1,18 @@
 <?php
 
 $params = json_decode(file_get_contents('conf/horusRouting.json'),true);
-//echo print_r($params,true);
 $source = $_GET['source'];
 $data = file_get_contents('php://input');
 $content_type = $_SERVER['CONTENT_TYPE'];
 
 function findSource($source,$params){
-    //echo "findSource $source \n";
-//    echo var_dump($params['RoutingTable'],true);
     foreach($params["RoutingTable"] as $route){
-        //echo "Source = " . $route['source'] . "\n";
         if($route['source']===$source){
             return $route;
         }
     }
     return false;
 }
-//echo $source . "\n";
 
 function extractHeader($header){
     if (function_exists('apache_request_headers')){
@@ -87,9 +82,9 @@ function mlog($message,$log_level,$format = 'TXT') {
 
    $route = findSource($source, $params);
 
-//echo print_r($route,true);
 
 if ($route===false){
+    mlog('No route found with source=' . $source,'WARNING');
     header("HTTP/1.1 400 MALFORMED URL",TRUE,400);
     header("Content-type: application/json");
     echo json_encode(array("error"=>"Route not found"));
@@ -148,9 +143,12 @@ foreach($route['destinations'] as $destination){
 
     mlog("Send http request to " . $destination['proxy'] . $proxy_query . "\n",'DEBUG');
     mlog("Final destination : " . $destination['destination'] . $dest_query . "\n",'DEBUG');
-    //echo "Content-type : " . $content_type . "\n";
 
-    $headers = array('Content-type: ' . $content_type, 'Accept: application/json', 'Expect: ', 'X_BUSINESS_ID: ' . $business_id);
+
+    $accept = $_SERVER['HTTP_ACCEPT']==="" ? "application/json" : $_SERVER['HTTP_ACCEPT'];
+    mlog("Content-type: " . $content_type . ", Accept: " . $_SERVER['HTTP_ACCEPT']);
+
+    $headers = array('Content-type: ' . $content_type, 'Accept: ' . $accept, 'Expect: ', 'X_BUSINESS_ID: ' . $business_id);
 
     if ($destination['proxy']==""){
         $dest_url = $destination['destination'] . $dest_query;
@@ -158,8 +156,6 @@ foreach($route['destinations'] as $destination){
         $dest_url = $destination['proxy'] . $proxy_query;
         $headers[] = 'X_DESTINATION_URL: ' . $destination['destination']. $dest_query;
     }
-    //echo "DST = " . $dest_url . "\n";
-    //echo print_r($headers);
     $handle = curl_init($dest_url);
     curl_setopt($handle, CURLOPT_URL,$dest_url);
     curl_setopt($handle, CURLOPT_RETURNTRANSFER,1);
@@ -171,9 +167,9 @@ foreach($route['destinations'] as $destination){
 
     echo $response;
 
-    if($destination['delayafter']!==""){
+    if(isset($destination['delayafter'])){
+        mlog('Waiting ' . $destination['delayafter'] . 'sec for next destination','INFO');
         sleep($destination['delayafter']);
     }
 }
 
-//die(print_r($responses,true));

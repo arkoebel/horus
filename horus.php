@@ -12,6 +12,16 @@ function echoerror($exception){
     die('Error ' . $exception->getMessage());
 }
 
+function myErrorHandler($errno, $errstr, $errfile, $errline) {
+
+    mlog("Error $errno at $errfile ( $errline ) : $errstr",'ERROR','TXT');
+
+    return false;
+
+}
+
+set_error_handler(myErrorHandler,E_ALL);
+
 function mlog($message,$log_level,$format = 'TXT',$colourx = 'GREEN') {
 
  global $business_id;

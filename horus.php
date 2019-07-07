@@ -429,8 +429,8 @@ function extractHeader($header){
 
     $conv_header = 'HTTP_' . strtoupper( preg_replace('/-/','_',$header));
 
-    if (array_key_exists($conv_header),$request_headers)){
-        return $request_headers[$conv_header)];
+    if (array_key_exists($conv_header,$request_headers)){
+        return $request_headers[$conv_header];
     }else{
          if (array_key_exists(strtoupper($header),$request_headers)){
             return $request_headers[strtolower($header)];

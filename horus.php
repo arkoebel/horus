@@ -116,7 +116,6 @@ function findMatch($matches,$request,$field){
 function locate($matches,$found,$value){
     $selected = -1;
     foreach($matches as $id=>$match){
-//      print_r($match);
         if($match['query']===$found){
             if(array_key_exists('queryMatch',$match) && $match['queryMatch']!=''){
                 //echo('/' . $match['queryMatch'] . '/' . "\n");
@@ -428,10 +427,12 @@ function extractHeader($header){
         $request_headers = $_SERVER;
     }
 
-    if (array_key_exists(strtoupper($header),$request_headers)){
-        return $request_headers[strtoupper($header)];
+    $conv_header = 'HTTP_' . strtoupper( preg_replace('/-/','_',$header));
+
+    if (array_key_exists($conv_header),$request_headers)){
+        return $request_headers[$conv_header)];
     }else{
-         if (array_key_exists(strtolower($header),$request_headers)){
+         if (array_key_exists(strtoupper($header),$request_headers)){
             return $request_headers[strtolower($header)];
         }else{
             return '';

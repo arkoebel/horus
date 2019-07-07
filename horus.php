@@ -404,15 +404,19 @@ function returnWithContentType($data,$content_type,$status,$forward='',$exitafte
 }
 
 function convertOutData($data,$content_type,$no_conversion=false){
+    mlog("Data to send",'INFO');
     if(!$no_conversion){
         mlog("Forced Conversion for $content_type",'DEBUG');
         if($content_type == 'application/json'){
             $dataJSON = array('payload' => $data);
+            mlog(json_encode($dataJSON),'DEBUG','JSON');
             return json_encode($dataJSON);
         }else{
+            mlog($data,'DEBUG','TXT');
             return $data;
         }
     }else{
+        mlog($data,'DEBUG','TXT');
         return $data;
     }
 }
@@ -478,7 +482,7 @@ $matches = $mmatches["pacs"];
 $reqbody = file_get_contents('php://input');
 $content_type = $_SERVER['CONTENT_TYPE'];
 mlog("Request : " . print_r($_SERVER,true) . "\n",'DEBUG','TXT',$colour);
-mlog("Received Data to post: '" . $reqbody . "'",'INFO','TXT',$colour);
+mlog("Received POST Data : '" . $reqbody . "'",'INFO','TXT',$colour);
 
 $proxy_mode = extractHeader('X_DESTINATION_URL');
 

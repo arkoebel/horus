@@ -38,6 +38,15 @@ class HorusBusinessTest extends TestCase {
         $this::assertEquals($horus->locate($params, "value10", "isthisokforvalue21or not?","b3"),2);
         $this::assertEquals($horus->locate($params, "value10", "isthisokforvalueor not?","b4"),-1);
         $this::assertEquals($horus->locate($params, "zip", "isthisokforvalue2or not?","b5"),4);
+        $this::assertEquals($horus->locate(null,'AAA','BBB','b6'),-1);
+        $this::assertEquals($horus->locate(array(),'AAA','BBB','b7'),-1);
+        $this::assertEquals($horus->locate('','AAA','BBB','b8'),-1);
+        $this::assertEquals($horus->locate($params,null,'BBB','b9'),-1);
+        $this::assertEquals($horus->locate($params,'zip',null,'b6'),-1);
+        
+        
+        
+        
         
         
     }

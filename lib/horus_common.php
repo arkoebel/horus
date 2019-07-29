@@ -39,7 +39,10 @@ class HorusCommon
         } else {
             $alog['message'] = HorusCommon::escapeJsonString($message);
         }
-        error_log(json_encode($alog) . "\n", 3, $this->log_location);
+        if (is_null($this->log_location))
+            error_log(json_encode($alog) . "\n");
+        else
+            error_log(json_encode($alog) . "\n", 3, $this->log_location);
 
         if (json_last_error() != 0)
             error_log(json_last_error_msg());

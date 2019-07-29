@@ -25,6 +25,16 @@ class HorusBusiness
     public function locate($matches, $found, $value,$business_id)
     {
         $selected = -1;
+
+        if(is_null($matches))
+            return $selected;
+        if(!is_array($matches))
+            return $selected;
+        if(count($matches)==0)
+            return $selected;
+        if(is_null($found)||is_null($value))
+            return $selected;
+
         foreach ($matches as $id => $match) {
             if ($match['query'] === $found) {
                 if (array_key_exists('queryMatch', $match) && $match['queryMatch'] != '') {

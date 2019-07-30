@@ -5,8 +5,9 @@ class HorusBusiness
 
     private $common = '';
 
-    function __construct($log_location){
-        $this->common = new HorusCommon($log_location);
+    function __construct($business_id, $log_location, $colour)
+    {
+        $this->common = new HorusCommon($business_id, $log_location, $colour);
     }
 
     public function findMatch($matches, $request, $field)
@@ -22,17 +23,17 @@ class HorusBusiness
         }
     }
 
-    public function locate($matches, $found, $value,$business_id)
+    public function locate($matches, $found, $value)
     {
         $selected = -1;
 
-        if(is_null($matches))
+        if (is_null($matches))
             return $selected;
-        if(!is_array($matches))
+        if (!is_array($matches))
             return $selected;
-        if(count($matches)==0)
+        if (count($matches) == 0)
             return $selected;
-        if(is_null($found)||is_null($value))
+        if (is_null($found) || is_null($value))
             return $selected;
 
         foreach ($matches as $id => $match) {
@@ -50,16 +51,16 @@ class HorusBusiness
         return $selected;
     }
 
-    function locateJson($matches, $input, $queryParams = array(),$business_id=0)
+    function locateJson($matches, $input, $queryParams = array())
     {
         $selected = -1;
         if (is_null($input))
             return $selected;
         if (is_null($matches))
             return $selected;
-        if (is_array($matches) && count($matches)==0)
+        if (is_array($matches) && count($matches) == 0)
             return $selected;
-            if (is_array($input) && count($input)==0)
+        if (is_array($input) && count($input) == 0)
             return $selected;
 
         if (is_null($queryParams))
@@ -68,30 +69,30 @@ class HorusBusiness
             if (array_key_exists($match['query']['key'], $input)) {
                 if (array_key_exists('queryKey', $match['query'])) {
                     if (array_key_exists($match['query']['queryKey'], $queryParams) && $match['query']['queryValue'] === $queryParams[$match['query']['queryKey']]) {
-                        $this->common->mlog($id . ': trying -- Matched query param', 'DEBUG','TXT','GREEN',$business_id);
+                        $this->common->mlog($id . ': trying -- Matched query param', 'DEBUG');
                         if ($input[$match['query']['key']] === $match['query']['value']) {
                             if (array_key_exists('queryMatch', $match) && $match['queryMatch'] != '') {
                                 if (preg_match('/' . $match['queryMatch'] . '/', json_encode($input)) === 1) {
-                                    $this->common->mlog($id . ': matched -- querymatch, query param', 'DEBUG','TXT','GREEN',$business_id);
+                                    $this->common->mlog($id . ': matched -- querymatch, query param', 'DEBUG');
                                     $selected = $id;
                                 }
                             } else {
-                                $this->common->mlog($id . ': matched -- no query match, query param', 'DEBUG','TXT','GREEN',$business_id);
+                                $this->common->mlog($id . ': matched -- no query match, query param', 'DEBUG');
                                 $selected = $id;
                             }
                         }
                     } else {
-                        $this->common->mlog($id . ': trying -- Query param wasn\'t a match', 'DEBUG','TXT','GREEN',$business_id);
+                        $this->common->mlog($id . ': trying -- Query param wasn\'t a match', 'DEBUG');
                     }
                 } else {
                     if ($input[$match['query']['key']] === $match['query']['value']) {
                         if (array_key_exists('queryMatch', $match) && $match['queryMatch'] != '') {
                             if (preg_match('/' . $match['queryMatch'] . '/', json_encode($input)) === 1) {
-                                $this->common->mlog($id . ': matched -- querymatch, no query param', 'DEBUG','TXT','GREEN',$business_id);
+                                $this->common->mlog($id . ': matched -- querymatch, no query param', 'DEBUG');
                                 $selected = $id;
                             }
                         } else {
-                            $this->common->mlog($id . ': matched -- no query match', 'DEBUG','TXT','GREEN',$business_id);
+                            $this->common->mlog($id . ': matched -- no query match', 'DEBUG');
                             $selected = $id;
                         }
                     }
@@ -126,7 +127,7 @@ class HorusBusiness
     function returnGenericError($format, $template, $errorMessage, $forward = '')
     {
 
-        mlog("Error being generated. Cause: $errorMessage", 'INFO');
+        $this->common->mlog("Error being generated. Cause: $errorMessage", 'INFO', 'TXT', 'GREEN', $business_id);
         ob_start();
         include $template;
         $errorOutput = ob_get_contents();

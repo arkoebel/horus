@@ -3,10 +3,13 @@
 class HorusCommon
 {
     private $log_location = '';
+    private $business_id = '';
+    private $colour = '';
 
-    function __construct($log_location)
+    function __construct($business_id, $log_location, $colour = 'GREEN')
     {
         $this->log_location = $log_location;
+        $this->business_id = $business_id;
     }
     public function echoerror($exception)
     {
@@ -24,15 +27,15 @@ class HorusCommon
 
     //set_error_handler(myErrorHandler,E_ALL);
 
-    public function mlog($message, $log_level, $format = 'TXT', $colour = 'GREEN', $business_id)
+    public function mlog($message, $log_level, $format = 'TXT')
     {
 
         $alog = array();
         $alog['timestamp'] = HorusCommon::utc_time(5);
-        $alog['program'] = $colour;
+        $alog['program'] = $this->colour;
         $alog['log_level'] = $log_level;
         $alog['file'] = $_SERVER["PHP_SELF"];
-        $alog['business_id'] = $business_id;
+        $alog['business_id'] = $this->business_id;
         $alog['pid'] = getmypid();
         if ($format === 'TXT') {
             $alog['message'] = $message;

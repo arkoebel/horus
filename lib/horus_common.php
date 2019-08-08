@@ -11,12 +11,21 @@ class HorusCommon
         $this->log_location = $log_location;
         $this->business_id = $business_id;
     }
+
+    /**
+     * Function echoerror
+     * Terminates program, writing an exception message to stdout
+     */
     public function echoerror($exception)
     {
         ob_clean();
         die('Error ' . $exception->getMessage());
     }
 
+    /**
+     * Function myErrorHandler
+     * Custom error handler to use our private logging facilities.
+     */
     public function myErrorHandler($errno, $errstr, $errfile, $errline)
     {
 
@@ -25,8 +34,10 @@ class HorusCommon
         return false;
     }
 
-    //set_error_handler(myErrorHandler,E_ALL);
-
+    /**
+     * Function mlog
+     * Private logging facilities. Format message into JSON for easy ES integration.
+     */
     public function mlog($message, $log_level, $format = 'TXT')
     {
 
@@ -51,6 +62,10 @@ class HorusCommon
             error_log(json_last_error_msg());
     }
 
+    /**
+     * function utc_time
+     * Gets back the current date in ISO-8601 format with variable precision on seconds.
+     */
     public static function utc_time($precision = 0)
     {
         $time = gettimeofday();
@@ -68,6 +83,10 @@ class HorusCommon
         return false;
     }
 
+    /**
+     * function escapeJsonString
+     * Escapes a JSON String to integrate inside a JSON value
+     */
     public static function escapeJsonString($value)
     {
         //$escapers =     array("\\",   "/",   "\"",   "\n",  "\r",  "\t",  "\x08", "\x0c");
@@ -78,6 +97,10 @@ class HorusCommon
         return $result;
     }
 
+    /**
+     * function libxml_display_error
+     * Custom SimpleXML error handler.
+     */
     function libxml_display_error($error)
     {
         $return = "";
@@ -98,6 +121,10 @@ class HorusCommon
         return $return;
     }
 
+    /**
+     * function libxml_display_errors
+     * Custom SimpleXML error handler.
+     */
     function libxml_display_errors()
     {
         $ret = "";
@@ -109,6 +136,10 @@ class HorusCommon
         return $ret;
     }
 
+    /**
+     * function decodeJsonError
+     * Convert json unmarshalling errors into something human-readable.
+     */
     function decodeJsonError($errnum)
     {
         switch ($errnum) {

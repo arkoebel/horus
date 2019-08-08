@@ -65,8 +65,12 @@ class ComposerStaticInitde7a39667ced54ac1565a011fa3ba2bf
     );
 
     public static $classMap = array (
+        'HorusBusiness' => __DIR__ . '/../..' . '/lib/horus_business.php',
         'HorusCommon' => __DIR__ . '/../..' . '/lib/horus_common.php',
         'HorusHttp' => __DIR__ . '/../..' . '/lib/horus_http.php',
+        'HorusInjector' => __DIR__ . '/../..' . '/lib/horus_inject.php',
+        'HorusSimpleJson' => __DIR__ . '/../..' . '/lib/horus_simplejson.php',
+        'HorusXml' => __DIR__ . '/../..' . '/lib/horus_xml.php',
         'PHPUnit\\Exception' => __DIR__ . '/..' . '/phpunit/phpunit/src/Exception.php',
         'PHPUnit\\Framework\\Assert' => __DIR__ . '/..' . '/phpunit/phpunit/src/Framework/Assert.php',
         'PHPUnit\\Framework\\AssertionFailedError' => __DIR__ . '/..' . '/phpunit/phpunit/src/Framework/AssertionFailedError.php',

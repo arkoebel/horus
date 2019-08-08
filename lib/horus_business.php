@@ -127,7 +127,7 @@ class HorusBusiness
     function returnGenericError($format, $template, $errorMessage, $forward = '')
     {
 
-        $this->common->mlog("Error being generated. Cause: $errorMessage", 'INFO', 'TXT', 'GREEN', $business_id);
+        $this->common->mlog("Error being generated. Cause: $errorMessage", 'INFO');
         ob_start();
         include $template;
         $errorOutput = ob_get_contents();

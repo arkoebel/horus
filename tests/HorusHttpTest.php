@@ -54,8 +54,7 @@ class HorusHttpTest extends TestCase
         runkit_function_add(
             'curl_init',
             '$string = null',
-            'HorusHttpTest::$curls[]=array(\'url\'=>$string,\'options\'=>array(),\'data\'=>\'\',\'returnHeaders\'=>\'\',\'returnCode\'=>0,\'returnBody\'=>\'\'); 
-                return array_keys(HorusHttpTest::$curls)[count(HorusHttpTest::$curls)-1];'
+            'return array_keys(HorusHttpTest::$curls)[count(HorusHttpTest::$curls)-1];'
         );
 
         runkit_function_add(
@@ -79,7 +78,7 @@ class HorusHttpTest extends TestCase
         runkit_function_add(
             'curl_multi_select',
             '$mh, $timeout = 1.0 ',
-            'sleep($timeout); return 0;'
+            'sleep(1); return 0;'
         );
 
         runkit_function_add(
@@ -100,7 +99,7 @@ class HorusHttpTest extends TestCase
         runkit_function_add(
             'curl_multi_getcontent',
             '$ch',
-            'return HorusHttpTest::$curls[$ch][\'returnBody\'];'
+            'return HorusHttpTest::$curls[$ch][\'data\'];'
         );
         
         runkit_function_add(
@@ -197,7 +196,7 @@ class HorusHttpTest extends TestCase
                                         "<html>Test</html>",
                                 'returnHeaders'=>array(
                                     CURLINFO_HTTP_CODE=>200,
-                                    CURLINFO_HEADER_SIZE=>217,
+                                    CURLINFO_HEADER_SIZE=>212,
 
                                 ),
                                 'returnCode'=>200,
@@ -205,8 +204,8 @@ class HorusHttpTest extends TestCase
                                 'returnBody'=>'<html>Test</html>');
 
         $result = $this->http->forwardHttpQueries($queries);
-
         $this::assertEquals($result[0]['response_code'], 200);
+        $this::assertEquals($result[0]['response_data'],'<html>Test</html>');
     }
 
     function testSetReturnType(): void

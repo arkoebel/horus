@@ -14,13 +14,15 @@ class HorusInjector
         $this->business_id = $business_id;
     }
 
-    function doInject($reqbody, $content_type, $proxy_mode)
+    function doInject($reqbody, $proxy_mode)
     {
         $reqparams = json_decode($reqbody, true);
         $template = 'templates/' . $reqparams['template'];
         $vars = array();
-        foreach ($reqparams['attr'] as $key => $value)
-            $vars[$key] = $value;
+        if (array_key_exists('attr',$reqparams)){
+            foreach ($reqparams['attr'] as $key => $value)
+                $vars[$key] = $value;
+        }
         $content = array();
         $this->common->mlog('Received request', 'INFO');
         for ($i = 0; $i < $reqparams['repeat']; $i++) {
@@ -50,7 +52,7 @@ class HorusInjector
             $this->common->mlog("=== Conversion XML -> JSON ===", 'DEBUG', 'TXT', 'YELLOW');
             $convert = true;
         }
-        $this->common->mlog("Generated all data at " . (microtime(true) - $mytime) * 1000, 'INFO', 'TXT', 'YELLOW');
-        $this->http->returnArrayWithContentType($content, $reqparams['destinationcontent'], 200, $proxy_mode, false, $mytime, !$convert);
+        $this->common->mlog('Generated all data', 'INFO', 'TXT', 'YELLOW');
+        return $this->http->returnArrayWithContentType($content, $reqparams['destinationcontent'], 200, $proxy_mode, false, null, !$convert);
     }
 }

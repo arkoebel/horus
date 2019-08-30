@@ -4,10 +4,12 @@ class HorusBusiness
 {
 
     private $common = '';
+    private $http = '';
 
     function __construct($business_id, $log_location, $colour)
     {
         $this->common = new HorusCommon($business_id, $log_location, $colour);
+        $this->http = new HorusHttp($business_id,$log_location,$colour);
     }
 
     public function findMatch($matches, $request, $field)
@@ -133,20 +135,20 @@ class HorusBusiness
         $errorOutput = ob_get_contents();
         ob_end_clean();
 
-        returnWithContentType($errorOutput, $format, 400, $forward);
+        $this->http->returnWithContentType($errorOutput, $format, 400, $forward);
     }
 
     function returnGenericJsonError($format, $template, $errorMessage, $forward = '')
     {
 
-        mlog("Error JSON being generated. Cause: $errorMessage", 'INFO');
+        $this->common->mlog("Error JSON being generated. Cause: $errorMessage", 'INFO');
         ob_start();
         include $template;
         $errorOutput = ob_get_contents();
         ob_end_clean();
 
-        mlog($errorOutput, 'DEBUG', 'JSON');
+        $this->common->mlog($errorOutput, 'DEBUG', 'JSON');
 
-        returnWithContentType($errorOutput, $format, 400, $forward, true, true);
+        return $this->http->returnWithContentType($errorOutput, $format, 400, $forward, true, true);
     }
 }

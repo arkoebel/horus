@@ -12,7 +12,7 @@ class HorusBusinessTest extends TestCase
 
     public function testFindMatch(): void
     {
-        $horus = new HorusBusiness('testFindMatch',null,'XXXX');
+        $horus = new HorusBusiness('testFindMatch', null, 'XXXX');
         $params = json_decode('[{"level1":"value1",
                                  "level2":"value2",
                                  "level3":{
@@ -30,7 +30,7 @@ class HorusBusinessTest extends TestCase
 
     public function testLocate(): void
     {
-        $horus = new HorusBusiness('testLocate',null,'XXXX');
+        $horus = new HorusBusiness('testLocate', null, 'XXXX');
         $params = json_decode('[{"query":"value1","queryMatch":"value2"},
                                 {"query":"value10","queryMatch":"value20"},
                                 {"query":"value10","queryMatch":"value21"},
@@ -51,7 +51,7 @@ class HorusBusinessTest extends TestCase
     public function testLocateJson(): void
     {
 
-        $horus = new HorusBusiness('testLocateJson',null,'XXXX');
+        $horus = new HorusBusiness('testLocateJson', null, 'XXXX');
         $params = json_decode('[
             {"query": {"key": "key1", "value": "value1"}},  
             {"query": {"key": "key1", "value": "value1"}, "queryMatch": "match"}, 

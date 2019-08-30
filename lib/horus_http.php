@@ -1,7 +1,4 @@
 <?php
-
-use PHPUnit\Framework\Exception;
-
 class HorusHttp
 {
 
@@ -38,8 +35,8 @@ class HorusHttp
     {
 
         if ($no_conversion === FALSE)
-            mlog('Forced conversion', 'DEBUG');
-        setHttpReturnCode($status);
+            $this->common->mlog('Forced conversion', 'DEBUG');
+        $this->setHttpReturnCode($status);
 
         if (is_null($forward))
             $forward = '';
@@ -48,12 +45,12 @@ class HorusHttp
             $headers = array('Content-type' => $content_type, 'Accept' => 'application/json', 'Expect' => '', 'X-Business-Id' => $this->business_id);
             $queries = array();
             foreach ($data as $i => $content) {
-                $ct = convertOutData($content, $content_type, $no_conversion);
+                $ct = $this->convertOutData($content, $content_type, $no_conversion);
                 $query = array('url' => $forward, 'method' => $method, 'headers' => $headers, 'data' => $ct);
                 $queries[] = $query;
             }
 
-            $result = forwardHttpQueries($queries);
+            $result = $this->forwardHttpQueries($queries);
             $responses = array();
 
             foreach ($result as $i => $content) {
@@ -69,6 +66,13 @@ class HorusHttp
             } else {
                 echo implode("\n", $responses);
             }
+        }else{
+            header('Content-type: ' . $content_type);
+            $ret = '';
+            foreach ($data as $i => $content) {
+                $ret .= $this->convertOutData($content, $content_type, $no_conversion) . "\n";
+            }
+            return $ret;
         }
 
         if ($exitafter === true)
@@ -100,11 +104,11 @@ class HorusHttp
 
             $result = $this->forwardHttpQueries($queries);
             header($result[0]['response_headers']['content-type']);
-            echo $result[0]['response_body'] . "\n";
+            return $result[0]['response_body'] . "\n";
         } else {
             header("Content-type: $content_type");
 
-            echo $this->convertOutData($data, $content_type, $no_conversion);
+            return $this->convertOutData($data, $content_type, $no_conversion);
         }
         if ($exitafter === true)
             exit;

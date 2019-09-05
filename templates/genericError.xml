@@ -9,7 +9,7 @@
 			</RltdRef>
 			<ReqHdlg>
 				<StsCd>T098</StsCd>
-				<Desc><?= $errorMessage?></Desc>
+				<Desc><?= htmlspecialchars($errorMessage,ENT_XML1,'UTF-8')?></Desc>
 			</ReqHdlg>
 		</Rpt>
 	</RctAck>

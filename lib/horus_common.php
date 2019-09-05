@@ -130,7 +130,7 @@ class HorusCommon
         $ret = "";
         $errors = libxml_get_errors();
         foreach ($errors as $error) {
-            $ret .= libxml_display_error($error);
+            $ret .= $this->libxml_display_error($error);
         }
         libxml_clear_errors();
         return $ret;

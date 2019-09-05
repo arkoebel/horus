@@ -135,7 +135,9 @@ class HorusBusiness
         $errorOutput = ob_get_contents();
         ob_end_clean();
 
-        $this->http->returnWithContentType($errorOutput, $format, 400, $forward);
+        $ret = $this->http->returnWithContentType($errorOutput, $format, 400, $forward);
+        if (''===$forward)
+            return $ret;
     }
 
     function returnGenericJsonError($format, $template, $errorMessage, $forward = '')

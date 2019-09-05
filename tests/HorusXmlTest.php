@@ -97,5 +97,7 @@ class HorusXmlTest extends HorusTestCase {
         $this::assertEquals($expectedvars,$vars);        
     }
 
+    
+
 
 }

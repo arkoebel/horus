@@ -103,8 +103,8 @@ class HorusHttp
             $queries = array($query);
 
             $result = $this->forwardHttpQueries($queries);
-            header($result[0]['response_headers']['content-type']);
-            return $result[0]['response_body'] . "\n";
+            header("Content-type: " . $result[0]['response_headers']['Content-type']);
+            return $result[0]['response_data'] . "\n";
         } else {
             header("Content-type: $content_type");
 
@@ -209,6 +209,7 @@ class HorusHttp
      */
     function forwardHttpQueries($queries)
     {
+       
         if (is_null($queries) || !is_array($queries) || count($queries) == 0)
             return new Exception('No query to forward');
 
@@ -223,8 +224,8 @@ class HorusHttp
                 break;
             }
             $this->common->mlog('Generate Curl call for ' . $query['method'] . ' ' . $query['url'], 'INFO');
-
             $ch[$id] = curl_init($query['url']);
+       
             curl_setopt($ch[$id], CURLOPT_RETURNTRANSFER, 1);
             if ($query['method'] !== 'GET')
                 curl_setopt($ch[$id], CURLOPT_POST, TRUE);

@@ -53,8 +53,8 @@ class HorusTestCase extends TestCase
         );
         runkit_function_add(
             'curl_init',
-            '$string = null',
-            'return array_keys(HorusTestCase::$curls)[count(HorusTestCase::$curls)-1];'
+            '$url = null',
+            'HorusTestCase::$curls[count(HorusTestCase::$curls)-1][\'url\'] = $url;return array_keys(HorusTestCase::$curls)[count(HorusTestCase::$curls)-1];'
         );
 
         runkit_function_add(
@@ -84,7 +84,7 @@ class HorusTestCase extends TestCase
         runkit_function_add(
             'curl_error',
             '$ch',
-            'return HorusTestCase::$curls[$ch][\'errorMessage\'];'
+            'if (array_key_exists(\'errorMessage\',HorusTestCase::$curls[$ch])){ return HorusTestCase::$curls[$ch][\'errorMessage\'];} else return \'\';'
         );
 
         runkit_function_add(

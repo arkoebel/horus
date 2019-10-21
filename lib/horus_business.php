@@ -45,9 +45,12 @@ class HorusBusiness
                         $selected = $id;
                     } else {
                         //echo('not found' . "\n");
+                        $this->common->mlog('No QueryMatch','DEBUG' );
                     }
-                } else
+                } else {
+                    $this->common->mlog('Selected by default : ' . $id,'DEBUG' );
                     $selected = $id;
+                }
             }
         }
         return $selected;

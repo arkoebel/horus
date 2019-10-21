@@ -10,7 +10,7 @@
       </InstgAgt>
       <InstdAgt>
         <FinInstnId>
-          <BIC><?= substr($vars["tobic"],0,8)?></BIC>
+          <BIC><?= substr($vars["tobic"],0,80)?></BIC>
         </FinInstnId>
       </InstdAgt>
     </GrpHdr>

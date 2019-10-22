@@ -83,6 +83,11 @@ class HorusCommon
         return false;
     }
 
+    public static function getNewBusinessId() {
+
+        return md5(time());
+    }
+
     /**
      * function escapeJsonString
      * Escapes a JSON String to integrate inside a JSON value

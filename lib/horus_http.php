@@ -157,7 +157,7 @@ class HorusHttp
      * function extractHeader
      * Extracts a specific Http Header value
      */
-    function extractHeader($header)
+    static function extractHeader($header)
     {
         if (function_exists('apache_request_headers')) {
             $request_headers = apache_request_headers();

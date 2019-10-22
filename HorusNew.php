@@ -2,6 +2,9 @@
 
 require_once('lib/horus_http.php');
 require_once('lib/horus_common.php');
+require_once('lib/horus_business.php');
+require_once('lib/horus_inject.php');
+require_once('lib/horus_simplejson.php');
 require_once('lib/horus_xml.php');
 require_once('lib/horus_exception.php');
 

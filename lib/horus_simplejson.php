@@ -3,9 +3,9 @@
 class HorusSimpleJson
 {
 
-    private $common = null;
-    private $http = null;
-    private $business = null;
+    public $common = null;
+    public $http = null;
+    public $business = null;
     private $business_id = '';
     private $simpleJsonMatches = null;
 

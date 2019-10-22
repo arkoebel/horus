@@ -3,8 +3,8 @@
 class HorusInjector
 {
 
-    private $common = null;
-    private $http = null;
+    public $common = null;
+    public $http = null;
     private $business_id = '';
 
     function __construct($business_id, $log_location)

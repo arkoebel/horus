@@ -3,8 +3,8 @@
 class HorusBusiness
 {
 
-    private $common = '';
-    private $http = '';
+    public $common = '';
+    public $http = '';
 
     function __construct($business_id, $log_location, $colour)
     {

@@ -2,8 +2,8 @@
 class HorusHttp
 {
 
-    private $common = null;
-    private $business_id = '';
+    public $common = null;
+    public $business_id = '';
 
     function __construct($business_id, $log_location, $colour)
     {

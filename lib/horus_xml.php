@@ -2,12 +2,11 @@
 
 class HorusXml
 {
-    private $common = null;
-    private $http = null;
-    private $business = null;
-    private $business_id = '';
-    private $matches = null;
-
+    public $common = null;
+    public $http = null;
+    public $business = null;
+    public $business_id = '';
+    
     function __construct($business_id, $log_location)
     {
         $this->common = new HorusCommon($business_id, $log_location, 'GREEN');

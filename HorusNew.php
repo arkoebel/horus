@@ -8,7 +8,7 @@ require_once('lib/horus_simplejson.php');
 require_once('lib/horus_xml.php');
 require_once('lib/horus_exception.php');
 
-
+$loglocation = '/var/log/nginx/horus.log';
 
 $business_id = HorusHttp::extractHeader('X-Business-Id');
 
@@ -24,9 +24,10 @@ else
 $colour = ("inject" === $request_type) ? 'YELLOW':'GREEN';
 $mmatches = json_decode(file_get_contents('conf/horusParams.json'),true);
 
+$common = new HorusCommon($business_id,$loglocation,$colour);
+
 if(json_last_error()!==JSON_ERROR_NONE){
     header("HTTP/1.1 500 SERVER ERROR",true,500);
-    $common = new HorusCommon($business_id,'',$colour);
     $common->mlog("Error while decoding horusParams.json : " . json_last_error_msg() . "\n","ERROR");
     echo "Error while decoding horusParams.json : " . json_last_error_msg() . "\n";
     exit;
@@ -45,14 +46,14 @@ $content_type = $_SERVER['CONTENT_TYPE'];
 $proxy_mode = HorusHttp::extractHeader('X_DESTINATION_URL');
 
 if ("inject" === $request_type){
-    $injector = new HorusInjector($business_id,'');
+    $injector = new HorusInjector($business_id,$loglocation);
     $common->mlog("Request : " . print_r($_SERVER,true) . "\n",'DEBUG');
     $common->mlog("Received POST Data : '" . $reqbody . "'",'INFO','TXT',$colour);
 
     echo $injector->doInject($reqbody,$proxy_mode);
 
 }else if (("simplejson" === $request_type)&&("application/json" === $content_type)){
-    $injector = new HorusSimpleJson($business_id,'',$matches);
+    $injector = new HorusSimpleJson($business_id,$loglocation,$matches);
 
     $common->mlog("Request : " . print_r($_SERVER,true) . "\n",'DEBUG');
     $common->mlog("Received POST Data : '" . $reqbody . "'",'INFO','TXT',$colour);
@@ -62,7 +63,7 @@ if ("inject" === $request_type){
     echo $injector->doInject($reqbody,$content_type,$proxy_mode,$preferredType,$_GET);
 
 }else{
-    $injector = new HorusXml($business_id,'');
+    $injector = new HorusXml($business_id,$loglocation);
     
     $common->mlog("Request : " . print_r($_SERVER,true) . "\n",'DEBUG');
     $common->mlog("Received POST Data : '" . $reqbody . "'",'INFO','TXT',$colour);

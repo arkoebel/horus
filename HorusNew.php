@@ -46,28 +46,28 @@ $proxy_mode = HorusHttp::extractHeader('X_DESTINATION_URL');
 
 if ("inject" === $request_type){
     $injector = new HorusInjector($business_id,'');
-    $injector->common->mlog("Request : " . print_r($_SERVER,true) . "\n",'DEBUG');
-    $injector->common->mlog("Received POST Data : '" . $reqbody . "'",'INFO','TXT',$colour);
+    $common->mlog("Request : " . print_r($_SERVER,true) . "\n",'DEBUG');
+    $common->mlog("Received POST Data : '" . $reqbody . "'",'INFO','TXT',$colour);
 
     echo $injector->doInject($reqbody,$proxy_mode);
 
 }else if (("simplejson" === $request_type)&&("application/json" === $content_type)){
     $injector = new HorusSimpleJson($business_id,'',$matches);
 
-    $injector->common->mlog("Request : " . print_r($_SERVER,true) . "\n",'DEBUG');
-    $injector->common->mlog("Received POST Data : '" . $reqbody . "'",'INFO','TXT',$colour);
+    $common->mlog("Request : " . print_r($_SERVER,true) . "\n",'DEBUG');
+    $common->mlog("Received POST Data : '" . $reqbody . "'",'INFO','TXT',$colour);
     $preferredType = $injector->http->setReturnType($_SERVER['HTTP_ACCEPT'],$errorFormat);
-    $injector->common->mlog("Preferred mime type : " . $preferredType,'DEBUG','TXT',$colour);
+    $common->mlog("Preferred mime type : " . $preferredType,'DEBUG','TXT',$colour);
 
     echo $injector->doInject($reqbody,$content_type,$proxy_mode,$preferredType,$_GET);
 
 }else{
     $injector = new HorusXml($business_id,'');
     
-    $injector->common->mlog("Request : " . print_r($_SERVER,true) . "\n",'DEBUG');
-    $injector->common->mlog("Received POST Data : '" . $reqbody . "'",'INFO','TXT',$colour);
+    $common->mlog("Request : " . print_r($_SERVER,true) . "\n",'DEBUG');
+    $common->mlog("Received POST Data : '" . $reqbody . "'",'INFO','TXT',$colour);
     $preferredType = $injector->http->setReturnType($_SERVER['HTTP_ACCEPT'],$errorFormat);
-    $injector->common->mlog("Preferred mime type : " . $preferredType,'DEBUG','TXT',$colour);
+    $common->mlog("Preferred mime type : " . $preferredType,'DEBUG','TXT',$colour);
 
     echo $injector->doInject($reqbody,$content_type,$proxy_mode,$matches, $preferredType,$_GET,$genericError);
 

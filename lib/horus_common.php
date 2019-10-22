@@ -10,6 +10,7 @@ class HorusCommon
     {
         $this->log_location = $log_location;
         $this->business_id = $business_id;
+        $this->colour = $colour;
     }
 
     /**

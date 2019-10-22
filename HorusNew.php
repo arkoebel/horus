@@ -28,6 +28,7 @@ $common = new HorusCommon($business_id,$loglocation,$colour);
 
 if(json_last_error()!==JSON_ERROR_NONE){
     header("HTTP/1.1 500 SERVER ERROR",true,500);
+    header('X-Business-Id: ' . $business_id);
     $common->mlog("Error while decoding horusParams.json : " . json_last_error_msg() . "\n","ERROR");
     echo "Error while decoding horusParams.json : " . json_last_error_msg() . "\n";
     exit;
@@ -70,6 +71,10 @@ if ("inject" === $request_type){
     $preferredType = $injector->http->setReturnType($_SERVER['HTTP_ACCEPT'],$errorFormat);
     $common->mlog("Preferred mime type : " . $preferredType,'DEBUG','TXT',$colour);
 
-    echo $injector->doInject($reqbody,$content_type,$proxy_mode,$matches, $preferredType,$_GET,$genericError);
+    $res = $injector->doInject($reqbody,$content_type,$proxy_mode,$matches, $preferredType,$_GET,$genericError);
+    
+    header("HTTP/1.1 200 OK",true,200);
+    header("X-Business-Id: $business_id");
+    echo implode("\n",$res);
 
 }

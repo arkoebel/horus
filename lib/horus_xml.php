@@ -69,7 +69,7 @@ class HorusXml
         return $vars;
     }
 
-    function getResponses($templates, $vars, $formats, $preferredType)
+    function getResponses($templates, $vars, $formats, $preferredType, $errorTemplate)
     {
         $response = array();
         $nrep = 0;
@@ -86,8 +86,7 @@ class HorusXml
                 $errorMessage = "Could not validate output with " . $formats[$nrep] . "\n";
                 $errorMessage .= $this->common->libxml_display_errors();
                 $this->common->mlog($errorMessage . "\n", 'ERROR');
-                throw new HorusException($errorMessage);
-                //$response[] = $this->business->returnGenericError($preferredType, $errorTemplate, $errorMessage, '');
+                throw new HorusException($this->business->returnGenericError($preferredType, $errorTemplate, $errorMessage, ''));
             }else{
                 $outputxml->formatOutput = false;
                 $outputxml->preserveWhiteSpace = false;
@@ -130,9 +129,10 @@ class HorusXml
         if ($query === FALSE) {
             $errorMessage = "Input XML not properly formatted.\n";
             $errorMessage .= $this->common->libxml_display_errors();
-            $ret = $this->business->returnGenericError($preferredType, $genericError, $errorMessage, $proxy_mode);
+            $ret = $this->business->returnGenericError($preferredType, $genericError, $errorMessage, '');
             //if ('' === $proxy_mode)
-            return $ret;
+            //return $ret;
+            throw new HorusException($ret);
         }
 
 
@@ -150,7 +150,7 @@ class HorusXml
                 $errorMessage = "Found match, but filtered out\n";
                 $errorMessage .= "XSD = $selectedXsd";
                 $this->common->mlog($errorMessage . "\n", 'INFO');
-                return $this->business->returnGenericError($preferredType, $genericError, $errorMessage, $proxy_mode);
+                throw new HorusException($this->business->returnGenericError($preferredType, $genericError, $errorMessage, ''));
             }
             $vars = $this->getVariables($query, $matches, $selected);
 
@@ -171,7 +171,7 @@ class HorusXml
             $errorTemplate = 'templates/' . $errorTemplate;
             if ($this->business->findMatch($matches, $selected, "displayError") === "On") {
                 //echo trim(preg_replace('/\s+/', ' ', $errorOutput));
-                return $this->business->returnGenericError($preferredType, $errorTemplate, "Requested error", '');
+                throw new HorusException($this->business->returnGenericError($preferredType, $errorTemplate, "Requested error", ''));
             }
             $response = '';
             $multiple = false;
@@ -190,9 +190,9 @@ class HorusXml
             $mime_boundary = md5(time());
 
             try{
-                $resp = $this->getResponses($templates, $vars, $formats, $preferredType);
+                $resp = $this->getResponses($templates, $vars, $formats, $preferredType, $errorTemplate);
             }catch(HorusException $e){
-                return $this->business->returnGenericError($preferredType, $genericError, $e->getMessage(), '');
+                throw new HorusException($e->getMessage());
             }
             $url = $this->formOutQuery($forwardparams, $proxy_mode);
 
@@ -209,9 +209,9 @@ class HorusXml
             $errorMessage = "Unable to find appropriate response.\n";
             $errorMessage .= $this->common->libxml_display_errors();
             $this->common->mlog($errorMessage . "\n", 'ERROR');
-            $res = $this->business->returnGenericError($preferredType, $genericError, $errorMessage, $proxy_mode);
+            $res = $this->business->returnGenericError($preferredType, $genericError, $errorMessage, '');
             //if ('' === $proxy_mode)
-            return $res;
+            throw new HorusException($res);
         }
     }
 }

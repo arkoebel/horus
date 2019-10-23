@@ -15,21 +15,21 @@ $business_id = HorusHttp::extractHeader('X-Business-Id');
 if ($business_id === '')
     $business_id = HorusCommon::getNewBusinessId();
 
-if(array_key_exists('type',$_GET))
+if (array_key_exists('type', $_GET))
     $request_type = $_GET["type"];
 else
     $request_type = '';
 
 
-$colour = ("inject" === $request_type) ? 'YELLOW':'GREEN';
-$mmatches = json_decode(file_get_contents('conf/horusParams.json'),true);
+$colour = ("inject" === $request_type) ? 'YELLOW' : 'GREEN';
+$mmatches = json_decode(file_get_contents('conf/horusParams.json'), true);
 
-$common = new HorusCommon($business_id,$loglocation,$colour);
+$common = new HorusCommon($business_id, $loglocation, $colour);
 
-if(json_last_error()!==JSON_ERROR_NONE){
-    header("HTTP/1.1 500 SERVER ERROR",true,500);
+if (json_last_error() !== JSON_ERROR_NONE) {
+    header("HTTP/1.1 500 SERVER ERROR", true, 500);
     header('X-Business-Id: ' . $business_id);
-    $common->mlog("Error while decoding horusParams.json : " . json_last_error_msg() . "\n","ERROR");
+    $common->mlog("Error while decoding horusParams.json : " . json_last_error_msg() . "\n", "ERROR");
     echo "Error while decoding horusParams.json : " . json_last_error_msg() . "\n";
     exit;
 }
@@ -46,35 +46,56 @@ $content_type = $_SERVER['CONTENT_TYPE'];
 
 $proxy_mode = HorusHttp::extractHeader('X_DESTINATION_URL');
 
-if ("inject" === $request_type){
-    $injector = new HorusInjector($business_id,$loglocation);
-    $common->mlog("Request : " . print_r($_SERVER,true) . "\n",'DEBUG');
-    $common->mlog("Received POST Data : '" . $reqbody . "'",'INFO','TXT',$colour);
+if ("inject" === $request_type) {
+    $injector = new HorusInjector($business_id, $loglocation);
+    $common->mlog("Request : " . print_r($_SERVER, true) . "\n", 'DEBUG');
+    $common->mlog("Received POST Data : '" . $reqbody . "'", 'INFO', 'TXT', $colour);
 
-    echo $injector->doInject($reqbody,$proxy_mode);
+    try {
+        $res = $injector->doInject($reqbody, $proxy_mode);
+        header("HTTP/1.1 200 OK", true, 200);
+        header("X-Business-Id: $business_id");
+        echo $res;
+    } catch (Exception $e) {
+        header("HTTP/1.1 200 OK", true, 200);
+        header("X-Business-Id: $business_id");
+        echo $e . errorMessage();
+    }
+} else if (("simplejson" === $request_type) && ("application/json" === $content_type)) {
+    $injector = new HorusSimpleJson($business_id, $loglocation, $matches);
 
-}else if (("simplejson" === $request_type)&&("application/json" === $content_type)){
-    $injector = new HorusSimpleJson($business_id,$loglocation,$matches);
+    $common->mlog("Request : " . print_r($_SERVER, true) . "\n", 'DEBUG');
+    $common->mlog("Received POST Data : '" . $reqbody . "'", 'INFO', 'TXT', $colour);
+    $preferredType = $injector->http->setReturnType($_SERVER['HTTP_ACCEPT'], $errorFormat);
+    $common->mlog("Preferred mime type : " . $preferredType, 'DEBUG', 'TXT', $colour);
 
-    $common->mlog("Request : " . print_r($_SERVER,true) . "\n",'DEBUG');
-    $common->mlog("Received POST Data : '" . $reqbody . "'",'INFO','TXT',$colour);
-    $preferredType = $injector->http->setReturnType($_SERVER['HTTP_ACCEPT'],$errorFormat);
-    $common->mlog("Preferred mime type : " . $preferredType,'DEBUG','TXT',$colour);
+    try {
+        $res =  $injector->doInject($reqbody, $content_type, $proxy_mode, $preferredType, $_GET);
+        header("HTTP/1.1 200 OK", true, 200);
+        header("X-Business-Id: $business_id");
+        echo implode("\n", $res);
+    } catch (Exception $e) {
+        header("HTTP/1.1 200 OK", true, 200);
+        header("X-Business-Id: $business_id");
+        echo $e . errorMessage();
+    }
+} else {
+    $injector = new HorusXml($business_id, $loglocation);
 
-    echo $injector->doInject($reqbody,$content_type,$proxy_mode,$preferredType,$_GET);
+    $common->mlog("Request : " . print_r($_SERVER, true) . "\n", 'DEBUG');
+    $common->mlog("Received POST Data : '" . $reqbody . "'", 'INFO', 'TXT', $colour);
+    $preferredType = $injector->http->setReturnType($_SERVER['HTTP_ACCEPT'], $errorFormat);
+    $common->mlog("Preferred mime type : " . $preferredType, 'DEBUG', 'TXT', $colour);
 
-}else{
-    $injector = new HorusXml($business_id,$loglocation);
-    
-    $common->mlog("Request : " . print_r($_SERVER,true) . "\n",'DEBUG');
-    $common->mlog("Received POST Data : '" . $reqbody . "'",'INFO','TXT',$colour);
-    $preferredType = $injector->http->setReturnType($_SERVER['HTTP_ACCEPT'],$errorFormat);
-    $common->mlog("Preferred mime type : " . $preferredType,'DEBUG','TXT',$colour);
+    try {
+        $res = $injector->doInject($reqbody, $content_type, $proxy_mode, $matches, $preferredType, $_GET, $genericError);
 
-    $res = $injector->doInject($reqbody,$content_type,$proxy_mode,$matches, $preferredType,$_GET,$genericError);
-    
-    header("HTTP/1.1 200 OK",true,200);
-    header("X-Business-Id: $business_id");
-    echo implode("\n",$res);
-
+        header("HTTP/1.1 200 OK", true, 200);
+        header("X-Business-Id: $business_id");
+        echo implode("\n", $res);
+    } catch (Exception $e) {
+        header("HTTP/1.1 200 OK", true, 200);
+        header("X-Business-Id: $business_id");
+        echo $e . errorMessage();
+    }
 }

@@ -19,7 +19,7 @@ class HorusInjector
         $reqparams = json_decode($reqbody, true);
         $template = 'templates/' . $reqparams['template'];
         $vars = array();
-        if (array_key_exists('attr',$reqparams)){
+        if (array_key_exists('attr', $reqparams)) {
             foreach ($reqparams['attr'] as $key => $value)
                 $vars[$key] = $value;
         }

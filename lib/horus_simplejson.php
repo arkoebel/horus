@@ -23,13 +23,13 @@ class HorusSimpleJson
 
         if ($input === null) {
             $error_message = 'JSON Error ' . $this->common->decodeJsonError(json_last_error());
-            return $this->business->returnGenericJsonError($preferredType, 'templates/generic_error.json', $error_message, $proxy_mode);
+            throw new HorusException($this->business->returnGenericJsonError($preferredType, 'templates/generic_error.json', $error_message,''));
         }
 
         $selected = $this->business->locateJson($this->simpleJsonMatches, $input, $_GET);
         if ($selected == -1) {
             $error_message = 'No match found';
-            return $this->business->returnGenericJsonError($preferredType, 'templates/generic_error.json', $error_message, $proxy_mode);
+            throw new HorusException($this->business->returnGenericJsonError($preferredType, 'templates/generic_error.json', $error_message, ''));
         } else {
             $this->common->mlog('Selected : ' . $selected, 'INFO');
         }
@@ -44,9 +44,9 @@ class HorusSimpleJson
         $errorTemplate = (($errorTemplate == null) ? 'generic_error.json' : $errorTemplate);
         $errorTemplate = 'templates/' . $errorTemplate;
         if ($this->business->findMatch($this->simpleJsonMatches, $selected, "displayError") === "On") {
-            return $this->business->returnGenericJsonError($preferredType, $errorTemplate, "Requested error", $proxy_mode);
+            throw new HorusException($this->business->returnGenericJsonError($preferredType, $errorTemplate, "Requested error", $proxy_mode));
         }
-        $response = '';
+        
         $multiple = false;
         if (!is_array($this->business->findMatch($this->simpleJsonMatches, $selected, "responseTemplate"))) {
             $templates = array($this->business->findMatch($this->simpleJsonMatches, $selected, "responseTemplate"));
@@ -64,7 +64,11 @@ class HorusSimpleJson
     {
         $input = $this->business->extractSimpleJsonPayload($reqbody);
 
-        $res = $this->selection($input, $content_type, $proxy_mode, $preferredType);
+        try{
+            $res = $this->selection($input, $content_type, $proxy_mode, $preferredType);
+        }catch(HorusException $e){
+            throw new HorusException($e->getMessage());
+        }
         if (''=== $proxy_mode && !is_array($res))
             return $res;
 

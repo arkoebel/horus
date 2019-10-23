@@ -45,10 +45,10 @@ class HorusBusiness
                         $selected = $id;
                     } else {
                         //echo('not found' . "\n");
-                        $this->common->mlog('No QueryMatch for line' . $id,'DEBUG' );
+                        $this->common->mlog('No QueryMatch for param line #' . $id,'DEBUG' );
                     }
                 } else {
-                    $this->common->mlog('Line ' . $id . ' could be selected (if last).','DEBUG' );
+                    $this->common->mlog('Param line #' . $id . ' could be selected (if last).','DEBUG' );
                     $selected = $id;
                 }
             }

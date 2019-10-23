@@ -95,6 +95,8 @@ class HorusHttp
             $forward = '';
 
         $data = $this->convertOutData($data, $content_type, $no_conversion);
+        $this->common->mlog('Sending back data', 'DEBUG', 'TXT');
+        $this->common->mlog($data, 'DEBUG', 'TXT');
 
         if ($forward !== '') {
 
@@ -120,14 +122,12 @@ class HorusHttp
      */
     function convertOutData($data, $content_type, $no_conversion = false)
     {
-        $this->common->mlog("Data to send", 'INFO');
         if (!$no_conversion && ($content_type == 'application/json')) {
             $this->common->mlog("Forced Conversion for $content_type", 'DEBUG');
             $dataJSON = array('payload' => $data);
             $this->common->mlog(json_encode($dataJSON), 'DEBUG', 'JSON');
             return json_encode($dataJSON);
         } else {
-            $this->common->mlog($data, 'DEBUG', 'TXT');
             return $data;
         }
     }

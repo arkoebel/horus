@@ -87,7 +87,7 @@ class HorusHttp
     {
 
         if ($no_conversion === 'FALSE')
-            $this->common->mlog('Conversion forced', 'DEBUG');
+            $this->common->mlog('Forced conversion to JSON', 'DEBUG');
 
         $this->setHttpReturnCode($status);
 
@@ -108,7 +108,7 @@ class HorusHttp
         } else {
             header("Content-type: $content_type");
 
-            return $this->convertOutData($data, $content_type, $no_conversion);
+            return $data;
         }
         if ($exitafter === true)
             exit;

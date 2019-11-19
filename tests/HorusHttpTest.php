@@ -7,6 +7,7 @@ use PHPUnit\Framework\TestCase;
 require_once('lib/horus_http.php');
 require_once('lib/horus_common.php');
 require_once('HorusTestCase.php');
+require_once('lib/horus_exception.php');
 
 class HorusHttpTest extends HorusTestCase
 {
@@ -81,5 +82,35 @@ class HorusHttpTest extends HorusTestCase
     {
         $this->http->setHttpReturnCode(400);
         $this::assertEquals(self::$mockheaders, array(array("HTTP/1.1 400 MALFORMED URL", TRUE, 400)));
+    }
+
+    function testForwardSingleHttpQuery(): void 
+    {
+
+        self::$curls[] = array( 'url'=>'https://www.google.com',
+                                'options'=>array(
+                                    CURLOPT_RETURNTRANSFER=>1,
+                                    CURLOPT_HTTPHEADER=>array('Content-type: application/json', 'Accept: application/json', 'Expect:', 'X-Business-Id: testHorusHttp'),
+                                    CURLOPT_SSL_VERIFYPEER=>False,
+                                    CURLOPT_VERBOSE=>True,
+                                    CURLOPT_HEADER=>True,
+                                    CURLINFO_HEADER_OUT=>True),
+                                'data'=>"HTTP/1.1 200 OK\nDate: Thu, 08 Aug 2019 20:22:04 GMT\nExpires: -1\nCache-Control: private, max-age=0\n" . 
+                                        "Content-Type: text/html; charset=ISO-8859-1\nAccept-Ranges: none\nVary: Accept-Encoding\nTransfer-Encoding: chunked\n" . 
+                                        "\n" . 
+                                        "<html>Test</html>",
+                                'returnHeaders'=>array(
+                                    CURLINFO_HTTP_CODE=>400,
+                                    CURLINFO_HEADER_SIZE=>212,
+
+                                ),
+                                'returnCode'=>400,
+                                'errorMessage'=>'',
+                                'returnBody'=>'<html>Test</html>');
+        $this->expectException(HorusException::class);
+        $this->http->forwardSingleHttpQuery('https://www.google.com', array('Content-type: application/json', 'Accept: application/json', 'Expect:', 'X-Business-Id: testHorusHttp') , null, 'POST');
+   
+
+
     }
 }

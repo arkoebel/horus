@@ -284,6 +284,29 @@ class HorusHttp
         return $queries;
     }
 
+
+    function forwardSingleHttpQuery($dest_url, $headers, $data, $method='POST')
+    {
+        $handle = curl_init($dest_url);
+        curl_setopt($handle, CURLOPT_URL, $dest_url);
+        curl_setopt($handle, CURLOPT_RETURNTRANSFER, 1);
+        if ('POST'===$method)
+            curl_setopt($handle, CURLOPT_POST, TRUE);
+        else
+            curl_setopt($handle,CURLOPT_CUSTOMREQUEST,$method);
+        curl_setopt($handle, CURLOPT_HTTPHEADER, $headers);
+        curl_setopt($handle, CURLOPT_POSTFIELDS, $data);
+        $response = curl_exec($handle);
+        $response_code = curl_getinfo($handle, CURLINFO_HTTP_CODE);
+        if (200 !== $response_code){
+            $this->common->mlog('Request to ' . $dest_url . ' produced error ' . curl_getinfo($handle, CURLINFO_HTTP_CODE),'ERROR');
+            $this->common->mlog('Call stack was : ' . curl_getinfo($handle),'DEBUG');
+            throw new HorusException('HTTP Error ' . $response_code . ' for ' . $dest_url);
+        }
+
+        return $response;
+    }
+
     function setHttpReturnCode($status)
     {
         switch ($status) {

@@ -103,6 +103,29 @@ class HorusCommon
         return $result;
     }
 
+    public static function formatQueryString($baseUrl, $params, $wholeUrl=FALSE){
+
+        if (is_null($params)) {
+            if (TRUE===$wholeUrl)
+                return $baseUrl;
+            else
+                return '';
+        }
+
+        $query = '';
+        foreach ($params as $key => $value){
+            $query .= '&' . urlencode($key) . '=' . urlencode($value);
+        }
+        if((stripos($baseUrl,'?')===FALSE)&&($query!=='')){
+            $query = '?' . substr($query,1);
+        }
+
+        if ($wholeUrl)
+            return $baseUrl . $query;
+        else
+            return $query;
+    }
+
     /**
      * function libxml_display_error
      * Custom SimpleXML error handler.

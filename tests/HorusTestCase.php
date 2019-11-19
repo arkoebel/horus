@@ -46,6 +46,7 @@ class HorusTestCase extends TestCase
         runkit_function_rename('curl_multi_remove_handle', 'curl_multi_remove_handle_old');
         runkit_function_rename('curl_close', 'curl_close_old');
         runkit_function_rename('curl_multi_close', 'curl_multi_close_old');
+        runkit_function_rename('curl_exec','curl_exec_old');
         runkit_function_add(
             'curl_multi_init',
             '',
@@ -75,6 +76,8 @@ class HorusTestCase extends TestCase
             'return 0;'
         );
 
+        runkit_function_add('curl_exec','$mh','return 0;');
+
         runkit_function_add(
             'curl_multi_select',
             '$mh, $timeout = 1.0 ',
@@ -89,11 +92,11 @@ class HorusTestCase extends TestCase
 
         runkit_function_add(
             'curl_getinfo',
-            '$ch, $opt',
+            '$ch, $opt=null',
             'if (isset($opt))
                 return HorusTestCase::$curls[$ch][\'returnHeaders\'][$opt];
             else
-                return HorusTestCase::$curls[$ch][\'returnHeaders\'];'
+                return implode(\',\',HorusTestCase::$curls[$ch][\'returnHeaders\']);'
         );
         
         runkit_function_add(
@@ -144,6 +147,7 @@ class HorusTestCase extends TestCase
         runkit_function_remove('curl_multi_remove_handle');
         runkit_function_remove('curl_close');
         runkit_function_remove('curl_multi_close');
+        runkit_function_remove('curl_exec');
 
 
         // Move our backup to restore header to its original glory.
@@ -160,6 +164,7 @@ class HorusTestCase extends TestCase
         runkit_function_rename('curl_multi_remove_handle_old', 'curl_multi_remove_handle');
         runkit_function_rename('curl_close_old', 'curl_close');
         runkit_function_rename('curl_multi_close_old', 'curl_multi_close');
+        runkit_function_rename('curl_exec_old','curl_exec');
     }
 
     /**

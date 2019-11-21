@@ -46,6 +46,7 @@ $content_type = $_SERVER['CONTENT_TYPE'];
 $proxy_mode = HorusHttp::extractHeader('X_DESTINATION_URL');
 
 if ("inject" === $request_type) {
+    $common->mlog('+++++ BEGIN INJECTOR MODE +++++','INFO');
     $injector = new HorusInjector($business_id, $loglocation);
     $common->mlog("Request : " . print_r($_SERVER, true) . "\n", 'DEBUG');
     $common->mlog("Received POST Data : '" . $reqbody . "'", 'INFO', 'TXT', $colour);
@@ -60,7 +61,9 @@ if ("inject" === $request_type) {
         header("X-Business-Id: $business_id");
         echo $e->getMessage();
     }
+    $common->mlog('+++++ END INJECTOR MODE +++++','INFO');
 } else if (("simplejson" === $request_type) && ("application/json" === $content_type)) {
+    $common->mlog('+++++ BEGIN SIMPLEJSON MODE +++++','INFO');
     $injector = new HorusSimpleJson($business_id, $loglocation, $matches);
 
     $common->mlog("Request : " . print_r($_SERVER, true) . "\n", 'DEBUG');
@@ -78,7 +81,9 @@ if ("inject" === $request_type) {
         header("X-Business-Id: $business_id");
         echo $e->getMessage();
     }
+    $common->mlog('+++++ END SIMPLEJSON MODE +++++','INFO');
 } else {
+    $common->mlog('+++++ BEGIN XML MODE +++++','INFO');
     $injector = new HorusXml($business_id, $loglocation);
 
     $common->mlog("Request : " . print_r($_SERVER, true) . "\n", 'DEBUG');
@@ -101,6 +106,7 @@ if ("inject" === $request_type) {
         header("X-Business-Id: $business_id");
         echo $e->getMessage();
     }
+    $common->mlog('+++++ END XML MODE +++++','INFO');
 }
 
 $common->mlog("===== END HORUS CALL =====","INFO");

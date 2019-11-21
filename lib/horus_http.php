@@ -296,18 +296,23 @@ class HorusHttp
             curl_setopt($handle,CURLOPT_CUSTOMREQUEST,$method);
         curl_setopt($handle, CURLOPT_HTTPHEADER, $headers);
         curl_setopt($handle, CURLOPT_POSTFIELDS, $data);
+
+        $this->common->mlog($method . ' ' . $dest_url . "\n" . implode("\n",$headers) . "\n\n",'DEBUG');
+
         $response = curl_exec($handle);
         $response_code = curl_getinfo($handle, CURLINFO_HTTP_CODE);
         if (200 !== $response_code){
             $this->common->mlog('Request to ' . $dest_url . ' produced error ' . curl_getinfo($handle, CURLINFO_HTTP_CODE),'ERROR');
             $this->common->mlog('Call stack was : ' . curl_getinfo($handle),'DEBUG');
             throw new HorusException('HTTP Error ' . $response_code . ' for ' . $dest_url);
+        }else{
+            $this->common->mlog("Query result was $response_code \n",'DEBUG');
         }
 
         return $response;
     }
 
-    function setHttpReturnCode($status)
+    public function setHttpReturnCode($status)
     {
         switch ($status) {
             case 200:

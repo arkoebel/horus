@@ -6,8 +6,10 @@ use PHPUnit\Framework\TestCase;
 //use HorusCommon;
 require_once('lib/horus_business.php');
 require_once('lib/horus_common.php');
+require_once('lib/horus_exception.php');
+require_once('HorusTestCase.php');
 
-class HorusBusinessTest extends TestCase
+class HorusBusinessTest extends HorusTestCase
 {
 
     public function testFindMatch(): void
@@ -75,5 +77,180 @@ class HorusBusinessTest extends TestCase
         $this::assertEquals($horus->locateJson($params, array(), null), -1);
         $this::assertEquals($horus->locateJson($params, null, null), -1);
         $this::assertEquals($horus->locateJson(null, array(), null), -1);
+    }
+
+    function testPerformRoutingError(): void
+    {
+        $horus = new HorusBusiness('testPerformRoutingError', null, 'OOOO');
+        $this->expectException(HorusException::class);
+        $horus->performRouting(null, 'application/json', 'application/json', '{"test":"ok"}');
+    }
+
+    function testPerformRoutingStandard(): void
+    {
+        $horus = new HorusBusiness('testPerformRouting', null, 'PPPP');
+        $route = json_decode('{
+			"source": "singlesource",
+			"parameters": [{
+					"key": "param1",
+					"value": "single"
+				}, {
+					"key": "sourcex",
+					"value": "cristal"
+				}
+			],
+			"destinations": [{
+                    "comment": "Destination 1, via proxy",
+					"proxy": "http://proxy/horus/horus.php",
+					"destination": "http://destination/horus/horusRouter.php",
+					"proxyParameters": [{
+							"key": "repeat",
+							"value": "5"
+						}, {
+							"key": "bic1",
+							"value": "BNPAFRPPXXX"
+						}
+					],
+                    "destParameters": [{
+                            "key": "source",
+                            "value": "router1"
+                    }],
+					"delayafter": "2"
+				}, {
+                    "comment": "Destination 2, direct",
+					"destination": "http://direct/horustojms"
+				}
+			]
+        }', TRUE);
+        
+
+        self::$curls[] = array( 'url'=>'https://www.xxx.com',
+                                'options'=>array(
+                                    CURLOPT_RETURNTRANSFER=>1,
+                                    CURLOPT_HTTPHEADER=>array('Content-type: application/json', 'Accept: application/json', 'Expect:', 'X-Business-Id: testHorusHttp'),
+                                    CURLOPT_SSL_VERIFYPEER=>False,
+                                    CURLOPT_VERBOSE=>True,
+                                    CURLOPT_HEADER=>True,
+                                    CURLINFO_HEADER_OUT=>True),
+                                'data'=>"HTTP/1.1 200 OK\nDate: Thu, 08 Aug 2019 20:22:04 GMT\nExpires: -1\nCache-Control: private, max-age=0\n" . 
+                                        "Content-Type: text/html; charset=ISO-8859-1\nAccept-Ranges: none\nVary: Accept-Encoding\nTransfer-Encoding: chunked\n" . 
+                                        "\n" . 
+                                        "{\"Status\":\"OK\"}",
+                                'returnHeaders'=>array(
+                                    CURLINFO_HTTP_CODE=>200,
+                                    CURLINFO_HEADER_SIZE=>212,
+
+                                ),
+                                'returnCode'=>400,
+                                'errorMessage'=>'',
+                                'returnBody'=>'{"Status":"OK"}');
+        self::$curls[] = array( 'url'=>'https://www.yyy.com',
+                                'options'=>array(
+                                    CURLOPT_RETURNTRANSFER=>1,
+                                    CURLOPT_HTTPHEADER=>array('Content-type: application/json', 'Accept: application/json', 'Expect:', 'X-Business-Id: testHorusHttp'),
+                                    CURLOPT_SSL_VERIFYPEER=>False,
+                                    CURLOPT_VERBOSE=>True,
+                                    CURLOPT_HEADER=>True,
+                                    CURLINFO_HEADER_OUT=>True),
+                                'data'=>"HTTP/1.1 200 OK\nDate: Thu, 08 Aug 2019 20:22:04 GMT\nExpires: -1\nCache-Control: private, max-age=0\n" . 
+                                        "Content-Type: text/html; charset=ISO-8859-1\nAccept-Ranges: none\nVary: Accept-Encoding\nTransfer-Encoding: chunked\n" . 
+                                        "\n" . 
+                                        "{\"Status\":\"OK\"}",
+                                'returnHeaders'=>array(
+                                    CURLINFO_HTTP_CODE=>200,
+                                    CURLINFO_HEADER_SIZE=>212,
+
+                                ),
+                                'returnCode'=>400,
+                                'errorMessage'=>'',
+                                'returnBody'=>'{"Status":"OK"}');
+
+        $res = $horus->performRouting($route, 'application/json', 'application/json', '{"test":"ok"}');
+        $this::assertEquals(2,sizeof($res),'2 queries should have responded');
+    }
+
+    function testPerformRoutingStopError(): void
+    {
+        $horus = new HorusBusiness('testPerformRouting', null, 'QQQQ');
+        $route = json_decode('{
+            "source": "singlesource",
+            "followOnError": "false",
+			"parameters": [{
+					"key": "param1",
+					"value": "single"
+				}, {
+					"key": "sourcex",
+					"value": "cristal"
+				}
+			],
+			"destinations": [{
+                    "comment": "Destination 1, via proxy",
+					"proxy": "http://proxy/horus/horus.php",
+					"destination": "http://destination/horus/horusRouter.php",
+					"proxyParameters": [{
+							"key": "repeat",
+							"value": "5"
+						}, {
+							"key": "bic1",
+							"value": "BNPAFRPPXXX"
+						}
+					],
+                    "destParameters": [{
+                            "key": "source",
+                            "value": "router1"
+                    }],
+					"delayafter": "2"
+				}, {
+                    "comment": "Destination 2, direct",
+					"destination": "http://direct/horustojms"
+				}
+			]
+        }', TRUE);
+        
+
+        self::$curls[] = array( 'url'=>'https://www.xxx.com',
+                                'options'=>array(
+                                    CURLOPT_RETURNTRANSFER=>1,
+                                    CURLOPT_HTTPHEADER=>array('Content-type: application/json', 'Accept: application/json', 'Expect:', 'X-Business-Id: testHorusHttp'),
+                                    CURLOPT_SSL_VERIFYPEER=>False,
+                                    CURLOPT_VERBOSE=>True,
+                                    CURLOPT_HEADER=>True,
+                                    CURLINFO_HEADER_OUT=>True),
+                                'data'=>"HTTP/1.1 400 OK\nDate: Thu, 08 Aug 2019 20:22:04 GMT\nExpires: -1\nCache-Control: private, max-age=0\n" . 
+                                        "Content-Type: text/html; charset=ISO-8859-1\nAccept-Ranges: none\nVary: Accept-Encoding\nTransfer-Encoding: chunked\n" . 
+                                        "\n" . 
+                                        "{\"Status\":\"KO\"}",
+                                'returnHeaders'=>array(
+                                    CURLINFO_HTTP_CODE=>400,
+                                    CURLINFO_HEADER_SIZE=>212,
+
+                                ),
+                                'returnCode'=>400,
+                                'errorMessage'=>'',
+                                'returnBody'=>'{"Status":"OK"}');
+        self::$curls[] = array( 'url'=>'https://www.yyy.com',
+                                'options'=>array(
+                                    CURLOPT_RETURNTRANSFER=>1,
+                                    CURLOPT_HTTPHEADER=>array('Content-type: application/json', 'Accept: application/json', 'Expect:', 'X-Business-Id: testHorusHttp'),
+                                    CURLOPT_SSL_VERIFYPEER=>False,
+                                    CURLOPT_VERBOSE=>True,
+                                    CURLOPT_HEADER=>True,
+                                    CURLINFO_HEADER_OUT=>True),
+                                'data'=>"HTTP/1.1 200 OK\nDate: Thu, 08 Aug 2019 20:22:04 GMT\nExpires: -1\nCache-Control: private, max-age=0\n" . 
+                                        "Content-Type: text/html; charset=ISO-8859-1\nAccept-Ranges: none\nVary: Accept-Encoding\nTransfer-Encoding: chunked\n" . 
+                                        "\n" . 
+                                        "{\"Status\":\"OK\"}",
+                                'returnHeaders'=>array(
+                                    CURLINFO_HTTP_CODE=>400,
+                                    CURLINFO_HEADER_SIZE=>212,
+
+                                ),
+                                'returnCode'=>400,
+                                'errorMessage'=>'',
+                                'returnBody'=>'{"Status":"OK"}');
+
+        $res = $horus->performRouting($route, 'application/json', 'application/json', '{"test":"ok"}');
+        
+        $this::assertEquals(1,sizeof($res),'1 query should have responded');
     }
 }

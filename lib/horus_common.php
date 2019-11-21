@@ -113,8 +113,8 @@ class HorusCommon
         }
 
         $query = '';
-        foreach ($params as $key => $value){
-            $query .= '&' . urlencode($key) . '=' . urlencode($value);
+        foreach ($params as $param){
+            $query .= '&' . urlencode($param['key']) . '=' . urlencode($param['value']);
         }
         if((stripos($baseUrl,'?')===FALSE)&&($query!=='')){
             $query = '?' . substr($query,1);

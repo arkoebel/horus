@@ -76,7 +76,7 @@ class HorusTestCase extends TestCase
             'return 0;'
         );
 
-        runkit_function_add('curl_exec','$mh','return 0;');
+        runkit_function_add('curl_exec','$mh','return HorusTestCase::$curls[$mh][\'returnBody\'];');
 
         runkit_function_add(
             'curl_multi_select',

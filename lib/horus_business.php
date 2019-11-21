@@ -5,11 +5,13 @@ class HorusBusiness
 
     public $common = '';
     public $http = '';
+    private $business_id='';
 
     function __construct($business_id, $log_location, $colour)
     {
+        $this->business_id = $business_id;
         $this->common = new HorusCommon($business_id, $log_location, $colour);
-        $this->http = new HorusHttp($business_id,$log_location,$colour);
+        $this->http = new HorusHttp($business_id, $log_location, $colour);
     }
 
     public function findMatch($matches, $request, $field)
@@ -23,6 +25,16 @@ class HorusBusiness
         } else {
             return '';
         }
+    }
+
+    public function findSource($source, $params)
+    {
+        foreach ($params["RoutingTable"] as $route) {
+            if ($route['source'] === $source) {
+                return $route;
+            }
+        }
+        return false;
     }
 
     public function locate($matches, $found, $value)
@@ -45,10 +57,10 @@ class HorusBusiness
                         $selected = $id;
                     } else {
                         //echo('not found' . "\n");
-                        $this->common->mlog('QueryMatch failed for param line #' . $id,'DEBUG' );
+                        $this->common->mlog('QueryMatch failed for param line #' . $id, 'DEBUG');
                     }
                 } else {
-                    $this->common->mlog('Param line #' . $id . ' could be selected (if last).','DEBUG' );
+                    $this->common->mlog('Param line #' . $id . ' could be selected (if last).', 'DEBUG');
                     $selected = $id;
                 }
             }
@@ -139,7 +151,7 @@ class HorusBusiness
         ob_end_clean();
 
         $ret = $this->http->returnWithContentType($errorOutput, $format, 400, $forward);
-        if (''===$forward)
+        if ('' === $forward)
             return $ret;
     }
 
@@ -155,5 +167,63 @@ class HorusBusiness
         $this->common->mlog($errorOutput, 'DEBUG', 'JSON');
 
         return $this->http->returnWithContentType($errorOutput, $format, 400, $forward, true, true);
+    }
+
+    public function performRouting($route, $content_type, $accept, $data)
+    {
+        if (is_null($route) || $route === false) {
+            $this->common->mlog('No route found with provided source value', 'WARNING');
+            throw new HorusException('Route not found',400);
+        }
+        
+        $followOnError = array_key_exists('followOnError',$route) ? $route['followOnError'] : true;
+        $this->common->mlog("FollowOnError $followOnError" , "INFO");
+        $globalParams = array_key_exists('parameters',$route) ? $route['parameters'] : array();
+            
+        $responses = array();
+
+        $ii = 0;
+
+        foreach ($route['destinations'] as $destination) {
+            $ii++;
+            
+            $this->common->mlog("Destination : $ii " . $destination['comment'] . "\n", "INFO");
+
+            
+            $destParams = array_key_exists('destParameters',$destination) ? $destination['destParameters'] : array();
+            $proxyParams = array_key_exists('proxyParameters',$destination) ? $destination['proxyParameters'] : array();
+                       
+            $destinationUrl = HorusCommon::formatQueryString($destination['destination'], array_merge($globalParams,$destParams), TRUE);
+            $proxyUrl = array_key_exists('proxy',$destination) ? HorusCommon::formatQueryString($destination['proxy'], array_merge($globalParams,$proxyParams), TRUE) : '';
+
+            $this->common->mlog("Send http request to " . $proxyUrl . "\n", 'DEBUG');
+            $this->common->mlog("Final destination : " . $destinationUrl . "\n", 'DEBUG');
+            $this->common->mlog("Content-type: " . $content_type . ", Accept: " . $accept, 'DEBUG');
+
+            $headers = array('Content-type: ' . $content_type, 'Accept: ' . $accept, 'Expect: ', 'X_BUSINESS_ID: ' . $this->business_id);
+
+            if (!array_key_exists('proxy',$destination)) {
+                $dest_url = $destinationUrl;
+            } else {
+                $dest_url = $proxyUrl;
+                $headers[] = 'X_DESTINATION_URL: ' . $destinationUrl;
+            }
+
+            try {
+                $response = $this->http->forwardSingleHttpQuery($dest_url, $headers, $data, 'POST');
+            } catch (HorusException $e) {
+                $response = json_encode(array("error" => $e->getMessage()));
+                if (!$followOnError)
+                    throw new HorusException('Flow interrupted after error ' . $e->getMessage(),503);
+            }
+
+            $responses[] = $response;
+
+            if (array_key_exists('delayafter', $destination)) {
+                $this->common->mlog('Waiting ' . $destination['delayafter'] . 'sec for next destination', 'INFO');
+                sleep($destination['delayafter']);
+            }
+        }
+        return $responses;
     }
 }

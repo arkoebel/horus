@@ -23,6 +23,7 @@ $colour = ("inject" === $request_type) ? 'YELLOW' : 'GREEN';
 $mmatches = json_decode(file_get_contents('conf/horusParams.json'), true);
 
 $common = new HorusCommon($business_id, $loglocation, $colour);
+$common->mlog("===== BEGIN HORUS CALL =====","INFO");
 
 if (json_last_error() !== JSON_ERROR_NONE) {
     header("HTTP/1.1 500 SERVER ERROR", true, 500);
@@ -57,7 +58,7 @@ if ("inject" === $request_type) {
     } catch (Exception $e) {
         header("HTTP/1.1 200 OK", true, 200);
         header("X-Business-Id: $business_id");
-        echo $e . errorMessage();
+        echo $e->getMessage();
     }
 } else if (("simplejson" === $request_type) && ("application/json" === $content_type)) {
     $injector = new HorusSimpleJson($business_id, $loglocation, $matches);
@@ -75,7 +76,7 @@ if ("inject" === $request_type) {
     } catch (Exception $e) {
         header("HTTP/1.1 200 OK", true, 200);
         header("X-Business-Id: $business_id");
-        echo $e . errorMessage();
+        echo $e->getMessage();
     }
 } else {
     $injector = new HorusXml($business_id, $loglocation);
@@ -94,6 +95,8 @@ if ("inject" === $request_type) {
     } catch (Exception $e) {
         header("HTTP/1.1 200 OK", true, 200);
         header("X-Business-Id: $business_id");
-        echo $e . errorMessage();
+        echo $e->getMessage();
     }
 }
+
+$common->mlog("===== END HORUS CALL =====","INFO");

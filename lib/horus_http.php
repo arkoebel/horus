@@ -105,15 +105,15 @@ class HorusHttp
 
         if ($forward !== '') {
 
-            $headers = array('Content-type' => $content_type, 'Accept' => 'application/json', 'Expect' => '', 'X-Business-Id' => $this->business_id);
+            $headers = array('Content-Type' => $content_type, 'Accept' => 'application/json', 'Expect' => '', 'X-Business-Id' => $this->business_id);
             $query = array('url' => $forward, 'method' => $method, 'headers' => $headers, 'data' => $data);
             $queries = array($query);
 
             $result = $this->forwardHttpQueries($queries);
-            header("Content-type: " . $result[0]['response_headers']['Content-type']);
+            header("Content-type: " . $result[0]['response_headers']['Content-Type']);
             return $result[0]['response_data'] . "\n";
         } else {
-            header("Content-type: $content_type");
+            header("Content-Type: $content_type");
 
             return $data;
         }

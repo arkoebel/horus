@@ -18,7 +18,7 @@ class HorusSimpleJson
         $this->simpleJsonMatches = $matches;
     }
 
-    function selection($input, $content_type, $proxy_mode, $preferredType)
+    function selection($input, $proxy_mode, $preferredType)
     {
 
         if ($input === null) {
@@ -35,10 +35,11 @@ class HorusSimpleJson
         }
 
         $vars = array();
-        if(!($this->business->findMatch($this->simpleJsonMatches, $selected, 'parameters')===""))
+        if(!($this->business->findMatch($this->simpleJsonMatches, $selected, 'parameters')==="")){
             foreach ($this->business->findMatch($this->simpleJsonMatches, $selected, 'parameters') as $param => $path) {
                 $vars[$param] = $input[$path];
             }
+        }
 
         $errorTemplate = $this->business->findMatch($this->simpleJsonMatches, $selected, 'errorTemplate');
         $errorTemplate = (($errorTemplate == null) ? 'generic_error.json' : $errorTemplate);
@@ -60,17 +61,18 @@ class HorusSimpleJson
         return array('templates' => $templates, 'formats' => $formats, 'variables' => $vars, 'multiple' => $multiple);
     }
 
-    function doInject($reqbody, $content_type, $proxy_mode, $preferredType, $queryParams)
+    function doInject($reqbody, $proxy_mode, $preferredType, $queryParams)
     {
         $input = $this->business->extractSimpleJsonPayload($reqbody);
 
         try{
-            $res = $this->selection($input, $content_type, $proxy_mode, $preferredType);
+            $res = $this->selection($input, $proxy_mode, $preferredType);
         }catch(HorusException $e){
             throw new HorusException($e->getMessage());
         }
-        if (''=== $proxy_mode && !is_array($res))
+        if (''=== $proxy_mode && !is_array($res)){
             return $res;
+        }
 
         $vars = array_merge($res['variables'], $queryParams);
 
@@ -84,19 +86,21 @@ class HorusSimpleJson
             include $respxml;
             $output = ob_get_contents();
             ob_end_clean();
-            if ($res['multiple'])
+            if ($res['multiple']){
                 $response .= $this->http->formMultiPart($template, $this->http->convertOutData($output, $preferredType, true), $mime_boundary, $eol, $preferredType);
-            else
+            }else{
                 $response = $output;
+            }
             $nrep++;
         }
         $outres = null;
         if ($res['multiple']) {
-            $outres = $this->http->returnWithContentType($response . "--" . $mime_boundary . "--" . $eol . $eol, "multipart/form-data; boundary=$mime_boundary", 200, $proxy_mode, true, true);
+            $outres = $this->http->returnWithContentType($response . "--" . $mime_boundary . "--" . $eol . $eol, "multipart/form-data; boundary=$mime_boundary", 200, $proxy_mode, true);
         } else {
-            $outres = $this->http->returnWithContentType($response, $preferredType, 200, $proxy_mode, true, true);
+            $outres = $this->http->returnWithContentType($response, $preferredType, 200, $proxy_mode, true);
         }
-        if('' === $proxy_mode)
+        if('' === $proxy_mode){
             return $outres;
+        }
     }
 }

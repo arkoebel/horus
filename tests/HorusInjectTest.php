@@ -8,7 +8,7 @@ require_once('lib/horus_http.php');
 require_once('lib/horus_common.php');
 require_once('lib/horus_inject.php');
 require_once('HorusTestCase.php');
-require_once('HorusHttpTest.php');
+//require_once('HorusHttpTest.php');
 
 class HorusInjectTest extends HorusTestCase {
 

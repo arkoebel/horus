@@ -523,7 +523,7 @@ if ("inject" === $request_type){
         $convert = true;
     }
     mlog("Generated all data at " . (microtime(true) - $mytime)*1000,'INFO','TXT','YELLOW');
-    returnArrayWithContentType($content,$reqparams['destinationcontent'],200,$proxy_mode,false,$mytime, !$convert);
+    returnArrayWithContentType($content,$reqparams['destinationcontent'],200,$proxy_mode,false,!$convert);
 
 }else if (("simplejson" === $request_type)&&("application/json" === $content_type)){
     $input = extractSimpleJsonPayload($reqbody);

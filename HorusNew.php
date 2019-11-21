@@ -12,13 +12,11 @@ $loglocation = '/var/log/nginx/horus.log';
 
 $business_id = HorusHttp::extractHeader('X-Business-Id');
 
-if ($business_id === '')
+if ($business_id === ''){
     $business_id = HorusCommon::getNewBusinessId();
+}
 
-if (array_key_exists('type', $_GET))
-    $request_type = $_GET["type"];
-else
-    $request_type = '';
+$request_type = array_key_exists('type', $_GET) ? $_GET["type"] : '';
 
 
 $colour = ("inject" === $request_type) ? 'YELLOW' : 'GREEN';
@@ -70,7 +68,7 @@ if ("inject" === $request_type) {
     $common->mlog("Preferred mime type : " . $preferredType, 'DEBUG', 'TXT', $colour);
 
     try {
-        $res =  $injector->doInject($reqbody, $content_type, $proxy_mode, $preferredType, $_GET);
+        $res =  $injector->doInject($reqbody, $proxy_mode, $preferredType, $_GET);
         header("HTTP/1.1 200 OK", true, 200);
         header("X-Business-Id: $business_id");
         echo implode("\n", $res);

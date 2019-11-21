@@ -29,7 +29,7 @@ final class HorusCommonTest extends TestCase
 
     public function testFormatQueryString():void
     {
-        $params = array("a"=>1,"b"=>2,"c"=>"A AA");
+        $params = array(array('key'=>"a",'value'=>1),array('key'=>"b",'value'=>2),array('key'=>"c", 'value'=>"A AA"));
         $url1 = "http://localhost:9000/test";
         $url2 = $url1 . "?zz=1&qq=2";
         $this->assertEquals(HorusCommon::formatQueryString($url1,$params,FALSE),'?a=1&b=2&c=A+AA','Test without query string, just params');

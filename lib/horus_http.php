@@ -22,29 +22,30 @@ class HorusHttp
         $cc .= "Content-Disposition: form-data; name=\"$file\"; filename=\"$file\"" . $eol;
         $cc .= 'Content-Type: ' . $content_type . $eol;
         $cc .= 'Content-Transfer-Encoding: base64' . $eol . $eol;
-        $cc .= chunk_split(base64_encode($data)) . $eol;
+        return $cc . chunk_split(base64_encode($data)) . $eol;
 
-        return $cc;
     }
 
     /**
      * function returnArrayWithContentType
      * Send a set of http queries to the same destination
      */
-    function returnArrayWithContentType($data, $content_type, $status, $forward = '', $exitafter = true, $mytime, $no_conversion = false, $method = 'POST')
+    function returnArrayWithContentType($data, $content_type, $status, $forward = '', $exitafter = true, $no_conversion = false, $method = 'POST')
     {
 
-        if ($no_conversion === FALSE)
+        if ($no_conversion === FALSE){
             $this->common->mlog('Forced conversion', 'DEBUG');
+        }
         $this->setHttpReturnCode($status);
 
-        if (is_null($forward))
+        if (is_null($forward)){
             $forward = '';
+        }
 
         if ($forward !== '') {
             $headers = array('Content-type' => $content_type, 'Accept' => 'application/json', 'Expect' => '', 'X-Business-Id' => $this->business_id);
             $queries = array();
-            foreach ($data as $i => $content) {
+            foreach ($data as $content) {
                 $ct = $this->convertOutData($content, $content_type, $no_conversion);
                 $query = array('url' => $forward, 'method' => $method, 'headers' => $headers, 'data' => $ct);
                 $queries[] = $query;
@@ -53,12 +54,13 @@ class HorusHttp
             $result = $this->forwardHttpQueries($queries);
             $responses = array();
 
-            foreach ($result as $i => $content) {
+            foreach ($result as $content) {
                 if (stripos($content['response_headers']['content-Type'], 'json') > 0) {
                     $json = true;
                     $responses[] = json_decode($content['response_data'], true);
-                } else
+                } else{
                     $responses[] = $content['response_data'];
+                }
             }
 
             if ($json) {
@@ -69,30 +71,33 @@ class HorusHttp
         } else {
             header('Content-type: ' . $content_type);
             $ret = '';
-            foreach ($data as $i => $content) {
+            foreach ($data as $content) {
                 $ret .= $this->convertOutData($content, $content_type, $no_conversion) . "\n";
             }
             return $ret;
         }
 
-        if ($exitafter === true)
+        if ($exitafter === true){
             exit;
+        }
     }
 
     /**
      * function returnWithContentType
      * Sends a http query to the next step or returns response
      */
-    function returnWithContentType($data, $content_type, $status, $forward = '', $exitafter = true, $no_conversion = false, $method = 'POST')
+    function returnWithContentType($data, $content_type, $status, $forward = '',$no_conversion = false, $method = 'POST')
     {
 
-        if ($no_conversion === 'FALSE')
+        if ($no_conversion === 'FALSE'){
             $this->common->mlog('Forced conversion to JSON', 'DEBUG');
+        }
 
         $this->setHttpReturnCode($status);
 
-        if (is_null($forward))
+        if (is_null($forward)){
             $forward = '';
+        }
 
         $data = $this->convertOutData($data, $content_type, $no_conversion);
         $this->common->mlog('Sending back data', 'DEBUG', 'TXT');
@@ -112,8 +117,7 @@ class HorusHttp
 
             return $data;
         }
-        if ($exitafter === true)
-            exit;
+
     }
 
     /**
@@ -139,15 +143,16 @@ class HorusHttp
     function setReturnType($accept, $default)
     {
 
-        if (is_null($accept) || ($accept == ''))
+        if (is_null($accept) || ($accept == '')){
             return $default;
-        else {
+        } else {
             $types = explode(',', $accept);
             foreach ($types as $type) {
-                if (stripos($type, 'application/xml') !== FALSE)
+                if (stripos($type, 'application/xml') !== FALSE) {
                     return 'application/xml';
-                else if (stripos($type, 'application/json') !== FALSE)
+                }elseif (stripos($type, 'application/json') !== FALSE){
                     return 'application/json';
+                }    
             }
             $this->returnWithContentType('Supported return types are only application/xml and application/json', 'text/plain', 400);
         }
@@ -186,8 +191,9 @@ class HorusHttp
     {
         $out_headers = array();
 
-        foreach ($headers as $header => $value)
+        foreach ($headers as $header => $value){
             $out_headers[] = $header . ': ' . $value;
+        }
 
         return $out_headers;
     }
@@ -210,8 +216,9 @@ class HorusHttp
     function forwardHttpQueries($queries)
     {
 
-        if (is_null($queries) || !is_array($queries) || count($queries) == 0)
+        if (is_null($queries) || !is_array($queries) || count($queries) == 0){
             return new Exception('No query to forward');
+        }
 
         $mh = curl_multi_init();
         $ch = array();
@@ -227,16 +234,18 @@ class HorusHttp
             $ch[$id] = curl_init($query['url']);
 
             curl_setopt($ch[$id], CURLOPT_RETURNTRANSFER, 1);
-            if ($query['method'] !== 'GET')
+            if ($query['method'] !== 'GET'){
                 curl_setopt($ch[$id], CURLOPT_POST, TRUE);
-            if (array_key_exists('headers', $query) && (count($query['headers']) != 0))
-                curl_setopt($ch[$id], CURLOPT_HTTPHEADER, $this->formatHeaders($query['headers']));
-            if ($query['method'] !== 'GET')
                 curl_setopt($ch[$id], CURLOPT_POSTFIELDS, $query['data']);
-            curl_setopt($ch[$id], CURLOPT_SSL_VERIFYPEER, False);
-            curl_setopt($ch[$id], CURLOPT_VERBOSE, True);
-            curl_setopt($ch[$id], CURLOPT_HEADER, True);
-            curl_setopt($ch[$id], CURLINFO_HEADER_OUT, True);
+            }
+            if (array_key_exists('headers', $query) && (count($query['headers']) != 0)){
+                curl_setopt($ch[$id], CURLOPT_HTTPHEADER, $this->formatHeaders($query['headers']));
+            }
+                
+            curl_setopt($ch[$id], CURLOPT_SSL_VERIFYPEER, false);
+            curl_setopt($ch[$id], CURLOPT_VERBOSE, true);
+            curl_setopt($ch[$id], CURLOPT_HEADER, true);
+            curl_setopt($ch[$id], CURLINFO_HEADER_OUT, true);
             curl_multi_add_handle($mh, $ch[$id]);
         }
 
@@ -263,8 +272,9 @@ class HorusHttp
                 $response_headers = array();
                 foreach ($bheader as $header) {
                     $exp = preg_split("/\:\s/", $header);
-                    if (count($exp) > 1)
+                    if (count($exp) > 1){
                         $response_headers[$exp[0]] = $exp[1];
+                    }
                 }
                 $queries[$i]['response_headers'] = $response_headers;
                 $this->common->mlog("Curl #$i headers: " . print_r($queries[$i]['response_headers'], true), 'DEBUG');
@@ -272,7 +282,7 @@ class HorusHttp
                 $this->common->mlog("Curl #$i response body: \n" . $queries[$i]['response_data'] . "\n", 'DEBUG');
             } else {
                 $this->common->mlog("Curl $i returned error: $curlError ", "INFO");
-                $this->common->mlog(var_dump(curl_getinfo($ch[$i]), true), 'INFO');
+                $this->common->mlog(print_r(curl_getinfo($ch[$i]), true), 'INFO');
                 $queries[$i]['response_data'] = "Error loop $i $curlError\n";
             }
             curl_multi_remove_handle($mh, $handle);
@@ -290,10 +300,11 @@ class HorusHttp
         $handle = curl_init($dest_url);
         curl_setopt($handle, CURLOPT_URL, $dest_url);
         curl_setopt($handle, CURLOPT_RETURNTRANSFER, 1);
-        if ('POST'===$method)
+        if ('POST'===$method){
             curl_setopt($handle, CURLOPT_POST, TRUE);
-        else
+        }else{
             curl_setopt($handle,CURLOPT_CUSTOMREQUEST,$method);
+        }
         curl_setopt($handle, CURLOPT_HTTPHEADER, $headers);
         curl_setopt($handle, CURLOPT_POSTFIELDS, $data);
 
@@ -327,6 +338,8 @@ class HorusHttp
             case 500:
                 header("HTTP/1.1 500 SERVER ERROR", TRUE, 500);
                 break;
+            default:
+                header("HTTP/1.1 500 SERVER ERROR", TRUE, 500);
         }
     }
 }

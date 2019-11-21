@@ -20,8 +20,9 @@ class HorusInjector
         $template = 'templates/' . $reqparams['template'];
         $vars = array();
         if (array_key_exists('attr', $reqparams)) {
-            foreach ($reqparams['attr'] as $key => $value)
+            foreach ($reqparams['attr'] as $key => $value){
                 $vars[$key] = $value;
+            }
         }
         $content = array();
         $this->common->mlog('Received request', 'INFO');
@@ -53,6 +54,6 @@ class HorusInjector
             $convert = true;
         }
         $this->common->mlog('Generated all data', 'INFO', 'TXT', 'YELLOW');
-        return $this->http->returnArrayWithContentType($content, $reqparams['destinationcontent'], 200, $proxy_mode, false, null, !$convert);
+        return $this->http->returnArrayWithContentType($content, $reqparams['destinationcontent'], 200, $proxy_mode, false, !$convert);
     }
 }

@@ -14,8 +14,9 @@ $loglocation = '/var/log/nginx/horus.log';
 
 $business_id = HorusHttp::extractHeader('X-Business-Id');
 
-if ($business_id === '')
+if ($business_id === ''){
     $business_id = HorusCommon::getNewBusinessId();
+}
 
 $common = new HorusCommon($business_id, $loglocation, 'ORANGE');
 
@@ -34,10 +35,11 @@ try{
     $this->http->setHttpReturnCode(200);
     echo json_encode(array('result'=>'OK','responses'=>$responses));
 }catch(HorusException $e){
-    if ($e->getCode !== 0)
+    if ($e->getCode !== 0){
         $this->http->setHttpReturnCode($e->getCode());
-    else
+     }else{
         $this->http->setHttpReturnCode(500);
+    }
     echo json_encode(array('result'=>'KO','message'=>$e->getMessage()));
 }
 

@@ -54,13 +54,15 @@ class HorusCommon
         } else {
             $alog['message'] = HorusCommon::escapeJsonString($message);
         }
-        if (is_null($this->log_location))
+        if (is_null($this->log_location)){
             error_log(json_encode($alog) . "\n");
-        else
+        }else{
             error_log(json_encode($alog) . "\n", 3, $this->log_location);
+        }
 
-        if (json_last_error() != 0)
+        if (json_last_error() != 0){
             error_log(json_last_error_msg());
+        }
     }
 
     /**
@@ -95,21 +97,19 @@ class HorusCommon
      */
     public static function escapeJsonString($value)
     {
-        //$escapers =     array("\\",   "/",   "\"",   "\n",  "\r",  "\t",  "\x08", "\x0c");
-        //$replacements = array("\\\\", "\\/", "\\\"", "\\n", "\\r", "\\t", "\\f", "\\b");
         $escapers = array('"', '/');
         $replacements = array('\"', '\/');
-        $result = str_replace($escapers, $replacements, $value);
-        return $result;
+        return str_replace($escapers, $replacements, $value);
     }
 
     public static function formatQueryString($baseUrl, $params, $wholeUrl=FALSE){
 
         if (is_null($params)) {
-            if (TRUE===$wholeUrl)
+            if (TRUE===$wholeUrl){
                 return $baseUrl;
-            else
+            }else{
                 return '';
+            }
         }
 
         $query = '';
@@ -120,10 +120,7 @@ class HorusCommon
             $query = '?' . substr($query,1);
         }
 
-        if ($wholeUrl)
-            return $baseUrl . $query;
-        else
-            return $query;
+        return ($wholeUrl) ? $baseUrl . $query : $query;
     }
 
     /**
@@ -132,22 +129,23 @@ class HorusCommon
      */
     function libxml_display_error($error)
     {
-        $return = "";
+        $ret = "";
         switch ($error->level) {
             case LIBXML_ERR_WARNING:
-                $return .= "Warning $error->code : ";
+                $ret .= "Warning $error->code : ";
                 break;
             case LIBXML_ERR_ERROR:
-                $return .= "Error $error->code : ";
+                $ret .= "Error $error->code : ";
                 break;
             case LIBXML_ERR_FATAL:
-                $return .= "Fatal Error $error->code : ";
+                $ret .= "Fatal Error $error->code : ";
+                break;
+            default:
+                $ret .= "Unknown Error $error->code : ";
                 break;
         }
-        $return .= trim($error->message);
-        $return .= " on line $error->line\n";
+        return $ret . trim($error->message) . " on line $error->line\n";
 
-        return $return;
     }
 
     /**

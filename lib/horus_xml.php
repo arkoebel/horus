@@ -33,16 +33,17 @@ class HorusXml
                 if ($domdoc->schemaValidate('xsd/' . $schema)) {
                     $selectedXsd = $schema;
                 } else {
-                    //$this->common->mlog("Validation errors with $schema : " . $this->common->libxml_display_errors(),'INFO');
+                    $this->common->mlog("Validation errors with $schema : " . $this->common->libxml_display_errors(),'DEBUG');
                 }
             } else {
-                //echo "skipping $schema\n";
+                $this->common->mlog("Skipping schema $schema (doesn't match namespace)",'DEBUG');
             }
         }
-        if ('' === $selectedXsd)
+        if ('' === $selectedXsd){
             $this->common->mlog("Failed to find appropriate XML Schema.", 'INFO');
-        else
+        }else{
             $this->common->mlog("schema=$selectedXsd\n", 'DEBUG');
+        }
 
         return $selectedXsd;
     }
@@ -111,10 +112,11 @@ class HorusXml
                     $fwd_params[] = $key . '=' . $value;
                 }
                 $this->common->mlog('query out : ' . print_r($fwd_params, true), 'INFO');
-                if (stripos($proxy_mode, '?') === FALSE)
+                if (stripos($proxy_mode, '?') === FALSE){
                     $url .= '?';
-                else
+                }else{
                     $url .= '&';
+                }
                 $url .= implode('&', $fwd_params);
             }
         }
@@ -130,17 +132,13 @@ class HorusXml
             $errorMessage = "Input XML not properly formatted.\n";
             $errorMessage .= $this->common->libxml_display_errors();
             $ret = $this->business->returnGenericError($preferredType, $genericError, $errorMessage, '');
-            //if ('' === $proxy_mode)
-            //return $ret;
+ 
             throw new HorusException($ret);
         }
 
 
         $namespaces = $query->getDocNamespaces();
         $query->registerXPathNamespace('u', $namespaces[""]);
-
-        //echo $namespace . "\n";
-
 
         $selectedXsd = $this->findSchema($query);
 
@@ -170,7 +168,6 @@ class HorusXml
             $errorTemplate = (($errorTemplate == null) ? $genericError : $errorTemplate);
             $errorTemplate = 'templates/' . $errorTemplate;
             if ($this->business->findMatch($matches, $selected, "displayError") === "On") {
-                //echo trim(preg_replace('/\s+/', ' ', $errorOutput));
                 throw new HorusException($this->business->returnGenericError($preferredType, $errorTemplate, "Requested error", ''));
             }
             $response = '';
@@ -199,11 +196,13 @@ class HorusXml
            
             if ($multiple) {
                 $response = '';
-                foreach ($resp as $i => $r)
+                foreach ($resp as $i => $r){
                     $response .= $this->http->formMultiPart("response_$i", $r, $mime_boundary, $eol, $preferredType);
+                }
                 return $this->http->returnWithContentType($response . "--" . $mime_boundary . "--" . $eol . $eol, "multipart/form-data; boundary=$mime_boundary", 200,$url);
-            } else
+            } else {
                 return $this->http->returnWithContentType($resp, $preferredType, 200, $url);
+            }
 
         } else {
             $errorMessage = "Unable to find appropriate response.\n";

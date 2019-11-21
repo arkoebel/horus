@@ -72,7 +72,7 @@ class HorusSimplejsonTest extends HorusTestCase
 
         $res = '';
         try {
-            $res = $simplejson->selection($input, 'application/json', '', 'application/json');
+            $res = $simplejson->selection($input, '', 'application/json');
         } catch (HorusException $e) {
             $this::assertEquals(self::$mockheaders[0], array("HTTP/1.1 400 MALFORMED URL", TRUE, 400), 'Forced error output should generate http/400');
             $outjson = json_decode($e->getMessage(), true);
@@ -145,7 +145,7 @@ class HorusSimplejsonTest extends HorusTestCase
         $input = '{"key1": "value1","key2":"matched"}';
 
         try {
-            $res = $simplejson->doInject($input, 'application/json', '', 'application/json', array());
+            $res = $simplejson->doInject($input, '', 'application/json', array());
         } catch (HorusException $e) {
             $this::assertEquals(self::$mockheaders[0], array("HTTP/1.1 400 MALFORMED URL", TRUE, 400), 'Forced error output should generate http/400');
             $outjson = json_decode($e->getMessage(), true);
@@ -172,7 +172,7 @@ class HorusSimplejsonTest extends HorusTestCase
 
         $simplejson = new HorusSimpleJson("mybusinessid", null, $matches);
         $input = '{"key1":"value1", "key2":"matched", "ipsystem":"returnvalue1", "ipparticipant":"returnvalue2"}';
-        $res = $simplejson->doInject($input, 'application/json', '', 'application/json', array('msgref' => 'returnvalue3', 'ipaccountid' => 'returnvalue4'));
+        $res = $simplejson->doInject($input, '', 'application/json', array('msgref' => 'returnvalue3', 'ipaccountid' => 'returnvalue4'));
         $this::assertNotNull($res, 'Should return something');
         $outres = json_decode($res, true);
         $this::assertTrue(is_array($outres), 'Should return a valid json');
@@ -197,7 +197,7 @@ class HorusSimplejsonTest extends HorusTestCase
 
         $simplejson = new HorusSimpleJson("mybusinessid", null, $matches);
         $input = '{"key1":"value1", "key2":"matched", "ipsystem":"returnvalue1", "ipparticipant":"returnvalue2"}';
-        $res = $simplejson->doInject($input, 'application/json', '', 'application/json', array('msgref' => 'returnvalue3', 'ipaccountid' => 'returnvalue4'));
+        $res = $simplejson->doInject($input, '', 'application/json', array('msgref' => 'returnvalue3', 'ipaccountid' => 'returnvalue4'));
         $this::assertNotNull($res, 'Should return something');
         $this::assertFalse(strpos($res, '--') === FALSE, 'Should contain a multipart boundary');
         $boundary = explode("\r\n", $res);

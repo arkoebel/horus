@@ -332,9 +332,7 @@
     {
       "query": {
         "key": "msgType",
-        "value": "PositionMessageQueryCRT",
-        "queryKey": "interfaceType",
-        "queryValue": "FIN"
+        "value": "PositionMessageQueryCRT"
       },
       "responseTemplate": "position_msg_response.json",
       "errorTemplate": "error_template.json",
@@ -404,6 +402,115 @@
         "ipparticipant": "IPParticipant",
         "ipaccountid": "IPAccountId"
       }
+    },
+    {
+      "query": {
+        "key": "msgType",
+        "value": "PositionMessageQueryCRT"
+      },
+      "comment":"cas pour notre Diamant",
+      "queryMatch": "BNPAFRPP",
+      "responseTemplate": "position_msg_response_BNPAFRPP.json",
+      "errorTemplate": "error_template.json",
+      "parameters": {
+        "msgref": "msgRef",
+        "ipsystem": "IPSystem",
+        "ipparticipant": "IPParticipant",
+        "ipaccountid": "IPAccountId"
+      }
+    },
+    {
+      "query": {
+        "key": "msgType",
+        "value": "PositionMessageQueryCRT"
+      },
+      "queryMatch": "BNPAFRP0CCT",
+      "responseTemplate": "position_msg_response_BNPAFRP0CCT.json",
+      "errorTemplate": "error_template.json",
+      "parameters": {
+        "msgref": "msgRef",
+        "ipsystem": "IPSystem",
+        "ipparticipant": "IPParticipant",
+        "ipaccountid": "IPAccountId"
+      }
+    },
+    {
+      "query": {
+        "key": "msgType",
+        "value": "PositionMessageQueryCRT"
+      },
+      "queryMatch": "BNPAFRP0DBT",
+      "responseTemplate": "position_msg_response_BNPAFRP0DBT.json",
+      "errorTemplate": "error_template.json",
+      "parameters": {
+        "msgref": "msgRef",
+        "ipsystem": "IPSystem",
+        "ipparticipant": "IPParticipant",
+        "ipaccountid": "IPAccountId"
+      }
+    },
+    {
+      "query": {
+        "key": "msgType",
+        "value": "LiquidityTransferMessageCRT"
+      },
+      "responseTemplate": "LiquityTransferMessageResponseCRT.json",
+      "errorTemplate": "error_template.json",
+      "parameters": {
+        "msgref": "msgRef",
+        "ipsystem": "IPSystem"
+      }
+    },
+    {
+      "query": {
+        "key": "msgType",
+        "value": "LiquidityTransferMessageCRT"
+      },
+      "queryMatch": "9999",
+      "responseTemplate": "LiquityTransferMessageResponseCRT_KO.json",
+      "errorTemplate": "error_template.json",
+      "parameters": {
+        "msgref": "msgRef",
+        "ipsystem": "IPSystem"
+      }
+    },
+  {
+    "query": {
+      "key": "msgType",
+      "value": "PositionMessageQueryCRT"
+    },
+    "queryMatch": "BREDFRP0XXX",
+    "responseTemplate": "position_msg_response_BREDFRP0XXX.json",
+    "errorTemplate": "error_template.json",
+    "parameters": {
+      "msgref": "msgRef",
+      "ipsystem": "IPSystem",
+      "ipparticipant": "IPParticipant",
+      "ipaccountid": "IPAccountId"
     }
-  ]
+  },
+          {
+                  "query": {
+                          "key": "msgType",
+                          "value": "CRTVS07XML"
+                  },
+                  "responseTemplate": "CRTVS07XML.xml",
+                  "errorTemplate": "error_template.xml",
+                  "parameters": {
+                          "bicrecep": "BicRecep",
+                          "ddr": "Ddr"
+                  }
+  },
+          {
+                  "query": {
+                          "key": "msgType",
+                          "value": "RECEPSWIFT202"
+                  },
+                  "responseTemplate": "MT202.swift",
+                  "errorTemplate": "error_template.xml",
+                  "parameters": {
+                          "bicemet": "BicEmet",
+                          "ddr": "Ddr"
+                  }
+          }]
 }

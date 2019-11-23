@@ -116,12 +116,12 @@ class HorusBusiness
         if ($content_type == "application/json") {
             $json = json_decode($body, true);
             if (json_last_error() != JSON_ERROR_NONE) {
-                returnGenericError($errorFormat, $errorTemplate, 'JSON Malformed : ' . decodeJsonError(json_last_error()));
+                $this->returnGenericError($errorFormat, $errorTemplate, 'JSON Malformed : ' . decodeJsonError(json_last_error()));
             } else {
-                if ($json['payload'] != null){
+                if (array_key_exists('payload',$json) && $json['payload'] != null){
                     return $json['payload'];
                 }else{
-                    returnGenericError($content_type, $errorTemplate, 'Empty JSON Payload');
+                    $this->returnGenericError($content_type, $errorTemplate, 'Empty JSON Payload');
                 }
             }
         } else {

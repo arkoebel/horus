@@ -8,7 +8,7 @@ require_once('lib/horus_simplejson.php');
 require_once('lib/horus_xml.php');
 require_once('lib/horus_exception.php');
 
-$loglocation = '/var/log/nginx/horus.log';
+$loglocation = '/var/log/horus/horus_http.log';
 
 $business_id = HorusHttp::extractHeader('X-Business-Id');
 
@@ -37,8 +37,8 @@ $genericError = 'templates/' . $mmatches["errorTemplate"];
 $errorFormat = $mmatches['errorFormat'];
 
 
-$simpleJsonMatches = $mmatches['simplejson'];
-$matches = $mmatches["pacs"];
+$simpleJsonMatches = array_key_exists('simplejson',$mmatches) ? $mmatches['simplejson'] : null;
+$matches = array_key_exists('pacs',$mmatches) ? $mmatches["pacs"] : null;
 
 $reqbody = file_get_contents('php://input');
 $content_type = $_SERVER['CONTENT_TYPE'];

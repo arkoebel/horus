@@ -176,7 +176,7 @@ class HorusHttp
             return $request_headers[$conv_header];
         } else {
             if (array_key_exists(strtoupper($header), $request_headers)) {
-                return $request_headers[strtolower($header)];
+                return $request_headers[strtoupper($header)];
             } else {
                 return '';
             }

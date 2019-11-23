@@ -1,0 +1,70 @@
+[{
+    "name": "Horus injector mode",
+	"transformation": "true",
+    "endpoint": "false",
+    "url": "http://172.23.120.132/horusCristalPLM/horus.php?type=inject",
+    "description": "Send to Horus using Injector mode"
+},{
+    "name": "Horus proxy mode",
+	"transformation": "true",
+    "endpoint": "false",
+    "url": "http://172.23.120.132/horusCristalPLM/horus.php",
+    "description": "Send to Horus using Proxy mode"
+},{
+    "name": "WMQ RAA IP_TO_CRT",
+	"transformation": "false",
+    "endpoint": "true",
+    "contenttype": "application/json",
+    "url": "http://opaline:8098/horustojms",
+    "description": "Receive CRT-IP Json"
+},{
+    "name": "WMQ RAB IP_TO_CRT",
+	"transformation": "false",
+    "endpoint": "true",
+    "contenttype": "application/json",
+    "url": "http://opaline:8085/horustojms",
+    "description": "Receive CRT-IP Json"
+},{
+    "name": "WMQ DIA IP_TO_CRT",
+	"transformation": "false",
+    "endpoint": "true",
+    "contenttype": "application/json",
+    "url": "http://opaline:8083/horustojms",
+    "description": "Receive CRT-IP Json"
+},{
+    "name": "WMQ DIA CRTEXP",
+	"transformation": "false",
+    "endpoint": "true",
+    "contenttype": "text/plain",
+    "url": "http://opaline:8084/horustojms",
+    "description": "Receive CRT-IP Json"
+},{
+    "name": "WMQ DIA FILEMQI",
+	"transformation": "false",
+    "endpoint": "true",
+    "contenttype": "text/plain",
+    "url": "http://opaline:8184/horustojms",
+    "description": "Cristal Capture FILEMQI"
+},{
+    "name": "WMQ DIA RNI_RESPONSE",
+	"transformation": "false",
+    "endpoint": "true",
+    "contenttype": "text/plain",
+    "url": "http://opaline:8192/horustojms",
+    "description": "Receive RNI messages"
+},{
+    "name": "WMQ GAHA IP_TO_CRT",
+	"transformation": "false",
+    "endpoint": "true",
+    "contenttype": "application/json",
+    "url": "http://opaline:8091/horustojms",
+    "description": "Receive CRT-IP Json"
+},{
+    "name": "WMQ GAF REVEIVE_Q",
+	"transformation": "false",
+    "endpoint": "true",
+    "contenttype": "application/json",
+    "url": "http://opaline:8189/horustojms",
+    "description": "Receive T2S messages"
+}
+]

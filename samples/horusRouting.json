@@ -1,0 +1,84 @@
+{
+	"RoutingTable": [{
+		"source": "singlesource",
+		"parameters": [{
+			"key": "param1",
+			"value": "single"
+		},
+		{
+			"key": "sourcex",
+			"value": "cristal"
+		}],
+		"destinations": [{
+			"comment": "Send to Horus, generate 5 copies, return to router, source=router1",
+			"proxy": "http://192.168.1.113/horus/horus.php",
+			"destination": "http://192.168.1.113/horus/horusRouter.php",
+			"proxyParameters": [{
+				"key": "repeat",
+				"value": "5"
+			},
+			{
+				"key": "bic1",
+				"value": "BNPAFRPPXXX"
+			}],
+			"destParameters": [{
+				"key": "source",
+				"value": "router1"
+			}],
+			"delayafter": "2"
+		},
+		{
+			"comment": "Send to out queue",
+			"destination": "http://192.168.1.126:8080/horustojms"
+		}]
+	},
+	{
+		"source": "router1",
+		"parameters": [{
+			"key": "param1",
+			"value": "router"
+		},
+		{
+			"key": "source",
+			"value": "router"
+		}],
+		"destinations": [{
+			"comment": "Send to Horus, generate 2 copies, return to out queue",
+			"proxy": "http://192.168.1.113/horus/horus.php",
+			"destination": "http://192.168.1.126:8080/horustojms",
+			"proxyParameters": [{
+				"key": "repeat",
+				"value": "2"
+			},
+			{
+				"key": "dest",
+				"value": "receiveq3"
+			}],
+			"delayafter": "0"
+		}]
+	},
+	{
+		"source": "Q_PACS_002_FROM_CSM",
+		"destinations": [{
+			"comment": "Sending pacs.002 to relevant Q",
+			"destination": "http://opaline:8081/horustojms",
+			"delayafter": "0"
+		}]
+	},
+	{
+		"source": "Q_RECALL_FROM_CSM",
+		"destinations": [{
+			"comment": "Sending recall response to relevant Q",
+			"destination": "http://opaline:8087/horustojms",
+			"delayafter": "0"
+		}]
+	},
+	{
+		"source": "Q_POUBELLE",
+		"destinations": [{
+			"comment": "Sending response to trash",
+			"destination": "http://opaline:8089/horustojms",
+			"delayafter": "0"
+		}]
+	}]
+}

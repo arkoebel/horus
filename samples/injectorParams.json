@@ -1,0 +1,60 @@
+{
+	"positionMessageInformationCRT.json": {
+		"type": "application/json"
+	},
+	"positionMessageInformationCRT_param.json": {
+		"type": "application/json",
+		"params": ["msgref",
+		"ipsystem",
+		"ipparticipant"]
+	},
+	"positionMessageInformationCRT_param_full.json": {
+		"type": "application/json",
+		"params": ["msgref",
+		"ipsystem",
+		"ipparticipant",
+		"currency",
+		"amount",
+		"direction"]
+	},
+	"positionMessageInformationCRT_from_IP.json": {
+		"type": "application/json"
+	},
+	"position_msg_response_param_full.json": {
+		"type": "application/json",
+		"params": ["msgref",
+		"orgnlmsgref",
+		"ipsystem",
+		"ipparticipant",
+		"currency",
+		"amount",
+		"direction",
+		"statuscode"]
+	},
+	"thresholdMessageCRT_STT_FLOOR.json": {
+		"type": "application/json",
+		"params": ["ipparticipant"]
+	},
+	"thresholdMessageCRT_STT_CEIL.json": {
+		"type": "application/json",
+		"params": ["ipparticipant"]
+	},
+	"thresholdMessageCRT_RT1.json": {
+		"type": "application/json",
+		"params": ["ipparticipant"]
+	},
+	"thresholdMessageCRT_TIPS.json": {
+		"type": "application/json",
+		"params": ["ipparticipant"]
+	},
+	"CRTVS07XML.xml": {
+		"type": "application/xml",
+		"params": ["bicrecep",
+		"ddr"]
+	},
+	"MT202.swift": {
+		"type": "text/plain",
+		"params": ["bicemet",
+		"ddr"]
+	}
+}

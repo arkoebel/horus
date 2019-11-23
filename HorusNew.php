@@ -75,7 +75,11 @@ if ("inject" === $request_type) {
         $res =  $injector->doInject($reqbody, $proxy_mode, $preferredType, $_GET);
         header("HTTP/1.1 200 OK", true, 200);
         header("X-Business-Id: $business_id");
-        echo implode("\n", $res);
+        if (is_array($res)){
+            echo implode("\n", $res);
+        }else{
+            echo $res;
+        }
     } catch (Exception $e) {
         header("HTTP/1.1 200 OK", true, 200);
         header("X-Business-Id: $business_id");

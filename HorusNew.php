@@ -64,7 +64,7 @@ if ("inject" === $request_type) {
     $common->mlog('+++++ END INJECTOR MODE +++++','INFO');
 } else if (("simplejson" === $request_type) && ("application/json" === $content_type)) {
     $common->mlog('+++++ BEGIN SIMPLEJSON MODE +++++','INFO');
-    $injector = new HorusSimpleJson($business_id, $loglocation, $matches);
+    $injector = new HorusSimpleJson($business_id, $loglocation, $simpleJsonMatches);
 
     $common->mlog("Request : " . print_r($_SERVER, true) . "\n", 'DEBUG');
     $common->mlog("Received POST Data : '" . $reqbody . "'", 'INFO', 'TXT', $colour);

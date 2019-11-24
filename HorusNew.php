@@ -43,7 +43,7 @@ $matches = array_key_exists('pacs',$mmatches) ? $mmatches["pacs"] : null;
 $reqbody = file_get_contents('php://input');
 $content_type = $_SERVER['CONTENT_TYPE'];
 
-$proxy_mode = HorusHttp::extractHeader('X_DESTINATION_URL');
+$proxy_mode = HorusHttp::extractHeader('x_destination_url');
 
 if ("inject" === $request_type) {
     $common->mlog('+++++ BEGIN INJECTOR MODE +++++','INFO');

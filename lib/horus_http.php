@@ -166,12 +166,15 @@ class HorusHttp
     {
         if (function_exists('apache_request_headers')) {
             $request_headers = apache_request_headers();
+            error_log(print_r($request_headers,true));
+            if (array_key_exists($header,$request_headers)) {
+                return $request_headers[$header];
+            }
         } else {
             $request_headers = $_SERVER;
         }
 
         $conv_header = 'HTTP_' . strtoupper(preg_replace('/-/', '_', $header));
-
         if (array_key_exists($conv_header, $request_headers)) {
             return $request_headers[$conv_header];
         } else {

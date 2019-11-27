@@ -10,7 +10,7 @@ require_once('lib/horus_exception.php');
 
 
 
-$loglocation = '/var/log/nginx/horus.log';
+$loglocation = '/var/log/horus/horus_http.log';
 
 $business_id = HorusHttp::extractHeader('X-Business-Id');
 
@@ -20,6 +20,9 @@ if ($business_id === ''){
 
 $common = new HorusCommon($business_id, $loglocation, 'ORANGE');
 
+$common->mlog('Headers : ' . print_r(apache_request_headers(),true),'DEBUG');
+
+$common->mlog('Destination is : ' . HorusHttp::extractHeader('x_destination_url'),'DEBUG');
 
 $params = json_decode(file_get_contents('conf/horusRouting.json'),true);
 
@@ -28,17 +31,19 @@ $content_type = array_key_exists('CONTENT_TYPE',$_SERVER) ? $_SERVER['CONTENT_TY
 $accept = array_key_exists('HTTP_ACCEPT',$_SERVER) ? $_SERVER['HTTP_ACCEPT'] : "application/json";
 $data = file_get_contents('php://input');
 
-$route = $this->business->findSource($source, $params);
+$business  = new HorusBusiness($business_id,$loglocation,'ORANGE');
+
+$route = $business->findSource($source, $params);
 
 try{
-    $responses = $this->business->performRouting($route, $content_type, $accept, $data);
-    $this->http->setHttpReturnCode(200);
+    $responses = $business->performRouting($route, $content_type, $accept, $data);
+    $business->http->setHttpReturnCode(200);
     echo json_encode(array('result'=>'OK','responses'=>$responses));
 }catch(HorusException $e){
     if ($e->getCode !== 0){
-        $this->http->setHttpReturnCode($e->getCode());
+        $busines->http->setHttpReturnCode($e->getCode());
      }else{
-        $this->http->setHttpReturnCode(500);
+        $business->http->setHttpReturnCode(500);
     }
     echo json_encode(array('result'=>'KO','message'=>$e->getMessage()));
 }

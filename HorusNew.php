@@ -24,6 +24,9 @@ $mmatches = json_decode(file_get_contents('conf/horusParams.json'), true);
 
 $common = new HorusCommon($business_id, $loglocation, $colour);
 $common->mlog("===== BEGIN HORUS CALL =====","INFO");
+$common->mlog('Destination is : ' . HorusHttp::extractHeader('x_destination_url'),'DEBUG');
+$common->mlog('Headers : ' . print_r(apache_request_headers(),true),'DEBUG');
+
 
 if (json_last_error() !== JSON_ERROR_NONE) {
     header("HTTP/1.1 500 SERVER ERROR", true, 500);

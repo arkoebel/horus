@@ -106,7 +106,7 @@ class HorusHttp
         if ($forward !== '') {
 
             $headers = array('Content-Type' => $content_type, 'Accept' => 'application/json', 'Expect' => '', 'X-Business-Id' => $this->business_id);
-            $query = array('url' => $forward, 'method' => $method, 'headers' => $headers, 'data' => $data);
+            $query = array('url' => $forward, 'method' => $method, 'headers' => $headers, 'data' =>  is_array($data) ? $data[0] : $data);
             $queries = array($query);
 
             $result = $this->forwardHttpQueries($queries);

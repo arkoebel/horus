@@ -53,6 +53,7 @@ class HorusHttp
 
             $result = $this->forwardHttpQueries($queries);
             $responses = array();
+	    $json = false;
 
             foreach ($result as $content) {
                 if (stripos($content['response_headers']['content-Type'], 'json') > 0) {
@@ -106,7 +107,7 @@ class HorusHttp
         if ($forward !== '') {
 
             $headers = array('Content-Type' => $content_type, 'Accept' => 'application/json', 'Expect' => '', 'X-Business-Id' => $this->business_id);
-            $query = array('url' => $forward, 'method' => $method, 'headers' => $headers, 'data' =>  is_array($data) ? $data[0] : $data);
+            $query = array('url' => $forward, 'method' => $method, 'headers' => $headers, 'data' => is_array($data) ? $data[0]:$data);
             $queries = array($query);
 
             $result = $this->forwardHttpQueries($queries);
@@ -166,7 +167,6 @@ class HorusHttp
     {
         if (function_exists('apache_request_headers')) {
             $request_headers = apache_request_headers();
-            error_log(print_r($request_headers,true));
             if (array_key_exists($header,$request_headers)) {
                 return $request_headers[$header];
             }

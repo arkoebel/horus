@@ -195,7 +195,7 @@ class HorusBusiness
             $this->common->mlog("Final destination : " . $destinationUrl . "\n", 'DEBUG');
             $this->common->mlog("Content-type: " . $content_type . ", Accept: " . $accept, 'DEBUG');
 
-            $headers = array('Content-type: ' . $content_type, 'Accept: ' . $accept, 'Expect: ', 'X_BUSINESS_ID: ' . $this->business_id);
+            $headers = array('Content-type: ' . $content_type, 'Accept: ' . $accept, 'Expect: ', 'X-Business-Id: ' . $this->business_id);
 
             if (!array_key_exists('proxy', $destination)) {
                 $dest_url = $destinationUrl;

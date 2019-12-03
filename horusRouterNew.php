@@ -26,6 +26,14 @@ $common->mlog('Destination is : ' . HorusHttp::extractHeader('x_destination_url'
 
 $params = json_decode(file_get_contents('conf/horusRouting.json'),true);
 
+if (json_last_error() !== JSON_ERROR_NONE) {
+    header("HTTP/1.1 500 SERVER ERROR", true, 500);
+    header('X-Business-Id: ' . $business_id);
+    $common->mlog("Error while decoding horusRouting.json : " . json_last_error_msg() . "\n", "ERROR");
+    echo "Error while decoding horusRouting.json : " . json_last_error_msg() . "\n";
+    exit;
+}
+
 $source = array_key_exists('source', $_GET) ? $_GET['source'] : '';
 $content_type = array_key_exists('CONTENT_TYPE',$_SERVER) ? $_SERVER['CONTENT_TYPE'] : 'application/json';
 $accept = array_key_exists('HTTP_ACCEPT',$_SERVER) ? $_SERVER['HTTP_ACCEPT'] : "application/json";
@@ -41,7 +49,7 @@ try{
     echo json_encode(array('result'=>'OK','responses'=>$responses));
 }catch(HorusException $e){
     if ($e->getCode !== 0){
-        $busines->http->setHttpReturnCode($e->getCode());
+        $business->http->setHttpReturnCode($e->getCode());
      }else{
         $business->http->setHttpReturnCode(500);
     }

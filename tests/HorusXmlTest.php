@@ -201,7 +201,7 @@ class HorusXmlTest extends HorusTestCase
         $xml->registerXPathNamespace('u', 'urn:iso:std:iso:20022:tech:xsd:pacs.002.001.03');
         $this::assertEquals($xml->xpath('/u:Document/u:FIToFIPmtStsRpt/u:GrpHdr/u:MsgId'), $xml->xpath('/u:Document/u:FIToFIPmtStsRpt/u:GrpHdr/u:MsgId'), 'These 2 elements should have the same value');
         $this::assertEquals($this::$mockheaders[0][0], 'HTTP/1.1 200 OK', 'We should return HTTP/200');
-        $this::assertEquals($this::$mockheaders[1][0], 'Content-type: application/xml', 'We should return xml content-type');
+        $this::assertEquals($this::$mockheaders[1][0], 'Content-Type: application/xml', 'We should return xml content-type');
     }
 
     function testXmlInjectProxySingle(): void
@@ -230,14 +230,14 @@ class HorusXmlTest extends HorusTestCase
             'url' => 'http://localhost',
             'options' => array(
                 CURLOPT_RETURNTRANSFER => 1,
-                CURLOPT_HTTPHEADER => array('Content-type: application/xml', 'Accept: application/xml', 'Expect:', 'X-Business-Id: PPPP'),
+                CURLOPT_HTTPHEADER => array('Content-Type: application/xml', 'Accept: application/xml', 'Expect:', 'X-Business-Id: PPPP'),
                 CURLOPT_SSL_VERIFYPEER => False,
                 CURLOPT_VERBOSE => True,
                 CURLOPT_HEADER => True,
                 CURLINFO_HEADER_OUT => True
             ),
             'data' => "HTTP/1.1 200 OK\nDate: Sun, 20 Oct 2019 11:22:04 GMT\nExpires: -1\nCache-Control: private, max-age=0\n" .
-                "Content-type: application/xml; charset=ISO-8859-1\nAccept-Ranges: none\nVary: Accept-Encoding\nTransfer-Encoding: chunked\n" .
+                "Content-Type: application/xml; charset=ISO-8859-1\nAccept-Ranges: none\nVary: Accept-Encoding\nTransfer-Encoding: chunked\n" .
                 "\n" .
                 '<?xml version="1.0"?>' . "\n" . '<Document xmlns="urn:iso:std:iso:20022:tech:xsd:pacs.002.001.03"><FIToFIPmtStsRpt><GrpHdr><MsgId>RE34567890</MsgId><CreDtTm>2019-10-20T11:56:36</CreDtTm><InstgAgt><FinInstnId><BIC>BNPAFRPP</BIC></FinInstnId></InstgAgt><InstdAgt><FinInstnId><BIC>BNPAFRPP</BIC></FinInstnId></InstdAgt></GrpHdr><OrgnlGrpInfAndSts><OrgnlMsgId>1234567890</OrgnlMsgId><OrgnlMsgNmId>pacs.008</OrgnlMsgNmId><GrpSts>ACCP</GrpSts></OrgnlGrpInfAndSts><TxInfAndSts><StsId>1234567890</StsId><OrgnlEndToEndId>1234567890</OrgnlEndToEndId><OrgnlTxId>1234567890</OrgnlTxId><AccptncDtTm>2012-12-13T12:12:12.000Z</AccptncDtTm><OrgnlTxRef><PmtTpInf><SvcLvl><Cd>SEPA</Cd></SvcLvl><LclInstrm><Cd>INST</Cd></LclInstrm><CtgyPurp><Cd>PURP</Cd></CtgyPurp></PmtTpInf><DbtrAgt><FinInstnId><BIC>BNPAFRPPXXX</BIC></FinInstnId></DbtrAgt></OrgnlTxRef></TxInfAndSts></FIToFIPmtStsRpt></Document>' . "\n",
             'returnHeaders' => array(
@@ -290,14 +290,14 @@ class HorusXmlTest extends HorusTestCase
             'url' => 'http://localhost',
             'options' => array(
                 CURLOPT_RETURNTRANSFER => 1,
-                CURLOPT_HTTPHEADER => array('Content-type: application/xml', 'Accept: application/xml', 'Expect:', 'X-Business-Id: PPPP'),
+                CURLOPT_HTTPHEADER => array('Content-Type: application/xml', 'Accept: application/xml', 'Expect:', 'X-Business-Id: PPPP'),
                 CURLOPT_SSL_VERIFYPEER => False,
                 CURLOPT_VERBOSE => True,
                 CURLOPT_HEADER => True,
                 CURLINFO_HEADER_OUT => True
             ),
             'data' => "HTTP/1.1 200 OK\nDate: Sun, 20 Oct 2019 11:22:04 GMT\nExpires: -1\nCache-Control: private, max-age=0\n" .
-                "Content-type: application/xml; charset=ISO-8859-1\nAccept-Ranges: none\nVary: Accept-Encoding\nTransfer-Encoding: chunked\n" .
+                "Content-Type: application/xml; charset=ISO-8859-1\nAccept-Ranges: none\nVary: Accept-Encoding\nTransfer-Encoding: chunked\n" .
                 "\n" .
                 "--b75a6e9befe222c24c10d5c9fa3007ee\r\nContent-Disposition: form-data; name=\"response_0\"; filename=\"response_0\"\r\nContent-Type: application/xml\r\nContent-Transfer-Encoding: base64\r\n\r\nPD94bWwgdmVyc2lvbj0iMS4wIj8+CjxEb2N1bWVudCB4bWxucz0idXJuOmlzbzpzdGQ6aXNvOjIw\r\nMDIyOnRlY2g6eHNkOnBhY3MuMDAyLjAwMS4wMyI+PEZJVG9GSVBtdFN0c1JwdD48R3JwSGRyPjxN\r\nc2dJZD5SRTM0NTY3ODkwPC9Nc2dJZD48Q3JlRHRUbT4yMDE5LTEwLTIwVDE0OjIyOjEyPC9DcmVE\r\ndFRtPjxJbnN0Z0FndD48RmluSW5zdG5JZD48QklDPkJOUEFGUlBQPC9CSUM+PC9GaW5JbnN0bklk\r\nPjwvSW5zdGdBZ3Q+PEluc3RkQWd0PjxGaW5JbnN0bklkPjxCSUM+Qk5QQUZSUFA8L0JJQz48L0Zp\r\nbkluc3RuSWQ+PC9JbnN0ZEFndD48L0dycEhkcj48T3JnbmxHcnBJbmZBbmRTdHM+PE9yZ25sTXNn\r\nSWQ+MTIzNDU2Nzg5MDwvT3JnbmxNc2dJZD48T3JnbmxNc2dObUlkPnBhY3MuMDA4PC9PcmdubE1z\r\nZ05tSWQ+PEdycFN0cz5BQ0NQPC9HcnBTdHM+PC9PcmdubEdycEluZkFuZFN0cz48VHhJbmZBbmRT\r\ndHM+PFN0c0lkPjEyMzQ1Njc4OTA8L1N0c0lkPjxPcmdubEVuZFRvRW5kSWQ+MTIzNDU2Nzg5MDwv\r\nT3JnbmxFbmRUb0VuZElkPjxPcmdubFR4SWQ+MTIzNDU2Nzg5MDwvT3JnbmxUeElkPjxBY2NwdG5j\r\nRHRUbT4yMDEyLTEyLTEzVDEyOjEyOjEyLjAwMFo8L0FjY3B0bmNEdFRtPjxPcmdubFR4UmVmPjxQ\r\nbXRUcEluZj48U3ZjTHZsPjxDZD5TRVBBPC9DZD48L1N2Y0x2bD48TGNsSW5zdHJtPjxDZD5JTlNU\r\nPC9DZD48L0xjbEluc3RybT48Q3RneVB1cnA+PENkPlBVUlA8L0NkPjwvQ3RneVB1cnA+PC9QbXRU\r\ncEluZj48RGJ0ckFndD48RmluSW5zdG5JZD48QklDPkJOUEFGUlBQWFhYPC9CSUM+PC9GaW5JbnN0\r\nbklkPjwvRGJ0ckFndD48L09yZ25sVHhSZWY+PC9UeEluZkFuZFN0cz48L0ZJVG9GSVBtdFN0c1Jw\r\ndD48L0RvY3VtZW50Pgo=\r\n\r\n--b75a6e9befe222c24c10d5c9fa3007ee\r\nContent-Disposition: form-data; name=\"response_1\"; filename=\"response_1\"\r\nContent-Type: application/xml\r\nContent-Transfer-Encoding: base64\r\n\r\nPD94bWwgdmVyc2lvbj0iMS4wIj8+CjxEb2N1bWVudCB4bWxucz0idXJuOmlzbzpzdGQ6aXNvOjIw\r\nMDIyOnRlY2g6eHNkOnBhY3MuMDAyLjAwMS4wMyI+PEZJVG9GSVBtdFN0c1JwdD48R3JwSGRyPjxN\r\nc2dJZD5SRTM0NTY3ODkwPC9Nc2dJZD48Q3JlRHRUbT4yMDE5LTEwLTIwVDE0OjIyOjEyPC9DcmVE\r\ndFRtPjxJbnN0Z0FndD48RmluSW5zdG5JZD48QklDPkJOUEFGUlBQPC9CSUM+PC9GaW5JbnN0bklk\r\nPjwvSW5zdGdBZ3Q+PEluc3RkQWd0PjxGaW5JbnN0bklkPjxCSUM+Qk5QQUZSUFBYWFg8L0JJQz48\r\nL0Zpbkluc3RuSWQ+PC9JbnN0ZEFndD48L0dycEhkcj48T3JnbmxHcnBJbmZBbmRTdHM+PE9yZ25s\r\nTXNnSWQ+MTIzNDU2Nzg5MDwvT3JnbmxNc2dJZD48T3JnbmxNc2dObUlkPnBhY3MuMDA4PC9Pcmdu\r\nbE1zZ05tSWQ+PEdycFN0cz5SSkNUPC9HcnBTdHM+PFN0c1JzbkluZj48T3JndHI+PE5tPlJUMTwv\r\nTm0+PC9Pcmd0cj48UnNuPjxDZD5GRjAxPC9DZD48L1Jzbj48L1N0c1JzbkluZj48L09yZ25sR3Jw\r\nSW5mQW5kU3RzPjxUeEluZkFuZFN0cz48U3RzSWQ+MTIzNDU2Nzg5MDwvU3RzSWQ+PE9yZ25sRW5k\r\nVG9FbmRJZD4xMjM0NTY3ODkwPC9PcmdubEVuZFRvRW5kSWQ+PE9yZ25sVHhJZD4xMjM0NTY3ODkw\r\nPC9PcmdubFR4SWQ+PEFjY3B0bmNEdFRtPjIwMTItMTItMTNUMTI6MTI6MTIuMDAwWjwvQWNjcHRu\r\nY0R0VG0+PE9yZ25sVHhSZWY+PFBtdFRwSW5mPjxTdmNMdmw+PENkPlNFUEE8L0NkPjwvU3ZjTHZs\r\nPjxMY2xJbnN0cm0+PENkPklOU1Q8L0NkPjwvTGNsSW5zdHJtPjxDdGd5UHVycD48Q2Q+UFVSUDwv\r\nQ2Q+PC9DdGd5UHVycD48L1BtdFRwSW5mPjxEYnRyQWd0PjxGaW5JbnN0bklkPjxCSUM+Qk5QQUZS\r\nUFBYWFg8L0JJQz48L0Zpbkluc3RuSWQ+PC9EYnRyQWd0PjwvT3JnbmxUeFJlZj48L1R4SW5mQW5k\r\nU3RzPjwvRklUb0ZJUG10U3RzUnB0PjwvRG9jdW1lbnQ+Cg==\r\n\r\n--b75a6e9befe222c24c10d5c9fa3007ee--\r\n\r\n",
             'returnHeaders' => array(
@@ -334,5 +334,61 @@ class HorusXmlTest extends HorusTestCase
         $this::assertEquals($xml->xpath('/u:Document/u:FIToFIPmtStsRpt/u:GrpHdr/u:MsgId'), $xml->xpath('/u:Document/u:FIToFIPmtStsRpt/u:GrpHdr/u:MsgId'), 'These 2 elements should have the same value');
         $this::assertEquals($this::$mockheaders[0][0], 'HTTP/1.1 200 OK', 'We should return HTTP/200');
         $this::assertEquals(explode(';', $this::$mockheaders[1][0])[0], 'Content-type: application/xml', 'We should return xml content-type');
+    }
+
+    function testSearchNamespace(): void {
+        $xmlinject = new HorusXml('WWWW', null);
+        $xmlinject->common->mlog("Testing search headers","INFO");
+        $testmsg = '<body><AppHdr xmlns="urn:iso:std:iso:20022:tech:xsd:head.001.001.01"><Fr><FIId><FinInstnId><BICFI>SOGEFRP0XXX</BICFI></FinInstnId></FIId></Fr><To><FIId><FinInstnId><BICFI>ZYEXFRP0XXX</BICFI></FinInstnId></FIId></To><BizMsgIdr>AV20190030001321</BizMsgIdr><MsgDefIdr>pacs.008.001.07</MsgDefIdr><CreDt>2019-11-28T12:24:40Z</CreDt></AppHdr><Document xmlns="urn:iso:std:iso:20022:tech:xsd:pacs.008.001.08" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="urn:iso:std:iso:20022:tech:xsd:pacs.008.001.08.xsd"><FIToFICstmrCdtTrf><GrpHdr><MsgId>NONREF</MsgId><CreDtTm>2019-11-14T09:30:47.0Z</CreDtTm><NbOfTxs>1</NbOfTxs><SttlmInf><SttlmMtd>CLRG</SttlmMtd></SttlmInf></GrpHdr><CdtTrfTxInf><PmtId><InstrId>ChampRef</InstrId><EndToEndId>NOTPROVIDED</EndToEndId><UETR>d747fc5c-59c5-41e9-be4c-d45102fc807d</UETR><ClrSysRef>AV20190030001321</ClrSysRef></PmtId><IntrBkSttlmAmt Ccy="EUR">1900.50</IntrBkSttlmAmt><IntrBkSttlmDt>2019-11-14</IntrBkSttlmDt><SttlmPrty>NORM</SttlmPrty><SttlmTmIndctn><CdtDtTm>2019-11-14T11:03:47.0Z</CdtDtTm></SttlmTmIndctn><InstdAmt Ccy="EUR">15550.00</InstdAmt><ChrgBr>DEBT</ChrgBr><ChrgsInf><Amt Ccy="EUR">2.00</Amt><Agt><FinInstnId><BICFI>CEPAFRPP888</BICFI></FinInstnId></Agt></ChrgsInf><InstgAgt><FinInstnId><BICFI>AGRIFRPXXXX</BICFI></FinInstnId></InstgAgt><InstdAgt><FinInstnId><BICFI>ZYEXFRPXXXX</BICFI></FinInstnId></InstdAgt><IntrmyAgt1><FinInstnId><BICFI>BPCEFRP0XXX</BICFI></FinInstnId></IntrmyAgt1><IntrmyAgt1Acct><Id><Othr><Id>34567890123456789012345678901234</Id></Othr></Id></IntrmyAgt1Acct><Dbtr><Nm>LAMBERT PIERRE FR/35000 RENNES</Nm></Dbtr><DbtrAcct><Id><IBAN>FR7640168000191924101877984</IBAN></Id></DbtrAcct><DbtrAgt><FinInstnId><BICFI>CEPAFRPP888</BICFI></FinInstnId></DbtrAgt><CdtrAgt><FinInstnId><BICFI>CEPAFRPP888</BICFI></FinInstnId></CdtrAgt><CdtrAgtAcct><Id><Othr><Id>rien</Id></Othr></Id></CdtrAgtAcct><Cdtr><Nm>JAN VAN GALEN</Nm></Cdtr><Purp><Cd>TYP</Cd></Purp><RmtInf><Ustrd>12345678901234657890123456789012345123456789012346578901234567890123451234567890123465789012345678901234512345678901234657890123456789012345</Ustrd></RmtInf></CdtTrfTxInf></FIToFICstmrCdtTrf></Document></body>';
+        $xml = simplexml_load_string($testmsg);
+        $this::assertEquals('urn:iso:std:iso:20022:tech:xsd:head.001.001.01', $xmlinject->searchNameSpace('AppHdr',$xml),'Find NS on first element');
+        $this::assertEquals('urn:iso:std:iso:20022:tech:xsd:pacs.008.001.08', $xmlinject->searchNameSpace('Document',$xml), 'Find NS on next element');
+        $this::assertEquals('',$xmlinject->searchNameSpace('test',$xml),'Unknown element should return empty ns');
+    }
+
+    function testRegisterExtraNamespaces(): void {
+        $xmlinject = new HorusXml('WZWZ', null);
+        $testmsg = '<body><AppHdr xmlns="urn:iso:std:iso:20022:tech:xsd:head.001.001.01"><Fr><FIId><FinInstnId><BICFI>SOGEFRP0XXX</BICFI></FinInstnId></FIId></Fr><To><FIId><FinInstnId><BICFI>ZYEXFRP0XXX</BICFI></FinInstnId></FIId></To><BizMsgIdr>AV20190030001321</BizMsgIdr><MsgDefIdr>pacs.008.001.07</MsgDefIdr><CreDt>2019-11-28T12:24:40Z</CreDt></AppHdr><Document xmlns="urn:iso:std:iso:20022:tech:xsd:pacs.008.001.08" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="urn:iso:std:iso:20022:tech:xsd:pacs.008.001.08.xsd"><FIToFICstmrCdtTrf><GrpHdr><MsgId>NONREF</MsgId><CreDtTm>2019-11-14T09:30:47.0Z</CreDtTm><NbOfTxs>1</NbOfTxs><SttlmInf><SttlmMtd>CLRG</SttlmMtd></SttlmInf></GrpHdr><CdtTrfTxInf><PmtId><InstrId>ChampRef</InstrId><EndToEndId>NOTPROVIDED</EndToEndId><UETR>d747fc5c-59c5-41e9-be4c-d45102fc807d</UETR><ClrSysRef>AV20190030001321</ClrSysRef></PmtId><IntrBkSttlmAmt Ccy="EUR">1900.50</IntrBkSttlmAmt><IntrBkSttlmDt>2019-11-14</IntrBkSttlmDt><SttlmPrty>NORM</SttlmPrty><SttlmTmIndctn><CdtDtTm>2019-11-14T11:03:47.0Z</CdtDtTm></SttlmTmIndctn><InstdAmt Ccy="EUR">15550.00</InstdAmt><ChrgBr>DEBT</ChrgBr><ChrgsInf><Amt Ccy="EUR">2.00</Amt><Agt><FinInstnId><BICFI>CEPAFRPP888</BICFI></FinInstnId></Agt></ChrgsInf><InstgAgt><FinInstnId><BICFI>AGRIFRPXXXX</BICFI></FinInstnId></InstgAgt><InstdAgt><FinInstnId><BICFI>ZYEXFRPXXXX</BICFI></FinInstnId></InstdAgt><IntrmyAgt1><FinInstnId><BICFI>BPCEFRP0XXX</BICFI></FinInstnId></IntrmyAgt1><IntrmyAgt1Acct><Id><Othr><Id>34567890123456789012345678901234</Id></Othr></Id></IntrmyAgt1Acct><Dbtr><Nm>LAMBERT PIERRE FR/35000 RENNES</Nm></Dbtr><DbtrAcct><Id><IBAN>FR7640168000191924101877984</IBAN></Id></DbtrAcct><DbtrAgt><FinInstnId><BICFI>CEPAFRPP888</BICFI></FinInstnId></DbtrAgt><CdtrAgt><FinInstnId><BICFI>CEPAFRPP888</BICFI></FinInstnId></CdtrAgt><CdtrAgtAcct><Id><Othr><Id>rien</Id></Othr></Id></CdtrAgtAcct><Cdtr><Nm>JAN VAN GALEN</Nm></Cdtr><Purp><Cd>TYP</Cd></Purp><RmtInf><Ustrd>12345678901234657890123456789012345123456789012346578901234567890123451234567890123465789012345678901234512345678901234657890123456789012345</Ustrd></RmtInf></CdtTrfTxInf></FIToFICstmrCdtTrf></Document></body>';
+        $xml = simplexml_load_string($testmsg);
+        $matches = json_decode('[
+            {
+              "query": "isis.xsd",
+              "comment": "body wrapper",
+              "responseFormat": "isis.xml",
+              "errorTemplate": "errorTemplate.xml",
+              "extraNamespaces": [
+                  {"prefix": "h", "namespace":"urn:iso:std:iso:20022:tech:xsd:head.001.001.01"},
+                  {"prefix": "d", "element": "Document"}
+              ],
+              "parameters" : {
+                "frombic" : "/body/h:AppHdr/h:Fr/h:FIId/h:FinInstnId/h:BICFI",
+                "tobic" : "/body/h:AppHdr/h:To/h:FIId/h:FinInstnId/h:BICFI",
+                "msgid" : "/body/h:AppHdr/h:BizMsgIdr",
+                "msgdef" : "/body/h:AppHdr/h:MsgDefIdr",
+                "msgdate" : "/body/h:AppHdr/h:CreDt",
+                "document" : "/body/d:Document",
+                "msgiddoc" : "/body/d:Document/d:FIToFICstmrCdtTrf/d:GrpHdr/d:MsgId"
+              }
+            }]',true);
+
+            $xmlinject->registerExtraNamespaces($xml,$matches,0);
+
+            $fragment1 = $xml->xpath('/body/h:AppHdr/h:MsgDefIdr');
+            $fragment2 = $xml->xpath('/body/d:Document/d:FIToFICstmrCdtTrf/d:GrpHdr/d:MsgId');
+
+            $this::assertEquals('pacs.008.001.07',(string) $fragment1[0],'Should return valid value from fixed NS');
+            $this::assertEquals('NONREF',(string) $fragment2[0],'Should return valid value for NS derived by element name');
+
+            $vars = $xmlinject->getVariables($xml,$matches,0);
+
+            $this::assertEquals('SOGEFRP0XXX', $vars['frombic']);
+            $this::assertEquals('AV20190030001321',$vars['msgid']);
+            $this::assertEquals('NONREF',$vars['msgiddoc']);
+
+            $fragment3 = simplexml_load_string($vars['document']);
+
+            $this::assertEquals(array(''=>'urn:iso:std:iso:20022:tech:xsd:pacs.008.001.08','xsi'=>'http://www.w3.org/2001/XMLSchema-instance'),$fragment3->getDocNamespaces());
+           
+
     }
 }

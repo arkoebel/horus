@@ -3,6 +3,24 @@
   "errorFormat": "application/xml",
   "pacs": [
     {
+      "query": "isis.xsd",
+      "comment": "body wrapper",
+      "responseFormat": "isis.xml",
+      "errorTemplate": "errorTemplate.xml",
+      "extraNamespaces": [
+          {"prefix": "h", "namespace":"urn:iso:std:iso:20022:tech:xsd:head.001.001.01"},
+          {"prefix": "d", "element": "Document"}
+      ],
+      "parameters" : {
+        "frombic" : "/body/h:AppHdr/h:Fr/h:FIId/h:FinInstnId/h:BICFI",
+        "tobic" : "/body/h:AppHdr/h:To/h:FIId/h:FinInstnId/h:BICFI",
+        "msgid" : "/body/h:AppHdr/h:BizMsgIdr",
+        "msgdef" : "/body/h:AppHdr/h:MsgDefIdr",
+        "msgdate" : "/body/h:AppHdr/h:CreDt",
+        "document" : "/body/d:Document"
+      }
+    },
+    {
       "query": "pacs.008.001.02.xsd",
       "comment": "Cas pour acquisition fixe pacs.008 : pacs.008",
       "responseFormat": "pacs.008.001.02.xsd",

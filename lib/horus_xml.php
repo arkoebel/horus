@@ -15,10 +15,13 @@ class HorusXml
         $this->business_id = $business_id;
     }
 
-    function findSchema($query)
+    function findSchema($query,$defaultNamespace='')
     {
 
         $namespaces = $query->getDocNamespaces();
+        if(count($namespaces)===0){
+            $namespaces[''] = $defaultNamespace;
+        }
         $mnamespaces = explode(':', $namespaces[""]);
         $namespace = array_pop($mnamespaces);
 
@@ -123,7 +126,40 @@ class HorusXml
         return $url;
     }
 
-    function doInject($reqbody, $content_type, $proxy_mode, $matches, $preferredType, $queryParams, $genericError)
+    function searchNameSpace($elementName, $xml){
+        $namespace = '';
+        foreach ($xml->Children() as $element => $fragment){
+            if ($element===$elementName){
+                $ns = $fragment->getNamespaces();
+                if (is_array($ns) && array_key_exists('',$ns)) {
+                    return $ns[''];
+                }
+            }
+        }
+        return $namespace;
+    }
+
+    function registerExtraNamespaces($query, $matches, $selected){
+        $extraNamespaces = $this->business->findMatch($matches, $selected, "extraNamespaces");
+
+            if(''!==$extraNamespaces){
+                foreach($extraNamespaces as $ns){
+                    if(array_key_exists('namespace',$ns)){
+                        $query->registerXPathNamespace($ns['prefix'],$ns['namespace']);
+                        $this->common->mlog('Registering extra namespace ' . $ns['prefix'] . ', ' . $ns['namespace'],'INFO');
+                    }elseif(array_key_exists('element',$ns)){
+                        $elementns = $this->searchNameSpace($ns['element'],$query);
+                        $query->registerXPathNamespace($ns['prefix'],$elementns);
+                        $this->common->mlog('Registering extra namespace ' . $ns['prefix'] . ', ' . $elementns . ' (' . $ns['element'] . ')','INFO');
+                    }
+                    
+                }
+            }else{
+                $this->common->mlog('No extra namespace to register','INFO');
+            }
+    }
+
+    function doInject($reqbody, $content_type, $proxy_mode, $matches, $preferredType, $queryParams, $genericError,$defaultNamespace='')
     {
         $input = $this->business->extractPayload($content_type, $reqbody, $genericError, $preferredType);
         libxml_use_internal_errors(true);
@@ -140,7 +176,7 @@ class HorusXml
         $namespaces = $query->getDocNamespaces();
         $query->registerXPathNamespace('u', $namespaces[""]);
 
-        $selectedXsd = $this->findSchema($query);
+        $selectedXsd = $this->findSchema($query,$defaultNamespace);
 
         if ('' !== $selectedXsd) {
             $selected = $this->business->locate($matches, $selectedXsd, $input);
@@ -150,6 +186,7 @@ class HorusXml
                 $this->common->mlog($errorMessage . "\n", 'INFO');
                 throw new HorusException($this->business->returnGenericError($preferredType, $genericError, $errorMessage, ''));
             }
+            $this->registerExtraNamespaces($query,$matches, $selected);
             $vars = $this->getVariables($query, $matches, $selected);
 
             $this->common->mlog("Match comment : " . $this->business->findMatch($matches, $selected, "comment") . "\n", 'INFO');

@@ -164,7 +164,15 @@ class HorusBusiness
       
     }
 
-    public function performRouting($route, $content_type, $accept, $data)
+    function transformGetParams($inParams){
+        $outParams = array();
+        foreach ($inParams as $key=>$value){
+            $outParams[] = array('key'=>$key,'value'=>$value);
+        }
+        return $outParams;
+    }
+
+    public function performRouting($route, $content_type, $accept, $data, $queryParams = array())
     {
         if (is_null($route) || $route === false) {
             $this->common->mlog('No route found with provided source value', 'WARNING');
@@ -174,6 +182,7 @@ class HorusBusiness
         $followOnError = array_key_exists('followOnError', $route) ? $route['followOnError'] : true;
         $this->common->mlog("FollowOnError $followOnError", "INFO");
         $globalParams = array_key_exists('parameters', $route) ? $route['parameters'] : array();
+        $globalParams = array_merge($this->transformGetParams($queryParams),$globalParams);
 
         $responses = array();
 

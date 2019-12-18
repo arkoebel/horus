@@ -44,7 +44,7 @@ $business  = new HorusBusiness($business_id,$loglocation,'ORANGE');
 $route = $business->findSource($source, $params);
 
 try{
-    $responses = $business->performRouting($route, $content_type, $accept, $data);
+    $responses = $business->performRouting($route, $content_type, $accept, $data, $_GET);
     $business->http->setHttpReturnCode(200);
     echo json_encode(array('result'=>'OK','responses'=>$responses));
 }catch(HorusException $e){

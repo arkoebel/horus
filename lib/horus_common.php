@@ -113,8 +113,16 @@ class HorusCommon
         }
 
         $query = '';
+        $converted = array();
+        // Cycles all parameters; key duplicates are set as the last encountered value
         foreach ($params as $param){
-            $query .= '&' . urlencode($param['key']) . '=' . urlencode($param['value']);
+                $converted[$param['key']] = $param['value'];
+        }
+
+        ksort($converted);
+
+        foreach ($converted as $key=>$value){
+            $query .= '&' . urlencode($key) . '=' . urlencode($value);
         }
         if((stripos($baseUrl,'?')===FALSE)&&($query!=='')){
             $query = '?' . substr($query,1);

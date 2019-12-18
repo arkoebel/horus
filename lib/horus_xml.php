@@ -191,7 +191,7 @@ class HorusXml
 
             $this->common->mlog("Match comment : " . $this->business->findMatch($matches, $selected, "comment") . "\n", 'INFO');
 
-            $vars = array_merge($vars, $queryParams);
+            $vars = array_merge($queryParams,$vars);
             $this->common->mlog("Variables: " . print_r($vars, true) . "\n", 'INFO');
 
             $templs = $this->business->findMatch($matches, $selected, "responseTemplate");

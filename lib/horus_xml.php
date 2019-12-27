@@ -7,11 +7,11 @@ class HorusXml
     public $business = null;
     public $business_id = '';
     
-    function __construct($business_id, $log_location)
+    function __construct($business_id, $log_location, $colour = 'GREEN')
     {
-        $this->common = new HorusCommon($business_id, $log_location, 'GREEN');
-        $this->http = new HorusHttp($business_id, $log_location, 'GREEN');
-        $this->business = new HorusBusiness($business_id, $log_location, 'GREEN');
+        $this->common = new HorusCommon($business_id, $log_location, $colour);
+        $this->http = new HorusHttp($business_id, $log_location, $colour);
+        $this->business = new HorusBusiness($business_id, $log_location, $colour);
         $this->business_id = $business_id;
     }
 
@@ -139,9 +139,8 @@ class HorusXml
         return $namespace;
     }
 
-    function registerExtraNamespaces($query, $matches, $selected){
-        $extraNamespaces = $this->business->findMatch($matches, $selected, "extraNamespaces");
-
+    function registerExtraNamespaces($query, $extraNamespaces){
+        
             if(''!==$extraNamespaces){
                 foreach($extraNamespaces as $ns){
                     if(array_key_exists('namespace',$ns)){
@@ -186,7 +185,7 @@ class HorusXml
                 $this->common->mlog($errorMessage . "\n", 'INFO');
                 throw new HorusException($this->business->returnGenericError($preferredType, $genericError, $errorMessage, ''));
             }
-            $this->registerExtraNamespaces($query,$matches, $selected);
+            $this->registerExtraNamespaces($query,$this->business->findMatch($matches, $selected, "extraNamespaces"));
             $vars = $this->getVariables($query, $matches, $selected);
 
             $this->common->mlog("Match comment : " . $this->business->findMatch($matches, $selected, "comment") . "\n", 'INFO');

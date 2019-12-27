@@ -10,45 +10,21 @@ class HorusRecurse
     
     function __construct($business_id, $log_location)
     {
-        $this->common = new HorusCommon($business_id, $log_location, 'GREEN');
-        $this->http = new HorusHttp($business_id, $log_location, 'GREEN');
-        $this->business = new HorusBusiness($business_id, $log_location, 'GREEN');
-        $this->xml = new HorusXml($business_id, $log_location, 'GREEN');
+        $this->common = new HorusCommon($business_id, $log_location, 'INDIGO');
+        $this->http = new HorusHttp($business_id, $log_location, 'INDIGO');
+        $this->business = new HorusBusiness($business_id, $log_location, 'INDIGO');
+        $this->xml = new HorusXml($business_id, $log_location, 'INDIGO');
         $this->business_id = $business_id;
     }
 
-    /*
-
-    {"section": "section1",
-     "content-type":"application/xml",
-     "comment":"Main PACS structure"
-     "schema":"cristal.xsd",
-     "baseNamespace": "",
-     "baseNamespacePrefix": "u",
-     "rootElement": "body",
-     "parts":[
-         {"order":"1",
-          "comment":"Header transformation",
-          "path":"/u:body/h:AppHdr",
-          "namespaces":[
-              {"prefix":"h","namespace":"urn:iso:std:iso:20022:tech:xsd:head.001.001.01"}
-          ],
-          "transformUrl":"http://horus/horus.php",
-          "targetPath":"/u:body/h:AppHdr",
-         },{
-             "order":"2",
-             "comment":"PACS Document transformation",
-             "namespaces":[
-                {"prefix":"d","element":"Document"}
-             ],
-             "path":"/u:body/d:Document",
-             "transformUrl":"http://horus/horus.php",
-             "targetElement":"Document",
-             "targetElementOrder":"2"
-         }
-     ]}
-
-    */
+    function getPart($order,$matches){
+        foreach($matches['parts'] as $part){
+            if ($order == $part['order']){
+                return $part;
+            }
+        }
+        return array();
+    }
 
     function doRecurse($reqBody,$content_type,$proxy_mode,$matches,$accept,$params){
         
@@ -96,13 +72,14 @@ class HorusRecurse
             if(array_key_exists('path',$part)){
                 $this->common->mlog('Extracting document from XPath=' . $part['path'],'DEBUG');
                 $inputXmlPart = $reqBody->xpath($part['path']);
-                if (FALSE!==$inputXmlPart && is_array($inputXmlPart && (count($inputXmlPart)>0))){
+                if (FALSE!==$inputXmlPart && is_array($inputXmlPart) && (count($inputXmlPart)>0)){
                     $xpathResult = $inputXmlPart[0];
-                    $elements[$part['order']] = simplexml_load_string($this->http->forwardSingleHttpQuery($part['transformUrl'],array(), $xpathResult->saveXML()));
+                    $this->common->mlog('Part Contents : ' . $xpathResult->saveXML(),'DEBUG');
+                    $rr = simplexml_load_string($this->http->forwardSingleHttpQuery($part['transformUrl'],array(), $xpathResult->saveXML()));
+                    $this->common->mlog('Part Transformed : ' . $rr->saveXML(),'DEBUG');
+                    $elements[$part['order']] = $rr;
                 }else{
-                    var_dump($inputXmlPart);
                     throw new HorusException('Could not extract location ' . $part['path'] . ' for part #' . $part['order']);
-                    
                 }
             }else{
                 throw new HorusException('No XPath to search for in configuration');
@@ -110,21 +87,23 @@ class HorusRecurse
 
         }
 
-        $rootXml = simplexml_load_string('<' . $matches['rootElement'] . '> </' . $matches['rootElement'] . '>');
-        if(array_key_exists('baseNameSpacePrefix',$matches) && array_key_exists('baseNameSpace',$matches)){
-            $rootXml->registerXPathNamespace($matches['baseNameSpacePrefix'],$matches['baseNameSpace']);
-        }
-        
-        $domRoot = dom_import_simplexml($rootXml);
-        
+        $dom = new DomDocument();
+        $root = new DomElement($matches['rootElement']);
+        $dom->appendChild($root);
+       
+
         foreach ($elements as $index=>$element){
-            $part = $matches['parts'][$index];
-            $this->common->mlog("Added element to XML response " . $index . ' at ' . $part['targetXpath'],'INFO');
-            $domElement = dom_import_simplexml($element);
-            $domRoot->appendChild($domElement);
+            $part =$this->getPart($index,$matches);
+            if (array_key_exists('targetPath',$part)){
+                $this->common->mlog("Added element to XML response " . $index . ' at ' . $part['targetPath'],'INFO');
+            }else{
+                $this->common->mlog("Added element to XML response " . $index ,'INFO');
+            }
+            $domElement = $dom->importNode(dom_import_simplexml($element),TRUE);
+            $root->appendChild($domElement);
         }
         
-        return $domRoot->ownerDocument->saveXml();
+        return $dom->saveXml();
 
 
 

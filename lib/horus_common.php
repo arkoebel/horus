@@ -88,7 +88,7 @@ class HorusCommon
 
     public static function getNewBusinessId() {
 
-        return md5(time());
+        return md5(microtime() . rand());
     }
 
     /**

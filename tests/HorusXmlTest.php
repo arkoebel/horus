@@ -371,7 +371,7 @@ class HorusXmlTest extends HorusTestCase
               }
             }]',true);
 
-            $xmlinject->registerExtraNamespaces($xml,$matches,0);
+            $xmlinject->registerExtraNamespaces($xml,$matches[0]['extraNamespaces']);
 
             $fragment1 = $xml->xpath('/body/h:AppHdr/h:MsgDefIdr');
             $fragment2 = $xml->xpath('/body/d:Document/d:FIToFICstmrCdtTrf/d:GrpHdr/d:MsgId');

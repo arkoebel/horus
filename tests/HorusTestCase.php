@@ -12,6 +12,7 @@ class HorusTestCase extends TestCase
 
     public static $mockheaders;
     public static $curls;
+    public static $curlCounter;
     protected $http;
 
     /**
@@ -55,7 +56,7 @@ class HorusTestCase extends TestCase
         runkit_function_add(
             'curl_init',
             '$url = null',
-            'HorusTestCase::$curls[count(HorusTestCase::$curls)-1][\'url\'] = $url;return array_keys(HorusTestCase::$curls)[count(HorusTestCase::$curls)-1];'
+            'HorusTestCase::$curls[count(HorusTestCase::$curls)-1][\'url\'] = $url;HorusTestCase::$curlCounter++;return array_keys(HorusTestCase::$curls)[HorusTestCase::$curlCounter-1];'
         );
 
         runkit_function_add(
@@ -175,5 +176,6 @@ class HorusTestCase extends TestCase
         $this->http = new HorusHttp('testHorusHttp', null, 'GREEN');
         self::$mockheaders = array();
         self::$curls = array();
+        self::$curlCounter = 0;
     }
 }

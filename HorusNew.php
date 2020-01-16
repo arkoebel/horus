@@ -103,7 +103,7 @@ if ("inject" === $request_type) {
     
 
     try {
-        $res = $injector->doInject($reqbody, $content_type, $proxy_mode, $preferredType, $defaultOutContentType, $_GET, $genericError);
+        $res = $injector->doInject($reqbody, $content_type, $proxy_mode, $matches,$preferredType, $_GET, $genericError);
 
         header("HTTP/1.1 200 OK", true, 200);
         header("X-Business-Id: $business_id");

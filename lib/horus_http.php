@@ -43,7 +43,7 @@ class HorusHttp
         }
 
         if ($forward !== '') {
-            $headers = array('Content-type' => $content_type, 'Accept' => $content_type, 'Expect' => '', 'X-Business-Id' => $this->business_id);
+            $headers = array('Content-type' => $content_type, 'Accept' => 'application/json', 'Expect' => '', 'X-Business-Id' => $this->business_id);
             $queries = array();
             foreach ($data as $content) {
                 $ct = $this->convertOutData($content, $content_type, $no_conversion);
@@ -106,7 +106,7 @@ class HorusHttp
 
         if ($forward !== '') {
 
-            $headers = array('Content-Type' => $content_type, 'Accept' => $content_type, 'Expect' => '', 'X-Business-Id' => $this->business_id);
+            $headers = array('Content-Type' => $content_type, 'Accept' => 'application/json', 'Expect' => '', 'X-Business-Id' => $this->business_id);
             $query = array('url' => $forward, 'method' => $method, 'headers' => $headers, 'data' => is_array($data) ? $data[0]:$data);
             $queries = array($query);
 

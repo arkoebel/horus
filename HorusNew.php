@@ -96,11 +96,14 @@ if ("inject" === $request_type) {
 
     $common->mlog("Request : " . print_r($_SERVER, true) . "\n", 'DEBUG');
     $common->mlog("Received POST Data : '" . $reqbody . "'", 'INFO', 'TXT', $colour);
-    $preferredType = $injector->http->setReturnType($accept, $errorFormat);
-    $common->mlog("Preferred mime type : " . $preferredType, 'DEBUG', 'TXT', $colour);
+    
+    $defaultOutContentType = array_key_exists('pacsDefaultOutputContentType',$mmatches) ? $mmatches['pacsDefaultOutputContentType'] : 'application/xml';
+    $preferredType = $injector->http->setReturnType($defaultOutContentType, $errorFormat);
+    $common->mlog("Generated documents will be converted to : " . $preferredType, 'DEBUG', 'TXT', $colour);
+    
 
     try {
-        $res = $injector->doInject($reqbody, $content_type, $proxy_mode, $matches, $preferredType, $_GET, $genericError);
+        $res = $injector->doInject($reqbody, $content_type, $proxy_mode, $preferredType, $defaultOutContentType, $_GET, $genericError);
 
         header("HTTP/1.1 200 OK", true, 200);
         header("X-Business-Id: $business_id");

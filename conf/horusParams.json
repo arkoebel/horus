@@ -1,6 +1,7 @@
 {
   "errorTemplate": "genericError.xml",
   "errorFormat": "application/xml",
+  "pacsDefaultOutputContentType": "application/json",
   "pacs": [
     {
       "query": "isis.xsd",

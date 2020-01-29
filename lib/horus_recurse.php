@@ -26,6 +26,16 @@ class HorusRecurse
         return array();
     }
 
+    function findSection($name,$matches){
+        foreach($matches as $section){
+            if($section['section']===$name){
+                return $section;
+            }
+
+        }
+        return null;
+    }
+
     function doRecurse($reqBody,$content_type,$proxy_mode,$matches,$accept,$params){
         
         if(!array_key_exists('section',$params)){

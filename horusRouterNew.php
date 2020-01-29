@@ -20,7 +20,9 @@ if ($business_id === ''){
 
 $common = new HorusCommon($business_id, $loglocation, 'ORANGE');
 
-$common->mlog('Headers : ' . print_r(apache_request_headers(),true),'DEBUG');
+if (function_exists('apache_request_headers')) {
+    $common->mlog('Headers : ' . print_r(apache_request_headers(),true),'DEBUG');
+}
 
 $common->mlog('Destination is : ' . HorusHttp::extractHeader('x_destination_url'),'DEBUG');
 

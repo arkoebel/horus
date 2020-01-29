@@ -51,7 +51,7 @@ class HorusRecurseTest extends HorusTestCase
             ]
         }',true);
         
-        $xml = simplexml_load_string('<body><AppHdr xmlns="urn:iso:std:iso:20022:tech:xsd:head.001.001.01"><headerElement>AAA</headerElement></AppHdr><Document xmlns="urn:testns"><documentElement>BBB</documentElement></Document></body>');
+        $xml = '<body><AppHdr xmlns="urn:iso:std:iso:20022:tech:xsd:head.001.001.01"><headerElement>AAA</headerElement></AppHdr><Document xmlns="urn:testns"><documentElement>BBB</documentElement></Document></body>';
         $recurse = new HorusRecurse('AAA',null);
         self::$curlCounter = 0;
         self::$curls[] = array(
@@ -105,5 +105,45 @@ class HorusRecurseTest extends HorusTestCase
        
     }
 
+    function testGetSection():void {
+        $config = json_decode('[{
+            "section": "section1",
+            "content-type": "application/xml",
+            "comment": "Main PACS structure",
+            "schema": "cristal.xsd",
+            "namespaces": [{
+                    "prefix": "h",
+                    "namespace": "urn:iso:std:iso:20022:tech:xsd:head.001.001.01"
+                }, {
+                    "prefix": "u",
+                    "element": "Document"
+                }
+            ],
+            "rootElement": "body",
+            "parts": [{
+                    "order": "1",
+                    "comment": "Header transformation",
+                    "path": "/body/h:AppHdr",
+                    "transformUrl": "http://horus/horus.php",
+                    "targetPath": "/body/h:AppHdr"
+                }, {
+                    "order": "2",
+                    "comment": "PACS Document transformation",
+                    "variables": {
+                            "var1":"/body/h:AppHdr/h:headerElement",             
+                            "var2":"/body/u:Document/u:documentElement"
+                    },
+                    "path": "/body/u:Document",
+                    "transformUrl": "http://horus/horus.php",
+                    "targetElement": "Document",
+                    "targetElementOrder": "2"
+                }
+            ]
+        }]',true);
+
+        $recurse = new HorusRecurse('AAA',null);
+        $this::assertNull($recurse->findSection('azerty',$config));
+        $this::assertNotNull($recurse->findSection('section1',$config));
+    }
 
 }

@@ -42,21 +42,21 @@ class HorusRecurse
             throw new HorusException('Section URL parameter is unknown');
         }
 
-        if(!array_key_exists($params['section'],$matches)){
-            throw new HorusException('Section ' . $params['section'] . ' is unknown');
-        }
+       // if(!array_key_exists($params['section'],$matches)){
+       //     throw new HorusException('Section ' . $params['section'] . ' is unknown');
+       // }
 
-        $section = findSection($params['section'],$matches);
+        $section = $this->findSection($params['section'],$matches);
 
-        if($content_type !== $section['content_type']){
-            throw new HorusException('Section ' . $params['section'] . " was supposed to be of type " . $section['content_type'] . ' but found ' . $content_type . ' instead');
+        if($content_type !== $section['content-type']){
+            throw new HorusException('Section ' . $params['section'] . " was supposed to be of type " . $section['content-type'] . ' but found ' . $content_type . ' instead');
         }
 
         $result = null;
         if ('application/xml'===$content_type){
-            $result = doRecurseXml($reqBody,$section);
+            $result = $this->doRecurseXml($reqBody,$section);
         }elseif('application/json'===$content_type){
-            $result = doRecurseJson($reqBody,$section);
+            $result = $this->doRecurseJson($reqBody,$section);
         }else{
             throw new HorusException('Unsupported content-type ' . $content_type);
         }
@@ -67,9 +67,9 @@ class HorusRecurse
     }
 
 
-    function doRecurseXml($xml,$section){
+    function doRecurseXml($body,$section){
         $elements = array();
-        
+        $xml = simplexml_load_string($body);
         if (array_key_exists('namespaces',$section)){
             $this->xml->registerExtraNamespaces($xml,$section['namespaces']);
         }
@@ -94,7 +94,7 @@ class HorusRecurse
                     $this->common->mlog('Part Contents : ' . $xpathResult->saveXML(),'DEBUG');
                     $finalUrl = $this->common->formatQueryString($part['transformUrl'],$vars,TRUE);
                     $this->common->mlog('Transformation URL is : ' . $finalUrl,'DEBUG');
-                    $rr = simplexml_load_string($this->http->forwardSingleHttpQuery($part['transformUrl'],array(), $xpathResult->saveXML()));
+                    $rr = simplexml_load_string($this->http->forwardSingleHttpQuery($part['transformUrl'],array('Content-type: application/xml','Accept: application/xml','x-business-id: '), $xpathResult->saveXML()));
                     $this->common->mlog('Part Transformed : ' . $rr->saveXML(),'DEBUG');
                     $elements[$part['order']] = $rr;
                 }else{

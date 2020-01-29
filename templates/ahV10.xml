@@ -1,0 +1,8 @@
+<AppHdr xmlns="urn:swift:xsd:iws.ApplicationHeader$ahV10">
+    <From>
+        <Type>NAME</Type>
+        <Id><?php echo $vars['frombic']?></Id>
+    </From>
+    <MsgRef><?php echo $vars['msgref']?></MsgRef>
+    <CrDate><?php echo $vars['crdate']?></CrDate>
+</AppHdr>

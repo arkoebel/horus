@@ -25,6 +25,7 @@ class HorusXml
         $mnamespaces = explode(':', $namespaces[""]);
         $namespace = array_pop($mnamespaces);
 
+ $this->common->mlog("NS: " . print_r($namespace, true) . "\n", 'INFO');
         $domelement = dom_import_simplexml($query);
         $domdoc = $domelement->ownerDocument;
 

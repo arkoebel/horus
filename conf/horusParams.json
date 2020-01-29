@@ -1,8 +1,20 @@
 {
   "errorTemplate": "genericError.xml",
   "errorFormat": "application/xml",
-  "pacsDefaultOutputContentType": "application/json",
+  "pacsDefaultOutputContentType": "application/xml",
   "pacs": [
+    {
+      "query": "iws.ApplicationHeader$ahV10.xsd",
+      "comment": "Header Swift",
+      "responseFormat": "iws.ApplicationHeader$ahV10.xsd",
+      "responseTemplate": "ahV10.xml",
+      "errorTemplate": "errorTemplate.xml",
+      "parameters" : {
+          "frombic":"/u:AppHdr/u:From/u:Id",
+          "ref":"/u:AppHdr/u:MsgRef",
+          "crdate":"/u:AppHdr/u:CrDate"
+      }
+    },
     {
       "query": "isis.xsd",
       "comment": "body wrapper",

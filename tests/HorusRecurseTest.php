@@ -16,34 +16,40 @@ class HorusRecurseTest extends HorusTestCase
 
     function testRecurseXml():void {
 
-        $config = json_decode('{"section": "section1",
-            "content-type":"application/xml",
-            "comment":"Main PACS structure",
-            "schema":"cristal.xsd",
-            "baseNamespace": "",
-            "baseNamespacePrefix": "u",
-            "rootElement": "body",
-            "parts":[
-                {"order":"1",
-                 "comment":"Header transformation",
-                 "path":"/body/h:AppHdr",
-                 "namespaces":[
-                     {"prefix":"h","namespace":"urn:iso:std:iso:20022:tech:xsd:head.001.001.01"}
-                 ],
-                 "transformUrl":"http://horus/horus.php",
-                 "targetPath":"/body/h:AppHdr"
-                },{
-                    "order":"2",
-                    "comment":"PACS Document transformation",
-                    "namespaces":[
-                       {"prefix":"d","element":"Document"}
-                    ],
-                    "path":"/body/d:Document",
-                    "transformUrl":"http://horus/horus.php",
-                    "targetElement":"Document",
-                    "targetElementOrder":"2"
+        $config = json_decode('{
+            "section": "section1",
+            "content-type": "application/xml",
+            "comment": "Main PACS structure",
+            "schema": "cristal.xsd",
+            "namespaces": [{
+                    "prefix": "h",
+                    "namespace": "urn:iso:std:iso:20022:tech:xsd:head.001.001.01"
+                }, {
+                    "prefix": "u",
+                    "element": "Document"
                 }
-            ]}',true);
+            ],
+            "rootElement": "body",
+            "parts": [{
+                    "order": "1",
+                    "comment": "Header transformation",
+                    "path": "/body/h:AppHdr",
+                    "transformUrl": "http://horus/horus.php",
+                    "targetPath": "/body/h:AppHdr"
+                }, {
+                    "order": "2",
+                    "comment": "PACS Document transformation",
+                    "variables": {
+                            "var1":"/body/h:AppHdr/h:headerElement",             
+                            "var2":"/body/u:Document/u:documentElement"
+                    },
+                    "path": "/body/u:Document",
+                    "transformUrl": "http://horus/horus.php",
+                    "targetElement": "Document",
+                    "targetElementOrder": "2"
+                }
+            ]
+        }',true);
         
         $xml = simplexml_load_string('<body><AppHdr xmlns="urn:iso:std:iso:20022:tech:xsd:head.001.001.01"><headerElement>AAA</headerElement></AppHdr><Document xmlns="urn:testns"><documentElement>BBB</documentElement></Document></body>');
         $recurse = new HorusRecurse('AAA',null);

@@ -57,24 +57,33 @@ class HorusRecurse
     }
 
 
-    function doRecurseXml($reqBody,$matches){
+    function doRecurseXml($xml,$section){
         $elements = array();
-        if(array_key_exists('baseNamespacePrefix',$matches) && array_key_exists('baseNamespace',$matches)){
-            $reqBody->registerXPathNamespace($matches['baseNamespacePrefix'],$matches['baseNamespace']);
-            $this->common->mlog('Registering namespace ' . $matches['baseNamespacePrefix'] . ', ' . $matches['baseNamespace'],'INFO');
+        
+        if (array_key_exists('namespaces',$section)){
+            $this->xml->registerExtraNamespaces($xml,$section['namespaces']);
         }
-        foreach ($matches['parts'] as $part){
-            $this->common->mlog('Dealing with part #' . $part['order'] . ' : ' . $part['comment'],'INFO');
-            if (array_key_exists('namespaces',$part)){
-                $this->xml->registerExtraNamespaces($reqBody,$part['namespaces']);
-            }
+
+        foreach ($section['parts'] as $part){
+            $this->common->mlog('Dealing with part #' . $part['order'] . ' : ' . $part['comment'],'INFO');    
             $inputXmlPart = null;
+            $vars = array();
+            if(array_key_exists('variables',$part)){
+                $this->common->mlog('Extracting variables for part #' . $part['order'] ,'DEBUG');
+                foreach($part['variables'] as $name=>$xpath){
+                    $elt = array('key'=>$name,'value'=>$this->xml->getXpathVariable($xml,$xpath));
+                    $this->common->mlog('  Variable ' . $elt['key'] . ' = ' . $elt['value'] ,'DEBUG');
+                    $vars[] = $elt;
+                }
+            }
             if(array_key_exists('path',$part)){
                 $this->common->mlog('Extracting document from XPath=' . $part['path'],'DEBUG');
-                $inputXmlPart = $reqBody->xpath($part['path']);
+                $inputXmlPart = $xml->xpath($part['path']);
                 if (FALSE!==$inputXmlPart && is_array($inputXmlPart) && (count($inputXmlPart)>0)){
                     $xpathResult = $inputXmlPart[0];
                     $this->common->mlog('Part Contents : ' . $xpathResult->saveXML(),'DEBUG');
+                    $finalUrl = $this->common->formatQueryString($part['transformUrl'],$vars,TRUE);
+                    $this->common->mlog('Transformation URL is : ' . $finalUrl,'DEBUG');
                     $rr = simplexml_load_string($this->http->forwardSingleHttpQuery($part['transformUrl'],array(), $xpathResult->saveXML()));
                     $this->common->mlog('Part Transformed : ' . $rr->saveXML(),'DEBUG');
                     $elements[$part['order']] = $rr;
@@ -88,12 +97,12 @@ class HorusRecurse
         }
 
         $dom = new DomDocument();
-        $root = new DomElement($matches['rootElement']);
+        $root = new DomElement($section['rootElement']);
         $dom->appendChild($root);
        
 
         foreach ($elements as $index=>$element){
-            $part =$this->getPart($index,$matches);
+            $part =$this->getPart($index,$section);
             if (array_key_exists('targetPath',$part)){
                 $this->common->mlog("Added element to XML response " . $index . ' at ' . $part['targetPath'],'INFO');
             }else{

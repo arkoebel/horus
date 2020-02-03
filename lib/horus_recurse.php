@@ -94,7 +94,7 @@ class HorusRecurse
                     $this->common->mlog('Part Contents : ' . $xpathResult->saveXML(),'DEBUG');
                     $finalUrl = $this->common->formatQueryString($part['transformUrl'],$vars,TRUE);
                     $this->common->mlog('Transformation URL is : ' . $finalUrl,'DEBUG');
-                    $rr = simplexml_load_string($this->http->forwardSingleHttpQuery($part['transformUrl'],array('Content-type: application/xml','Accept: application/xml','Expect: ' , 'X-Business-Id: ' . $this->business_id), $xpathResult->saveXML()));
+                    $rr = simplexml_load_string($this->http->forwardSingleHttpQuery($finalUrl,array('Content-type: application/xml','Accept: application/xml','Expect: ' , 'X-Business-Id: ' . $this->business_id), $xpathResult->saveXML()));
                     $this->common->mlog('Part Transformed : ' . $rr->saveXML(),'DEBUG');
                     $elements[$part['order']] = $rr;
                 }else{

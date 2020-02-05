@@ -107,7 +107,25 @@ class HorusRecurse
         }
 
         $dom = new DomDocument();
-        $root = new DomElement($section['rootElement']);
+        $rootns='';
+        if(preg_match('/\:/',$section['rootElement'])){
+            $split = explode(':',$section['rootElement'])[0];
+            foreach($section['namespaces'] as $ns){
+                if (array_key_exists('namespace', $ns)) {
+                    if($split===$ns['prefix']){
+                        $rootns=$ns['namespace'];
+                        break;
+                    }
+                } elseif (array_key_exists('element', $ns)) {
+                    if($split===$ns['prefix']){
+                        $rootns = $this->xml->searchNameSpace($ns['element'], $xml);
+                        break;
+                    }
+                }
+            }
+        }
+
+        $root = new DomElement($section['rootElement'],null,$rootns);
         $dom->appendChild($root);
        
 

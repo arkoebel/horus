@@ -14,7 +14,8 @@ require_once('lib/horus_exception.php');
 class HorusRecurseTest extends HorusTestCase
 {
 
-    function testRecurseXml():void {
+    function testRecurseXml(): void
+    {
 
         $config = json_decode('{
             "section": "section1",
@@ -27,15 +28,18 @@ class HorusRecurseTest extends HorusTestCase
                 }, {
                     "prefix": "u",
                     "element": "Document"
+                }, {
+                    "prefix": "d", 
+                    "namespace": "urn:xxx"
                 }
             ],
-            "rootElement": "u:body",
+            "rootElement": "/d:PDU",
             "parts": [{
                     "order": "1",
                     "comment": "Header transformation",
                     "path": "/body/h:AppHdr",
                     "transformUrl": "http://horus/horus.php",
-                    "targetPath": "/body/h:AppHdr"
+                    "targetPath": "/d:PDU/d:Body/h:AppHdr"
                 }, {
                     "order": "2",
                     "comment": "PACS Document transformation",
@@ -45,14 +49,13 @@ class HorusRecurseTest extends HorusTestCase
                     },
                     "path": "/body/u:Document",
                     "transformUrl": "http://horus/horus.php",
-                    "targetElement": "Document",
-                    "targetElementOrder": "2"
+                    "targetPath": "/d:PDU/d:Body/u:Document"
                 }
             ]
-        }',true);
-        
+        }', true);
+
         $xml = '<body><AppHdr xmlns="urn:iso:std:iso:20022:tech:xsd:head.001.001.01"><headerElement>AAA</headerElement></AppHdr><Document xmlns="urn:testns"><documentElement>BBB</documentElement></Document></body>';
-        $recurse = new HorusRecurse('AAA',null);
+        $recurse = new HorusRecurse('AAA', null);
         self::$curlCounter = 0;
         self::$curls[] = array(
             'url' => 'http://localhost',
@@ -99,15 +102,15 @@ class HorusRecurseTest extends HorusTestCase
             'returnBody' => '<Document xmlns="urn:iso:std:iso:20022:tech:xsd:pacs.002.001.03"><FIToFIPmtStsRpt><GrpHdr><MsgId>RE34567890</MsgId><CreDtTm>2019-10-20T11:56:36</CreDtTm><InstgAgt><FinInstnId><BIC>BNPAFRPP</BIC></FinInstnId></InstgAgt><InstdAgt><FinInstnId><BIC>BNPAFRPP</BIC></FinInstnId></InstdAgt></GrpHdr><OrgnlGrpInfAndSts><OrgnlMsgId>1234567890</OrgnlMsgId><OrgnlMsgNmId>pacs.008</OrgnlMsgNmId><GrpSts>ACCP</GrpSts></OrgnlGrpInfAndSts><TxInfAndSts><StsId>1234567890</StsId><OrgnlEndToEndId>1234567890</OrgnlEndToEndId><OrgnlTxId>1234567890</OrgnlTxId><AccptncDtTm>2012-12-13T12:12:12.000Z</AccptncDtTm><OrgnlTxRef><PmtTpInf><SvcLvl><Cd>SEPA</Cd></SvcLvl><LclInstrm><Cd>INST</Cd></LclInstrm><CtgyPurp><Cd>PURP</Cd></CtgyPurp></PmtTpInf><DbtrAgt><FinInstnId><BIC>BNPAFRPPXXX</BIC></FinInstnId></DbtrAgt></OrgnlTxRef></TxInfAndSts></FIToFIPmtStsRpt></Document>'
         );
 
-        $result = $recurse->doRecurseXml($xml,$config);
+        $result = $recurse->doRecurseXml($xml, $config);
 
         var_dump($result);
 
-        $this::assertEquals('<?xml version="1.0"?>' . "\n" . '<body><AppHdr xmlns="urn:iso:std:iso:20022:tech:xsd:head.001.001.01"><headerReturnElement>ZZZ</headerReturnElement></AppHdr><Document xmlns="urn:iso:std:iso:20022:tech:xsd:pacs.002.001.03"><FIToFIPmtStsRpt><GrpHdr><MsgId>RE34567890</MsgId><CreDtTm>2019-10-20T11:56:36</CreDtTm><InstgAgt><FinInstnId><BIC>BNPAFRPP</BIC></FinInstnId></InstgAgt><InstdAgt><FinInstnId><BIC>BNPAFRPP</BIC></FinInstnId></InstdAgt></GrpHdr><OrgnlGrpInfAndSts><OrgnlMsgId>1234567890</OrgnlMsgId><OrgnlMsgNmId>pacs.008</OrgnlMsgNmId><GrpSts>ACCP</GrpSts></OrgnlGrpInfAndSts><TxInfAndSts><StsId>1234567890</StsId><OrgnlEndToEndId>1234567890</OrgnlEndToEndId><OrgnlTxId>1234567890</OrgnlTxId><AccptncDtTm>2012-12-13T12:12:12.000Z</AccptncDtTm><OrgnlTxRef><PmtTpInf><SvcLvl><Cd>SEPA</Cd></SvcLvl><LclInstrm><Cd>INST</Cd></LclInstrm><CtgyPurp><Cd>PURP</Cd></CtgyPurp></PmtTpInf><DbtrAgt><FinInstnId><BIC>BNPAFRPPXXX</BIC></FinInstnId></DbtrAgt></OrgnlTxRef></TxInfAndSts></FIToFIPmtStsRpt></Document></body>' . "\n",$result);
-       
+        $this::assertEquals('<?xml version="1.0"?>' . "\n" . '<PDU xmlns="urn:xxx"><Body><AppHdr xmlns="urn:iso:std:iso:20022:tech:xsd:head.001.001.01"><headerReturnElement>ZZZ</headerReturnElement></AppHdr><Document xmlns="urn:iso:std:iso:20022:tech:xsd:pacs.002.001.03"><FIToFIPmtStsRpt><GrpHdr><MsgId>RE34567890</MsgId><CreDtTm>2019-10-20T11:56:36</CreDtTm><InstgAgt><FinInstnId><BIC>BNPAFRPP</BIC></FinInstnId></InstgAgt><InstdAgt><FinInstnId><BIC>BNPAFRPP</BIC></FinInstnId></InstdAgt></GrpHdr><OrgnlGrpInfAndSts><OrgnlMsgId>1234567890</OrgnlMsgId><OrgnlMsgNmId>pacs.008</OrgnlMsgNmId><GrpSts>ACCP</GrpSts></OrgnlGrpInfAndSts><TxInfAndSts><StsId>1234567890</StsId><OrgnlEndToEndId>1234567890</OrgnlEndToEndId><OrgnlTxId>1234567890</OrgnlTxId><AccptncDtTm>2012-12-13T12:12:12.000Z</AccptncDtTm><OrgnlTxRef><PmtTpInf><SvcLvl><Cd>SEPA</Cd></SvcLvl><LclInstrm><Cd>INST</Cd></LclInstrm><CtgyPurp><Cd>PURP</Cd></CtgyPurp></PmtTpInf><DbtrAgt><FinInstnId><BIC>BNPAFRPPXXX</BIC></FinInstnId></DbtrAgt></OrgnlTxRef></TxInfAndSts></FIToFIPmtStsRpt></Document></Body></PDU>' . "\n", $result);
     }
 
-    function testGetSection():void {
+    function testGetSection(): void
+    {
         $config = json_decode('[{
             "section": "section1",
             "content-type": "application/xml",
@@ -119,15 +122,15 @@ class HorusRecurseTest extends HorusTestCase
                 }, {
                     "prefix": "u",
                     "element": "Document"
-                }
+                }, { "prefix": "d", "namespace": "xxx"}
             ],
-            "rootElement": "body",
+            "rootElement": "/d:PDU/d:Body",
             "parts": [{
                     "order": "1",
                     "comment": "Header transformation",
                     "path": "/body/h:AppHdr",
                     "transformUrl": "http://horus/horus.php",
-                    "targetPath": "/body/h:AppHdr"
+                    "targetPath": "/d:PDU/d:Body/h:AppHdr"
                 }, {
                     "order": "2",
                     "comment": "PACS Document transformation",
@@ -137,15 +140,123 @@ class HorusRecurseTest extends HorusTestCase
                     },
                     "path": "/body/u:Document",
                     "transformUrl": "http://horus/horus.php",
-                    "targetElement": "Document",
-                    "targetElementOrder": "2"
+                    "targetPath": "/d:PDU/d:Body/u:Document"
                 }
             ]
-        }]',true);
+        }]', true);
 
-        $recurse = new HorusRecurse('AAA',null);
-        $this::assertNull($recurse->findSection('azerty',$config));
-        $this::assertNotNull($recurse->findSection('section1',$config));
+        $recurse = new HorusRecurse('AAA', null);
+        $this::assertNull($recurse->findSection('azerty', $config));
+        $this::assertNotNull($recurse->findSection('section1', $config));
     }
 
+    function testGetNSUriFromPrefix(): void
+    {
+
+        // getNSUriFromPrefix($prefix,$namespaces){
+
+        $this::assertEquals('', HorusRecurse::getNSUriFromPrefix(null, array()));
+        $this::assertEquals('', HorusRecurse::getNSUriFromPrefix('', array()));
+        $this::assertEquals('', HorusRecurse::getNSUriFromPrefix('abc', array()));
+        $this::assertEquals('', HorusRecurse::getNSUriFromPrefix('abc', null));
+
+        $namespaces = json_decode('[{"prefix":"a","namespace":"auri"},{"prefix":"b","namespace":"buri"},{"prefix":"c","namespace":"curi"}]', true);
+
+
+        $this::assertEquals('curi', HorusRecurse::getNSUriFromPrefix('c', $namespaces));
+        $this::assertEquals('buri', HorusRecurse::getNSUriFromPrefix('b', $namespaces));
+        $this::assertEquals('auri', HorusRecurse::getNSUriFromPrefix('a', $namespaces));
+    }
+
+    function testAddPath(): void
+    {
+        $doc = new DomDocument();
+        $root = new DomElement('root', '', 'rootns');
+        $doc->appendChild($root);
+
+        $namespaces = json_decode('[{"prefix":"r","namespace":"rootns"},{"prefix":"b","namespace":"buri"},{"prefix":"c","namespace":"curi"}]', true);
+        $recurse = new HorusRecurse('ABCD', null);
+        $result = $recurse->addPath($root, '/r:root/c:test/b:test2/b:othertest', $namespaces);
+
+        $output = '<?xml version="1.0"?>' . "\n" . '<root xmlns="rootns"><test xmlns="curi"><test2 xmlns="buri"/></test></root>' . "\n";
+        $this::assertEquals($output, $result->ownerDocument->saveXml());
+    }
+
+    function testAddPath2(): void
+    {
+        $doc = new DomDocument();
+        $root = new DomElement('root');
+        $doc->appendChild($root);
+
+        $namespaces = json_decode('[{"prefix":"b","namespace":"buri"},{"prefix":"c","namespace":"curi"}]', true);
+        $recurse = new HorusRecurse('DCBA', null);
+        $result = $recurse->addPath($root, '/root/c:test/b:test2/b:othertest', $namespaces);
+        $result = $recurse->addPath($root, '/root/c:test/b:test2/b:someothertest', $namespaces);
+
+        $output = '<?xml version="1.0"?>' . "\n" . '<root><test xmlns="curi"><test2 xmlns="buri"/></test></root>' . "\n";
+        $this::assertEquals($output, $result->ownerDocument->saveXml());
+        $this::assertEquals('test2', $result->localName);
+        $this::assertEquals('buri', $result->namespaceURI);
+    }
+
+    function testAddPath3(): void
+    {
+        $doc = new DomDocument();
+        $root = new DomElement('root');
+        $doc->appendChild($root);
+
+        $namespaces = json_decode('[{"prefix":"b","namespace":"buri"},{"prefix":"c","namespace":"curi"}]', true);
+        $recurse = new HorusRecurse('ZYWX', null);
+        $result = $recurse->addPath($root, '/root/b:othertest', $namespaces);
+        $result = $recurse->addPath($root, '/root/b:someothertest', $namespaces);
+
+        $output = '<?xml version="1.0"?>' . "\n" . '<root/>' . "\n";
+        $this::assertEquals($output, $result->ownerDocument->saveXml());
+        $this::assertEquals('root', $result->localName);
+        $this::assertNull($result->namespaceURI);
+    }
+
+    function testConstants(): void
+    {
+
+        $config = json_decode('{
+        "section": "section1",
+        "content-type": "application/xml",
+        "comment": "Main PACS structure",
+        "schema": "cristal.xsd",
+        "namespaces": [{
+                "prefix": "h",
+                "namespace": "urn:iso:std:iso:20022:tech:xsd:head.001.001.01"
+            }, {
+                "prefix": "u",
+                "element": "Document"
+            }, {
+                "prefix": "d", 
+                "namespace": "urn:xxx"
+            }
+        ],
+        "rootElement": "/d:PDU",
+        "parts": [{
+                "order": "1",
+                "comment": "Header transformation",
+                "constant": {
+                    "namespace": "urn:xxx",
+                    "elementName": "constantElt",
+                    "variableName": "testVar"
+                },
+                "variables": {
+                    "testVar":"/body/h:AppHdr/h:headerElement"             
+            },
+                "targetPath": "/d:PDU/d:Body/d:constantElt"
+            }
+        ]
+    }', true);
+
+        $xml = '<body><AppHdr xmlns="urn:iso:std:iso:20022:tech:xsd:head.001.001.01"><headerElement>AAA</headerElement></AppHdr><Document xmlns="urn:testns"><documentElement>BBB</documentElement></Document></body>';
+        $recurse = new HorusRecurse('AAA', null);
+
+        $result = $recurse->doRecurseXml($xml, $config);
+
+        var_dump($result);
+    }
 }

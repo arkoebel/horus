@@ -7,7 +7,7 @@ class HorusRecurse
     public $business = null;
     public $xml = null;
     public $business_id = '';
-    
+
     function __construct($business_id, $log_location)
     {
         $this->common = new HorusCommon($business_id, $log_location, 'INDIGO');
@@ -17,136 +17,222 @@ class HorusRecurse
         $this->business_id = $business_id;
     }
 
-    function getPart($order,$matches){
-        foreach($matches['parts'] as $part){
-            if ($order == $part['order']){
+    function getPart($order, $matches)
+    {
+        foreach ($matches['parts'] as $part) {
+            if ($order == $part['order']) {
                 return $part;
             }
         }
         return array();
     }
 
-    function findSection($name,$matches){
-        foreach($matches as $section){
-            if($section['section']===$name){
+    function findSection($name, $matches)
+    {
+        foreach ($matches as $section) {
+            if ($section['section'] === $name) {
                 return $section;
             }
-
         }
         return null;
     }
 
-    function doRecurse($reqBody,$content_type,$proxy_mode,$matches,$accept,$params){
-        
-        if(!array_key_exists('section',$params)){
+    function doRecurse($reqBody, $content_type, $proxy_mode, $matches, $accept, $params)
+    {
+
+        if (!array_key_exists('section', $params)) {
             throw new HorusException('Section URL parameter is unknown');
         }
 
-       // if(!array_key_exists($params['section'],$matches)){
-       //     throw new HorusException('Section ' . $params['section'] . ' is unknown');
-       // }
 
-        $section = $this->findSection($params['section'],$matches);
+        $section = $this->findSection($params['section'], $matches);
 
-        if($content_type !== $section['content-type']){
+        if ($content_type !== $section['content-type']) {
             throw new HorusException('Section ' . $params['section'] . " was supposed to be of type " . $section['content-type'] . ' but found ' . $content_type . ' instead');
         }
 
         $result = null;
-        if ('application/xml'===$content_type){
-            $result = $this->doRecurseXml($reqBody,$section);
-        }elseif('application/json'===$content_type){
-            $result = $this->doRecurseJson($reqBody,$section);
-        }else{
+        if ('application/xml' === $content_type) {
+            $result = $this->doRecurseXml($reqBody, $section);
+        } elseif ('application/json' === $content_type) {
+            $result = $this->doRecurseJson($reqBody, $section);
+        } else {
             throw new HorusException('Unsupported content-type ' . $content_type);
         }
 
         return $this->http->returnWithContentType($result, $accept, 200, $proxy_mode);
-
-
     }
 
 
-    function doRecurseXml($body,$section){
+    function doRecurseXml($body, $section)
+    {
         $elements = array();
-        $xml = simplexml_load_string($body);
-        if (array_key_exists('namespaces',$section)){
-            $this->xml->registerExtraNamespaces($xml,$section['namespaces']);
+        $xmlBody = simplexml_load_string($body);
+        if (array_key_exists('namespaces', $section)) {
+            $this->xml->registerExtraNamespaces($xmlBody, $section['namespaces']);
         }
 
-        foreach ($section['parts'] as $part){
-            $this->common->mlog('Dealing with part #' . $part['order'] . ' : ' . $part['comment'],'INFO');    
+        foreach ($section['parts'] as $part) {
+            $this->common->mlog('Dealing with part #' . $part['order'] . ' : ' . $part['comment'], 'INFO');
             $inputXmlPart = null;
             $vars = array();
-            if(array_key_exists('variables',$part)){
-                $this->common->mlog('Extracting variables for part #' . $part['order'] ,'DEBUG');
-                foreach($part['variables'] as $name=>$xpath){
-                    $elt = array('key'=>$name,'value'=>$this->xml->getXpathVariable($xml,$xpath));
-                    $this->common->mlog('  Variable ' . $elt['key'] . ' = ' . $elt['value'] ,'DEBUG');
+            if (array_key_exists('variables', $part)) {
+                $this->common->mlog('Extracting variables for part #' . $part['order'], 'DEBUG');
+                foreach ($part['variables'] as $name => $xpath) {
+                    $elt = array('key' => $name, 'value' => $this->xml->getXpathVariable($xmlBody, $xpath));
+                    $this->common->mlog('  Variable ' . $elt['key'] . ' = ' . $elt['value'], 'DEBUG');
                     $vars[] = $elt;
                 }
             }
-            if(array_key_exists('path',$part)){
-                $this->common->mlog('Extracting document from XPath=' . $part['path'],'DEBUG');
-                $inputXmlPart = $xml->xpath($part['path']);
-                if (FALSE!==$inputXmlPart && is_array($inputXmlPart) && (count($inputXmlPart)>0)){
+            if (array_key_exists('path', $part)) {
+                $this->common->mlog('Extracting document from XPath=' . $part['path'], 'DEBUG');
+                $inputXmlPart = $xmlBody->xpath($part['path']);
+                if (FALSE !== $inputXmlPart && is_array($inputXmlPart) && (count($inputXmlPart) > 0)) {
                     $xpathResult = $inputXmlPart[0];
-                    $this->common->mlog('Part Contents : ' . $xpathResult->saveXML(),'DEBUG');
-                    $finalUrl = $this->common->formatQueryString($part['transformUrl'],$vars,TRUE);
-                    $this->common->mlog('Transformation URL is : ' . $finalUrl,'DEBUG');
-                    $rr = simplexml_load_string($this->http->forwardSingleHttpQuery($finalUrl,array('Content-type: application/xml','Accept: application/xml','Expect: ' , 'X-Business-Id: ' . $this->business_id), $xpathResult->saveXML()));
-                    $this->common->mlog('Part Transformed : ' . $rr->saveXML(),'DEBUG');
+                    $ddom = dom_import_simplexml($xpathResult);
+                    $correctedxmlpart = $ddom->ownerDocument->saveXML($ddom);
+                    $this->common->mlog('Part Contents : ' . $correctedxmlpart, 'DEBUG');
+                    $finalUrl = $this->common->formatQueryString($part['transformUrl'], $vars, TRUE);
+                    $this->common->mlog('Transformation URL is : ' . $finalUrl, 'DEBUG');
+                    $rr = simplexml_load_string($this->http->forwardSingleHttpQuery($finalUrl, array('Content-type: application/xml', 'Accept: application/xml', 'Expect: ', 'X-Business-Id: ' . $this->business_id), $correctedxmlpart));
+                    $this->common->mlog('Part Transformed : ' . $rr->saveXML(), 'DEBUG');
                     $elements[$part['order']] = $rr;
-                }else{
+                } else {
                     throw new HorusException('Could not extract location ' . $part['path'] . ' for part #' . $part['order']);
                 }
-            }else{
-                throw new HorusException('No XPath to search for in configuration');
-            }
+            } else {
+                if (array_key_exists('constant',$part)){
+                    $nsp = $part['constant']['namespace'];
+                    $tag = $part['constant']['elementName'];
 
+                    $value = self::getVar($part['constant']['variableName'],$vars);
+                    $xxx = '<' . $tag . ' xmlns="' . $nsp . '">' . $value . '</' . $tag . '>';
+                    error_log($xxx);
+                    $rr = simplexml_load_string($xxx);
+                    $elements[$part['order']] = $rr;
+                }else{
+                    throw new HorusException('No XPath to search for in configuration');
+                }
+            }
         }
 
         $dom = new DomDocument();
-        $rootns='';
-        if(preg_match('/\:/',$section['rootElement'])){
-            $split = explode(':',$section['rootElement'])[0];
-            foreach($section['namespaces'] as $ns){
+
+        $rootns = '';
+        if (preg_match('/\:/', $section['rootElement'])) {
+            $split = explode(':', $section['rootElement'])[0];
+            if (preg_match('/^\//', $split)) {
+                $split = substr($split, 1);
+            }
+            foreach ($section['namespaces'] as $ns) {
                 if (array_key_exists('namespace', $ns)) {
-                    if($split===$ns['prefix']){
-                        $rootns=$ns['namespace'];
+                    if ($split === $ns['prefix']) {
+                        $rootns = $ns['namespace'];
                         break;
                     }
                 } elseif (array_key_exists('element', $ns)) {
-                    if($split===$ns['prefix']){
-                        $rootns = $this->xml->searchNameSpace($ns['element'], $xml);
+                    if ($split === $ns['prefix']) {
+                        $rootns = $this->xml->searchNameSpace($ns['element'], $xmlBody);
                         break;
                     }
                 }
             }
         }
 
-        $root = new DomElement($section['rootElement'],null,$rootns);
-        $dom->appendChild($root);
-       
-
-        foreach ($elements as $index=>$element){
-            $part =$this->getPart($index,$section);
-            if (array_key_exists('targetPath',$part)){
-                $this->common->mlog("Added element to XML response " . $index . ' at ' . $part['targetPath'],'INFO');
-            }else{
-                $this->common->mlog("Added element to XML response " . $index ,'INFO');
-            }
-            $domElement = $dom->importNode(dom_import_simplexml($element),TRUE);
-            $root->appendChild($domElement);
+        if (preg_match('/^\//', $section['rootElement'])) {
+            $elementName = substr($section['rootElement'], 1);
+        } else {
+            $elementName =  $section['rootElement'];
         }
-        
+
+        $this->common->mlog("Root NS = " . $rootns . ' / Root Elt = ' . $elementName, 'DEBUG');
+        if ($rootns === '') {
+            $root = new DomElement($elementName);
+        } else {
+            $root = new DomElement($elementName, null, $rootns);
+        }
+        $dom->appendChild($root);
+
+        foreach ($elements as $index => $element) {
+            $part = $this->getPart($index, $section);
+            if (array_key_exists('targetPath', $part)) {
+                $this->common->mlog("Added element to XML response " . $index . ' at ' . $part['targetPath'], 'INFO');
+                $node = $this->addPath($root, $part['targetPath'], $section['namespaces']);
+            } else {
+                $this->common->mlog("Added element to XML response " . $index, 'INFO');
+                $node = $root;
+            }
+            $this->common->mlog("Parent Element is " . $node->localName . ' (' . $node->namespaceURI . ')', 'DEBUG');
+
+            $domElement = $dom->importNode(dom_import_simplexml($element), TRUE);
+            $node->appendChild($domElement);
+        }
+
         return $dom->saveXml();
-
-
-
     }
 
-    function doRecurseJson($reqBody,$matches){
-        $this->common->mlog("Called Recurse Json with parameters " . print_r($matches,true) . ' and document = ' . print_r($reqBody,true),'INFO');
+    function doRecurseJson($reqBody, $matches)
+    {
+        $this->common->mlog("Called Recurse Json with parameters " . print_r($matches, true) . ' and document = ' . print_r($reqBody, true), 'INFO');
+    }
+
+    function addPath($root, $targetPath, $namespaces)
+    {
+        $tree = explode('/', $targetPath);
+        array_shift($tree);   // Remove First element (coming from the heading slash in XPath)
+        array_shift($tree);   // Remove Root Element
+        array_pop($tree);     // Remove last Element (the one to add)
+        $this->common->mlog('Xml Tree : ' . print_r($tree, true), 'DEBUG');
+        $node = $root;
+        $this->common->mlog("Root is " . $root->prefix . ':' . $root->localName, 'DEBUG');
+                
+        foreach ($tree as $leaf) {
+            $this->common->mlog("Testing output XML : is element " . $leaf . ' present?', 'DEBUG');
+            $ns = explode(':', $leaf);
+            if (count($ns) === 1) {
+                $prefix = '';
+                $path = $ns[0];
+            } else {
+                $prefix = $ns[0];
+                $path = $ns[1];
+            }
+            $uri = self::getNSUriFromPrefix($prefix, $namespaces);
+            $this->common->mlog("Testing output XML : testing " . $path . ' (' . $uri . ')', 'DEBUG');
+            $cc = $root->getElementsByTagNameNS($uri, $path);
+            $this->common->mlog(' Elements count = ' . $cc->length, 'DEBUG');
+
+            if ($cc->length !== 1) {
+                $this->common->mlog("Testing output XML : element " . $path . ' not found. Creating it under node ' . $node->prefix . ':' . $node->localName, 'DEBUG');
+                $elt = new DomElement($path, '', $uri);
+                $node->appendChild($elt);
+            }
+            $node = $root->getElementsByTagNameNS($uri, $path)->item(0);
+        }
+
+        return $node;
+    }
+
+    static function getNSUriFromPrefix($prefix, $namespaces)
+    {
+
+        if (is_null($prefix) || !is_array($namespaces) || (count($namespaces) == 0) || is_null($prefix) || ($prefix == '')) {
+            return '';
+        }
+
+        foreach ($namespaces as $namespace) {
+            if ($namespace['prefix'] === $prefix) {
+                return $namespace['namespace'];
+            }
+        }
+        return '';
+    }
+
+    static function getVar($name,$vars){
+        foreach($vars as $var){
+            if ($var['key'] == $name){
+                return $var['value'];
+            }
+        }
+        return '';
     }
 }

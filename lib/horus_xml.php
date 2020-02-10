@@ -25,7 +25,7 @@ class HorusXml
         $mnamespaces = explode(':', $namespaces[""]);
         $namespace = array_pop($mnamespaces);
 
- $this->common->mlog("NS: " . print_r($namespace, true) . "\n", 'INFO');
+        $this->common->mlog("NS: " . print_r($namespace, true) . "\n", 'INFO');
         $domelement = dom_import_simplexml($query);
         $domdoc = $domelement->ownerDocument;
 
@@ -58,7 +58,7 @@ class HorusXml
 
         $parameters = $this->business->findMatch($matches, $selected, "parameters");
 
-        if(is_null($parameters)||!is_array($parameters)||(count($parameters)==0)){
+        if (is_null($parameters) || !is_array($parameters) || (count($parameters) == 0)) {
             return $vars;
         }
 
@@ -140,11 +140,20 @@ class HorusXml
     function searchNameSpace($elementName, $xml)
     {
         $namespace = '';
-        foreach ($xml->Children() as $element => $fragment) {
-            if ($element === $elementName) {
-                $ns = $fragment->getNamespaces();
-                if (is_array($ns) && array_key_exists('', $ns)) {
-                    return $ns[''];
+        if ($xml->count() != 0) {
+            foreach ($xml->Children() as $element => $fragment) {
+                if ($element === $elementName) {
+                    $ns = $fragment->getNamespaces();
+                    if (is_array($ns) && array_key_exists('', $ns)) {
+                        return $ns[''];
+                    }
+                } else {
+                    $this->common->mlog('Searching deeper into ' . $element, 'DEBUG');
+                    $childrenns = $this->searchNameSpace($elementName, $fragment);
+                    if ($childrenns != '') {
+                        $this->common->mlog('Found element ' . $elementName . ' in child ' . $element . ' at namespace ' . $childrenns, 'DEBUG');
+                        return $childrenns;
+                    }
                 }
             }
         }

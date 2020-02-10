@@ -259,4 +259,65 @@ class HorusRecurseTest extends HorusTestCase
 
         var_dump($result);
     }
+
+    function testReal():void {
+
+        $input = '<DataPDU xmlns="urn:swift:saa:xsd:saa.2.0"><Revision>2.0.2</Revision><Header><Message><SenderReference>AX20190780000010</SenderReference><MessageIdentifier>camt.005.001.03</MessageIdentifier><Format>AnyXML</Format><Sender><DN>ou=bpce,ou=target2,o=bpcefrpp,o=swift</DN></Sender><Receiver><DN>ou=iwsiapilot,ou=euro1,ou=swiftnet,o=swhqbebb,o=swift</DN></Receiver><InterfaceInfo><UserReference>AX20190780000010</UserReference><ValidationLevel>Minimum</ValidationLevel><MessageNature>Financial</MessageNature><ProductInfo><Product><VendorName>Diamis</VendorName><ProductName>CT2C</ProductName><ProductVersion>2.0</ProductVersion></Product></ProductInfo></InterfaceInfo><NetworkInfo><Service>swift.euro1.iws!p</Service></NetworkInfo><SecurityInfo><SWIFTNetSecurityInfo><IsNRRequested>true</IsNRRequested></SWIFTNetSecurityInfo></SecurityInfo></Message></Header><Body><AppHdr xmlns="urn:swift:xsd:iws.ApplicationHeader$ahV10"><From><Type>XML</Type><Id>BPCEFRPPXXX</Id></From><MsgRef>AX20190780000010</MsgRef><CrDate>2019-03-19T07:15:44</CrDate></AppHdr><Document xmlns="urn:swift:xsd:iws.GetTransaction$camt.005.001.03"><camt.005.001.03><MsgId><Id>AX20190780000010</Id></MsgId><TxQryDef><TxCrit><NewCrit><SchCrit><PmtTo><SysId>ERP</SysId></PmtTo><PmtFr><SysId>ERP</SysId></PmtFr><PmtSch><InstrSts><PmtInstrSts><PdgSts>STLE</PdgSts></PmtInstrSts><PmtInstrStsDtTm><DtTmRg><FrDtTm>2019-03-18T12:12:06</FrDtTm><ToDtTm>2019-03-19T07:15:44</ToDtTm></DtTmRg></PmtInstrStsDtTm></InstrSts><IntrBkValDt>2019-03-19</IntrBkValDt></PmtSch></SchCrit></NewCrit></TxCrit></TxQryDef></camt.005.001.03></Document></Body></DataPDU>';
+
+        $config = json_decode('{
+            "section": "section1",
+            "content-type": "application/xml",
+            "comment": "Main PACS structure",
+            "schema": "cristal.xsd",
+            "namespaces": [{
+                    "prefix": "h",
+                    "namespace": "urn:iso:std:iso:20022:tech:xsd:head.001.001.01"
+                }, {
+                    "prefix": "u",
+                    "element": "Document"
+                }, {
+                    "prefix": "saa", 
+                    "namespace": "urn:swift:saa:xsd:saa.2.0"
+                }
+            ],
+            "rootElement": "/saa:DataPDU",
+            "parts": [{
+                    "order": "1",
+                    "comment": "Header transformation",
+                    "path": "/saa:DataPDU/saa:Header",
+                    "transformUrl": "http://localhost",
+                    "targetPath": "/saa:DataPDU/saa:Header"
+                }
+            ]
+        }', true);
+
+        self::$curlCounter = 0;
+        self::$curls[] = array(
+            'url' => 'http://localhost',
+            'options' => array(
+                CURLOPT_RETURNTRANSFER => 1,
+                CURLOPT_HTTPHEADER => array('Content-Type: application/xml', 'Accept: application/xml', 'Expect:', 'X-Business-Id: PPPP'),
+                CURLOPT_SSL_VERIFYPEER => False,
+                CURLOPT_VERBOSE => True,
+                CURLOPT_HEADER => True,
+                CURLINFO_HEADER_OUT => True
+            ),
+            'data' => "HTTP/1.1 200 OK\nDate: Sun, 20 Oct 2019 11:22:04 GMT\nExpires: -1\nCache-Control: private, max-age=0\n" .
+                "Content-Type: application/xml; charset=ISO-8859-1\nAccept-Ranges: none\nVary: Accept-Encoding\nTransfer-Encoding: chunked\n" .
+                "\n" .
+                '<?xml version="1.0"?>' . "\n" . '<Header xmlns="urn:swift:saa:xsd:saa.2.0"><Message><SenderReference>AX20190780000010</SenderReference><MessageIdentifier>camt.005.001.03</MessageIdentifier><Format>AnyXML</Format><Sender><DN>ou=bpce,ou=target2,o=bpcefrpp,o=swift</DN></Sender><Receiver><DN>ou=iwsiapilot,ou=euro1,ou=swiftnet,o=swhqbebb,o=swift</DN></Receiver><InterfaceInfo><UserReference>AX20190780000010</UserReference><ValidationLevel>Minimum</ValidationLevel><MessageNature>Financial</MessageNature><ProductInfo><Product><VendorName>Diamis</VendorName><ProductName>CT2C</ProductName><ProductVersion>2.0</ProductVersion></Product></ProductInfo></InterfaceInfo><NetworkInfo><Service>swift.euro1.iws!p</Service></NetworkInfo><SecurityInfo><SWIFTNetSecurityInfo><IsNRRequested>true</IsNRRequested></SWIFTNetSecurityInfo></SecurityInfo></Message></Header>' . "\n",
+            'returnHeaders' => array(
+                CURLINFO_HTTP_CODE => 200,
+                CURLINFO_HEADER_SIZE => 218
+            ),
+            'returnCode' => 200,
+            'errorMessage' => '',
+            'returnBody' => '<Header xmlns="urn:swift:saa:xsd:saa.2.0"><Message><SenderReference>AX20190780000010</SenderReference><MessageIdentifier>camt.005.001.03</MessageIdentifier><Format>AnyXML</Format><Sender><DN>ou=bpce,ou=target2,o=bpcefrpp,o=swift</DN></Sender><Receiver><DN>ou=iwsiapilot,ou=euro1,ou=swiftnet,o=swhqbebb,o=swift</DN></Receiver><InterfaceInfo><UserReference>AX20190780000010</UserReference><ValidationLevel>Minimum</ValidationLevel><MessageNature>Financial</MessageNature><ProductInfo><Product><VendorName>Diamis</VendorName><ProductName>CT2C</ProductName><ProductVersion>2.0</ProductVersion></Product></ProductInfo></InterfaceInfo><NetworkInfo><Service>swift.euro1.iws!p</Service></NetworkInfo><SecurityInfo><SWIFTNetSecurityInfo><IsNRRequested>true</IsNRRequested></SWIFTNetSecurityInfo></SecurityInfo></Message></Header>'
+        );
+
+        $recurse = new HorusRecurse('FFF', null);
+        $result = $recurse->doRecurseXml($input, $config);
+
+        var_dump($result);
+    }
 }

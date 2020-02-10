@@ -56,7 +56,13 @@ class HorusXml
     {
         $vars = array();
 
-        foreach ($this->business->findMatch($matches, $selected, "parameters") as $param => $path) {
+        $parameters = $this->business->findMatch($matches, $selected, "parameters");
+
+        if(is_null($parameters)||!is_array($parameters)||(count($parameters)==0)){
+            return $vars;
+        }
+
+        foreach ($parameters as $param => $path) {
             $vars[$param] = $this->getXpathVariable($query, $path);
         }
 

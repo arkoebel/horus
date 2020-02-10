@@ -60,7 +60,7 @@ class HorusRecurse
             throw new HorusException('Unsupported content-type ' . $content_type);
         }
 
-        return $this->http->returnWithContentType($result, $accept, 200, $proxy_mode);
+        return $this->http->returnWithContentType($result, $content_type, 200, $proxy_mode);
     }
 
 
@@ -90,7 +90,9 @@ class HorusRecurse
                 if (FALSE !== $inputXmlPart && is_array($inputXmlPart) && (count($inputXmlPart) > 0)) {
                     $xpathResult = $inputXmlPart[0];
                     $ddom = dom_import_simplexml($xpathResult);
-                    $correctedxmlpart = $ddom->ownerDocument->saveXML($ddom);
+                    $newdom = new DomDocument('1.0','utf-8');
+                    $newdom->appendChild($newdom->importNode($ddom,true));
+                    $correctedxmlpart =  $newdom->saveXml($newdom->documentElement);
                     $this->common->mlog('Part Contents : ' . $correctedxmlpart, 'DEBUG');
                     $finalUrl = $this->common->formatQueryString($part['transformUrl'], $vars, TRUE);
                     $this->common->mlog('Transformation URL is : ' . $finalUrl, 'DEBUG');

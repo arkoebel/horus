@@ -172,6 +172,23 @@ class HorusBusiness
         return $outParams;
     }
 
+    public function getTemplateName($template,$variables){
+        preg_match_all('/\$\{([A-z0-9_\-]*)\}/',$template,$list);
+        if(count($list)==0){
+            return $template;
+        }else{
+            $tmpl = $template;
+            foreach($list[1] as $item){
+                if(array_key_exists($item,$variables)){
+                    $tmpl = preg_replace('/\$\{' . $item . '\}/',$variables[$item],$tmpl);
+                }else{
+                    $tmpl = preg_replace('/\$\{' . $item . '\}/','',$tmpl);
+                }
+            }
+            return $tmpl;
+        }
+    }
+
     public function performRouting($route, $content_type, $accept, $data, $queryParams = array())
     {
         if (is_null($route) || $route === false) {

@@ -17,7 +17,6 @@ class HorusInjector
     function doInject($reqbody, $proxy_mode)
     {
         $reqparams = json_decode($reqbody, true);
-        $template = 'templates/' . $reqparams['template'];
         $vars = array();
         if (array_key_exists('attr', $reqparams)) {
             foreach ($reqparams['attr'] as $key => $value){
@@ -28,6 +27,9 @@ class HorusInjector
         $this->common->mlog('Received request', 'INFO');
         for ($i = 0; $i < $reqparams['repeat']; $i++) {
             $vars['loop_index'] = $i;
+            $template = 'templates/' . HorusBusiness::getTemplateName($reqparams['template'],$vars);
+            $this->common->mlog("Using template " . $template, 'INFO');
+
             ob_start();
             include $template;
             $output = ob_get_contents();

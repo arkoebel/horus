@@ -115,8 +115,12 @@ class HorusCommon
         $query = '';
         $converted = array();
         // Cycles all parameters; key duplicates are set as the last encountered value
-        foreach ($params as $param){
-                $converted[$param['key']] = $param['value'];
+        foreach ($params as $id=>$param){
+                if((is_array($param))&&(array_key_exists('key',$param))&&(array_key_exists('value',$param))){
+                    $converted[$param['key']] = $param['value'];
+                }else if(!is_array($param)){
+                    $converted[$id] = $param;
+                }
         }
 
         ksort($converted);

@@ -81,7 +81,9 @@ class HorusSimpleJson
         $nrep = 0;
         $response = '';
         foreach ($res['templates'] as $template) {
-            $respxml = 'templates/' . $template;
+            $respxml = 'templates/' . HorusBusiness::getTemplateName($template,$vars);
+            $this->common->mlog("Using template " . $respxml, 'INFO');
+
             ob_start();
             include $respxml;
             $output = ob_get_contents();

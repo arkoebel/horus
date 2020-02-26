@@ -102,7 +102,7 @@ class HorusRecurseTest extends HorusTestCase
             'returnBody' => '<Document xmlns="urn:iso:std:iso:20022:tech:xsd:pacs.002.001.03"><FIToFIPmtStsRpt><GrpHdr><MsgId>RE34567890</MsgId><CreDtTm>2019-10-20T11:56:36</CreDtTm><InstgAgt><FinInstnId><BIC>BNPAFRPP</BIC></FinInstnId></InstgAgt><InstdAgt><FinInstnId><BIC>BNPAFRPP</BIC></FinInstnId></InstdAgt></GrpHdr><OrgnlGrpInfAndSts><OrgnlMsgId>1234567890</OrgnlMsgId><OrgnlMsgNmId>pacs.008</OrgnlMsgNmId><GrpSts>ACCP</GrpSts></OrgnlGrpInfAndSts><TxInfAndSts><StsId>1234567890</StsId><OrgnlEndToEndId>1234567890</OrgnlEndToEndId><OrgnlTxId>1234567890</OrgnlTxId><AccptncDtTm>2012-12-13T12:12:12.000Z</AccptncDtTm><OrgnlTxRef><PmtTpInf><SvcLvl><Cd>SEPA</Cd></SvcLvl><LclInstrm><Cd>INST</Cd></LclInstrm><CtgyPurp><Cd>PURP</Cd></CtgyPurp></PmtTpInf><DbtrAgt><FinInstnId><BIC>BNPAFRPPXXX</BIC></FinInstnId></DbtrAgt></OrgnlTxRef></TxInfAndSts></FIToFIPmtStsRpt></Document>'
         );
 
-        $result = $recurse->doRecurseXml($xml, $config);
+        $result = $recurse->doRecurseXml($xml, $config,array());
 
         var_dump($result);
 
@@ -255,7 +255,7 @@ class HorusRecurseTest extends HorusTestCase
         $xml = '<body><AppHdr xmlns="urn:iso:std:iso:20022:tech:xsd:head.001.001.01"><headerElement>AAA</headerElement></AppHdr><Document xmlns="urn:testns"><documentElement>BBB</documentElement></Document></body>';
         $recurse = new HorusRecurse('AAA', null);
 
-        $result = $recurse->doRecurseXml($xml, $config);
+        $result = $recurse->doRecurseXml($xml, $config,array());
 
         var_dump($result);
     }
@@ -316,7 +316,7 @@ class HorusRecurseTest extends HorusTestCase
         );
 
         $recurse = new HorusRecurse('FFF', null);
-        $result = $recurse->doRecurseXml($input, $config);
+        $result = $recurse->doRecurseXml($input, $config,array('test'=>'value'));
 
         var_dump($result);
     }

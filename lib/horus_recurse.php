@@ -53,9 +53,9 @@ class HorusRecurse
 
         $result = null;
         if ('application/xml' === $content_type) {
-            $result = $this->doRecurseXml($reqBody, $section);
+            $result = $this->doRecurseXml($reqBody, $section,$params);
         } elseif ('application/json' === $content_type) {
-            $result = $this->doRecurseJson($reqBody, $section);
+            $result = $this->doRecurseJson($reqBody, $section,$params);
         } else {
             throw new HorusException('Unsupported content-type ' . $content_type);
         }
@@ -64,7 +64,7 @@ class HorusRecurse
     }
 
 
-    function doRecurseXml($body, $section)
+    function doRecurseXml($body, $section, $queryParams)
     {
         $elements = array();
         $xmlBody = simplexml_load_string($body);
@@ -75,7 +75,7 @@ class HorusRecurse
         foreach ($section['parts'] as $part) {
             $this->common->mlog('Dealing with part #' . $part['order'] . ' : ' . $part['comment'], 'INFO');
             $inputXmlPart = null;
-            $vars = array();
+            $vars = $queryParams;
             if (array_key_exists('variables', $part)) {
                 $this->common->mlog('Extracting variables for part #' . $part['order'], 'DEBUG');
                 foreach ($part['variables'] as $name => $xpath) {
@@ -89,9 +89,12 @@ class HorusRecurse
                 $inputXmlPart = $xmlBody->xpath($part['path']);
                 if (FALSE !== $inputXmlPart && is_array($inputXmlPart) && (count($inputXmlPart) > 0)) {
                     $xpathResult = $inputXmlPart[0];
+
                     $ddom = dom_import_simplexml($xpathResult);
+
                     $newdom = new DomDocument('1.0','utf-8');
                     $newdom->appendChild($newdom->importNode($ddom,true));
+                    
                     $correctedxmlpart =  $newdom->saveXml($newdom->documentElement);
                     $this->common->mlog('Part Contents : ' . $correctedxmlpart, 'DEBUG');
                     $finalUrl = $this->common->formatQueryString($part['transformUrl'], $vars, TRUE);
@@ -108,9 +111,8 @@ class HorusRecurse
                     $tag = $part['constant']['elementName'];
 
                     $value = self::getVar($part['constant']['variableName'],$vars);
-                    $xxx = '<' . $tag . ' xmlns="' . $nsp . '">' . $value . '</' . $tag . '>';
-                    error_log($xxx);
-                    $rr = simplexml_load_string($xxx);
+
+                    $rr = simplexml_load_string('<' . $tag . ' xmlns="' . $nsp . '">' . $value . '</' . $tag . '>');
                     $elements[$part['order']] = $rr;
                 }else{
                     throw new HorusException('No XPath to search for in configuration');
@@ -173,9 +175,9 @@ class HorusRecurse
         return $dom->saveXml();
     }
 
-    function doRecurseJson($reqBody, $matches)
+    function doRecurseJson($reqBody, $matches,$queryParams)
     {
-        $this->common->mlog("Called Recurse Json with parameters " . print_r($matches, true) . ' and document = ' . print_r($reqBody, true), 'INFO');
+        $this->common->mlog("Called Recurse Json with parameters " . print_r($matches, true) . ' and document = ' . print_r($reqBody, true) . ' and queryParameters = ' . $queryParams, 'INFO');
     }
 
     function addPath($root, $targetPath, $namespaces)

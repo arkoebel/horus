@@ -309,9 +309,20 @@ class HorusBusinessTest extends HorusTestCase
                                 'errorMessage'=>'',
                                 'returnBody'=>'{"Status":"OK"}');
 
-        $res = $horus->performRouting($route, 'application/json', 'application/json', '{"test":"ok"}',array('repeat'=>'3','extra'=>'true'));
+        $horus->performRouting($route, 'application/json', 'application/json', '{"test":"ok"}',array('repeat'=>'3','extra'=>'true'));
 
         $this::assertEquals('http://proxy/horus/horus.php?bic1=BNPAFRPPXXX&extra=true&param1=single&repeat=5&sourcex=cristal',self::$curls[0]['url'], 'Url params should be mixed');
 
+    }
+
+    function testGetTemplate():void {
+        $template1 = 'azer${test1}${test2}.ccc';
+        $template2 = 'azer${test1}${test3}.ccc';
+        $template3 = 'azer.ccc';
+        $variables = array('test1'=>'123','test2'=>'456');
+        $this::assertEquals('azer123456.ccc',HorusBusiness::getTemplateName($template1,$variables));
+        $this::assertEquals('azer123.ccc',HorusBusiness::getTemplateName($template2,$variables));
+        $this::assertEquals('azer.ccc',HorusBusiness::getTemplateName($template3,$variables));
+        $this::assertEquals('azer.ccc',HorusBusiness::getTemplateName($template1,array()));
     }
 }

@@ -19,10 +19,12 @@ class HorusXml
     {
 
         $namespaces = $query->getDocNamespaces();
-        if (count($namespaces) === 0) {
+        if ((count($namespaces) === 0)||(!array_key_exists('',$namespaces)) ) {
             $domns = dom_import_simplexml($query);
             $namespaces[''] = $domns->namespaceURI;
-            //$namespaces[''] = $defaultNamespace;
+            if ($domns->namespaceURI == '') {
+              $namespaces[''] = $defaultNamespace;
+            }   
         }
         $mnamespaces = explode(':', $namespaces[""]);
         $namespace = array_pop($mnamespaces);

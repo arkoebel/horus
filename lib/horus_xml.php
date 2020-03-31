@@ -15,9 +15,7 @@ class HorusXml
         $this->business_id = $business_id;
     }
 
-    function findSchema($query, $defaultNamespace = '')
-    {
-
+    function getRootNamespace($query, $defaultNamespace){
         $namespaces = $query->getDocNamespaces();
         if ((count($namespaces) === 0)||(!array_key_exists('',$namespaces)) ) {
             $domns = dom_import_simplexml($query);
@@ -26,7 +24,15 @@ class HorusXml
               $namespaces[''] = $defaultNamespace;
             }   
         }
-        $mnamespaces = explode(':', $namespaces[""]);
+        return $namespaces[''];
+    }
+
+    function findSchema($query, $defaultNamespace = '')
+    {
+
+        $namespaces = $this->getRootNamespace($query,$defaultNamespace);
+        
+        $mnamespaces = explode(':', $namespaces);
         $namespace = array_pop($mnamespaces);
 
         $this->common->mlog("NS: " . print_r($namespace, true) . "\n", 'INFO');
@@ -198,8 +204,8 @@ class HorusXml
         }
 
 
-        $namespaces = $query->getDocNamespaces();
-        $query->registerXPathNamespace('u', $namespaces[""]);
+        $namespaces = $this->getRootNamespace($query,$defaultNamespace);
+        $query->registerXPathNamespace('u', $namespaces);
 
         $selectedXsd = $this->findSchema($query, $defaultNamespace);
 

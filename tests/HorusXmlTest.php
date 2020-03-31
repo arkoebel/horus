@@ -323,8 +323,9 @@ class HorusXmlTest extends HorusTestCase
         $this::assertEquals(count($results), 3, 'Should find 3 multipart boundary markers for 2 files downloaded');
         $first = explode("\r\n", $results[1]);
         $b64 = '';
-        for ($i = 4; $i < count($first) - 2; $i++)
+        for ($i = 4; $i < count($first) - 2; $i++){
             $b64 .= $first[$i];
+        }
         $b64 = base64_decode($b64);
 
         $xml = simplexml_load_string($b64);
@@ -389,6 +390,14 @@ class HorusXmlTest extends HorusTestCase
 
             $this::assertEquals(array(''=>'urn:iso:std:iso:20022:tech:xsd:pacs.008.001.08','xsi'=>'http://www.w3.org/2001/XMLSchema-instance'),$fragment3->getDocNamespaces());
            
+
+    }
+
+    function testGlobalNamespace():void {
+        $xmlinject = new HorusXml('WZWZ', null);
+        $input = '<a:test xmlns:a="urn:a"><a:test2>AAA</a:test2></a:test>';
+        $this::assertEquals('urn:a',$xmlinject->getRootNamespace(simplexml_load_string($input),'aa'));
+
 
     }
 }

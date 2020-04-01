@@ -81,14 +81,14 @@ class HorusXml
 
     function getXpathVariable($xml, $xpath)
     {
-        $rr = ($xml->xpath($xpath));
-        if (($rr !== FALSE) && (count($rr) > 0)) {
-            $rr0 = $rr[0];
-            if ($rr0->count() != 0) {
-                return $rr0->asXml();
-            } else {
-                return (string) $rr0;
-            }
+        $rr = $xml->xpath($xpath);
+        if(($rr!==FALSE) && (count($rr)>0)){
+          $dom = dom_import_simplexml($rr[0]);
+          if (XML_TEXT_NODE == $dom->childNodes->item(0)->nodeType){
+            return (string) $rr[0];
+          }else{
+            return $rr[0]->asXml();
+          }
         } else {
             return '';
         }

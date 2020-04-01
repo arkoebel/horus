@@ -394,10 +394,17 @@ class HorusXmlTest extends HorusTestCase
     }
 
     function testGlobalNamespace():void {
-        $xmlinject = new HorusXml('WZWZ', null);
+        $xmlinject = new HorusXml('XXXX', null);
         $input = '<a:test xmlns:a="urn:a"><a:test2>AAA</a:test2></a:test>';
         $this::assertEquals('urn:a',$xmlinject->getRootNamespace(simplexml_load_string($input),'aa'));
 
+        $input2 = simplexml_load_string('<?xml version="1.0"?><saa:DataPDU xmlns:saa="urn:swift:saa:xsd:saa.2.0"><saa:Revision>2.0.9</saa:Revision><saa:Header><saa:Message><saa:SenderReference>SR20190780000010</saa:SenderReference><saa:MessageIdentifier>pacs.008.001.08</saa:MessageIdentifier><saa:Format>AnyXML</saa:Format><saa:Sender><saa:DN>ou=bpce,ou=target2,o=bpcefrpp,o=swift</saa:DN></saa:Sender><saa:Receiver><saa:DN>cn=rtgs,o=trgtxepm,o=swift</saa:DN></saa:Receiver><saa:InterfaceInfo><saa:UserReference>UR20190780000010</saa:UserReference><saa:ValidationLevel>Minimum</saa:ValidationLevel><saa:MessageNature>Financial</saa:MessageNature><saa:ProductInfo><saa:Product><saa:VendorName>Diamis</saa:VendorName><saa:ProductName>Cristal</saa:ProductName><saa:ProductVersion>5.0</saa:ProductVersion></saa:Product></saa:ProductInfo></saa:InterfaceInfo><saa:NetworkInfo><saa:Service>esmig.t2.iast</saa:Service></saa:NetworkInfo><saa:SecurityInfo><saa:SWIFTNetSecurityInfo><saa:IsNRRequested>true</saa:IsNRRequested></saa:SWIFTNetSecurityInfo></saa:SecurityInfo></saa:Message></saa:Header><saa:Body><AppHdr xmlns="urn:iso:std:iso:20022:tech:xsd:head.001.001.01"><Fr><FIId><FinInstnId><BICFI>BPCEFRPPXXX</BICFI></FinInstnId></FIId></Fr><To><FIId><FinInstnId><BICFI>ZYEXFRP0XXX</BICFI></FinInstnId></FIId></To><BizMsgIdr>BizMsgIdr6520</BizMsgIdr><MsgDefIdr>pacs.008.001.08</MsgDefIdr><CreDt>2020-03-04T17:28:38Z</CreDt></AppHdr><Document xmlns="urn:iso:std:iso:20022:tech:xsd:pacs.008.001.08"><FIToFICstmrCdtTrf><GrpHdr><MsgId>NONREF</MsgId><CreDtTm>2020-03-17T15:08:49+01:00</CreDtTm><NbOfTxs>1</NbOfTxs><SttlmInf><SttlmMtd>CLRG</SttlmMtd><ClrSys><Cd>TGT</Cd></ClrSys></SttlmInf></GrpHdr><CdtTrfTxInf><PmtId><InstrId>InstrId6520</InstrId><EndToEndId>EndToEndId6520</EndToEndId><UETR>eb6305c9-1f7f-49de-aed0-16487c27b43d</UETR></PmtId><IntrBkSttlmAmt Ccy="EUR">27535371.01</IntrBkSttlmAmt><IntrBkSttlmDt>2020-01-03</IntrBkSttlmDt><SttlmPrty>HIGH</SttlmPrty><ChrgBr>DEBT</ChrgBr><InstgAgt><FinInstnId><BICFI>BNPAFRPPXXX</BICFI></FinInstnId></InstgAgt><InstdAgt><FinInstnId><BICFI>ZYFAFRP0XXX</BICFI></FinInstnId></InstdAgt><Dbtr/><DbtrAgt><FinInstnId/></DbtrAgt><CdtrAgt><FinInstnId/></CdtrAgt><Cdtr/></CdtTrfTxInf></FIToFICstmrCdtTrf></Document></saa:Body></saa:DataPDU>');
 
+        $namespaces = $xmlinject->getRootNamespace($input2,'aaa');
+        $input2->registerXPathNamespace('u',$namespaces);
+        $xx = $xmlinject->getXpathVariable($input2,'/u:DataPDU/u:Revision');
+        $this::assertEquals('2.0.9',$xx);
+        $yy = $xmlinject->getXpathVariable($input2,'/u:DataPDU/*');
+        error_log('XXX ' . print_r($yy,true) . ' xxx');
     }
 }

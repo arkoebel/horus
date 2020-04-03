@@ -405,6 +405,32 @@ class HorusXmlTest extends HorusTestCase
         $xx = $xmlinject->getXpathVariable($input2,'/u:DataPDU/u:Revision');
         $this::assertEquals('2.0.9',$xx);
         $yy = $xmlinject->getXpathVariable($input2,'/u:DataPDU/*');
-        error_log('XXX ' . print_r($yy,true) . ' xxx');
+
+    }
+
+    function testSpecialRegisterExtraNamespaces():void {
+        $xml = '<?xml version="1.0"?>
+        <saa:DataPDU xmlns:saa="urn:swift:saa:xsd:saa.2.0"><saa:Revision>2.0.9</saa:Revision><saa:Header><saa:Message><saa:SenderReference>SR20190780000010</saa:SenderReference><saa:MessageIdentifier>pacs.008.001.08</saa:MessageIdentifier><saa:Format>AnyXML</saa:Format><saa:Sender><saa:DN>ou=bpce,ou=target2,o=bpcefrpp,o=swift</saa:DN></saa:Sender><saa:Receiver><saa:DN>cn=rtgs,o=trgtxepm,o=swift</saa:DN></saa:Receiver><saa:InterfaceInfo><saa:UserReference>UR20190780000010</saa:UserReference><saa:ValidationLevel>Minimum</saa:ValidationLevel><saa:MessageNature>Financial</saa:MessageNature><saa:ProductInfo><saa:Product><saa:VendorName>Diamis</saa:VendorName><saa:ProductName>Cristal</saa:ProductName><saa:ProductVersion>5.0</saa:ProductVersion></saa:Product></saa:ProductInfo></saa:InterfaceInfo><saa:NetworkInfo><saa:Service>esmig.t2.iast</saa:Service></saa:NetworkInfo><saa:SecurityInfo><saa:SWIFTNetSecurityInfo><saa:IsNRRequested>true</saa:IsNRRequested></saa:SWIFTNetSecurityInfo></saa:SecurityInfo></saa:Message></saa:Header><saa:Body><AppHdr xmlns="urn:iso:std:iso:20022:tech:xsd:head.001.001.01"><Fr><FIId><FinInstnId><BICFI>BPCEFRPPXXX</BICFI></FinInstnId></FIId></Fr><To><FIId><FinInstnId><BICFI>ZYEXFRP0XXX</BICFI></FinInstnId></FIId></To><BizMsgIdr>BizMsgIdr7503</BizMsgIdr><MsgDefIdr>pacs.008.001.08</MsgDefIdr><CreDt>2020-03-04T17:28:38Z</CreDt></AppHdr><pacs:Document xmlns:pacs="urn:iso:std:iso:20022:tech:xsd:pacs.008.001.08"><pacs:FIToFICstmrCdtTrf><pacs:GrpHdr><pacs:MsgId>NONREF</pacs:MsgId><pacs:CreDtTm>2020-03-17T15:08:49+01:00</pacs:CreDtTm><pacs:NbOfTxs>1</pacs:NbOfTxs><pacs:SttlmInf><pacs:SttlmMtd>CLRG</pacs:SttlmMtd><pacs:ClrSys><pacs:Cd>TGT</pacs:Cd></pacs:ClrSys></pacs:SttlmInf></pacs:GrpHdr><pacs:CdtTrfTxInf><pacs:PmtId><pacs:InstrId>-C0</pacs:InstrId><pacs:EndToEndId>InstrIdnumid</pacs:EndToEndId><pacs:UETR>eb6305c9-1f7f-49de-aed0-16487c27b43d</pacs:UETR></pacs:PmtId><pacs:IntrBkSttlmAmt Ccy="EUR">27535371.01</pacs:IntrBkSttlmAmt><pacs:IntrBkSttlmDt>2020-01-03</pacs:IntrBkSttlmDt><pacs:SttlmPrty>HIGH</pacs:SttlmPrty><pacs:ChrgBr>DEBT</pacs:ChrgBr><pacs:InstgAgt><pacs:FinInstnId><pacs:BICFI>BNPAFRPPXXX</pacs:BICFI></pacs:FinInstnId></pacs:InstgAgt><pacs:InstdAgt><pacs:FinInstnId><pacs:BICFI>ZYFAFRP0XXX</pacs:BICFI></pacs:FinInstnId></pacs:InstdAgt><pacs:Dbtr/><pacs:DbtrAgt><pacs:FinInstnId/></pacs:DbtrAgt><pacs:CdtrAgt><pacs:FinInstnId/></pacs:CdtrAgt><pacs:Cdtr/></pacs:CdtTrfTxInf></pacs:FIToFICstmrCdtTrf><!-- HORUS:DetectedAction=ACK_CSM_OK-DetectedMsgType=pacs.008-DetectedCode=2-C0GO --></pacs:Document></saa:Body></saa:DataPDU>
+        ';
+        $config = json_decode('[
+            {
+              "query": "isis.xsd",
+              "comment": "body wrapper",
+              "responseFormat": "isis.xml",
+              "errorTemplate": "errorTemplate.xml",
+              "extraNamespaces": [
+                  {"prefix": "saa", "namespace":"urn:swift:saa:xsd:saa.2.0"},
+                  {"prefix": "sah", "namespace":"urn:iso:std:iso:20022:tech:xsd:head.001.001.01"},
+                  {"prefix": "d", "element": "Document"}
+              ],
+              "parameters" : {
+                "header" : "/saa:DataPDU/saa:Body/sah:AppHdr",
+                "doc" : "/saa:DataPDU/saa:Body/d:Document"
+              }
+            }]',true);
+        $xmlinject = new HorusXml('ABCABC','');
+        $input = simplexml_load_string($xml);
+        $xmlinject->registerExtraNamespaces($input,$config['extraNamespaces']);
+
     }
 }

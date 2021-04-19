@@ -1,0 +1,15 @@
+{
+    "horusFormats": [
+        {
+            "formatName": "SibesIn",
+            "stripSection": "SIBESHeader",
+            "httpQueryPrefix": "s_"
+        },
+        {
+            "formatName": "SibesOut",
+            "addSection": "SIBESOutHeader",
+            "httpQueryPrefix": "s_"
+        }
+
+    ]
+}

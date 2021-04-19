@@ -133,7 +133,15 @@ class HorusXml
             if (is_array($forwardparams[0])) {
                 foreach ($forwardparams[0] as $forwardparam) {
                     $key = urlencode($forwardparam['key']);
-                    $value = urlencode($forwardparam['value']);
+                    if (strpos('<?',$forwardparam['value'])>0)
+                        try {
+                            $value = urlencode(eval($forwardparam['value']));
+                        } catch (\Throwable $th) {
+                            $value = urlencode($forwardparam['value']);
+                        }
+                    else
+                        $value = urlencode($forwardparam['value']);
+
                     $fwd_params[] = $key . '=' . $value;
                 }
                 $this->common->mlog('query out : ' . print_r($fwd_params, true), 'INFO');

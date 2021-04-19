@@ -15,14 +15,15 @@ class HorusXml
         $this->business_id = $business_id;
     }
 
-    function getRootNamespace($query, $defaultNamespace){
+    function getRootNamespace($query, $defaultNamespace)
+    {
         $namespaces = $query->getDocNamespaces();
-        if ((count($namespaces) === 0)||(!array_key_exists('',$namespaces)) ) {
+        if ((count($namespaces) === 0) || (!array_key_exists('', $namespaces))) {
             $domns = dom_import_simplexml($query);
             $namespaces[''] = $domns->namespaceURI;
             if ($domns->namespaceURI == '') {
-              $namespaces[''] = $defaultNamespace;
-            }   
+                $namespaces[''] = $defaultNamespace;
+            }
         }
         return $namespaces[''];
     }
@@ -30,8 +31,8 @@ class HorusXml
     function findSchema($query, $defaultNamespace = '')
     {
 
-        $namespaces = $this->getRootNamespace($query,$defaultNamespace);
-        
+        $namespaces = $this->getRootNamespace($query, $defaultNamespace);
+
         $mnamespaces = explode(':', $namespaces);
         $namespace = array_pop($mnamespaces);
 
@@ -82,13 +83,13 @@ class HorusXml
     function getXpathVariable($xml, $xpath)
     {
         $rr = $xml->xpath($xpath);
-        if(($rr!==FALSE) && (count($rr)>0)){
-          $dom = dom_import_simplexml($rr[0]);
-          if (XML_TEXT_NODE == $dom->childNodes->item(0)->nodeType){
-            return (string) $rr[0];
-          }else{
-            return $rr[0]->asXml();
-          }
+        if (($rr !== FALSE) && (count($rr) > 0)) {
+            $dom = dom_import_simplexml($rr[0]);
+            if (XML_TEXT_NODE == $dom->childNodes->item(0)->nodeType) {
+                return (string) $rr[0];
+            } else {
+                return $rr[0]->asXml();
+            }
         } else {
             return '';
         }
@@ -100,7 +101,7 @@ class HorusXml
         $nrep = 0;
 
         foreach ($templates as $template) {
-            $respxml = 'templates/' . HorusBusiness::getTemplateName($template,$vars);
+            $respxml = 'templates/' . HorusBusiness::getTemplateName($template, $vars);
             $this->common->mlog("Using template " . $respxml, 'INFO');
             ob_start();
             include $respxml;
@@ -158,25 +159,20 @@ class HorusXml
 
     function searchNameSpace($elementName, $xml)
     {
-        $namespace = '';
-        if ($xml->count() != 0) {
-            foreach ($xml->Children() as $element => $fragment) {
-                if ($element === $elementName) {
-                    $ns = $fragment->getNamespaces();
-                    if (is_array($ns) && array_key_exists('', $ns)) {
-                        return $ns[''];
-                    }
-                } else {
-                    $this->common->mlog('Searching deeper into ' . $element, 'DEBUG');
-                    $childrenns = $this->searchNameSpace($elementName, $fragment);
-                    if ($childrenns != '') {
-                        $this->common->mlog('Found element ' . $elementName . ' in child ' . $element . ' at namespace ' . $childrenns, 'DEBUG');
-                        return $childrenns;
-                    }
-                }
+        $dom = dom_import_simplexml($xml);
+        $list = $dom->getElementsByTagName($elementName);
+        if ($list->length == 1) {
+            $this->common->mlog('Found element ' . $elementName . ' at namespace ' . $list->item(0)->namespaceURI, 'DEBUG');
+
+            return $list->item(0)->namespaceURI;
+        } else {
+            if ($list->length == 0) {
+                $this->common->mlog('Element ' . $elementName . ' not found', 'DEBUG');
+            } else {
+                $this->common->mlog('Found too many elements named ' . $elementName . ' (' . $list->length . ')', 'DEBUG');
             }
+            return '';
         }
-        return $namespace;
     }
 
     function registerExtraNamespaces($query, $extraNamespaces)
@@ -212,7 +208,7 @@ class HorusXml
         }
 
 
-        $namespaces = $this->getRootNamespace($query,$defaultNamespace);
+        $namespaces = $this->getRootNamespace($query, $defaultNamespace);
         $query->registerXPathNamespace('u', $namespaces);
 
         $selectedXsd = $this->findSchema($query, $defaultNamespace);

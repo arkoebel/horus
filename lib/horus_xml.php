@@ -125,7 +125,7 @@ class HorusXml
         return $response;
     }
 
-    function formOutQuery($forwardparams, $proxy_mode)
+    function formOutQuery($forwardparams, $proxy_mode,$vars=array())
     {
         $url = $proxy_mode;
         if ($url !== '' && $forwardparams !== null && $forwardparams != "" && is_array($forwardparams) && (count($forwardparams) == 1) && count($forwardparams[0]) > 0) {
@@ -134,15 +134,20 @@ class HorusXml
             if (is_array($forwardparams[0])) {
                 foreach ($forwardparams[0] as $forwardparam) {
                     $key = urlencode($forwardparam['key']);
-                    if (strpos('<?',$forwardparam['value'])>0)
+                    if (array_key_exists('phpvalue',$forwardparam))
                         try {
-                            $value = urlencode(eval($forwardparam['value']));
+                            ob_start();
+                            eval($forwardparam['phpvalue']);
+                            $value = urlencode(ob_get_contents());
+                            ob_end_clean();
                         } catch (\Throwable $th) {
+error_log("catch");
                             $value = urlencode($forwardparam['value']);
                         }
-                    else
+                    else{
+error_log("else");
                         $value = urlencode($forwardparam['value']);
-
+		    }
                     $fwd_params[] = $key . '=' . $value;
                 }
                 $this->common->mlog('query out : ' . print_r($fwd_params, true), 'INFO');
@@ -263,7 +268,7 @@ class HorusXml
             } catch (HorusException $e) {
                 throw new HorusException($e->getMessage());
             }
-            $url = $this->formOutQuery($forwardparams, $proxy_mode);
+            $url = $this->formOutQuery($forwardparams, $proxy_mode,$vars);
 
 
             if ($multiple) {

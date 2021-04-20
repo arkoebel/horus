@@ -16,6 +16,22 @@
       }
     },
     {
+			"query": "RTGS_pacs.008.001.08.xsd",
+			"comment": "Horus RTGS : Fabrique du Message Status d'un pacs.008",
+			"queryMatch": "<!-- HORUS:DetectedAction=ACK_MESSAGE_STATUS_OK",
+			"responseFormat": "bogusHeader.saa.2.0.xsd",
+			"responseTemplate": "messageStatus_OK.xml",
+			"errorTemplate": "errorTemplate.xml",
+			"parameters": {
+				"SenderReference": "/u:Document/u:FIToFICstmrCdtTrf/u:GrpHdr/u:MsgId",
+				"varMsg": "/u:Document"
+			},
+      "destParameters": [{
+        "key":"s_key1",
+        "phpvalue":"echo $vars[\"SenderReference\"];"
+      }]
+		},
+    {
       "query": "isis.xsd",
       "comment": "body wrapper",
       "responseFormat": "isis.xml",

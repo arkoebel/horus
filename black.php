@@ -37,6 +37,7 @@ if ($business_id === ''){
 $common = new HorusCommon($business_id, $loglocation, 'BLACK');
 $http = new HorusHttp($business_id,$loglocation,'BLACK');
 
+
 if (function_exists('apache_request_headers')) {
     $common->mlog('Headers : ' . print_r(apache_request_headers(),true),'DEBUG');
 }
@@ -71,6 +72,7 @@ $business  = new HorusBusiness($business_id,$loglocation,'BLACK');
 
 $common->mlog('Incoming data : ' . $data . "\n","DEBUG");
 
+$returnContent = '';
 $returnData = $data;
 $queryParams = array();
 if(array_key_exists('stripSection',$section)){
@@ -85,6 +87,7 @@ if(array_key_exists('stripSection',$section)){
             $queryParams[$xsi->key()] = strval($xsi->current());
     }
     $returnData = substr($returnData,$i2);
+    $returnContent = 'application/xml';
     $common->mlog('Found Header parameters ' . print_r($queryParams,true),'DEBUG');
 }
 
@@ -99,11 +102,13 @@ if (array_key_exists('addSection',$section)){
     $fragment = $dom->ownerDocument->saveXML($dom->ownerDocument->documentElement);
     $common->mlog('Inserting value : ' . $fragment . "\n",'DEBUG');
     $returnData = $fragment . "\n" . $returnData;
+    $returnContent = 'text/plain';
 }
 
 if(''===$destination){
     $common->mlog('Return content is : ' . $returnData . "\n","INFO");
     $http->setHttpReturnCode(200);
+    header('Content-type: ' . $returnContent);
     echo $returnData;
     exit;
 }else{
@@ -118,7 +123,7 @@ if(''===$destination){
         $ddest = $destination . $query;
     else
         $ddest = $destination . '?' . substr($query,1);
-    $rr =  $http->forwardSingleHttpQuery($ddest,array('Content-type: ' . $content_type,'Accept: ' . $accept),$returnData,'POST');
+    $rr =  $http->forwardSingleHttpQuery($ddest,array('Content-type: ' . $returnContent,'Accept: ' . $accept),$returnData,'POST');
     echo $rr;
     exit;
 }

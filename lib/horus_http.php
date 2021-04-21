@@ -106,7 +106,7 @@ class HorusHttp
 
         if ($forward !== '') {
 
-            $headers = array('Content-Type' => $content_type, 'Accept' => 'application/json', 'Expect' => '', 'X-Business-Id' => $this->business_id);
+            $headers = array('Content-Type' => $content_type, 'Accept' => 'application/xml', 'Expect' => '', 'X-Business-Id' => $this->business_id);
             $query = array('url' => $forward, 'method' => $method, 'headers' => $headers, 'data' => is_array($data) ? $data[0]:$data);
             $queries = array($query);
 
@@ -165,14 +165,14 @@ class HorusHttp
      */
     static function extractHeader($header)
     {
-        if (function_exists('apache_request_headers')) {
-            $request_headers = apache_request_headers();
-            if (array_key_exists($header,$request_headers)) {
-                return $request_headers[$header];
-            }
-        } else {
+       // if (function_exists('apache_request_headers')) {
+       //     $request_headers = apache_request_headers();
+       //     if (array_key_exists($header,$request_headers)) {
+       //         return $request_headers[$header];
+       //     }
+       // } else {
             $request_headers = $_SERVER;
-        }
+       // }
 
         $conv_header = 'HTTP_' . strtoupper(preg_replace('/-/', '_', $header));
         if (array_key_exists($conv_header, $request_headers)) {

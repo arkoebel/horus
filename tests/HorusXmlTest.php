@@ -433,4 +433,17 @@ class HorusXmlTest extends HorusTestCase
         $xmlinject->registerExtraNamespaces($input,$config['extraNamespaces']);
 
     }
+ 
+   function testDestOutQuery(): void
+    {
+        $xmlinject = new HorusXml('ZAZA', null);
+
+        $forwardparams = json_decode('[{"key":"onekey","phpvalue":"echo \"onevalue\";"},{"key":"two keys","phpvalue":"echo $vars[\"test\"];"}]', true);
+        $url1 = 'http://localhost/?a=b';
+        $url2 = 'http://localhost/';
+
+        $this::assertEquals($xmlinject->formOutQuery(array($forwardparams), $url1, array('test' => 'XXX')), $url1 . '&onekey=onevalue&two+keys=XXX', 'Should return parameters urlencoded');
+        $this::assertEquals($xmlinject->formOutQuery(array($forwardparams), $url2), $url2 . '?onekey=onevalue&two+keys=', 'Should return query string');
+    }
+
 }

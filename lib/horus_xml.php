@@ -141,11 +141,12 @@ class HorusXml
                             $value = urlencode(ob_get_contents());
                             ob_end_clean();
                         } catch (\Throwable $th) {
-error_log("catch");
-                            $value = urlencode($forwardparam['value']);
+                            if(array_key_exists('value',$forwardparams))
+                                $value = urlencode($forwardparam['value']);
+                            else
+                                $value='';
                         }
                     else{
-error_log("else");
                         $value = urlencode($forwardparam['value']);
 		    }
                     $fwd_params[] = $key . '=' . $value;

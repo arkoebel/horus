@@ -65,7 +65,8 @@ if ((''=== $format) || (getParams($params,$format) === null)){
 }
 
 $content_type = array_key_exists('CONTENT_TYPE',$_SERVER) ? $_SERVER['CONTENT_TYPE'] : 'application/json';
-$accept = array_key_exists('HTTP_ACCEPT',$_SERVER) ? $_SERVER['HTTP_ACCEPT'] : "application/json";
+//$accept = array_key_exists('HTTP_ACCEPT',$_SERVER) ? $_SERVER['HTTP_ACCEPT'] : "application/json";
+$accept = 'application/json';
 $data = file_get_contents('php://input');
 $section = getParams($params,$format);
 $business  = new HorusBusiness($business_id,$loglocation,'BLACK');
@@ -123,7 +124,7 @@ if(''===$destination){
         $ddest = $destination . $query;
     else
         $ddest = $destination . '?' . substr($query,1);
-    $rr =  $http->forwardSingleHttpQuery($ddest,array('Content-type: ' . $returnContent,'Accept: ' . $accept),$returnData,'POST');
+    $rr =  $http->forwardSingleHttpQuery($ddest,array('Content-type: ' . $returnContent,'Accept: ' . $accept,'X-Business-Id: ' . $business_id),$returnData,'POST');
     echo $rr;
     exit;
 }

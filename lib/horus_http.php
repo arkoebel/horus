@@ -345,4 +345,23 @@ class HorusHttp
                 header("HTTP/1.1 500 SERVER ERROR", TRUE, 500);
         }
     }
+
+    static function formatQueryString($url,$params,$exclude=array()){
+        $res='';
+
+        foreach($params as $key=>$value){
+            if(!in_array($key,$exclude,true))
+                $res .= '&' . urlencode($key) . '=' . urlencode($value);
+        }
+
+        if (!strpos($url,'?')) {
+            if(strlen($res)>0)
+                return $url . '?' . substr($res,1);
+            else
+                return $url;
+        }else{
+            return $url . $res;
+        }
+    }
+
 }

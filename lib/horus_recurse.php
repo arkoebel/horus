@@ -60,7 +60,13 @@ class HorusRecurse
             throw new HorusException('Unsupported content-type ' . $content_type);
         }
 
-        return $this->http->returnWithContentType($result, $content_type, 200, $proxy_mode);
+        if(''!==$proxy_mode){
+            $destination = HorusHttp::formatQueryString($proxy_mode,$params,array('section'));
+        }else{
+            $destination = '';
+        }
+
+        return $this->http->returnWithContentType($result, $content_type, 200, $destination);
     }
 
 

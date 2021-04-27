@@ -25,6 +25,20 @@ class HorusHttp
         return $cc . chunk_split(base64_encode($data)) . $eol;
     }
 
+    function unpackHeaders($inHeaders){
+        $outHeaders = array();
+
+        foreach($inHeaders as $header){
+            $i = strpos($header,'x-horus-');
+            if ($i>=0){
+                $cut = explode(': ',substr($header,$i),2);
+                $outHeaders[$cut[0]] = $cut[1];
+            }
+        }
+        error_log('ZZZ=' . print_r($outHeaders,true));
+        return $outHeaders;
+    }
+
     /**
      * function returnArrayWithContentType
      * Send a set of http queries to the same destination
@@ -88,6 +102,7 @@ class HorusHttp
      */
     function returnWithContentType($data, $content_type, $status, $forward = '', $no_conversion = false, $method = 'POST',$returnHeaders=array())
     {
+error_log('RWCT : ' . $forward . ' / ' . implode(',',$returnHeaders) . "\n");
 
         if ($no_conversion === 'FALSE') {
             $this->common->mlog('Forced conversion to JSON', 'DEBUG');
@@ -111,9 +126,16 @@ class HorusHttp
 
             $result = $this->forwardHttpQueries($queries);
             header("Content-type: " . $result[0]['response_headers']['Content-Type']);
+            foreach($returnHeaders as $rh){
+                header($rh);
+            }
+
             return $result[0]['response_data'] . "\n";
         } else {
             header("Content-Type: $content_type");
+            foreach($returnHeaders as $rh){
+                header($rh);
+            }
 
             return $data;
         }
@@ -163,14 +185,14 @@ class HorusHttp
      */
     static function extractHeader($header)
     {
-        if (function_exists('apache_request_headers')) {
-            $request_headers = apache_request_headers();
-            if (array_key_exists($header, $request_headers)) {
-                return $request_headers[$header];
-            }
-        } else {
+       // if (function_exists('apache_request_headers')) {
+       //     $request_headers = apache_request_headers();
+       //     if (array_key_exists($header, $request_headers)) {
+       //         return $request_headers[$header];
+       //     }
+       // } else {
             $request_headers = $_SERVER;
-        }
+       // }
 
         $conv_header = 'HTTP_' . strtoupper(preg_replace('/-/', '_', $header));
         if (array_key_exists($conv_header, $request_headers)) {
@@ -334,7 +356,6 @@ class HorusHttp
         } else {
             $this->common->mlog("Query result was $response_code \n", 'DEBUG');
             $this->common->mlog('Return Headers : ' . implode("\n",$headersout) . "\n",'DEBUG');
-            error_log(print_r($headersout,true));
         }
 
         return array('body'=>$response,'headers'=>$headersout);

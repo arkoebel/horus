@@ -122,7 +122,7 @@ class HorusXml
             $nrep++;
         }
 
-        return $response;
+       return $response;
     }
 
     function formOutQuery($forwardparams, $proxy_mode, $vars = array())
@@ -151,7 +151,7 @@ class HorusXml
                     }
                     $fwd_params[] = $key . '=' . $value;
                 }
-                $this->common->mlog('query out : ' . print_r($fwd_params, true), 'INFO');
+                $this->common->mlog('query out (urlparameters) : ' . print_r($fwd_params, true), 'INFO');
                 if (stripos($proxy_mode, '?') === FALSE) {
                     $url .= '?';
                 } else {
@@ -181,14 +181,28 @@ class HorusXml
                     else {
                         $value = urlencode($forwardparam['value']);
                     }
-                    $fwd_params[] = 'x-horus-' . $key . ': ' . $value;
+                    if(strpos($key,'x-horus-')===0)
+                        $fwd_params[$key] = $key . ': ' . $value;
+                    else
+                        $fwd_params['x-horus-' . $key] = 'x-horus-' . $key . ': ' . $value;
                 }
             }
-            foreach ($vars as $key => $value)
-                if (!array_key_exists($key, $fwd_params))
-                    $fwd_params['x-horus-' . $key] = $value;
-            $this->common->mlog('query out : ' . print_r($fwd_params, true), 'INFO');
-            return $fwd_params;
+            foreach ($vars as $key => $value){
+                if (strpos($key,'x-horus-')===0)
+                    $key2 = $key;
+                else
+                    $key2 = 'x-horus-' . $key;
+
+                if (!array_key_exists($key2, $fwd_params))
+                    $fwd_params[$key2] = $key2 . ': ' . $value;
+            }
+
+            $ff = array();
+            foreach ($fwd_params as $f)
+                $ff[] = $f;
+
+            $this->common->mlog('query out (headers): ' . print_r($ff, true), 'INFO');
+            return $ff;
         }
 
         return $url;

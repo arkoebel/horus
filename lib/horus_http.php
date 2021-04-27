@@ -318,14 +318,13 @@ class HorusHttp
                 if (count($header) < 2) // ignore invalid headers
                     return $len;
 
-                $headersout[strtolower(trim($header[0]))][] = trim($header[1]);
+                $headersout[strtolower(trim($header[0]))] = trim($header[1]);
 
                 return $len;
             }
         );
 
         $this->common->mlog($method . ' ' . $dest_url . "\n" . implode("\n", $headers) . "\n\n", 'DEBUG');
-        
         $response = curl_exec($handle);
         $response_code = curl_getinfo($handle, CURLINFO_HTTP_CODE);
         if (200 !== $response_code) {
@@ -335,6 +334,7 @@ class HorusHttp
         } else {
             $this->common->mlog("Query result was $response_code \n", 'DEBUG');
             $this->common->mlog('Return Headers : ' . implode("\n",$headersout) . "\n",'DEBUG');
+            error_log(print_r($headersout,true));
         }
 
         return array('body'=>$response,'headers'=>$headersout);

@@ -30,11 +30,9 @@ class HorusRecurse
     function flattenHeaders($headersArray){
         $result = array();
         foreach ($headersArray as $elt) {
-            foreach ($elt as $header){
-                $i=strpos($header,'x-horus-');
-                if ($i>=0){
-                    $sp = explode(':',substr($header,$i+8),2);
-                    $result[] = array('key'=>$sp[0],'value'=>$sp[1]);
+            foreach ($elt as $key=>$value){
+                if (strpos($key,'x-horus-')===0){
+                    $result[] = array('key'=>$key,'value'=>$value);
                 }
             }
         }
@@ -74,15 +72,15 @@ class HorusRecurse
             throw new HorusException('Unsupported content-type ' . $content_type);
         }
 
-        $urlparams = array_merge($params,flattenHeaders($result['headers']));
+        $urlparams = array_merge($params,$this->flattenHeaders($result['headers']));
 
         if(''!==$proxy_mode){
             $destination = HorusHttp::formatQueryString($proxy_mode,$urlparams,array('section'));
         }else{
             $destination = '';
         }
-
-        return $this->http->returnWithContentType($result['body'], $content_type, 200, $destination);
+error_log(print_r($result,true));
+        return $this->http->returnWithContentType($result['xml'], $content_type, 200, $destination);
     }
 
 

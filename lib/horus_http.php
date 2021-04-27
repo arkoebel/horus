@@ -86,7 +86,7 @@ class HorusHttp
      * function returnWithContentType
      * Sends a http query to the next step or returns response
      */
-    function returnWithContentType($data, $content_type, $status, $forward = '', $no_conversion = false, $method = 'POST')
+    function returnWithContentType($data, $content_type, $status, $forward = '', $no_conversion = false, $method = 'POST',$returnHeaders=array())
     {
 
         if ($no_conversion === 'FALSE') {

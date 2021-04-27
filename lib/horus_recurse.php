@@ -74,13 +74,14 @@ class HorusRecurse
 
         $urlparams = array_merge($params,$this->flattenHeaders($result['headers']));
 
+        $returnHeaders = array();
         if(''!==$proxy_mode){
             $destination = HorusHttp::formatQueryString($proxy_mode,$urlparams,array('section'));
         }else{
             $destination = '';
+            $returnHeaders = $urlparams;
         }
-error_log(print_r($result,true));
-        return $this->http->returnWithContentType($result['xml'], $content_type, 200, $destination);
+        return $this->http->returnWithContentType($result['xml'], $content_type, 200, $destination,false ,'POST',$returnHeaders);
     }
 
 

@@ -27,6 +27,20 @@ class HorusRecurse
         return array();
     }
 
+    function flattenHeaders($headersArray){
+        $result = array();
+        foreach ($headersArray as $elt) {
+            foreach ($elt as $header){
+                $i=strpos($header,'x-horus-');
+                if ($i>=0){
+                    $sp = explode(':',substr($header,$i+8),2);
+                    $result[] = array('key'=>$sp[0],'value'=>$sp[1]);
+                }
+            }
+        }
+        return $result;
+    }
+
     function findSection($name, $matches)
     {
         foreach ($matches as $section) {
@@ -60,13 +74,15 @@ class HorusRecurse
             throw new HorusException('Unsupported content-type ' . $content_type);
         }
 
+        $urlparams = array_merge($params,flattenHeaders($result['headers']));
+
         if(''!==$proxy_mode){
-            $destination = HorusHttp::formatQueryString($proxy_mode,$params,array('section'));
+            $destination = HorusHttp::formatQueryString($proxy_mode,$urlparams,array('section'));
         }else{
             $destination = '';
         }
 
-        return $this->http->returnWithContentType($result, $content_type, 200, $destination);
+        return $this->http->returnWithContentType($result['body'], $content_type, 200, $destination);
     }
 
 
@@ -77,6 +93,8 @@ class HorusRecurse
         if (array_key_exists('namespaces', $section)) {
             $this->xml->registerExtraNamespaces($xmlBody, $section['namespaces']);
         }
+
+        $headers = array();
 
         foreach ($section['parts'] as $part) {
             $this->common->mlog('Dealing with part #' . $part['order'] . ' : ' . $part['comment'], 'INFO');
@@ -105,7 +123,9 @@ class HorusRecurse
                     $this->common->mlog('Part Contents : ' . $correctedxmlpart, 'DEBUG');
                     $finalUrl = $this->common->formatQueryString($part['transformUrl'], $vars, TRUE);
                     $this->common->mlog('Transformation URL is : ' . $finalUrl, 'DEBUG');
-                    $rr = simplexml_load_string($this->http->forwardSingleHttpQuery($finalUrl, array('Content-type: application/xml', 'Accept: application/xml', 'Expect: ', 'X-Business-Id: ' . $this->business_id), $correctedxmlpart));
+                    $resp = $this->http->forwardSingleHttpQuery($finalUrl, array('Content-type: application/xml', 'Accept: application/xml', 'Expect: ', 'X-Business-Id: ' . $this->business_id), $correctedxmlpart);
+                    $headers[$part['order']] = $resp['headers'];
+                    $rr = simplexml_load_string($resp['body']);
                     $this->common->mlog('Part Transformed : ' . $rr->saveXML(), 'DEBUG');
                     $elements[$part['order']] = $rr;
                 } else {
@@ -178,7 +198,7 @@ class HorusRecurse
             $node->appendChild($domElement);
         }
 
-        return $dom->saveXml();
+        return array('xml'=>$dom->saveXml(),'headers'=>$headers);
     }
 
     function doRecurseJson($reqBody, $matches,$queryParams)

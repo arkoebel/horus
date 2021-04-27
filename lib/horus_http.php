@@ -23,7 +23,6 @@ class HorusHttp
         $cc .= 'Content-Type: ' . $content_type . $eol;
         $cc .= 'Content-Transfer-Encoding: base64' . $eol . $eol;
         return $cc . chunk_split(base64_encode($data)) . $eol;
-
     }
 
     /**
@@ -33,12 +32,12 @@ class HorusHttp
     function returnArrayWithContentType($data, $content_type, $status, $forward = '', $exitafter = true, $no_conversion = false, $method = 'POST')
     {
 
-        if ($no_conversion === FALSE){
+        if ($no_conversion === FALSE) {
             $this->common->mlog('Forced conversion', 'DEBUG');
         }
         $this->setHttpReturnCode($status);
 
-        if (is_null($forward)){
+        if (is_null($forward)) {
             $forward = '';
         }
 
@@ -53,13 +52,13 @@ class HorusHttp
 
             $result = $this->forwardHttpQueries($queries);
             $responses = array();
-	    $json = false;
+            $json = false;
 
             foreach ($result as $content) {
                 if (stripos($content['response_headers']['content-Type'], 'json') > 0) {
                     $json = true;
                     $responses[] = json_decode($content['response_data'], true);
-                } else{
+                } else {
                     $responses[] = $content['response_data'];
                 }
             }
@@ -78,7 +77,7 @@ class HorusHttp
             return $ret;
         }
 
-        if ($exitafter === true){
+        if ($exitafter === true) {
             exit;
         }
     }
@@ -87,16 +86,16 @@ class HorusHttp
      * function returnWithContentType
      * Sends a http query to the next step or returns response
      */
-    function returnWithContentType($data, $content_type, $status, $forward = '',$no_conversion = false, $method = 'POST')
+    function returnWithContentType($data, $content_type, $status, $forward = '', $no_conversion = false, $method = 'POST')
     {
 
-        if ($no_conversion === 'FALSE'){
+        if ($no_conversion === 'FALSE') {
             $this->common->mlog('Forced conversion to JSON', 'DEBUG');
         }
 
         $this->setHttpReturnCode($status);
 
-        if (is_null($forward)){
+        if (is_null($forward)) {
             $forward = '';
         }
 
@@ -107,7 +106,7 @@ class HorusHttp
         if ($forward !== '') {
 
             $headers = array('Content-Type' => $content_type, 'Accept' => 'application/xml', 'Expect' => '', 'X-Business-Id' => $this->business_id);
-            $query = array('url' => $forward, 'method' => $method, 'headers' => $headers, 'data' => is_array($data) ? $data[0]:$data);
+            $query = array('url' => $forward, 'method' => $method, 'headers' => $headers, 'data' => is_array($data) ? $data[0] : $data);
             $queries = array($query);
 
             $result = $this->forwardHttpQueries($queries);
@@ -118,7 +117,6 @@ class HorusHttp
 
             return $data;
         }
-
     }
 
     /**
@@ -144,16 +142,16 @@ class HorusHttp
     function setReturnType($accept, $default)
     {
 
-        if (is_null($accept) || ($accept == '')){
+        if (is_null($accept) || ($accept == '')) {
             return $default;
         } else {
             $types = explode(',', $accept);
             foreach ($types as $type) {
                 if (stripos($type, 'application/xml') !== FALSE) {
                     return 'application/xml';
-                }elseif (stripos($type, 'application/json') !== FALSE){
+                } elseif (stripos($type, 'application/json') !== FALSE) {
                     return 'application/json';
-                }    
+                }
             }
             $this->returnWithContentType('Supported return types are only application/xml and application/json', 'text/plain', 400);
         }
@@ -165,14 +163,14 @@ class HorusHttp
      */
     static function extractHeader($header)
     {
-       // if (function_exists('apache_request_headers')) {
-       //     $request_headers = apache_request_headers();
-       //     if (array_key_exists($header,$request_headers)) {
-       //         return $request_headers[$header];
-       //     }
-       // } else {
+        if (function_exists('apache_request_headers')) {
+            $request_headers = apache_request_headers();
+            if (array_key_exists($header, $request_headers)) {
+                return $request_headers[$header];
+            }
+        } else {
             $request_headers = $_SERVER;
-       // }
+        }
 
         $conv_header = 'HTTP_' . strtoupper(preg_replace('/-/', '_', $header));
         if (array_key_exists($conv_header, $request_headers)) {
@@ -194,7 +192,7 @@ class HorusHttp
     {
         $out_headers = array();
 
-        foreach ($headers as $header => $value){
+        foreach ($headers as $header => $value) {
             $out_headers[] = $header . ': ' . $value;
         }
 
@@ -219,7 +217,7 @@ class HorusHttp
     function forwardHttpQueries($queries)
     {
 
-        if (is_null($queries) || !is_array($queries) || count($queries) == 0){
+        if (is_null($queries) || !is_array($queries) || count($queries) == 0) {
             return new Exception('No query to forward');
         }
 
@@ -237,14 +235,14 @@ class HorusHttp
             $ch[$id] = curl_init($query['url']);
 
             curl_setopt($ch[$id], CURLOPT_RETURNTRANSFER, 1);
-            if ($query['method'] !== 'GET'){
+            if ($query['method'] !== 'GET') {
                 curl_setopt($ch[$id], CURLOPT_POST, TRUE);
                 curl_setopt($ch[$id], CURLOPT_POSTFIELDS, $query['data']);
             }
-            if (array_key_exists('headers', $query) && (count($query['headers']) != 0)){
+            if (array_key_exists('headers', $query) && (count($query['headers']) != 0)) {
                 curl_setopt($ch[$id], CURLOPT_HTTPHEADER, $this->formatHeaders($query['headers']));
             }
-                
+
             curl_setopt($ch[$id], CURLOPT_SSL_VERIFYPEER, false);
             curl_setopt($ch[$id], CURLOPT_VERBOSE, true);
             curl_setopt($ch[$id], CURLOPT_HEADER, true);
@@ -275,7 +273,7 @@ class HorusHttp
                 $response_headers = array();
                 foreach ($bheader as $header) {
                     $exp = preg_split("/\:\s/", $header);
-                    if (count($exp) > 1){
+                    if (count($exp) > 1) {
                         $response_headers[$exp[0]] = $exp[1];
                     }
                 }
@@ -298,32 +296,48 @@ class HorusHttp
     }
 
 
-    function forwardSingleHttpQuery($dest_url, $headers, $data, $method='POST')
+    function forwardSingleHttpQuery($dest_url, $headers, $data, $method = 'POST')
     {
         $handle = curl_init($dest_url);
+        $headersout = array();
         curl_setopt($handle, CURLOPT_URL, $dest_url);
         curl_setopt($handle, CURLOPT_RETURNTRANSFER, 1);
-        if ('POST'===$method){
+        if ('POST' === $method) {
             curl_setopt($handle, CURLOPT_POST, TRUE);
-        }else{
-            curl_setopt($handle,CURLOPT_CUSTOMREQUEST,$method);
+        } else {
+            curl_setopt($handle, CURLOPT_CUSTOMREQUEST, $method);
         }
         curl_setopt($handle, CURLOPT_HTTPHEADER, $headers);
         curl_setopt($handle, CURLOPT_POSTFIELDS, $data);
+        curl_setopt(
+            $handle,
+            CURLOPT_HEADERFUNCTION,
+            function ($curl, $header) use (&$headersout) {
+                $len = strlen($header);
+                $header = explode(':', $header, 2);
+                if (count($header) < 2) // ignore invalid headers
+                    return $len;
 
-        $this->common->mlog($method . ' ' . $dest_url . "\n" . implode("\n",$headers) . "\n\n",'DEBUG');
+                $headersout[strtolower(trim($header[0]))][] = trim($header[1]);
 
+                return $len;
+            }
+        );
+
+        $this->common->mlog($method . ' ' . $dest_url . "\n" . implode("\n", $headers) . "\n\n", 'DEBUG');
+        
         $response = curl_exec($handle);
         $response_code = curl_getinfo($handle, CURLINFO_HTTP_CODE);
-        if (200 !== $response_code){
-            $this->common->mlog('Request to ' . $dest_url . ' produced error ' . curl_getinfo($handle, CURLINFO_HTTP_CODE),'ERROR');
-            $this->common->mlog('Call stack was : ' . curl_getinfo($handle),'DEBUG');
+        if (200 !== $response_code) {
+            $this->common->mlog('Request to ' . $dest_url . ' produced error ' . curl_getinfo($handle, CURLINFO_HTTP_CODE), 'ERROR');
+            $this->common->mlog('Call stack was : ' . curl_getinfo($handle), 'DEBUG');
             throw new HorusException('HTTP Error ' . $response_code . ' for ' . $dest_url);
-        }else{
-            $this->common->mlog("Query result was $response_code \n",'DEBUG');
+        } else {
+            $this->common->mlog("Query result was $response_code \n", 'DEBUG');
+            $this->common->mlog('Return Headers : ' . implode("\n",$headersout) . "\n",'DEBUG');
         }
 
-        return $response;
+        return array('body'=>$response,'headers'=>$headersout);
     }
 
     public function setHttpReturnCode($status)
@@ -346,22 +360,22 @@ class HorusHttp
         }
     }
 
-    static function formatQueryString($url,$params,$exclude=array()){
-        $res='';
+    static function formatQueryString($url, $params, $exclude = array())
+    {
+        $res = '';
 
-        foreach($params as $key=>$value){
-            if(!in_array($key,$exclude,true))
+        foreach ($params as $key => $value) {
+            if (!in_array($key, $exclude, true))
                 $res .= '&' . urlencode($key) . '=' . urlencode($value);
         }
 
-        if (!strpos($url,'?')) {
-            if(strlen($res)>0)
-                return $url . '?' . substr($res,1);
+        if (!strpos($url, '?')) {
+            if (strlen($res) > 0)
+                return $url . '?' . substr($res, 1);
             else
                 return $url;
-        }else{
+        } else {
             return $url . $res;
         }
     }
-
 }

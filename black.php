@@ -125,6 +125,6 @@ if(''===$destination){
     else
         $ddest = $destination . '?' . substr($query,1);
     $rr =  $http->forwardSingleHttpQuery($ddest,array('Content-type: ' . $returnContent,'Accept: ' . $accept,'X-Business-Id: ' . $business_id),$returnData,'POST');
-    echo $rr;
+    echo $rr['body'];
     exit;
 }

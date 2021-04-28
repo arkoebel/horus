@@ -128,7 +128,7 @@ class HorusXml
     function formOutQuery($forwardparams, $proxy_mode, $vars = array())
     {
         $url = $proxy_mode;
-        if ($url !== '' && $forwardparams !== null && $forwardparams != "" && is_array($forwardparams) && (count($forwardparams) == 1) && count($forwardparams[0]) > 0) {
+        if ($url !== '' && $forwardparams !== null && $forwardparams != "" && is_array($forwardparams) && (count($forwardparams) == 1) && is_array($forwardparams[0]) && (count($forwardparams[0]) > 0)) {
             $this->common->mlog('params forward : ' . print_r($forwardparams, true), 'INFO');
             $fwd_params = array();
             if (is_array($forwardparams[0])) {
@@ -159,7 +159,7 @@ class HorusXml
                 }
                 $vv1 = array();
                 foreach($vars as $k=>$v)
-                    $vv1[] = $k . "=" . $v;
+                    $vv1[] = urlencode($k) . "=" . urlencode($v);
 
                 $vv = array_merge($vv1, $fwd_params);
 

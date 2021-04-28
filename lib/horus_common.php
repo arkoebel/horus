@@ -103,7 +103,6 @@ class HorusCommon
     }
 
     public static function formatQueryString($baseUrl, $params, $wholeUrl=FALSE){
-
         if (is_null($params)) {
             if (TRUE===$wholeUrl){
                 return $baseUrl;

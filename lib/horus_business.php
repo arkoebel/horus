@@ -50,11 +50,14 @@ class HorusBusiness
                 if (array_key_exists('queryMatch', $match) && $match['queryMatch'] != '') {
                     if (preg_match('/' . $match['queryMatch'] . '/', $value) === 1) {
                         $selected = $id;
+                         $this->common->mlog('Current match: ' . $match['comment'] . ' ' . $match['queryMatch'],'DEBUG');
                     } else {
                         $this->common->mlog('QueryMatch failed for param line #' . $id, 'DEBUG');
+                        $this->common->mlog($match['comment'] . ' ' . $match['queryMatch'],'DEBUG');
                     }
                 } else {
                     $this->common->mlog('Param line #' . $id . ' could be selected (if last).', 'DEBUG');
+                    $this->common->mlog($match['comment'] . ' ' . (array_key_exists('queryMatch',$match) ? $match['queryMatch'] : ''),'DEBUG');
                     $selected = $id;
                 }
             }
@@ -200,7 +203,6 @@ class HorusBusiness
         $this->common->mlog("FollowOnError $followOnError", "INFO");
         $globalParams = array_key_exists('parameters', $route) ? $route['parameters'] : array();
         $globalParams = array_merge($this->transformGetParams($queryParams),$globalParams);
-
         $responses = array();
 
         $ii = 0;

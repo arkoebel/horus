@@ -52,6 +52,7 @@ class HorusRecurse
     function doRecurse($reqBody, $content_type, $proxy_mode, $matches, $accept, $params)
     {
 
+
         if (!array_key_exists('section', $params)) {
             throw new HorusException('Section URL parameter is unknown');
         }
@@ -62,7 +63,6 @@ class HorusRecurse
         if ($content_type !== $section['content-type']) {
             throw new HorusException('Section ' . $params['section'] . " was supposed to be of type " . $section['content-type'] . ' but found ' . $content_type . ' instead');
         }
-
         $result = null;
         if ('application/xml' === $content_type) {
             $result = $this->doRecurseXml($reqBody, $section,$params);

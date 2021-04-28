@@ -35,8 +35,21 @@ class HorusHttp
                 $outHeaders[$cut[0]] = $cut[1];
             }
         }
-        error_log('ZZZ=' . print_r($outHeaders,true));
         return $outHeaders;
+    }
+
+    
+
+    static function cleanVariables($to_remove,$list){
+        $temp = array();
+        foreach($list as $key=>$element){
+            if(in_array($key,$to_remove)){
+              //remove
+            }else{
+              $temp[$key] = urldecode($element);
+           }
+        }
+        return array_merge($temp);
     }
 
     /**
@@ -102,7 +115,6 @@ class HorusHttp
      */
     function returnWithContentType($data, $content_type, $status, $forward = '', $no_conversion = false, $method = 'POST',$returnHeaders=array())
     {
-error_log('RWCT : ' . $forward . ' / ' . implode(',',$returnHeaders) . "\n");
 
         if ($no_conversion === 'FALSE') {
             $this->common->mlog('Forced conversion to JSON', 'DEBUG');
@@ -185,14 +197,14 @@ error_log('RWCT : ' . $forward . ' / ' . implode(',',$returnHeaders) . "\n");
      */
     static function extractHeader($header)
     {
-       // if (function_exists('apache_request_headers')) {
-       //     $request_headers = apache_request_headers();
-       //     if (array_key_exists($header, $request_headers)) {
-       //         return $request_headers[$header];
-       //     }
-       // } else {
+       if (function_exists('apache_request_headers')) {
+            $request_headers = apache_request_headers();
+            if (array_key_exists($header, $request_headers)) {
+                return $request_headers[$header];
+            }
+        } else {
             $request_headers = $_SERVER;
-       // }
+        }
 
         $conv_header = 'HTTP_' . strtoupper(preg_replace('/-/', '_', $header));
         if (array_key_exists($conv_header, $request_headers)) {
@@ -384,11 +396,20 @@ error_log('RWCT : ' . $forward . ' / ' . implode(',',$returnHeaders) . "\n");
     static function formatQueryString($url, $params, $exclude = array())
     {
         $res = '';
-
         foreach ($params as $key => $value) {
-            if (!in_array($key, $exclude, true))
-                $res .= '&' . urlencode($key) . '=' . urlencode($value);
+            if (!in_array($key, $exclude, true)){
+                if(is_array($value)&&array_key_exists('key',$value)&&array_key_exists('value',$value)){
+                    $i=strpos($value['key'],'x-horus-');
+                    if ($i>=0) $kk = substr($value['key'],$i+8); else $kk = $value['key'];
+                    $res .= '&' . urlencode($kk) . '=' . urlencode($value['value']);
+               }else{
+                    $i=strpos($key,'x-horus-');
+                    if ($i>=0) $kk = substr($key,$i+8); else $kk = $key;
+                    $res .= '&' . urlencode($kk) . '=' . urlencode($value);
+               } 
+            }
         }
+
 
         if (!strpos($url, '?')) {
             if (strlen($res) > 0)

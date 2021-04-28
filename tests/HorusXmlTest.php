@@ -251,7 +251,6 @@ class HorusXmlTest extends HorusTestCase
 
 
         $res = $xmlinject->doInject($input, 'application/xml', 'http://localhost', json_decode($matches, true), 'application/xml', $queryParams, 'templates/genericError.xml');
-
         $this::assertNotNull($res, 'Response is not empty');
         $this::assertEquals(count($res), 1, 'Should get only 1 response');
         $this::assertEquals(self::$curls[0]['url'], 'http://localhost?forwardkey1=forwardvalue1&forwardkey2=forwardvalue2');
@@ -442,7 +441,7 @@ class HorusXmlTest extends HorusTestCase
         $url1 = 'http://localhost/?a=b';
         $url2 = 'http://localhost/';
 
-        $this::assertEquals($xmlinject->formOutQuery(array($forwardparams), $url1, array('test' => 'XXX')), $url1 . '&onekey=onevalue&two+keys=XXX', 'Should return parameters urlencoded');
+        $this::assertEquals($xmlinject->formOutQuery(array($forwardparams), $url1, array('test' => 'XXX')), $url1 . '&test=XXX&onekey=onevalue&two+keys=XXX', 'Should return parameters urlencoded');
         $this::assertEquals($xmlinject->formOutQuery(array($forwardparams), $url2), $url2 . '?onekey=onevalue&two+keys=', 'Should return query string');
     }
 

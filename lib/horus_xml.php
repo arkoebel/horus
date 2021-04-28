@@ -157,8 +157,13 @@ class HorusXml
                 } else {
                     $url .= '&';
                 }
-                $vv = array_merge($vars, $fwd_params);
-                $url .= implode('&', $fwd_params, $vv);
+                $vv1 = array();
+                foreach($vars as $k=>$v)
+                    $vv1[] = $k . "=" . $v;
+
+                $vv = array_merge($vv1, $fwd_params);
+
+                $url .= implode('&', $vv);
             }
         } else if ($url === '' && $forwardparams !== null && $forwardparams != "" && is_array($forwardparams) && (count($forwardparams) == 1) && count($forwardparams[0]) > 0) {
             $this->common->mlog('return headers : ' . print_r($forwardparams, true), 'INFO');

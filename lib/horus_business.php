@@ -172,7 +172,7 @@ class HorusBusiness
         return $outParams;
     }
 
-    public function getTemplateName($template,$variables){
+    public static function getTemplateName($template,$variables){
         preg_match_all('/\$\{([A-z0-9_\-]*)\}/',$template,$list);
         if(count($list)==0){
             return $template;

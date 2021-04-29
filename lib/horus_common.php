@@ -125,7 +125,10 @@ class HorusCommon
         ksort($converted);
 
         foreach ($converted as $key=>$value){
-            $query .= '&' . urlencode($key) . '=' . urlencode($value);
+            if(strlen($value)<100)
+                $query .= '&' . urlencode($key) . '=' . urlencode($value);
+            else
+                mlog('Parameter ' . $key . ' too long, filtering out.','DEBUG');
         }
         if((stripos($baseUrl,'?')===FALSE)&&($query!=='')){
             $query = '?' . substr($query,1);

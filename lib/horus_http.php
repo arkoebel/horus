@@ -132,7 +132,7 @@ class HorusHttp
 
         if ($forward !== '') {
 
-            $headers = array('Content-Type' => $content_type, 'Accept' => 'application/xml', 'Expect' => '', 'X-Business-Id' => $this->business_id);
+            $headers = array('Content-Type' => $content_type, 'Accept' => 'application/json', 'Expect' => '', 'X-Business-Id' => $this->business_id);
             $query = array('url' => $forward, 'method' => $method, 'headers' => $headers, 'data' => is_array($data) ? $data[0] : $data);
             $queries = array($query);
 
@@ -401,11 +401,17 @@ class HorusHttp
                 if(is_array($value)&&array_key_exists('key',$value)&&array_key_exists('value',$value)){
                     $i=strpos($value['key'],'x-horus-');
                     if ($i>=0) $kk = substr($value['key'],$i+8); else $kk = $value['key'];
-                    $res .= '&' . urlencode($kk) . '=' . urlencode($value['value']);
+                    if(strlen($value['value'])<100)
+                        $res .= '&' . urlencode($kk) . '=' . urlencode($value['value']);
+                    //else
+                    //    $this->common->mlog('Parameter ' . $kk . ' too long. Filtering out','DEBUG');
                }else{
                     $i=strpos($key,'x-horus-');
                     if ($i>=0) $kk = substr($key,$i+8); else $kk = $key;
-                    $res .= '&' . urlencode($kk) . '=' . urlencode($value);
+                    if(strlen($value)<100)
+                        $res .= '&' . urlencode($kk) . '=' . urlencode($value);
+                    //else
+                    //    $this->common->mlog('Parameter ' . $kk . ' too long. Filtering out','DEBUG');
                } 
             }
         }

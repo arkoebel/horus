@@ -410,7 +410,7 @@ class HorusHttp
                 $kk = $key;
                 if($i!==FALSE)
                     $kk = substr($key,$i+8);
-                if(strlen($value)<50){
+                if(strlen(urlencode($value))<50){
                     $pp[$kk] = $value;
                 }else{
                     //error_log('QQQ4 dropped ' . $value . "\n");

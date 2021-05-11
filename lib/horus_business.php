@@ -52,8 +52,8 @@ class HorusBusiness
                         $selected = $id;
                          $this->common->mlog('Current match: ' . $match['comment'] . ' ' . $match['queryMatch'],'DEBUG');
                     } else {
-                        $this->common->mlog('QueryMatch failed for param line #' . $id, 'DEBUG');
-                        $this->common->mlog($match['comment'] . ' ' . $match['queryMatch'],'DEBUG');
+                       // $this->common->mlog('QueryMatch failed for param line #' . $id, 'DEBUG');
+                       // $this->common->mlog($match['comment'] . ' ' . $match['queryMatch'],'DEBUG');
                     }
                 } else {
                     $this->common->mlog('Param line #' . $id . ' could be selected (if last).', 'DEBUG');

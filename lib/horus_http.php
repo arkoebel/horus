@@ -32,14 +32,14 @@ class HorusHttp
             $i = strpos($header,'x-horus-');
             if ($i>=0){
                 $cut = explode(': ',substr($header,$i),2);
-                $outHeaders[$cut[0]] = $cut[1];
+                $kk = $cut[0];
+                $outHeaders[$kk] = $cut[1];
             }
         }
         return $outHeaders;
     }
 
     
-
     static function cleanVariables($to_remove,$list){
         $temp = array();
         foreach($list as $key=>$element){
@@ -396,26 +396,30 @@ class HorusHttp
     static function formatQueryString($url, $params, $exclude = array())
     {
         $res = '';
-        foreach ($params as $key => $value) {
+        $pp = array();
+        foreach ($params as $k1 => $v1) {
+            if(is_int($k1)&&is_array($v1)&&array_key_exists('key',$v1)&&array_key_exists('value',$v1)){
+                $key = $v1['key'];
+                $value = $v1['value'];
+            }else{
+                $key = $k1;
+                $value = $v1;
+            }
             if (!in_array($key, $exclude, true)){
-                if(is_array($value)&&array_key_exists('key',$value)&&array_key_exists('value',$value)){
-                    $i=strpos($value['key'],'x-horus-');
-                    if ($i>=0) $kk = substr($value['key'],$i+8); else $kk = $value['key'];
-                    if(strlen($value['value'])<100)
-                        $res .= '&' . urlencode($kk) . '=' . urlencode($value['value']);
-                    //else
-                    //    $this->common->mlog('Parameter ' . $kk . ' too long. Filtering out','DEBUG');
-               }else{
-                    $i=strpos($key,'x-horus-');
-                    if ($i>=0) $kk = substr($key,$i+8); else $kk = $key;
-                    if(strlen($value)<100)
-                        $res .= '&' . urlencode($kk) . '=' . urlencode($value);
-                    //else
-                    //    $this->common->mlog('Parameter ' . $kk . ' too long. Filtering out','DEBUG');
-               } 
+                $i=strpos($key,'x-horus-');
+                $kk = $key;
+                if($i!==FALSE)
+                    $kk = substr($key,$i+8);
+                if(strlen($value)<50){
+                    $pp[$kk] = $value;
+                }else{
+                    //error_log('QQQ4 dropped ' . $value . "\n");
+                }
             }
         }
 
+       foreach ($pp as $key=>$value)
+           $res .= '&' . urlencode($key) . '=' . urlencode($value);
 
         if (!strpos($url, '?')) {
             if (strlen($res) > 0)

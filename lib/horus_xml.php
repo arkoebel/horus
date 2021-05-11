@@ -187,9 +187,9 @@ class HorusXml
                         $value = urlencode($forwardparam['value']);
                     }
                     if(strpos($key,'x-horus-')===0)
-                        $fwd_params[$key] = $key . ': ' . $value;
+                        $fwd_params[$key] = $key . ': ' . $key . ';' . $value;
                     else
-                        $fwd_params['x-horus-' . $key] = 'x-horus-' . $key . ': ' . $value;
+                        $fwd_params['x-horus-' . $key] = 'x-horus-' . $key . ': ' . $key . ';' . $value;
                 }
             }
             foreach ($vars as $key => $value){
@@ -199,7 +199,7 @@ class HorusXml
                     $key2 = 'x-horus-' . $key;
 
                 if (!array_key_exists($key2, $fwd_params))
-                    $fwd_params[$key2] = $key2 . ': ' . $value;
+                    $fwd_params[$key2] = $key2 . ': ' . $key . ';' . $value;
             }
 
             $ff = array();

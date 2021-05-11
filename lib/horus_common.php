@@ -125,7 +125,7 @@ class HorusCommon
         ksort($converted);
 
         foreach ($converted as $key=>$value){
-            if(strlen($value)<100)
+            if(strlen($value)<50)
                 $query .= '&' . urlencode($key) . '=' . urlencode($value);
             else
                 mlog('Parameter ' . $key . ' too long, filtering out.','DEBUG');

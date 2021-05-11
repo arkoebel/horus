@@ -32,7 +32,12 @@ class HorusRecurse
         foreach ($headersArray as $elt) {
             foreach ($elt as $key=>$value){
                 if (strpos($key,'x-horus-')===0){
-                    $result[] = array('key'=>$key,'value'=>$value);
+                    $zkey = substr($value,8);
+                    if(strpos($value,';')>=0)
+                        $mkey = explode(';',$value,2);
+                    else
+                        $mkey = array($zkey,$value);
+                    $result[] = array('key'=>$mkey[0],'value'=>$mkey[1]);
                 }
             }
         }

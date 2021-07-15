@@ -8,6 +8,13 @@ require_once('lib/horus_simplejson.php');
 require_once('lib/horus_xml.php');
 require_once('lib/horus_exception.php');
 
+require_once('vendor/autoload.php');
+
+$tracer = HorusCommon::getTracer($config,'ORANGE',HorusCommon::getPath($_SERVER));
+$rootSpan = HorusCommon::getStartSpan($tracer,apache_request_headers(),'Start Orange');
+
+$rootSpan->log(['message'=>'Start Router','path'=>HorusCommon::getPath($_SERVER), 'BOX'=>'ORANGE']);
+
 
 
 $loglocation = '/var/log/horus/horus_http.log';
@@ -40,12 +47,12 @@ $source = array_key_exists('source', $_GET) ? $_GET['source'] : '';
 $content_type = array_key_exists('CONTENT_TYPE',$_SERVER) ? $_SERVER['CONTENT_TYPE'] : 'application/json';
 $accept = array_key_exists('HTTP_ACCEPT',$_SERVER) ? $_SERVER['HTTP_ACCEPT'] : "application/json";
 $data = file_get_contents('php://input');
-$business  = new HorusBusiness($business_id,$loglocation,'ORANGE');
+$business  = new HorusBusiness($business_id,$loglocation,'ORANGE',$tracer);
 
 $route = $business->findSource($source, $params);
 
 try{
-    $responses = $business->performRouting($route, $content_type, $accept, $data, HorusHttp::cleanVariables(array('source'),$_GET));
+    $responses = $business->performRouting($route, $content_type, $accept, $data, HorusHttp::cleanVariables(array('source'),$_GET),$rootSpan);
     $business->http->setHttpReturnCode(200);
     header('Content-type: application/json');
     echo json_encode(array('result'=>'OK','responses'=>$responses));
@@ -56,5 +63,9 @@ try{
         $business->http->setHttpReturnCode(500);
     }
     echo json_encode(array('result'=>'KO','message'=>$e->getMessage()));
+}finally{
+    $rootSpan->finish();
+    $tracer->flush();
+    Jaeger\Config::getInstance()->flush();
 }
 

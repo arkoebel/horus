@@ -10,6 +10,8 @@ return array(
     'Webmozart\\Assert\\' => array($vendorDir . '/webmozart/assert/src'),
     'Symfony\\Polyfill\\Ctype\\' => array($vendorDir . '/symfony/polyfill-ctype'),
     'Prophecy\\' => array($vendorDir . '/phpspec/prophecy/src/Prophecy'),
+    'OpenTracing\\' => array($vendorDir . '/opentracing/opentracing/src/OpenTracing'),
+    'Jaeger\\' => array($vendorDir . '/jukylin/jaeger-php/src/Jaeger'),
     'Doctrine\\Instantiator\\' => array($vendorDir . '/doctrine/instantiator/src/Doctrine/Instantiator'),
     'DeepCopy\\' => array($vendorDir . '/myclabs/deep-copy/src/DeepCopy'),
 );

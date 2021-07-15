@@ -1,0 +1,44 @@
+<phpunit
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/8.2/phpunit.xsd"
+        backupGlobals="true"
+        backupStaticAttributes="false"
+        bootstrap="./vendor/autoload.php"
+        cacheResult="false"
+        cacheTokens="false"
+        colors="true"
+        convertErrorsToExceptions="true"
+        convertNoticesToExceptions="true"
+        convertWarningsToExceptions="true"
+        forceCoversAnnotation="false"
+        processIsolation="false"
+        stopOnError="false"
+        stopOnFailure="false"
+        stopOnIncomplete="false"
+        stopOnSkipped="false"
+        stopOnRisky="false"
+        timeoutForSmallTests="1"
+        timeoutForMediumTests="10"
+        timeoutForLargeTests="60"
+        verbose="false">
+        <testsuites>
+            <testsuite name="jaeger-php">
+                <directory>./tests/</directory>
+            </testsuite>
+        </testsuites>
+        <filter>
+            <blacklist>
+                <file>./src/Jaeger/Reporter/Reporter.php</file>
+                <file>./src/Jaeger/Sampler/Sampler.php</file>
+                <file>./src/Jaeger/Transport/Transport.php</file>
+                <file>./src/Jaeger/Thrift</file>
+            </blacklist>
+            <whitelist>
+                <directory>./src</directory>
+            </whitelist>
+        </filter>
+        <logging>
+            <log type="coverage-text" target="php://stdout" showUncoveredFiles="true" showOnlySummary="true"/>
+            <log type="coverage-clover" target="build/logs/clover.xml"/>
+        </logging>
+</phpunit>

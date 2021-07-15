@@ -8,4 +8,7 @@ $baseDir = dirname($vendorDir);
 return array(
     '320cde22f66dd4f5d3fd621d3e88b98f' => $vendorDir . '/symfony/polyfill-ctype/bootstrap.php',
     '6124b4c8570aa390c21fafd04a26c69f' => $vendorDir . '/myclabs/deep-copy/src/DeepCopy/deep_copy.php',
+    '870c221a18597bfcd5ed576d0fb64a19' => $vendorDir . '/opentracing/opentracing/src/OpenTracing/Tags.php',
+    'd25d883add1ecab0d3a9ffec57f0f183' => $vendorDir . '/opentracing/opentracing/src/OpenTracing/Formats.php',
+    '700dcaa359912479db3776dd849a600b' => $vendorDir . '/jukylin/jaeger-php/src/Jaeger/Constants.php',
 );

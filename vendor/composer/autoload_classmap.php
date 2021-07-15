@@ -6,10 +6,19 @@ $vendorDir = dirname(dirname(__FILE__));
 $baseDir = dirname($vendorDir);
 
 return array(
+    'FineDiff' => $baseDir . '/lib/diff.php',
+    'FineDiffCopyOp' => $baseDir . '/lib/diff.php',
+    'FineDiffDeleteOp' => $baseDir . '/lib/diff.php',
+    'FineDiffInsertOp' => $baseDir . '/lib/diff.php',
+    'FineDiffOp' => $baseDir . '/lib/diff.php',
+    'FineDiffOps' => $baseDir . '/lib/diff.php',
+    'FineDiffReplaceOp' => $baseDir . '/lib/diff.php',
     'HorusBusiness' => $baseDir . '/lib/horus_business.php',
     'HorusCommon' => $baseDir . '/lib/horus_common.php',
+    'HorusException' => $baseDir . '/lib/horus_exception.php',
     'HorusHttp' => $baseDir . '/lib/horus_http.php',
     'HorusInjector' => $baseDir . '/lib/horus_inject.php',
+    'HorusRecurse' => $baseDir . '/lib/horus_recurse.php',
     'HorusSimpleJson' => $baseDir . '/lib/horus_simplejson.php',
     'HorusXml' => $baseDir . '/lib/horus_xml.php',
     'PHPUnit\\Exception' => $vendorDir . '/phpunit/phpunit/src/Exception.php',

@@ -1,18 +1,25 @@
 <?php
 
+use OpenTracing\Formats;
+use OpenTracing\GlobalTracer;
+use Jaeger\Config;
+
 class HorusXml
 {
     public $common = null;
     public $http = null;
     public $business = null;
     public $business_id = '';
+    public $tracer = null;
 
-    function __construct($business_id, $log_location, $colour = 'GREEN')
+    function __construct($business_id, $log_location, $colour = 'GREEN',$tracer)
     {
         $this->common = new HorusCommon($business_id, $log_location, $colour);
-        $this->http = new HorusHttp($business_id, $log_location, $colour);
-        $this->business = new HorusBusiness($business_id, $log_location, $colour);
+        $this->http = new HorusHttp($business_id, $log_location, $colour,$tracer);
+        $this->business = new HorusBusiness($business_id, $log_location, $colour,$tracer);
         $this->business_id = $business_id;
+
+        $this->tracer = $tracer;
     }
 
     function getRootNamespace($query, $defaultNamespace)
@@ -95,7 +102,7 @@ class HorusXml
         }
     }
 
-    function getResponses($templates, $vars, $formats, $preferredType, $errorTemplate)
+    function getResponses($templates, $vars, $formats, $preferredType, $errorTemplate,$span)
     {
         $response = array();
         $nrep = 0;
@@ -113,7 +120,7 @@ class HorusXml
                 $errorMessage = "Could not validate output with " . $formats[$nrep] . "\n";
                 $errorMessage .= $this->common->libxml_display_errors();
                 $this->common->mlog($errorMessage . "\n", 'ERROR');
-                throw new HorusException($this->business->returnGenericError($preferredType, $errorTemplate, $errorMessage, ''));
+                throw new HorusException($this->business->returnGenericError($preferredType, $errorTemplate, $errorMessage, '',$span));
             } else {
                 $outputxml->formatOutput = false;
                 $outputxml->preserveWhiteSpace = false;
@@ -250,15 +257,16 @@ class HorusXml
         }
     }
 
-    function doInject($reqbody, $content_type, $proxy_mode, $matches, $preferredType, $queryParams, $genericError, $defaultNamespace = '')
+    function doInject($reqbody, $content_type, $proxy_mode, $matches, $preferredType, $queryParams, $genericError, $defaultNamespace = '',$rootSpan = null)
     {
-        $input = $this->business->extractPayload($content_type, $reqbody, $genericError, $preferredType);
+        $input = $this->business->extractPayload($content_type, $reqbody, $genericError, $preferredType,$rootSpan);
         libxml_use_internal_errors(true);
+        $rootSpan->log(['message'=>'Validating XML Input']);
         $query = simplexml_load_string($input);
         if ($query === FALSE) {
             $errorMessage = "Input XML not properly formatted.\n";
             $errorMessage .= $this->common->libxml_display_errors();
-            $ret = $this->business->returnGenericError($preferredType, $genericError, $errorMessage, '');
+            $ret = $this->business->returnGenericError($preferredType, $genericError, $errorMessage, '',$rootSpan);
 
             throw new HorusException($ret);
         }
@@ -267,6 +275,7 @@ class HorusXml
         $namespaces = $this->getRootNamespace($query, $defaultNamespace);
         $query->registerXPathNamespace('u', $namespaces);
 
+        $rootSpan->log(['message'=>'Finding XSD']);
         $selectedXsd = $this->findSchema($query, $defaultNamespace);
 
         if ('' !== $selectedXsd) {
@@ -275,16 +284,17 @@ class HorusXml
                 $errorMessage = "Found match, but filtered out\n";
                 $errorMessage .= "XSD = $selectedXsd";
                 $this->common->mlog($errorMessage . "\n", 'INFO');
-                throw new HorusException($this->business->returnGenericError($preferredType, $genericError, $errorMessage, ''));
+                throw new HorusException($this->business->returnGenericError($preferredType, $genericError, $errorMessage, '',$rootSpan));
             }
             $this->registerExtraNamespaces($query, $this->business->findMatch($matches, $selected, "extraNamespaces"));
             $vars = $this->getVariables($query, $matches, $selected);
 
             $this->common->mlog("Match comment : " . $this->business->findMatch($matches, $selected, "comment") . "\n", 'INFO');
-
+            $rootSpan->setTag('section',$this->business->findMatch($matches, $selected, "comment"));
             $vars = array_merge($queryParams, $vars);
             $this->common->mlog("Variables: " . print_r($vars, true) . "\n", 'INFO');
 
+            $rootSpan->log(['message'=>'Finding Response Template']);
             $templs = $this->business->findMatch($matches, $selected, "responseTemplate");
             if (is_array($templs)) {
                 $this->common->mlog("Selected template : " . implode(',', $templs) . "\n", 'INFO');
@@ -296,7 +306,7 @@ class HorusXml
             $errorTemplate = (($errorTemplate == null) ? $genericError : $errorTemplate);
             $errorTemplate = 'templates/' . $errorTemplate;
             if ($this->business->findMatch($matches, $selected, "displayError") === "On") {
-                throw new HorusException($this->business->returnGenericError($preferredType, $errorTemplate, "Requested error", ''));
+                throw new HorusException($this->business->returnGenericError($preferredType, $errorTemplate, "Requested error", '',$rootSpan));
             }
             $response = '';
             $multiple = false;
@@ -315,7 +325,8 @@ class HorusXml
             $mime_boundary = md5(time());
 
             try {
-                $resp = $this->getResponses($templates, $vars, $formats, $preferredType, $errorTemplate);
+                $rootSpan->log(['message'=>'Generate XML Response']);
+                $resp = $this->getResponses($templates, $vars, $formats, $preferredType, $errorTemplate,$rootSpan);
             } catch (HorusException $e) {
                 throw new HorusException($e->getMessage());
             }
@@ -327,21 +338,24 @@ class HorusXml
                 foreach ($resp as $i => $r) {
                     $response .= $this->http->formMultiPart("response_$i", $r, $mime_boundary, $eol, $preferredType);
                 }
+                $ret=null;
                 if (''===$proxy_mode)
-                    return $this->http->returnWithContentType($response . "--" . $mime_boundary . "--" . $eol . $eol, "multipart/form-data; boundary=$mime_boundary", 200, $proxy_mode,false,'POST',$forwardData);
+                    $ret=$this->http->returnWithContentType($response . "--" . $mime_boundary . "--" . $eol . $eol, "multipart/form-data; boundary=$mime_boundary", 200, $proxy_mode,false,'POST',$forwardData,$rootSpan);
                 else
-                    return $this->http->returnWithContentType($response . "--" . $mime_boundary . "--" . $eol . $eol, "multipart/form-data; boundary=$mime_boundary", 200, $forwardData,false,'POST',$vars);
+                    $ret=$this->http->returnWithContentType($response . "--" . $mime_boundary . "--" . $eol . $eol, "multipart/form-data; boundary=$mime_boundary", 200, $forwardData,false,'POST',$vars,$rootSpan);
             } else {
                 if (''===$proxy_mode)
-                    return $this->http->returnWithContentType($resp, $preferredType, 200, $proxy_mode, false, 'POST', $forwardData);
+                    $ret=$this->http->returnWithContentType($resp, $preferredType, 200, $proxy_mode, false, 'POST', $forwardData,$rootSpan);
                 else
-                    return $this->http->returnWithContentType($resp, $preferredType, 200, $forwardData, false, 'POST', $vars);
+                    $ret=$this->http->returnWithContentType($resp, $preferredType, 200, $forwardData, false, 'POST', $vars,$rootSpan);
             }
+            return $ret;
         } else {
             $errorMessage = "Unable to find appropriate response.\n";
             $errorMessage .= $this->common->libxml_display_errors();
             $this->common->mlog($errorMessage . "\n", 'ERROR');
-            $res = $this->business->returnGenericError($preferredType, $genericError, $errorMessage, '');
+            $rootSpan->log(['message'=>'Generate Error']);
+            $res = $this->business->returnGenericError($preferredType, $genericError, $errorMessage, '',$rootSpan);
             //if ('' === $proxy_mode)
             throw new HorusException($res);
         }

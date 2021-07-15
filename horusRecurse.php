@@ -8,7 +8,14 @@ require_once('lib/horus_simplejson.php');
 require_once('lib/horus_xml.php');
 require_once('lib/horus_exception.php');
 require_once('lib/horus_recurse.php');
+require_once('vendor/autoload.php');
 
+use Jaeger\Config;
+
+$tracer = HorusCommon::getTracer(Config::getInstance(),'INDIGO',HorusCommon::getPath($_SERVER));
+$rootSpan = HorusCommon::getStartSpan($tracer,apache_request_headers(),'Start Indigo');
+
+$rootSpan->log(['message'=>'Start Indigo','path'=>HorusCommon::getPath($_SERVER), 'BOX'=>'INDIGO']);
 
 
 $loglocation = '/var/log/horus/horus_http.log';
@@ -21,9 +28,11 @@ if ($business_id === '') {
 
 $common = new HorusCommon($business_id, $loglocation, 'INDIGO');
 
+$common->mlog('EEEE ' . print_r($rootSpan,true),'DEBUG');
+
 $common->mlog('+++++ BEGIN HORUS RECURSE +++++', 'INFO');
 
-$recurse  = new HorusRecurse($business_id, $loglocation);
+$recurse  = new HorusRecurse($business_id, $loglocation,$tracer);
 
 $params = json_decode(file_get_contents('conf/horusRecurse.json'), true);
 
@@ -41,7 +50,7 @@ $accept = HorusHttp::extractHeader('Accept');
 $data = file_get_contents('php://input');
 
 try {
-    $result = $recurse->doRecurse($data, $content_type, $proxy_mode, $params, $accept, $_GET);
+    $result = $recurse->doRecurse($data, $content_type, $proxy_mode, $params, $accept, $_GET,$rootSpan);
     header("HTTP/1.1 200 OK", true, 200);
     header("X-Business-Id: $business_id");
     if (is_array($result)) {
@@ -54,4 +63,10 @@ try {
     header("X-Business-Id: $business_id");
     echo $e->getMessage();
 }
+
+$rootSpan->finish();
+$tracer->flush();
+Config::getInstance()->flush();
 $common->mlog('+++++ END HORUS RECURSE +++++', 'INFO');
+
+

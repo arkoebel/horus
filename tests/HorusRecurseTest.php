@@ -55,7 +55,7 @@ class HorusRecurseTest extends HorusTestCase
         }', true);
 
         $xml = '<body><AppHdr xmlns="urn:iso:std:iso:20022:tech:xsd:head.001.001.01"><headerElement>AAA</headerElement></AppHdr><Document xmlns="urn:testns"><documentElement>BBB</documentElement></Document></body>';
-        $recurse = new HorusRecurse('AAA', null);
+        $recurse = new HorusRecurse('AAA', null,self::$tracer);
         self::$curlCounter = 0;
         self::$curls[] = array(
             'url' => 'http://localhost',
@@ -102,7 +102,7 @@ class HorusRecurseTest extends HorusTestCase
             'returnBody' => '<Document xmlns="urn:iso:std:iso:20022:tech:xsd:pacs.002.001.03"><FIToFIPmtStsRpt><GrpHdr><MsgId>RE34567890</MsgId><CreDtTm>2019-10-20T11:56:36</CreDtTm><InstgAgt><FinInstnId><BIC>BNPAFRPP</BIC></FinInstnId></InstgAgt><InstdAgt><FinInstnId><BIC>BNPAFRPP</BIC></FinInstnId></InstdAgt></GrpHdr><OrgnlGrpInfAndSts><OrgnlMsgId>1234567890</OrgnlMsgId><OrgnlMsgNmId>pacs.008</OrgnlMsgNmId><GrpSts>ACCP</GrpSts></OrgnlGrpInfAndSts><TxInfAndSts><StsId>1234567890</StsId><OrgnlEndToEndId>1234567890</OrgnlEndToEndId><OrgnlTxId>1234567890</OrgnlTxId><AccptncDtTm>2012-12-13T12:12:12.000Z</AccptncDtTm><OrgnlTxRef><PmtTpInf><SvcLvl><Cd>SEPA</Cd></SvcLvl><LclInstrm><Cd>INST</Cd></LclInstrm><CtgyPurp><Cd>PURP</Cd></CtgyPurp></PmtTpInf><DbtrAgt><FinInstnId><BIC>BNPAFRPPXXX</BIC></FinInstnId></DbtrAgt></OrgnlTxRef></TxInfAndSts></FIToFIPmtStsRpt></Document>'
         );
 
-        $result = $recurse->doRecurseXml($xml, $config,array());
+        $result = $recurse->doRecurseXml($xml, $config,array(),self::$rootSpan);
 
         var_dump($result);
 
@@ -145,7 +145,7 @@ class HorusRecurseTest extends HorusTestCase
             ]
         }]', true);
 
-        $recurse = new HorusRecurse('AAA', null);
+        $recurse = new HorusRecurse('AAA', null,self::$tracer);
         $this::assertNull($recurse->findSection('azerty', $config));
         $this::assertNotNull($recurse->findSection('section1', $config));
     }
@@ -175,7 +175,7 @@ class HorusRecurseTest extends HorusTestCase
         $doc->appendChild($root);
 
         $namespaces = json_decode('[{"prefix":"r","namespace":"rootns"},{"prefix":"b","namespace":"buri"},{"prefix":"c","namespace":"curi"}]', true);
-        $recurse = new HorusRecurse('ABCD', null);
+        $recurse = new HorusRecurse('ABCD', null,self::$tracer);
         $result = $recurse->addPath($root, '/r:root/c:test/b:test2/b:othertest', $namespaces);
 
         $output = '<?xml version="1.0"?>' . "\n" . '<root xmlns="rootns"><test xmlns="curi"><test2 xmlns="buri"/></test></root>' . "\n";
@@ -189,7 +189,7 @@ class HorusRecurseTest extends HorusTestCase
         $doc->appendChild($root);
 
         $namespaces = json_decode('[{"prefix":"b","namespace":"buri"},{"prefix":"c","namespace":"curi"}]', true);
-        $recurse = new HorusRecurse('DCBA', null);
+        $recurse = new HorusRecurse('DCBA', null,self::$tracer);
         $result = $recurse->addPath($root, '/root/c:test/b:test2/b:othertest', $namespaces);
         $result = $recurse->addPath($root, '/root/c:test/b:test2/b:someothertest', $namespaces);
 
@@ -206,7 +206,7 @@ class HorusRecurseTest extends HorusTestCase
         $doc->appendChild($root);
 
         $namespaces = json_decode('[{"prefix":"b","namespace":"buri"},{"prefix":"c","namespace":"curi"}]', true);
-        $recurse = new HorusRecurse('ZYWX', null);
+        $recurse = new HorusRecurse('ZYWX', null,self::$tracer);
         $result = $recurse->addPath($root, '/root/b:othertest', $namespaces);
         $result = $recurse->addPath($root, '/root/b:someothertest', $namespaces);
 
@@ -253,9 +253,9 @@ class HorusRecurseTest extends HorusTestCase
     }', true);
 
         $xml = '<body><AppHdr xmlns="urn:iso:std:iso:20022:tech:xsd:head.001.001.01"><headerElement>AAA</headerElement></AppHdr><Document xmlns="urn:testns"><documentElement>BBB</documentElement></Document></body>';
-        $recurse = new HorusRecurse('AAA', null);
+        $recurse = new HorusRecurse('AAA', null,self::$tracer);
 
-        $result = $recurse->doRecurseXml($xml, $config,array());
+        $result = $recurse->doRecurseXml($xml, $config,array(),self::$rootSpan);
 
         var_dump($result);
     }
@@ -315,8 +315,8 @@ class HorusRecurseTest extends HorusTestCase
             'returnBody' => '<Header xmlns="urn:swift:saa:xsd:saa.2.0"><Message><SenderReference>AX20190780000010</SenderReference><MessageIdentifier>camt.005.001.03</MessageIdentifier><Format>AnyXML</Format><Sender><DN>ou=bpce,ou=target2,o=bpcefrpp,o=swift</DN></Sender><Receiver><DN>ou=iwsiapilot,ou=euro1,ou=swiftnet,o=swhqbebb,o=swift</DN></Receiver><InterfaceInfo><UserReference>AX20190780000010</UserReference><ValidationLevel>Minimum</ValidationLevel><MessageNature>Financial</MessageNature><ProductInfo><Product><VendorName>Diamis</VendorName><ProductName>CT2C</ProductName><ProductVersion>2.0</ProductVersion></Product></ProductInfo></InterfaceInfo><NetworkInfo><Service>swift.euro1.iws!p</Service></NetworkInfo><SecurityInfo><SWIFTNetSecurityInfo><IsNRRequested>true</IsNRRequested></SWIFTNetSecurityInfo></SecurityInfo></Message></Header>'
         );
 
-        $recurse = new HorusRecurse('FFF', null);
-        $result = $recurse->doRecurseXml($input, $config,array('test'=>'value'));
+        $recurse = new HorusRecurse('FFF', null,self::$tracer);
+        $result = $recurse->doRecurseXml($input, $config,array('test'=>'value'),self::$rootSpan);
 
         var_dump($result);
     }

@@ -14,7 +14,7 @@ class HorusBusinessTest extends HorusTestCase
 
     public function testFindMatch(): void
     {
-        $horus = new HorusBusiness('testFindMatch', null, 'XXXX');
+        $horus = new HorusBusiness('testFindMatch', null, 'XXXX',self::$tracer);
         $params = json_decode('[{"level1":"value1",
                                  "level2":"value2",
                                  "level3":{
@@ -32,12 +32,12 @@ class HorusBusinessTest extends HorusTestCase
 
     public function testLocate(): void
     {
-        $horus = new HorusBusiness('testLocate', null, 'XXXX');
-        $params = json_decode('[{"query":"value1","queryMatch":"value2"},
-                                {"query":"value10","queryMatch":"value20"},
-                                {"query":"value10","queryMatch":"value21"},
-                                {"query":"zip"},
-                                {"query":"zip"}]', true);
+        $horus = new HorusBusiness('testLocate', null, 'XXXX',self::$tracer);
+        $params = json_decode('[{"query":"value1","queryMatch":"value2","comment":"line1"},
+                                {"query":"value10","queryMatch":"value20","comment":"line2"},
+                                {"query":"value10","queryMatch":"value21","comment":"line3"},
+                                {"query":"zip","comment":"line4"},
+                                {"query":"zip","comment":"line5"}]', true);
         $this::assertEquals($horus->locate($params, 'value1', 'isthisokforvalue2or not?'), 0);
         $this::assertEquals($horus->locate($params, 'value10', 'isthisokforvalue20or not?'), 1);
         $this::assertEquals($horus->locate($params, 'value10', 'isthisokforvalue21or not?'), 2);
@@ -53,7 +53,7 @@ class HorusBusinessTest extends HorusTestCase
     public function testLocateJson(): void
     {
 
-        $horus = new HorusBusiness('testLocateJson', null, 'XXXX');
+        $horus = new HorusBusiness('testLocateJson', null, 'XXXX',self::$tracer);
         $params = json_decode('[
             {"query": {"key": "key1", "value": "value1"}},  
             {"query": {"key": "key1", "value": "value1"}, "queryMatch": "match"}, 
@@ -81,14 +81,14 @@ class HorusBusinessTest extends HorusTestCase
 
     function testPerformRoutingError(): void
     {
-        $horus = new HorusBusiness('testPerformRoutingError', null, 'OOOO');
+        $horus = new HorusBusiness('testPerformRoutingError', null, 'OOOO',self::$tracer);
         $this->expectException(HorusException::class);
-        $horus->performRouting(null, 'application/json', 'application/json', '{"test":"ok"}');
+        $horus->performRouting(null, 'application/json', 'application/json', '{"test":"ok"}',array(),self::$rootSpan);
     }
 
     function testPerformRoutingStandard(): void
     {
-        $horus = new HorusBusiness('testPerformRouting', null, 'PPPP');
+        $horus = new HorusBusiness('testPerformRouting', null, 'PPPP',self::$tracer);
         $route = json_decode('{
 			"source": "singlesource",
 			"parameters": [{
@@ -165,13 +165,13 @@ class HorusBusinessTest extends HorusTestCase
                                 'errorMessage'=>'',
                                 'returnBody'=>'{"Status":"OK"}');
 
-        $res = $horus->performRouting($route, 'application/json', 'application/json', '{"test":"ok"}');
+        $res = $horus->performRouting($route, 'application/json', 'application/json', '{"test":"ok"}',array(),self::$rootSpan);
         $this::assertEquals(2,sizeof($res),'2 queries should have responded');
     }
 
     function testPerformRoutingStopError(): void
     {
-        $horus = new HorusBusiness('testPerformRouting', null, 'QQQQ');
+        $horus = new HorusBusiness('testPerformRouting', null, 'QQQQ',self::$tracer);
         $route = json_decode('{
             "source": "singlesource",
             "followOnError": "false",
@@ -249,13 +249,13 @@ class HorusBusinessTest extends HorusTestCase
                                 'errorMessage'=>'',
                                 'returnBody'=>'{"Status":"OK"}');
 
-        $res = $horus->performRouting($route, 'application/json', 'application/json', '{"test":"ok"}');
+        $res = $horus->performRouting($route, 'application/json', 'application/json', '{"test":"ok"}',array(),self::$rootSpan);
         
         $this::assertEquals(2,sizeof($res),'1 query should have responded');
     }
 
     function testParametersMerge(): void {
-        $horus = new HorusBusiness('testPerformRouting', null, 'QQQQ');
+        $horus = new HorusBusiness('testPerformRouting', null, 'QQQQ',self::$tracer);
         $route = json_decode('{
             "source": "singlesource",
             "followOnError": "false",
@@ -309,7 +309,7 @@ class HorusBusinessTest extends HorusTestCase
                                 'errorMessage'=>'',
                                 'returnBody'=>'{"Status":"OK"}');
 
-        $horus->performRouting($route, 'application/json', 'application/json', '{"test":"ok"}',array('repeat'=>'3','extra'=>'true'));
+        $horus->performRouting($route, 'application/json', 'application/json', '{"test":"ok"}',array('repeat'=>'3','extra'=>'true'),self::$rootSpan);
 
         $this::assertEquals('http://proxy/horus/horus.php?bic1=BNPAFRPPXXX&extra=true&param1=single&repeat=5&sourcex=cristal',self::$curls[0]['url'], 'Url params should be mixed');
 

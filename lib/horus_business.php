@@ -6,12 +6,14 @@ class HorusBusiness
     public $common = '';
     public $http = '';
     private $business_id = '';
+    public $tracer = null;
 
-    function __construct($business_id, $log_location, $colour)
+    function __construct($business_id, $log_location, $colour,$tracer)
     {
         $this->business_id = $business_id;
         $this->common = new HorusCommon($business_id, $log_location, $colour);
-        $this->http = new HorusHttp($business_id, $log_location, $colour);
+        $this->http = new HorusHttp($business_id, $log_location, $colour,$tracer);
+        $this->tracer = $tracer;
     }
 
     public function findMatch($matches, $request, $field)
@@ -114,17 +116,17 @@ class HorusBusiness
         return $selected;
     }
 
-    function extractPayload($content_type, $body, $errorTemplate, $errorFormat)
+    function extractPayload($content_type, $body, $errorTemplate, $errorFormat,$span)
     {
         if ($content_type == "application/json") {
             $json = json_decode($body, true);
             if (json_last_error() != JSON_ERROR_NONE) {
-                $this->returnGenericError($errorFormat, $errorTemplate, 'JSON Malformed : ' . decodeJsonError(json_last_error()));
+                $this->returnGenericError($errorFormat, $errorTemplate, 'JSON Malformed : ' . decodeJsonError(json_last_error()),'',$span);
             } else {
                 if (array_key_exists('payload',$json) && $json['payload'] != null){
                     return $json['payload'];
                 }else{
-                    $this->returnGenericError($content_type, $errorTemplate, 'Empty JSON Payload');
+                    $this->returnGenericError($content_type, $errorTemplate, 'Empty JSON Payload','',$span);
                 }
             }
         } else {
@@ -137,7 +139,7 @@ class HorusBusiness
         return json_decode($body, true);
     }
 
-    function returnGenericError($format, $template, $errorMessage, $forward = '')
+    function returnGenericError($format, $template, $errorMessage, $forward = '',$span)
     {
 
         $this->common->mlog("Error being generated. Cause: $errorMessage", 'INFO');
@@ -146,13 +148,13 @@ class HorusBusiness
         $errorOutput = ob_get_contents();
         ob_end_clean();
 
-        $ret = $this->http->returnWithContentType($errorOutput, $format, 400, $forward);
+        $ret = $this->http->returnWithContentType($errorOutput, $format, 400, $forward,true,'POST',array(),$span);
         if ('' === $forward){
             return $ret;
         }
     }
 
-    function returnGenericJsonError($format, $template, $errorMessage, $forward = '')
+    function returnGenericJsonError($format, $template, $errorMessage, $forward = '',$span)
     {
 
         $this->common->mlog("Error JSON being generated. Cause: $errorMessage", 'INFO');
@@ -162,8 +164,7 @@ class HorusBusiness
         ob_end_clean();
 
         $this->common->mlog($errorOutput, 'DEBUG', 'JSON');
-
-        return $this->http->returnWithContentType($errorOutput, $format, 400, $forward, true);
+        return $this->http->returnWithContentType($errorOutput, $format, 400, $forward, true,'POST',array(),$span);
       
     }
 
@@ -192,7 +193,7 @@ class HorusBusiness
         }
     }
 
-    public function performRouting($route, $content_type, $accept, $data, $queryParams = array())
+    public function performRouting($route, $content_type, $accept, $data, $queryParams = array(),$span)
     {
         if (is_null($route) || $route === false) {
             $this->common->mlog('No route found with provided source value', 'WARNING');
@@ -210,6 +211,8 @@ class HorusBusiness
         foreach ($route['destinations'] as $destination) {
             $ii++;
 
+            $routeSpan = $this->tracer->startSpan('Destination ' . $destination['comment'],['child_of'=>$span]);
+
             $this->common->mlog("Destination : $ii " . $destination['comment'] . "\n", "INFO");
 
 
@@ -223,6 +226,11 @@ class HorusBusiness
             $this->common->mlog("Final destination : " . $destinationUrl . "\n", 'DEBUG');
             $this->common->mlog("Content-type: " . $content_type . ", Accept: " . $accept, 'DEBUG');
 
+            $routeSpan->setTag('destination',$destinationUrl);
+            $routeSpan->setTag('proxy',$proxyUrl);
+            $routeSpan->setTag('content-type',$content_type);
+            $routeSpan->setTag('accept',$accept);
+
             $headers = array('Content-type: ' . $content_type, 'Accept: ' . $accept, 'Expect: ', 'X-Business-Id: ' . $this->business_id);
 
             if (!array_key_exists('proxy', $destination)) {
@@ -233,10 +241,11 @@ class HorusBusiness
             }
 
             try {
-                $response = $this->http->forwardSingleHttpQuery($dest_url, $headers, $data, 'POST');
+                $response = $this->http->forwardSingleHttpQuery($dest_url, $headers, $data, 'POST',$routeSpan);
             } catch (HorusException $e) {
                 $response = json_encode(array("error" => $e->getMessage()));
                 if (!$followOnError){
+                    $routeSpan->finish();
                     throw new HorusException('Flow interrupted after error ' . $e->getMessage(), 503);
                 }
             }
@@ -244,9 +253,12 @@ class HorusBusiness
             $responses[] = $response;
 
             if (array_key_exists('delayafter', $destination)) {
+                $routeSpan->log(['message'=>'Start delay ' . $destination['delayafter']] . 's');
                 $this->common->mlog('Waiting ' . $destination['delayafter'] . 'sec for next destination', 'INFO');
                 sleep($destination['delayafter']);
+                $routeSpan->log(['message'=>'End delay']);
             }
+            $routeSpan->finish();
         }
         return $responses;
     }

@@ -8,6 +8,12 @@ require_once('lib/horus_simplejson.php');
 require_once('lib/horus_xml.php');
 require_once('lib/horus_exception.php');
 
+require_once('vendor/autoload.php');
+
+
+$tracer = HorusCommon::getTracer(Jaeger\Config::getInstance(),'BLACK',HorusCommon::getPath($_SERVER));
+$rootSpan = HorusCommon::getStartSpan($tracer,apache_request_headers(),'Start Black');
+
 function getParams($conf,$format){
     foreach ($conf['horusFormats'] as $i => $section){
         if ($section['formatName']===$format)
@@ -35,7 +41,7 @@ if ($business_id === ''){
 }
 
 $common = new HorusCommon($business_id, $loglocation, 'BLACK');
-$http = new HorusHttp($business_id,$loglocation,'BLACK');
+$http = new HorusHttp($business_id,$loglocation,'BLACK',$tracer);
 
 
 if (function_exists('apache_request_headers')) {
@@ -44,6 +50,7 @@ if (function_exists('apache_request_headers')) {
 
 $destination = HorusHttp::extractHeader('x_destination_url');
 $common->mlog('Destination is : ' . $destination ,'DEBUG');
+$rootSpan->setTag('destination',$destination);
 
 $params = json_decode(file_get_contents('conf/horusFormating.json'),true);
 
@@ -61,17 +68,20 @@ if ((''=== $format) || (getParams($params,$format) === null)){
     header('X-Business-Id: ' . $business_id);
     $common->mlog("Missing or unknown format : " . $format . "\n", "ERROR");
     echo "Missing or unknown format : " . $format . "\n";
+    $rootSpan->finish();
+    $tracer->flush();
     exit;
 }
 
+$rootSpan->setTag('format',$format);
 $content_type = array_key_exists('CONTENT_TYPE',$_SERVER) ? $_SERVER['CONTENT_TYPE'] : 'application/json';
 //$accept = array_key_exists('HTTP_ACCEPT',$_SERVER) ? $_SERVER['HTTP_ACCEPT'] : "application/json";
 $accept = 'application/json';
 $data = file_get_contents('php://input');
 $section = getParams($params,$format);
-$business  = new HorusBusiness($business_id,$loglocation,'BLACK');
+$business  = new HorusBusiness($business_id,$loglocation,'BLACK',$tracer);
 
-$common->mlog('Incoming data : ' . $data . "\n","DEBUG");
+$common->mlog('Incoming data : ' . $data . "\n","INFO");
 
 $returnContent = '';
 $returnData = $data;
@@ -81,6 +91,8 @@ if(array_key_exists('stripSection',$section)){
     $i1 = strpos($returnData,'<' . $section['stripSection'] . '>');
     $i2 = strpos($returnData,'</' . $section['stripSection'] . '>',$i1) + strlen($section['stripSection'])+3;
     $tostrip = substr($returnData,$i1,$i2-$i1);
+    error_log($section['stripSection'] . ' ' . $i1 . ' ' . $i2);
+    error_log('XXX' . $tostrip . 'YYY');
     //$xml = simplexml_load_string($tostrip);
     $xsi = new SimpleXMLIterator($tostrip);
     for($xsi->rewind(); $xsi->valid(); $xsi->next()){
@@ -111,6 +123,8 @@ if(''===$destination){
     $http->setHttpReturnCode(200);
     header('Content-type: ' . $returnContent);
     echo $returnData;
+    $rootSpan->finish();
+    $tracer->flush();
     exit;
 }else{
     $common->mlog('Forwarding content to ' . $destination . "\n","INFO");
@@ -124,10 +138,14 @@ if(''===$destination){
         $ddest = $destination . $query;
     else
         $ddest = $destination . '?' . substr($query,1);
-    $rr =  $http->forwardSingleHttpQuery($ddest,array('Content-type: ' . $returnContent,'Accept: ' . $accept,'X-Business-Id: ' . $business_id),$returnData,'POST');
+    $rr =  $http->forwardSingleHttpQuery($ddest,array('Content-type: ' . $returnContent,'Accept: ' . $accept,'X-Business-Id: ' . $business_id),$returnData,'POST',$rootSpan);
     foreach ($rr['headers'] as $header=>$value)
         if(strpos($header,'x-horus-')>=0)
             header($header . ': ' . $value);
     echo $rr['body'];
+
+    $rootSpan->finish();
+    $tracer->flush();
+    Jaeger\Config::getInstance()->flush();
     exit;
 }

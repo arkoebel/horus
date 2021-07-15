@@ -1,14 +1,22 @@
 <?php
+
+use OpenTracing\Formats;
+use OpenTracing\GlobalTracer;
+use Jaeger\Config;
+
 class HorusHttp
 {
 
     public $common = null;
     public $business_id = '';
+    private $tracer = null;
 
-    function __construct($business_id, $log_location, $colour)
+    function __construct($business_id, $log_location, $colour,$tracer)
     {
         $this->common = new HorusCommon($business_id, $log_location, $colour);
         $this->business_id = $business_id;
+
+        $this->tracer = $tracer;
     }
 
     /**
@@ -38,6 +46,24 @@ class HorusHttp
         return $outHeaders;
     }
 
+    static function formatOutHeaders($inHeaders){
+        $outHeaders = array();
+        foreach($inHeaders as $key=>$value){
+            if(is_int($key)){
+                if(is_array($value))
+                  $outHeaders[] = strtolower($value[0]) . ': ' . ltrim(rtrim($value[1]));
+                else
+                  if(mb_strpos($value, ':') !== false){
+                    $elt = explode(':',$value);
+                    $outHeaders[] = strtolower($elt[0]) . ': ' . ltrim(rtrim($elt[1]));
+                  }
+            }else{
+                $outHeaders[] = strtolower($key) . ': ' . ltrim(rtrim($value));
+            }
+        }
+        return $outHeaders;
+    }
+
     
 
     static function cleanVariables($to_remove,$list){
@@ -56,8 +82,10 @@ class HorusHttp
      * function returnArrayWithContentType
      * Send a set of http queries to the same destination
      */
-    function returnArrayWithContentType($data, $content_type, $status, $forward = '', $exitafter = true, $no_conversion = false, $method = 'POST')
+    function returnArrayWithContentType($data, $content_type, $status, $forward = '', $exitafter = true, $no_conversion = false, $method = 'POST',$rootSpan=null)
     {
+
+        $injectSpan = $this->tracer->startSpan('Http Call Lib for Arrays',['child_of'=>$rootSpan]);
 
         if ($no_conversion === FALSE) {
             $this->common->mlog('Forced conversion', 'DEBUG');
@@ -77,7 +105,7 @@ class HorusHttp
                 $queries[] = $query;
             }
 
-            $result = $this->forwardHttpQueries($queries);
+            $result = $this->forwardHttpQueries($queries,$injectSpan);
             $responses = array();
             $json = false;
 
@@ -95,12 +123,14 @@ class HorusHttp
             } else {
                 echo implode("\n", $responses);
             }
+            $injectSpan->finish();
         } else {
             header('Content-type: ' . $content_type);
             $ret = '';
             foreach ($data as $content) {
                 $ret .= $this->convertOutData($content, $content_type, $no_conversion) . "\n";
             }
+            $injectSpan->finish();
             return $ret;
         }
 
@@ -113,14 +143,16 @@ class HorusHttp
      * function returnWithContentType
      * Sends a http query to the next step or returns response
      */
-    function returnWithContentType($data, $content_type, $status, $forward = '', $no_conversion = false, $method = 'POST',$returnHeaders=array())
+    function returnWithContentType($data, $content_type, $status, $forward = '', $no_conversion = false, $method = 'POST',$returnHeaders=array(),$rootSpan=null)
     {
+
+        $injectSpan = $this->tracer->startSpan('Http call lib',['child_of'=>$rootSpan]);
 
         if ($no_conversion === 'FALSE') {
             $this->common->mlog('Forced conversion to JSON', 'DEBUG');
         }
 
-        $this->setHttpReturnCode($status);
+        //$this->setHttpReturnCode($status);
 
         if (is_null($forward)) {
             $forward = '';
@@ -131,24 +163,29 @@ class HorusHttp
         $this->common->mlog($data, 'DEBUG', 'TXT');
 
         if ($forward !== '') {
+            //$injectSpan->log(['message'=>'Send HTTP Queries to destination']);
+            //$injectSpan->setTag('destination',$forward);
 
             $headers = array('Content-Type' => $content_type, 'Accept' => 'application/json', 'Expect' => '', 'X-Business-Id' => $this->business_id);
             $query = array('url' => $forward, 'method' => $method, 'headers' => $headers, 'data' => is_array($data) ? $data[0] : $data);
             $queries = array($query);
 
-            $result = $this->forwardHttpQueries($queries);
+            $result = $this->forwardHttpQueries($queries,$injectSpan);
             header("Content-type: " . $result[0]['response_headers']['Content-Type']);
             foreach($returnHeaders as $rh){
                 header($rh);
             }
 
+            $injectSpan->finish();
             return $result[0]['response_data'] . "\n";
         } else {
+            $injectSpan->log(['message'=>'Return to sender']);
+            $this->setHttpReturnCode($status);
             header("Content-Type: $content_type");
             foreach($returnHeaders as $rh){
                 header($rh);
             }
-
+            $injectSpan->finish();
             return $data;
         }
     }
@@ -248,7 +285,7 @@ class HorusHttp
      *      response_code
      *      response_data
      */
-    function forwardHttpQueries($queries)
+    function forwardHttpQueries($queries,$rootSpan)
     {
 
         if (is_null($queries) || !is_array($queries) || count($queries) == 0) {
@@ -258,15 +295,25 @@ class HorusHttp
         $mh = curl_multi_init();
         $ch = array();
 
+        $span = array();
+
         foreach ($queries as $id => $query) {
+            $span[$id] = $this->tracer->startSpan('Send Query ' . $id,['child_of'=>$rootSpan]);
+            
             if (!array_key_exists('method', $query) || !array_key_exists('url', $query)) {
                 $query['response_code'] = '400';
                 $query['response_data'] = 'Invalid query : method and/or url missing';
                 $this->common->mlog('Invalid url/method : method=' . $query['method'] . ', url=' . $query['url'], 'WARNING');
                 break;
             }
+            $span[$id]->setTag('path',$query['url']);
+            $span[$id]->setTag('method',$query['method']);
+            $this->tracer->inject($span[$id]->spanContext,Formats\TEXT_MAP,$query['headers']);       
+
             $this->common->mlog('Generate Curl call for ' . $query['method'] . ' ' . $query['url'], 'INFO');
             $ch[$id] = curl_init($query['url']);
+
+            $span[$id]->log(['message'=>'Prepare Curl']);
 
             curl_setopt($ch[$id], CURLOPT_RETURNTRANSFER, 1);
             if ($query['method'] !== 'GET') {
@@ -274,7 +321,8 @@ class HorusHttp
                 curl_setopt($ch[$id], CURLOPT_POSTFIELDS, $query['data']);
             }
             if (array_key_exists('headers', $query) && (count($query['headers']) != 0)) {
-                curl_setopt($ch[$id], CURLOPT_HTTPHEADER, $this->formatHeaders($query['headers']));
+                curl_setopt($ch[$id], CURLOPT_HTTPHEADER, HorusHttp::formatOutHeaders($query['headers']));
+                //curl_setopt($ch[$id], CURLOPT_HTTPHEADER, $this->formatHeaders($query['headers']));
             }
 
             curl_setopt($ch[$id], CURLOPT_SSL_VERIFYPEER, false);
@@ -286,19 +334,20 @@ class HorusHttp
 
         $this->common->mlog('Sending out curl calls', 'INFO');
 
+        $rootSpan->log(['message'=>'Send multiple HTTP queries']);
         $running = NULL;
         do {
             curl_multi_exec($mh, $running);
             curl_multi_select($mh, 10);
         } while ($running > 0);
 
+        $rootSpan->log(['message'=>'Received all HTTP responses']);
         $this->common->mlog('Got all curl responses', 'INFO');
-
         foreach ($ch as $i => $handle) {
-
             $curlError = curl_error($handle);
             $content_length = curl_getinfo($handle, CURLINFO_HEADER_SIZE);
             $queries[$i]['response_code'] = curl_getinfo($handle, CURLINFO_HTTP_CODE);
+            $span[$i]->setTag('ResponseCode',$queries[$i]['response_code'] );
             $this->common->mlog("Curl #$i response code: " . $queries[$i]['response_code'], 'INFO');
 
             if ($curlError == "") {
@@ -324,14 +373,18 @@ class HorusHttp
             curl_close($handle);
 
             curl_multi_close($mh);
+            $span[$i]->finish();
         }
 
         return $queries;
     }
 
 
-    function forwardSingleHttpQuery($dest_url, $headers, $data, $method = 'POST')
+    function forwardSingleHttpQuery($dest_url, $headers, $data, $method = 'POST',$span)
     {
+        $currentSpan = $this->tracer->startSpan('Forward Http query',['child_of'=>$span]);
+        $this->tracer->inject($currentSpan->spanContext,Formats\TEXT_MAP,$headers);    
+        
         $handle = curl_init($dest_url);
         $headersout = array();
         curl_setopt($handle, CURLOPT_URL, $dest_url);
@@ -341,7 +394,7 @@ class HorusHttp
         } else {
             curl_setopt($handle, CURLOPT_CUSTOMREQUEST, $method);
         }
-        curl_setopt($handle, CURLOPT_HTTPHEADER, $headers);
+        curl_setopt($handle, CURLOPT_HTTPHEADER, HorusHttp::formatOutHeaders($headers));
         curl_setopt($handle, CURLOPT_POSTFIELDS, $data);
         curl_setopt(
             $handle,
@@ -361,13 +414,16 @@ class HorusHttp
         $this->common->mlog($method . ' ' . $dest_url . "\n" . implode("\n", $headers) . "\n\n", 'DEBUG');
         $response = curl_exec($handle);
         $response_code = curl_getinfo($handle, CURLINFO_HTTP_CODE);
+        $currentSpan->setTag('Return Code',$response_code);
         if (200 !== $response_code) {
             $this->common->mlog('Request to ' . $dest_url . ' produced error ' . curl_getinfo($handle, CURLINFO_HTTP_CODE), 'ERROR');
             $this->common->mlog('Call stack was : ' . curl_getinfo($handle), 'DEBUG');
+            $currentSpan->finish();
             throw new HorusException('HTTP Error ' . $response_code . ' for ' . $dest_url);
         } else {
             $this->common->mlog("Query result was $response_code \n", 'DEBUG');
             $this->common->mlog('Return Headers : ' . implode("\n",$headersout) . "\n",'DEBUG');
+            $currentSpan->finish();
         }
 
         return array('body'=>$response,'headers'=>$headersout);

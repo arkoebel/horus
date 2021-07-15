@@ -43,7 +43,7 @@ class HorusHttpTest extends HorusTestCase
                                 'errorMessage'=>'',
                                 'returnBody'=>'<html>Test</html>');
 
-        $result = $this->http->forwardHttpQueries($queries);
+        $result = $this->http->forwardHttpQueries($queries,self::$rootSpan);
         $this::assertEquals($result[0]['response_code'], 200);
         $this::assertEquals($result[0]['response_data'],'<html>Test</html>');
     }
@@ -108,9 +108,36 @@ class HorusHttpTest extends HorusTestCase
                                 'errorMessage'=>'',
                                 'returnBody'=>'<html>Test</html>');
         $this->expectException(HorusException::class);
-        $this->http->forwardSingleHttpQuery('https://www.google.com', array('Content-type: application/json', 'Accept: application/json', 'Expect:', 'X-Business-Id: testHorusHttp') , null, 'POST');
+        $this->http->forwardSingleHttpQuery('https://www.google.com', array('Content-type: application/json', 'Accept: application/json', 'Expect:', 'X-Business-Id: testHorusHttp') , null, 'POST',self::$rootSpan);
    
 
 
+    }
+
+    function testFormatOutHeaders():void
+    {
+        $input =    array('Content-type: application/xml',
+                            'Accept: text/plain',
+                            'Expect:',
+                            'X-Business-Id: 6b15cb4e-fb64-409d-b228-ed069fe6369e',
+                            'x-b3-traceid' => 'a050f67be54f66ac',
+                            'x-b3-parentspanid' => '16907023254a39c4',
+                            'x-b3-spanid' => '169070232774471d',
+                            'x-b3-sampled' => 1);
+        $output = HorusHttp::formatOutHeaders($input);
+
+        $expected =    array('content-type: application/xml',
+                            'accept: text/plain',
+                            'expect: ',
+                            'x-business-id: 6b15cb4e-fb64-409d-b228-ed069fe6369e',
+                            'x-b3-traceid: a050f67be54f66ac',
+                            'x-b3-parentspanid: 16907023254a39c4',
+                            'x-b3-spanid: 169070232774471d',
+                            'x-b3-sampled: 1');
+
+        $this::assertEquals(count($output),8);
+        $this::assertEquals($output,$expected);
+
+    
     }
 }

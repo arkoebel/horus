@@ -9,6 +9,9 @@ class ComposerStaticInitde7a39667ced54ac1565a011fa3ba2bf
     public static $files = array (
         '320cde22f66dd4f5d3fd621d3e88b98f' => __DIR__ . '/..' . '/symfony/polyfill-ctype/bootstrap.php',
         '6124b4c8570aa390c21fafd04a26c69f' => __DIR__ . '/..' . '/myclabs/deep-copy/src/DeepCopy/deep_copy.php',
+        '870c221a18597bfcd5ed576d0fb64a19' => __DIR__ . '/..' . '/opentracing/opentracing/src/OpenTracing/Tags.php',
+        'd25d883add1ecab0d3a9ffec57f0f183' => __DIR__ . '/..' . '/opentracing/opentracing/src/OpenTracing/Formats.php',
+        '700dcaa359912479db3776dd849a600b' => __DIR__ . '/..' . '/jukylin/jaeger-php/src/Jaeger/Constants.php',
     );
 
     public static $prefixLengthsPsr4 = array (
@@ -27,6 +30,14 @@ class ComposerStaticInitde7a39667ced54ac1565a011fa3ba2bf
         'P' => 
         array (
             'Prophecy\\' => 9,
+        ),
+        'O' => 
+        array (
+            'OpenTracing\\' => 12,
+        ),
+        'J' => 
+        array (
+            'Jaeger\\' => 7,
         ),
         'D' => 
         array (
@@ -54,6 +65,14 @@ class ComposerStaticInitde7a39667ced54ac1565a011fa3ba2bf
         array (
             0 => __DIR__ . '/..' . '/phpspec/prophecy/src/Prophecy',
         ),
+        'OpenTracing\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/opentracing/opentracing/src/OpenTracing',
+        ),
+        'Jaeger\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/jukylin/jaeger-php/src/Jaeger',
+        ),
         'Doctrine\\Instantiator\\' => 
         array (
             0 => __DIR__ . '/..' . '/doctrine/instantiator/src/Doctrine/Instantiator',
@@ -64,11 +83,30 @@ class ComposerStaticInitde7a39667ced54ac1565a011fa3ba2bf
         ),
     );
 
+    public static $prefixesPsr0 = array (
+        'T' => 
+        array (
+            'Thrift\\' => 
+            array (
+                0 => __DIR__ . '/..' . '/packaged/thrift/src',
+            ),
+        ),
+    );
+
     public static $classMap = array (
+        'FineDiff' => __DIR__ . '/../..' . '/lib/diff.php',
+        'FineDiffCopyOp' => __DIR__ . '/../..' . '/lib/diff.php',
+        'FineDiffDeleteOp' => __DIR__ . '/../..' . '/lib/diff.php',
+        'FineDiffInsertOp' => __DIR__ . '/../..' . '/lib/diff.php',
+        'FineDiffOp' => __DIR__ . '/../..' . '/lib/diff.php',
+        'FineDiffOps' => __DIR__ . '/../..' . '/lib/diff.php',
+        'FineDiffReplaceOp' => __DIR__ . '/../..' . '/lib/diff.php',
         'HorusBusiness' => __DIR__ . '/../..' . '/lib/horus_business.php',
         'HorusCommon' => __DIR__ . '/../..' . '/lib/horus_common.php',
+        'HorusException' => __DIR__ . '/../..' . '/lib/horus_exception.php',
         'HorusHttp' => __DIR__ . '/../..' . '/lib/horus_http.php',
         'HorusInjector' => __DIR__ . '/../..' . '/lib/horus_inject.php',
+        'HorusRecurse' => __DIR__ . '/../..' . '/lib/horus_recurse.php',
         'HorusSimpleJson' => __DIR__ . '/../..' . '/lib/horus_simplejson.php',
         'HorusXml' => __DIR__ . '/../..' . '/lib/horus_xml.php',
         'PHPUnit\\Exception' => __DIR__ . '/..' . '/phpunit/phpunit/src/Exception.php',
@@ -624,6 +662,7 @@ class ComposerStaticInitde7a39667ced54ac1565a011fa3ba2bf
         return \Closure::bind(function () use ($loader) {
             $loader->prefixLengthsPsr4 = ComposerStaticInitde7a39667ced54ac1565a011fa3ba2bf::$prefixLengthsPsr4;
             $loader->prefixDirsPsr4 = ComposerStaticInitde7a39667ced54ac1565a011fa3ba2bf::$prefixDirsPsr4;
+            $loader->prefixesPsr0 = ComposerStaticInitde7a39667ced54ac1565a011fa3ba2bf::$prefixesPsr0;
             $loader->classMap = ComposerStaticInitde7a39667ced54ac1565a011fa3ba2bf::$classMap;
 
         }, null, ClassLoader::class);

@@ -13,6 +13,32 @@ class HorusCommon
         $this->colour = $colour;
     }
 
+    public static function getPath($vars){
+        $patharray = explode('/',$vars['SCRIPT_FILENAME']);
+        $tmp = array_pop($patharray);
+        $path = array_pop($patharray);
+        return $path;
+    }
+
+    public static function getTracer($config,$prefix,$path){
+        $cnf = json_decode(file_get_contents('conf/horusConfig.json'),true);
+        $config = Jaeger\Config::getInstance();
+        $config::$propagator = \Jaeger\Constants\PROPAGATOR_ZIPKIN;
+        return $config->initTracer($prefix . '_' . $path,$cnf['tracerCollectorHost']);
+    }
+
+    public static function getStartSpan($tracer,$headers,$title){
+        $h = array();
+        foreach ($headers as $key=>$value)
+            $h[strtolower($key)] = $value;
+    
+        $rootContext = $tracer->extract(OpenTracing\Formats\TEXT_MAP,$h);
+
+        if(null !== $rootContext)
+            return $tracer->startSpan($title,['child_of'=>$rootContext]);
+        else
+            return $tracer->startSpan($title);
+    }
     /**
      * Function echoerror
      * Terminates program, writing an exception message to stdout

@@ -16,12 +16,12 @@ class HorusSimplejsonTest extends HorusTestCase
 
     function testSelectionEmptyBody(): void
     {
-        $simplejson = new HorusSimpleJson("mybusinessid", null, null);
+        $simplejson = new HorusSimpleJson("mybusinessid", null, null,self::$tracer);
 
         $json = '{';
         json_decode($json, true);
         try {
-            $res = $simplejson->selection(null, '', '', '');
+            $res = $simplejson->selection(null, '', '', self::$rootSpan);
         } catch (HorusException $e) {
             $this::assertEquals(self::$mockheaders[0], array("HTTP/1.1 400 MALFORMED URL", TRUE, 400), 'Null input should generate http/400');
             $outjson = json_decode($e->getMessage(), true);
@@ -41,12 +41,12 @@ class HorusSimplejsonTest extends HorusTestCase
             {"query": {"key": "zip"},"queryMatch": "match3"}, 
             {"query": {"key": "zip"}}
         ]', true);
-        $simplejson = new HorusSimpleJson("mybusinessid", null, $matches);
+        $simplejson = new HorusSimpleJson("mybusinessid", null, $matches,self::$tracer);
         $input = json_decode('{"nothing": "to decode"}', true);
 
         $res = '';
         try {
-            $res = $simplejson->selection($input, 'application/json', '', 'application/json');
+            $res = $simplejson->selection($input, '', 'application/json',self::$rootSpan);
         } catch (HorusException $e) {
             $this::assertEquals(self::$mockheaders[0], array("HTTP/1.1 400 MALFORMED URL", TRUE, 400), 'Unmatched input should generate http/400');
             $outjson = json_decode($e->getMessage(), true);
@@ -67,12 +67,12 @@ class HorusSimplejsonTest extends HorusTestCase
             {"query": {"key": "zip"},"queryMatch": "match3"}, 
             {"query": {"key": "zip"}}
         ]', true);
-        $simplejson = new HorusSimpleJson("mybusinessid", null, $matches);
+        $simplejson = new HorusSimpleJson("mybusinessid", null, $matches,self::$tracer);
         $input = json_decode('{"key1": "value1","key2":"matched"}', true);
 
         $res = '';
         try {
-            $res = $simplejson->selection($input, '', 'application/json');
+            $res = $simplejson->selection($input, '', 'application/json',self::$rootSpan);
         } catch (HorusException $e) {
             $this::assertEquals(self::$mockheaders[0], array("HTTP/1.1 400 MALFORMED URL", TRUE, 400), 'Forced error output should generate http/400');
             $outjson = json_decode($e->getMessage(), true);
@@ -97,10 +97,10 @@ class HorusSimplejsonTest extends HorusTestCase
             {"query": {"key": "zip"}}
         ]', true);
 
-        $simplejson = new HorusSimpleJson("mybusinessid", null, $matches);
+        $simplejson = new HorusSimpleJson("mybusinessid", null, $matches,self::$tracer);
         $input = json_decode('{"key1": "value1","key2":"matched", "value1": "returnvalue1","value2":"returnvalue2"}', true);
         $expected = array('templates' => array('position_msg_response.json'), 'formats' => array('application/json'), 'variables' => array('var1' => 'returnvalue1', 'var2' => 'returnvalue2'), 'multiple' => false);
-        $res = $simplejson->selection($input, 'application/json', '', 'application/json');
+        $res = $simplejson->selection($input, 'application/json', '', 'application/json',self::$rootSpan);
         $this::assertNotNull($res, 'Should return something');
         $this::assertTrue(is_array($res), 'Should return an array');
         $this::assertEquals($res, $expected, 'Compare to expected result');
@@ -121,10 +121,10 @@ class HorusSimplejsonTest extends HorusTestCase
             {"query": {"key": "zip"}}
         ]', true);
 
-        $simplejson = new HorusSimpleJson("mybusinessid", null, $matches);
+        $simplejson = new HorusSimpleJson("mybusinessid", null, $matches,self::$tracer);
         $input = json_decode('{"key1": "value1","key2":"matched", "value1": "returnvalue1","value2":"returnvalue2"}', true);
         $expected = array('templates' => array('position_msg_response.json', 'position_msg_response_error.json'), 'formats' => array('application/json', 'application/json'), 'variables' => array('var1' => 'returnvalue1', 'var2' => 'returnvalue2'), 'multiple' => true);
-        $res = $simplejson->selection($input, 'application/json', '', 'application/json');
+        $res = $simplejson->selection($input, 'application/json', '', 'application/json',self::$rootSpan);
         $this::assertNotNull($res, 'Should return something');
         $this::assertTrue(is_array($res), 'Should return an array');
         $this::assertEquals($res, $expected, 'Compare to expected result');
@@ -141,11 +141,11 @@ class HorusSimplejsonTest extends HorusTestCase
             {"query": {"key": "zip"},"queryMatch": "match3"}, 
             {"query": {"key": "zip"}}
         ]', true);
-        $simplejson = new HorusSimpleJson("mybusinessid", null, $matches);
+        $simplejson = new HorusSimpleJson("mybusinessid", null, $matches,self::$tracer);
         $input = '{"key1": "value1","key2":"matched"}';
 
         try {
-            $res = $simplejson->doInject($input, '', 'application/json', array());
+            $res = $simplejson->doInject($input, '', 'application/json', array(),self::$rootSpan);
         } catch (HorusException $e) {
             $this::assertEquals(self::$mockheaders[0], array("HTTP/1.1 400 MALFORMED URL", TRUE, 400), 'Forced error output should generate http/400');
             $outjson = json_decode($e->getMessage(), true);
@@ -170,9 +170,9 @@ class HorusSimplejsonTest extends HorusTestCase
             {"query": {"key": "zip"}}
         ]', true);
 
-        $simplejson = new HorusSimpleJson("mybusinessid", null, $matches);
+        $simplejson = new HorusSimpleJson("mybusinessid", null, $matches,self::$tracer);
         $input = '{"key1":"value1", "key2":"matched", "ipsystem":"returnvalue1", "ipparticipant":"returnvalue2"}';
-        $res = $simplejson->doInject($input, '', 'application/json', array('msgref' => 'returnvalue3', 'ipaccountid' => 'returnvalue4'));
+        $res = $simplejson->doInject($input, '', 'application/json', array('msgref' => 'returnvalue3', 'ipaccountid' => 'returnvalue4'),self::$rootSpan);
         $this::assertNotNull($res, 'Should return something');
         $outres = json_decode($res, true);
         $this::assertTrue(is_array($outres), 'Should return a valid json');
@@ -195,9 +195,9 @@ class HorusSimplejsonTest extends HorusTestCase
             {"query": {"key": "zip"}}
         ]', true);
 
-        $simplejson = new HorusSimpleJson("mybusinessid", null, $matches);
+        $simplejson = new HorusSimpleJson("mybusinessid", null, $matches,self::$tracer);
         $input = '{"key1":"value1", "key2":"matched", "ipsystem":"returnvalue1", "ipparticipant":"returnvalue2"}';
-        $res = $simplejson->doInject($input, '', 'application/json', array('msgref' => 'returnvalue3', 'ipaccountid' => 'returnvalue4'));
+        $res = $simplejson->doInject($input, '', 'application/json', array('msgref' => 'returnvalue3', 'ipaccountid' => 'returnvalue4'),self::$rootSpan);
         $this::assertNotNull($res, 'Should return something');
         $this::assertFalse(strpos($res, '--') === FALSE, 'Should contain a multipart boundary');
         $boundary = explode("\r\n", $res);

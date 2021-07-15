@@ -48,7 +48,7 @@ $content_type = array_key_exists('CONTENT_TYPE', $_SERVER) ? $_SERVER['CONTENT_T
 $proxy_mode = HorusHttp::extractHeader('x_destination_url');
 $accept = HorusHttp::extractHeader('Accept');
 $data = file_get_contents('php://input');
-
+$common->mlog('AAAAA Recurse dest=' . $proxy_mode . ' / queryparams=' . implode(',',$_GET),'DEBUG');
 try {
     $result = $recurse->doRecurse($data, $content_type, $proxy_mode, $params, $accept, $_GET,$rootSpan);
     header("HTTP/1.1 200 OK", true, 200);

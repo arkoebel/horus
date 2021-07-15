@@ -156,7 +156,8 @@ class HorusXml
                     else {
                         $value = urlencode($forwardparam['value']);
                     }
-                    $fwd_params[] = $key . '=' . $value;
+                    if(strlen($value)<50)
+                        $fwd_params[] = $key . '=' . $value;
                 }
                 $this->common->mlog('query out (urlparameters) : ' . print_r($fwd_params, true), 'INFO');
                 if (stripos($proxy_mode, '?') === FALSE) {
@@ -166,7 +167,8 @@ class HorusXml
                 }
                 $vv1 = array();
                 foreach($vars as $k=>$v)
-                    $vv1[] = urlencode($k) . "=" . urlencode($v);
+                    if(strlen($v)<50)
+                        $vv1[] = urlencode($k) . "=" . urlencode($v);
 
                 $vv = array_merge($vv1, $fwd_params);
 
@@ -194,9 +196,9 @@ class HorusXml
                         $value = urlencode($forwardparam['value']);
                     }
                     if(strpos($key,'x-horus-')===0)
-                        $fwd_params[$key] = $key . ': ' . $value;
+                        $fwd_params[$key] = $key . ': ' . $key . ';' . $value;
                     else
-                        $fwd_params['x-horus-' . $key] = 'x-horus-' . $key . ': ' . $value;
+                        $fwd_params['x-horus-' . $key] = 'x-horus-' . $key . ': ' . $key . ';' . $value;
                 }
             }
             foreach ($vars as $key => $value){
@@ -206,7 +208,7 @@ class HorusXml
                     $key2 = 'x-horus-' . $key;
 
                 if (!array_key_exists($key2, $fwd_params))
-                    $fwd_params[$key2] = $key2 . ': ' . $value;
+                    $fwd_params[$key2] = $key2 . ': ' . $key . ';' . $value;
             }
 
             $ff = array();

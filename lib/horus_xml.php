@@ -92,7 +92,8 @@ class HorusXml
         $rr = $xml->xpath($xpath);
         if (($rr !== FALSE) && (count($rr) > 0)) {
             $dom = dom_import_simplexml($rr[0]);
-            if (XML_TEXT_NODE == $dom->childNodes->item(0)->nodeType) {
+            if ((XML_TEXT_NODE == $dom->childNodes->item(0)->nodeType)&&($dom->childNodes->count()==1)) 
+            {
                 return (string) $rr[0];
             } else {
                 return $rr[0]->asXml();

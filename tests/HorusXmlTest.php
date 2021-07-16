@@ -101,13 +101,20 @@ class HorusXmlTest extends HorusTestCase
             "parameters" : {    "msgid":"/u:Document/u:FIToFIPmtStsRpt/u:GrpHdr/u:MsgId", 
                                 "bic":"/u:Document/u:FIToFIPmtStsRpt/u:GrpHdr/u:InstgAgt/u:FinInstnId/u:BIC", 
                                 "test":"/u:Document/u:FIToFIPmtStsRpt/u:XXX",
-                                "fragment":"/u:Document/u:FIToFIPmtStsRpt/u:GrpHdr/u:InstgAgt"}
+                                "fragment":"/u:Document/u:FIToFIPmtStsRpt/u:GrpHdr/u:InstgAgt",
+                                "whole": "/u:Document"}
           }]';
         $xml = simplexml_load_string($input);
         $namespaces = $xml->getDocNamespaces();
         $xml->registerXPathNamespace('u', 'urn:iso:std:iso:20022:tech:xsd:pacs.002.001.03');
         $vars = $xmlinject->getVariables($xml, json_decode($matches, true), 0);
-        $expectedvars = array('msgid' => '1234567890', 'bic' => 'BNPAFRPPXXX', 'test' => '', 'fragment' => '<InstgAgt><FinInstnId><BIC>BNPAFRPPXXX</BIC></FinInstnId></InstgAgt>');
+        $expectedvars = array('msgid' => '1234567890', 
+                                'bic' => 'BNPAFRPPXXX', 
+                                'test' => '', 
+                                'fragment' => '<InstgAgt><FinInstnId><BIC>BNPAFRPPXXX</BIC></FinInstnId></InstgAgt>',
+                                'whole' => '<?xml version="1.0"?>
+<Document xmlns="urn:iso:std:iso:20022:tech:xsd:pacs.002.001.03"><FIToFIPmtStsRpt><GrpHdr><MsgId>1234567890</MsgId><CreDtTm>2012-12-13T12:12:12.000Z</CreDtTm><InstgAgt><FinInstnId><BIC>BNPAFRPPXXX</BIC></FinInstnId></InstgAgt><InstdAgt><FinInstnId><BIC>BNPAFRPPXXX</BIC></FinInstnId></InstdAgt></GrpHdr><OrgnlGrpInfAndSts><OrgnlMsgId>1234567890</OrgnlMsgId><OrgnlMsgNmId>pacs.008</OrgnlMsgNmId><GrpSts>ACCP</GrpSts></OrgnlGrpInfAndSts><TxInfAndSts><StsId>1234567890</StsId><OrgnlEndToEndId>1234567890</OrgnlEndToEndId><OrgnlTxId>1234567890</OrgnlTxId><AccptncDtTm>2012-12-13T12:12:12.000Z</AccptncDtTm><OrgnlTxRef><PmtTpInf><SvcLvl><Cd>SEPA</Cd></SvcLvl><LclInstrm><Cd>INST</Cd></LclInstrm><CtgyPurp><Cd>PURP</Cd></CtgyPurp></PmtTpInf><DbtrAgt><FinInstnId><BIC>BNPAFRPPXXX</BIC></FinInstnId></DbtrAgt></OrgnlTxRef></TxInfAndSts></FIToFIPmtStsRpt></Document>
+');
         $this::assertEquals($expectedvars, $vars);
     }
 
@@ -442,6 +449,29 @@ class HorusXmlTest extends HorusTestCase
 
         $this::assertEquals($xmlinject->formOutQuery(array($forwardparams), $url1, array('test' => 'XXX')), $url1 . '&test=XXX&onekey=onevalue&two+keys=XXX', 'Should return parameters urlencoded');
         $this::assertEquals($xmlinject->formOutQuery(array($forwardparams), $url2), $url2 . '?onekey=onevalue&two+keys=', 'Should return query string');
+    }
+
+    function testGetXpathVariables(): void
+    {
+        $xmlinject = new HorusXml('ZZZZ', null,'GREEN',self::$tracer);
+        $input = '<Document xmlns="urn:iso:std:iso:20022:tech:xsd:pacs.002.001.03">
+
+<FIToFIPmtStsRpt><GrpHdr><MsgId>1234567890</MsgId>
+
+<CreDtTm>2012-12-13T12:12:12.000Z</CreDtTm><InstgAgt><FinInstnId><BIC>BNPAFRPPXXX</BIC></FinInstnId></InstgAgt><InstdAgt><FinInstnId><BIC>BNPAFRPPXXX</BIC></FinInstnId></InstdAgt></GrpHdr><OrgnlGrpInfAndSts><OrgnlMsgId>1234567890</OrgnlMsgId><OrgnlMsgNmId>pacs.008</OrgnlMsgNmId><GrpSts>ACCP</GrpSts></OrgnlGrpInfAndSts><TxInfAndSts><StsId>1234567890</StsId><OrgnlEndToEndId>1234567890</OrgnlEndToEndId><OrgnlTxId>1234567890</OrgnlTxId><AccptncDtTm>2012-12-13T12:12:12.000Z</AccptncDtTm><OrgnlTxRef><PmtTpInf><SvcLvl><Cd>SEPA</Cd></SvcLvl><LclInstrm><Cd>INST</Cd></LclInstrm><CtgyPurp><Cd>PURP</Cd></CtgyPurp></PmtTpInf><DbtrAgt><FinInstnId><BIC>BNPAFRPPXXX</BIC></FinInstnId></DbtrAgt></OrgnlTxRef></TxInfAndSts></FIToFIPmtStsRpt></Document>';
+       
+        $xml = simplexml_load_string($input);
+        $namespaces = $xml->getDocNamespaces();
+        $xml->registerXPathNamespace('u', 'urn:iso:std:iso:20022:tech:xsd:pacs.002.001.03');
+        $vars = $xmlinject->getXpathVariable($xml, '/u:Document');
+        $expectedvars = '<?xml version="1.0"?>
+<Document xmlns="urn:iso:std:iso:20022:tech:xsd:pacs.002.001.03">
+
+<FIToFIPmtStsRpt><GrpHdr><MsgId>1234567890</MsgId>
+
+<CreDtTm>2012-12-13T12:12:12.000Z</CreDtTm><InstgAgt><FinInstnId><BIC>BNPAFRPPXXX</BIC></FinInstnId></InstgAgt><InstdAgt><FinInstnId><BIC>BNPAFRPPXXX</BIC></FinInstnId></InstdAgt></GrpHdr><OrgnlGrpInfAndSts><OrgnlMsgId>1234567890</OrgnlMsgId><OrgnlMsgNmId>pacs.008</OrgnlMsgNmId><GrpSts>ACCP</GrpSts></OrgnlGrpInfAndSts><TxInfAndSts><StsId>1234567890</StsId><OrgnlEndToEndId>1234567890</OrgnlEndToEndId><OrgnlTxId>1234567890</OrgnlTxId><AccptncDtTm>2012-12-13T12:12:12.000Z</AccptncDtTm><OrgnlTxRef><PmtTpInf><SvcLvl><Cd>SEPA</Cd></SvcLvl><LclInstrm><Cd>INST</Cd></LclInstrm><CtgyPurp><Cd>PURP</Cd></CtgyPurp></PmtTpInf><DbtrAgt><FinInstnId><BIC>BNPAFRPPXXX</BIC></FinInstnId></DbtrAgt></OrgnlTxRef></TxInfAndSts></FIToFIPmtStsRpt></Document>
+';
+        $this::assertEquals($expectedvars, $vars);
     }
 
 }

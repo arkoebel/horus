@@ -46,6 +46,7 @@ class HorusHttp
                     if (count($tmp)>1){
                         $key = array_shift($tmp);
                         $val = ltrim(implode(':',$tmp));
+                        error_log('MQ Header : ' . $key . ', ' . $val . "\n",3,'/var/log/horus/horus_http.log');
                         $res[$key] = $val;
                     }else{
                         $res[$header] = $value;
@@ -195,8 +196,6 @@ class HorusHttp
             
             $headersoff = array_merge($mqheaders,$headers);
 
-            $this->common->mlog("DEBUG",'IIII ' . print_r($headersoff,true));
-
             $query = array('url' => $forward, 'method' => $method, 'headers' => $headersoff, 'data' => is_array($data) ? $data[0] : $data);
             $queries = array($query);
 
@@ -276,7 +275,7 @@ class HorusHttp
         }
 
         $conv_header = 'HTTP_' . strtoupper(preg_replace('/-/', '_', $header));
-        if (array_key_exists($conv_header, $request_headers)) {
+        if (array_key_exists($conv_header, $request_headers)) {    
             return $request_headers[$conv_header];
         } else {
             if (array_key_exists(strtoupper($header), $request_headers)) {

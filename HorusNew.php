@@ -31,7 +31,6 @@ $mmatches = json_decode(file_get_contents('conf/horusParams.json'), true);
 
 $common = new HorusCommon($business_id, $loglocation, $colour);
 
-$common->mlog(print_r($rootSpan,true),'DEBUG');
 $common->mlog("===== BEGIN HORUS CALL =====", "INFO");
 $common->mlog('Destination is : ' . HorusHttp::extractHeader('x_destination_url'), 'DEBUG');
 

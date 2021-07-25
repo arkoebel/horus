@@ -144,7 +144,7 @@ class HorusHttpTest extends HorusTestCase
 
     function testFilterMQHeaders(): void{
         $this->http->common->cnf = array("rfh2Prefix"=>"rfh-","mqmdPrefix"=>"mqmd-");
-        $input =  array('rfh-key'=>'value','rfh-key2'=>'XX: value2','rfh-key3' => 'XX2: YY: value3');
+        $input =  array('rfh-key'=>'value','rfh-key2'=>'XX: value2','rfh-key3' => 'XX2: YY: value3', 'other' => 'http://test');
         $output1 = $this->http->filterMQHeaders($input,'UNPACK');
         $expectedOutput1 = array('rfh-key'=>'value','XX'=>'value2','XX2' => 'YY: value3');
         $this::assertEquals($expectedOutput1, $output1);

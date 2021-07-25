@@ -397,7 +397,7 @@ class HorusXml
             $totest='';
             foreach($definition['parameters'] as $field){
                 if('Document'===$field)
-                    $totest .= $document;
+                    $totest .= rtrim($document);
                 else{
                     if(array_key_exists($field,$headers))
                         $totest .= $headers[$field];
@@ -407,7 +407,8 @@ class HorusXml
                         $totest .= $headers[$conf[HorusCommon::MQMD_PREFIX] . $field];
                 }
             }
-
+error_log('Digest variables : key=' . $definition['key'] . "\nXXX" . $totest . "XXX\n",3,'/var/log/horus/horus_http.log');
+file_put_contents('/var/log/horus/test.txt',$totest);
             $digest = base64_encode(hash_hmac($definition['algorithm'],$totest,hex2bin($definition['key']),true));
 
             $expectedDigest = '';

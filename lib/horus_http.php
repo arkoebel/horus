@@ -353,7 +353,7 @@ class HorusHttp
             }
             if (array_key_exists('headers', $query) && (count($query['headers']) != 0)) {
                 curl_setopt($ch[$id], CURLOPT_HTTPHEADER, HorusHttp::formatOutHeaders($query['headers']));
-                $this->common->mlog('DEBUG','VVVVVVVVV actual headers : ' . print_r(HorusHttp::formatOutHeaders($query['headers']),true));
+                $this->common->mlog('VVVVVVVVV actual headers : ' . print_r(HorusHttp::formatOutHeaders($query['headers']),true),'DEBUG');
                 //curl_setopt($ch[$id], CURLOPT_HTTPHEADER, $this->formatHeaders($query['headers']));
             }
 

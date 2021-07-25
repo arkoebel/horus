@@ -33,6 +33,30 @@ class HorusHttp
         return $cc . chunk_split(base64_encode($data)) . $eol;
     }
 
+    function filterMQHeaders($headers, $outformat='EXPAND'){
+        $res = array();
+        foreach($headers as $header => $value){
+            if(preg_match('/' . $this->common->cnf[HorusCommon::MQMD_PREFIX] . '/', $header)||preg_match('/' . $this->common->cnf[HorusCommon::RFH_PREFIX] . '/', $header)){
+                if('EXPAND' === $outformat)
+                    $res[$header] = $header . ': ' . $value;
+                else if ('NOTHING'== $outformat)
+                    $res[$header] = $value;
+                else if ('UNPACK'=== $outformat){
+                    $tmp = explode(':',$value);
+                    if (count($tmp)>1){
+                        $key = array_shift($tmp);
+                        $val = ltrim(implode(':',$tmp));
+                        $res[$key] = $val;
+                    }else{
+                        $res[$header] = $value;
+                    }
+                }
+                    
+            }
+        }
+        return $res;
+    }
+
     function unpackHeaders($inHeaders){
         $outHeaders = array();
 
@@ -167,7 +191,13 @@ class HorusHttp
             //$injectSpan->setTag('destination',$forward);
 
             $headers = array('Content-Type' => $content_type, 'Accept' => 'application/json', 'Expect' => '', 'X-Business-Id' => $this->business_id);
-            $query = array('url' => $forward, 'method' => $method, 'headers' => $headers, 'data' => is_array($data) ? $data[0] : $data);
+            $mqheaders = $this->filterMQHeaders($returnHeaders);
+            
+            $headersoff = array_merge($mqheaders,$headers);
+
+            $this->common->mlog("DEBUG",'IIII ' . print_r($headersoff,true));
+
+            $query = array('url' => $forward, 'method' => $method, 'headers' => $headersoff, 'data' => is_array($data) ? $data[0] : $data);
             $queries = array($query);
 
             $result = $this->forwardHttpQueries($queries,$injectSpan);
@@ -182,8 +212,10 @@ class HorusHttp
             $injectSpan->log(['message'=>'Return to sender']);
             $this->setHttpReturnCode($status);
             header("Content-Type: $content_type");
-            foreach($returnHeaders as $rh){
-                header($rh);
+            if(null !== $returnHeaders && is_array($returnHeaders)){
+                foreach($returnHeaders as $rh){
+                    header($rh);
+                }
             }
             $injectSpan->finish();
             return $data;
@@ -322,6 +354,7 @@ class HorusHttp
             }
             if (array_key_exists('headers', $query) && (count($query['headers']) != 0)) {
                 curl_setopt($ch[$id], CURLOPT_HTTPHEADER, HorusHttp::formatOutHeaders($query['headers']));
+                $this->common->mlog('DEBUG','VVVVVVVVV actual headers : ' . print_r(HorusHttp::formatOutHeaders($query['headers']),true));
                 //curl_setopt($ch[$id], CURLOPT_HTTPHEADER, $this->formatHeaders($query['headers']));
             }
 

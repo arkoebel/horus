@@ -4,49 +4,100 @@
   "pacsDefaultOutputContentType": "application/xml",
   "pacs": [
     {
+      "query": "isis.generic.xsd",
+      "comment": "Test output",
+      "responseFormat": "null",
+      "responseTemplate": "empty.xml",
+      "errorTemplate": "errorTemplate.xml",
+      "parameters": {
+        "param1" : "/u:Document/u:QueryParams/u:Param[@name=\"param1\"]",
+        "param2" : "/u:Document/u:QueryParams/u:Param[@name=\"param2\"]",
+        "param3" : "/u:Document/u:ResponseType"
+      }
+    },
+    {
       "query": "iws.ApplicationHeader$ahV10.xsd",
       "comment": "Header Swift",
       "responseFormat": "iws.ApplicationHeader$ahV10.xsd",
       "responseTemplate": "ahV10.xml",
       "errorTemplate": "errorTemplate.xml",
-      "parameters" : {
-          "frombic":"/u:AppHdr/u:From/u:Id",
-          "ref":"/u:AppHdr/u:MsgRef",
-          "crdate":"/u:AppHdr/u:CrDate"
+      "parameters": {
+        "frombic": "/u:AppHdr/u:From/u:Id",
+        "ref": "/u:AppHdr/u:MsgRef",
+        "crdate": "/u:AppHdr/u:CrDate"
       }
     },
     {
-			"query": "RTGS_pacs.008.001.08.xsd",
-			"comment": "Horus RTGS : Fabrique du Message Status d'un pacs.008",
-			"queryMatch": "<!-- HORUS:DetectedAction=ACK_MESSAGE_STATUS_OK",
-			"responseFormat": "bogusHeader.saa.2.0.xsd",
-			"responseTemplate": "messageStatus_OK.xml",
-			"errorTemplate": "errorTemplate.xml",
-			"parameters": {
-				"SenderReference": "/u:Document/u:FIToFICstmrCdtTrf/u:GrpHdr/u:MsgId",
-				"varMsg": "/u:Document"
-			},
-      "destParameters": [{
-        "key":"s_key1",
-        "phpvalue":"echo $vars[\"SenderReference\"];"
-      }]
-		},
+      "query": "saa.2.0.xsd",
+      "comment": "DataPDU",
+      "responseFormat": "saa.2.0.xsd",
+      "responseTemplate": "datapdu.xml",
+      "errorTemplate": "errorTemplate.xml",
+      "parameters": {
+        "varu": "/u:DataPDU/u:Header/u:Message/u:SenderReference"
+      }
+    },
+    {
+      "query": "camt.056.001.01.xsd",
+      "comment": "CAMT 56",
+      "queryMatch": "WCBVNV51",
+      "responseFormat": "pacs.002.001.03.xsd",
+      "responseTemplate": "pacs.002_ACCP.xml",
+      "errorTemplate": "errorTemplate.xml",
+      "parameters": {
+        "varxx": "/u:Document/u:FIToFIPmtCxlReq/u:Assgnmt/u:Assgnr/u:Agt/u:FinInstnId/u:BIC"
+      },
+      "destParameters": [
+        {
+          "key": "varz",
+          "phpvalue": "echo $vars[\"varxx\"];"
+        }
+      ]
+    },
+    {
+      "query": "RTGS_pacs.008.001.08.xsd",
+      "comment": "Horus RTGS : Fabrique du Message Status d'un pacs.008",
+      "queryMatch": "<!-- HORUS:DetectedAction=ACK_MESSAGE_STATUS_OK",
+      "responseFormat": "bogusHeader.saa.2.0.xsd",
+      "responseTemplate": "messageStatus_OK.xml",
+      "errorTemplate": "errorTemplate.xml",
+      "parameters": {
+        "SenderReference": "/u:Document/u:FIToFICstmrCdtTrf/u:GrpHdr/u:MsgId",
+        "varMsg": "/u:Document"
+      },
+      "destParameters": [
+        {
+          "key": "s_key1",
+          "phpvalue": "echo $vars[\"SenderReference\"];"
+        },
+        {
+          "key": "x-horus-s_key2",
+          "value": "test2"
+        }
+      ]
+    },
     {
       "query": "isis.xsd",
       "comment": "body wrapper",
       "responseFormat": "isis.xml",
       "errorTemplate": "errorTemplate.xml",
       "extraNamespaces": [
-          {"prefix": "h", "namespace":"urn:iso:std:iso:20022:tech:xsd:head.001.001.01"},
-          {"prefix": "d", "element": "Document"}
+        {
+          "prefix": "h",
+          "namespace": "urn:iso:std:iso:20022:tech:xsd:head.001.001.01"
+        },
+        {
+          "prefix": "d",
+          "element": "Document"
+        }
       ],
-      "parameters" : {
-        "frombic" : "/body/h:AppHdr/h:Fr/h:FIId/h:FinInstnId/h:BICFI",
-        "tobic" : "/body/h:AppHdr/h:To/h:FIId/h:FinInstnId/h:BICFI",
-        "msgid" : "/body/h:AppHdr/h:BizMsgIdr",
-        "msgdef" : "/body/h:AppHdr/h:MsgDefIdr",
-        "msgdate" : "/body/h:AppHdr/h:CreDt",
-        "document" : "/body/d:Document"
+      "parameters": {
+        "frombic": "/body/h:AppHdr/h:Fr/h:FIId/h:FinInstnId/h:BICFI",
+        "tobic": "/body/h:AppHdr/h:To/h:FIId/h:FinInstnId/h:BICFI",
+        "msgid": "/body/h:AppHdr/h:BizMsgIdr",
+        "msgdef": "/body/h:AppHdr/h:MsgDefIdr",
+        "msgdate": "/body/h:AppHdr/h:CreDt",
+        "document": "/body/d:Document"
       }
     },
     {
@@ -92,7 +143,12 @@
       "responseFormat": "pacs.002.001.03.xsd",
       "responseTemplate": "pacs.002_ACCP.xml",
       "errorTemplate": "errorTemplate.xml",
-      "destParameters": [{ "key": "source", "value": "router1" }],
+      "destParameters": [
+        {
+          "key": "source",
+          "value": "router1"
+        }
+      ],
       "parameters": {
         "id": "/u:Document/u:FIToFICstmrCdtTrf/u:GrpHdr/u:MsgId",
         "frombic": "/u:Document/u:FIToFICstmrCdtTrf/u:GrpHdr/u:InstgAgt/u:FinInstnId/u:BIC",
@@ -373,6 +429,13 @@
         "instrid": "/u:Document/u:FIToFIStsReq/u:TxInf/u:OrgnlInstrId",
         "endtoendid": "/u:Document/u:FIToFIStsReq/u:TxInf/u:OrgnlEndToEndId"
       }
+    },
+    {
+      "query":"pacs.008.001.02.xsd",
+      "comment": "Test AGI",
+      "responseFormat": "null",
+      "responseTemplate": "empty.xml",
+      "validator": {"method": "HMAC", "algorithm": "SHA256","key": "AAABCDEF01234567AAABCDEF01234567","valueField": "HMAC","parameters": ["Version","Service","Sender","Receiver","PrimitiveType","MsgType","MsgRef","AdditionalInfo","PossibleDuplicate","NotificationRequired","TechnicalAckRequired","Document"]}
     }
   ],
   "simplejson": [
@@ -455,7 +518,7 @@
         "key": "msgType",
         "value": "PositionMessageQueryCRT"
       },
-      "comment":"cas pour notre Diamant",
+      "comment": "cas pour notre Diamant",
       "queryMatch": "BNPAFRPP",
       "responseTemplate": "position_msg_response_BNPAFRPP.json",
       "errorTemplate": "error_template.json",
@@ -521,43 +584,44 @@
         "ipsystem": "IPSystem"
       }
     },
-  {
-    "query": {
-      "key": "msgType",
-      "value": "PositionMessageQueryCRT"
+    {
+      "query": {
+        "key": "msgType",
+        "value": "PositionMessageQueryCRT"
+      },
+      "queryMatch": "BREDFRP0XXX",
+      "responseTemplate": "position_msg_response_BREDFRP0XXX.json",
+      "errorTemplate": "error_template.json",
+      "parameters": {
+        "msgref": "msgRef",
+        "ipsystem": "IPSystem",
+        "ipparticipant": "IPParticipant",
+        "ipaccountid": "IPAccountId"
+      }
     },
-    "queryMatch": "BREDFRP0XXX",
-    "responseTemplate": "position_msg_response_BREDFRP0XXX.json",
-    "errorTemplate": "error_template.json",
-    "parameters": {
-      "msgref": "msgRef",
-      "ipsystem": "IPSystem",
-      "ipparticipant": "IPParticipant",
-      "ipaccountid": "IPAccountId"
+    {
+      "query": {
+        "key": "msgType",
+        "value": "CRTVS07XML"
+      },
+      "responseTemplate": "CRTVS07XML.xml",
+      "errorTemplate": "error_template.xml",
+      "parameters": {
+        "bicrecep": "BicRecep",
+        "ddr": "Ddr"
+      }
+    },
+    {
+      "query": {
+        "key": "msgType",
+        "value": "RECEPSWIFT202"
+      },
+      "responseTemplate": "MT202.swift",
+      "errorTemplate": "error_template.xml",
+      "parameters": {
+        "bicemet": "BicEmet",
+        "ddr": "Ddr"
+      }
     }
-  },
-          {
-                  "query": {
-                          "key": "msgType",
-                          "value": "CRTVS07XML"
-                  },
-                  "responseTemplate": "CRTVS07XML.xml",
-                  "errorTemplate": "error_template.xml",
-                  "parameters": {
-                          "bicrecep": "BicRecep",
-                          "ddr": "Ddr"
-                  }
-  },
-          {
-                  "query": {
-                          "key": "msgType",
-                          "value": "RECEPSWIFT202"
-                  },
-                  "responseTemplate": "MT202.swift",
-                  "errorTemplate": "error_template.xml",
-                  "parameters": {
-                          "bicemet": "BicEmet",
-                          "ddr": "Ddr"
-                  }
-          }]
+  ]
 }

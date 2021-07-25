@@ -253,7 +253,7 @@ class HorusBusiness
             $responses[] = $response;
 
             if (array_key_exists('delayafter', $destination)) {
-                $routeSpan->log(['message'=>'Start delay ' . $destination['delayafter']] . 's');
+                $routeSpan->log(['message'=>'Start delay ' . $destination['delayafter'] . 's']);
                 $this->common->mlog('Waiting ' . $destination['delayafter'] . 'sec for next destination', 'INFO');
                 sleep($destination['delayafter']);
                 $routeSpan->log(['message'=>'End delay']);

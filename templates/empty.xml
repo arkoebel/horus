@@ -1,0 +1,8 @@
+<?php
+
+    $vars['mqmd-correlid'] = $vars['mqmd-msgid'];
+    $vars['rfh-param1'] = $vars['param1'];
+    $vars['rfh-param2'] = $vars['param2'];
+
+    echo('Went there : ' . print_r($vars,true) . "\n");
+?>

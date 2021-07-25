@@ -5,12 +5,16 @@ class HorusCommon
     private $log_location = '';
     private $business_id = '';
     private $colour = '';
+    public $cnf = array();
+    public const RFH_PREFIX = 'rfh2Prefix';
+    public const MQMD_PREFIX = 'mqmdPrefix';
 
     function __construct($business_id, $log_location, $colour = 'GREEN')
     {
         $this->log_location = $log_location;
         $this->business_id = $business_id;
         $this->colour = $colour;
+        $this->cnf = json_decode(file_get_contents('conf/horusConfig.json'),true);
     }
 
     public static function getPath($vars){

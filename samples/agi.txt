@@ -1,0 +1,60 @@
+1swift.support.msg.ins!pcn=agi009,ou=bank,o=swhqbebb,o=swiftcn=agi009,ou=csm,o=swhqbebb,o=swiftSendRequestpacs.008.001.02Test-CoE-1NAA<n1:Document xmlns:n1="urn:iso:std:iso:20022:tech:xsd:pacs.008.001.02">
+	<n1:FIToFICstmrCdtTrf>
+		<n1:GrpHdr>
+			<n1:MsgId>APPL1234</n1:MsgId>
+			<n1:CreDtTm>2018-Jul-09T08:24:23Z</n1:CreDtTm>
+			<n1:NbOfTxs>1</n1:NbOfTxs>
+			<n1:TtlIntrBkSttlmAmt Ccy="EUR">1250.50</n1:TtlIntrBkSttlmAmt>
+			<n1:IntrBkSttlmDt>2018-03-12</n1:IntrBkSttlmDt>
+			<n1:SttlmInf>
+				<n1:SttlmMtd>CLRG</n1:SttlmMtd>
+			</n1:SttlmInf>
+			<n1:PmtTpInf>
+				<n1:SvcLvl>
+					<n1:Cd>SEPA</n1:Cd>
+				</n1:SvcLvl>
+				<n1:LclInstrm>
+					<n1:Cd>INST</n1:Cd>
+				</n1:LclInstrm>
+			</n1:PmtTpInf>
+		</n1:GrpHdr>
+		<n1:CdtTrfTxInf>
+			<n1:PmtId>
+				<n1:EndToEndId>20180312ETE00001</n1:EndToEndId>
+				<n1:TxId>20180312TXI00001</n1:TxId>
+			</n1:PmtId>
+			<n1:IntrBkSttlmAmt Ccy="EUR">1250.50</n1:IntrBkSttlmAmt>
+			<n1:AccptncDtTm>2018-03-12T06:30:02Z</n1:AccptncDtTm>
+			<n1:ChrgBr>SLEV</n1:ChrgBr>
+			<n1:Dbtr>
+				<n1:Nm>John Doe</n1:Nm>
+			</n1:Dbtr>
+			<n1:DbtrAcct>
+				<n1:Id>
+					<n1:IBAN>IT60 X054 2811 1010 0000 0123 456</n1:IBAN>
+				</n1:Id>
+			</n1:DbtrAcct>
+			<n1:DbtrAgt>
+				<n1:FinInstnId>
+					<n1:BIC>BANKITMM</n1:BIC>
+				</n1:FinInstnId>
+			</n1:DbtrAgt>
+			<n1:CdtrAgt>
+				<n1:FinInstnId>
+					<n1:BIC>BANKITBC</n1:BIC>
+				</n1:FinInstnId>
+			</n1:CdtrAgt>
+			<n1:Cdtr>
+				<n1:Nm>Marco Doe</n1:Nm>
+			</n1:Cdtr>
+			<n1:CdtrAcct>
+				<n1:Id>
+					<n1:IBAN>IT60 X054 2811 1010 0000 0123 789</n1:IBAN>
+				</n1:Id>
+			</n1:CdtrAcct>
+			<n1:RmtInf>
+				<n1:Ustrd>Invoice nb 123456</n1:Ustrd>
+			</n1:RmtInf>
+		</n1:CdtTrfTxInf>
+	</n1:FIToFICstmrCdtTrf>
+</n1:Document>

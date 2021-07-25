@@ -12,6 +12,10 @@ class HorusXml
     public $business_id = '';
     public $tracer = null;
 
+    public const XMLENVSIG = "http://www.w3.org/2000/09/xmldsig#enveloped-signature";
+    public const XMLC14N = "http://www.w3.org/2001/10/xml-exc-c14n#";
+    public const XMLAES = "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256";
+
     function __construct($business_id, $log_location, $colour = 'GREEN',$tracer)
     {
         $this->common = new HorusCommon($business_id, $log_location, $colour);
@@ -103,7 +107,7 @@ class HorusXml
         }
     }
 
-    function getResponses($templates, $vars, $formats, $preferredType, $errorTemplate,$span)
+    function getResponses($templates, &$vars, $formats, $preferredType, $errorTemplate,$span)
     {
         $response = array();
         $nrep = 0;
@@ -117,7 +121,12 @@ class HorusXml
             ob_end_clean();
             $outputxml = new DOMDocument();
             $outputxml->loadXML(preg_replace('/\s*(<[^>]*>)\s*/', '$1', $output));
-            if (!($outputxml->schemaValidate('xsd/' . $formats[$nrep]) === TRUE)) {
+            if('null'===$formats[$nrep]){
+                // Special case for empty responses
+                $this->common->mlog('Response is supposed to be empty','INFO');
+                $this->common->mlog('Effective body : ' . $output,'INFO');
+                $response[]=null;
+            }else if (!($outputxml->schemaValidate('xsd/' . $formats[$nrep]) === TRUE)) {
                 $errorMessage = "Could not validate output with " . $formats[$nrep] . "\n";
                 $errorMessage .= $this->common->libxml_display_errors();
                 $this->common->mlog($errorMessage . "\n", 'ERROR');
@@ -175,7 +184,7 @@ class HorusXml
 
                 $url .= implode('&', $vv);
             }
-        } else if ($url === '' && $forwardparams !== null && $forwardparams != "" && is_array($forwardparams) && (count($forwardparams) == 1) && count($forwardparams[0]) > 0) {
+        } else if ($url === '' && $forwardparams !== null && $forwardparams != "" && is_array($forwardparams) && (count($forwardparams) == 1) && is_array($forwardparams[0]) && count($forwardparams[0]) > 0) {
             $this->common->mlog('return headers : ' . print_r($forwardparams, true), 'INFO');
             $fwd_params = array();
             if (is_array($forwardparams[0])) {
@@ -294,8 +303,21 @@ class HorusXml
 
             $this->common->mlog("Match comment : " . $this->business->findMatch($matches, $selected, "comment") . "\n", 'INFO');
             $rootSpan->setTag('section',$this->business->findMatch($matches, $selected, "comment"));
-            $vars = array_merge($queryParams, $vars);
+            $vars = array_merge($queryParams, $vars, $this->http->filterMQHeaders(apache_request_headers(),'UNPACK'));
             $this->common->mlog("Variables: " . print_r($vars, true) . "\n", 'INFO');
+
+            $validator = $this->business->findMatch($matches, $selected, "validator");
+
+            if(''!==$validator){
+                $this->common->mlog('INFO','Attempting to validate Signature/Digest');
+                $rootSpan->log(['message'=>'Attempt to validate Signature/Digest']);
+                try{
+                    HorusXml::validateSignature($reqbody,$vars,$validator,$this->common->cnf);
+                }catch(HorusException $e){
+                    $this->common->mlog('ERROR','Signature/Digest validation failed ' . $e->getMessage());
+                    throw new HorusException($e->getMessage());
+                }
+            }
 
             $rootSpan->log(['message'=>'Finding Response Template']);
             $templs = $this->business->findMatch($matches, $selected, "responseTemplate");
@@ -361,6 +383,43 @@ class HorusXml
             $res = $this->business->returnGenericError($preferredType, $genericError, $errorMessage, '',$rootSpan);
             //if ('' === $proxy_mode)
             throw new HorusException($res);
+        }
+    }
+
+    static function getSignaturePart($fragment,$url,$transforms){
+        foreach($transforms as $transform){
+
+        }
+    }
+
+    static function validateSignature($document, $headers, $definition,$conf){
+        if('HMAC'===$definition['method']){
+            $totest='';
+            foreach($definition['parameters'] as $field){
+                if('Document'===$field)
+                    $totest .= $document;
+                else{
+                    if(array_key_exists($field,$headers))
+                        $totest .= $headers[$field];
+                    else if(array_key_exists($conf[HorusCommon::RFH_PREFIX] . $field,$headers))
+                        $totest .= $headers[$conf[HorusCommon::RFH_PREFIX] . $field];
+                    else if(array_key_exists($conf[HorusCommon::MQMD_PREFIX] . $field,$headers))
+                        $totest .= $headers[$conf[HorusCommon::MQMD_PREFIX] . $field];
+                }
+            }
+
+            $digest = base64_encode(hash_hmac($definition['algorithm'],$totest,hex2bin($definition['key']),true));
+
+            $expectedDigest = '';
+
+            if (array_key_exists($definition['valueField'],$headers))
+                $expectedDigest = $headers[$definition['valueField']];
+            else if (array_key_exists($conf[HorusCommon::RFH_PREFIX] . $definition['valueField'],$headers))
+                $expectedDigest = $headers[$conf[HorusCommon::RFH_PREFIX] . $definition['valueField']];
+            
+            if($digest != $expectedDigest)
+                throw new HorusException('Digest Verification Failed (found ' . $digest . ', expected ' . $expectedDigest . ')' );
+
         }
     }
 }

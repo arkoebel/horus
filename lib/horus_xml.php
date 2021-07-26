@@ -309,12 +309,13 @@ class HorusXml
             $validator = $this->business->findMatch($matches, $selected, "validator");
 
             if(''!==$validator){
-                $this->common->mlog('INFO','Attempting to validate Signature/Digest');
+                $this->common->mlog('Attempting to validate Signature/Digest', 'INFO');
                 $rootSpan->log(['message'=>'Attempt to validate Signature/Digest']);
                 try{
                     HorusXml::validateSignature($reqbody,$vars,$validator,$this->common->cnf);
+                    $this->common->mlog('Signature/Digest checked OK', 'INFO');
                 }catch(HorusException $e){
-                    $this->common->mlog('ERROR','Signature/Digest validation failed ' . $e->getMessage());
+                    $this->common->mlog('Signature/Digest validation failed ' . $e->getMessage(),'ERROR');
                     throw new HorusException($e->getMessage());
                 }
             }

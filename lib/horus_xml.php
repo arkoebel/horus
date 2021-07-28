@@ -16,11 +16,11 @@ class HorusXml
     public const XMLC14N = "http://www.w3.org/2001/10/xml-exc-c14n#";
     public const XMLAES = "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256";
 
-    function __construct($business_id, $log_location, $colour = 'GREEN',$tracer)
+    function __construct($business_id, $log_location, $colour = 'GREEN', $tracer)
     {
         $this->common = new HorusCommon($business_id, $log_location, $colour);
-        $this->http = new HorusHttp($business_id, $log_location, $colour,$tracer);
-        $this->business = new HorusBusiness($business_id, $log_location, $colour,$tracer);
+        $this->http = new HorusHttp($business_id, $log_location, $colour, $tracer);
+        $this->business = new HorusBusiness($business_id, $log_location, $colour, $tracer);
         $this->business_id = $business_id;
 
         $this->tracer = $tracer;
@@ -96,8 +96,7 @@ class HorusXml
         $rr = $xml->xpath($xpath);
         if (($rr !== FALSE) && (count($rr) > 0)) {
             $dom = dom_import_simplexml($rr[0]);
-            if ((XML_TEXT_NODE == $dom->childNodes->item(0)->nodeType)&&($dom->childNodes->count()==1)) 
-            {
+            if ((XML_TEXT_NODE == $dom->childNodes->item(0)->nodeType) && ($dom->childNodes->count() == 1)) {
                 return (string) $rr[0];
             } else {
                 return $rr[0]->asXml();
@@ -107,39 +106,57 @@ class HorusXml
         }
     }
 
-    function getResponses($templates, &$vars, $formats, $preferredType, $errorTemplate,$span)
+    function getResponses($templates, &$vars, $formats, $preferredType, $errorTemplate, $span, $multiple)
     {
         $response = array();
         $nrep = 0;
 
         foreach ($templates as $template) {
             $respxml = 'templates/' . HorusBusiness::getTemplateName($template, $vars);
+            $vars['nb'] = $nrep;
             $this->common->mlog("Using template " . $respxml, 'INFO');
             ob_start();
             include $respxml;
             $output = ob_get_contents();
             ob_end_clean();
-            $outputxml = new DOMDocument();
-            $outputxml->loadXML(preg_replace('/\s*(<[^>]*>)\s*/', '$1', $output));
-            if('null'===$formats[$nrep]){
+
+            if ('null' === $formats[$nrep]) {
+                // Special case for empty xsd
+                $this->common->mlog('Response is supposed to be empty', 'INFO');
+                $this->common->mlog('Effective body : ' . $output, 'INFO');
+                if ($multiple) {
+                    $response[] = array("data" => null, "headers" => $vars);
+                } else
+                    $response[] = null;
+            } else if ('' === $output) {
                 // Special case for empty responses
-                $this->common->mlog('Response is supposed to be empty','INFO');
-                $this->common->mlog('Effective body : ' . $output,'INFO');
-                $response[]=null;
-            }else if (!($outputxml->schemaValidate('xsd/' . $formats[$nrep]) === TRUE)) {
-                $errorMessage = "Could not validate output with " . $formats[$nrep] . "\n";
-                $errorMessage .= $this->common->libxml_display_errors();
-                $this->common->mlog($errorMessage . "\n", 'ERROR');
-                throw new HorusException($this->business->returnGenericError($preferredType, $errorTemplate, $errorMessage, '',$span));
+                $this->common->mlog('Response is empty', 'INFO');
+                if ($multiple) {
+                    $response[] = array("data" => null, "headers" => $vars);
+                }
+                $response[] = null;
             } else {
-                $outputxml->formatOutput = false;
-                $outputxml->preserveWhiteSpace = false;
-                $response[] = $this->http->convertOutData($outputxml->saveXML(), $preferredType);
+                $outputxml = new DOMDocument();
+                $outputxml->loadXML(preg_replace('/\s*(<[^>]*>)\s*/', '$1', $output));
+                if (!($outputxml->schemaValidate('xsd/' . $formats[$nrep]) === TRUE)) {
+                    $errorMessage = "Could not validate output with " . $formats[$nrep] . "\n";
+                    $errorMessage .= $this->common->libxml_display_errors();
+                    $this->common->mlog($errorMessage . "\n", 'ERROR');
+                    throw new HorusException($this->business->returnGenericError($preferredType, $errorTemplate, $errorMessage, '', $span));
+                } else {
+                    $outputxml->formatOutput = false;
+                    $outputxml->preserveWhiteSpace = false;
+                    $rs = $this->http->convertOutData($outputxml->saveXML(), $preferredType);
+                    if ($multiple) {
+                        $response[] = array("data" => $rs, "headers" => $vars);
+                    } else
+                        $response[] = $rs;
+                }
             }
             $nrep++;
         }
 
-       return $response;
+        return $response;
     }
 
     function formOutQuery($forwardparams, $proxy_mode, $vars = array())
@@ -166,7 +183,7 @@ class HorusXml
                     else {
                         $value = urlencode($forwardparam['value']);
                     }
-                    if(strlen($value)<50)
+                    if (strlen($value) < 50)
                         $fwd_params[] = $key . '=' . $value;
                 }
                 $this->common->mlog('query out (urlparameters) : ' . print_r($fwd_params, true), 'INFO');
@@ -176,8 +193,8 @@ class HorusXml
                     $url .= '&';
                 }
                 $vv1 = array();
-                foreach($vars as $k=>$v)
-                    if(strlen($v)<50)
+                foreach ($vars as $k => $v)
+                    if (strlen($v) < 50)
                         $vv1[] = urlencode($k) . "=" . urlencode($v);
 
                 $vv = array_merge($vv1, $fwd_params);
@@ -205,14 +222,14 @@ class HorusXml
                     else {
                         $value = urlencode($forwardparam['value']);
                     }
-                    if(strpos($key,'x-horus-')===0)
+                    if (strpos($key, 'x-horus-') === 0)
                         $fwd_params[$key] = $key . ': ' . $key . ';' . $value;
                     else
                         $fwd_params['x-horus-' . $key] = 'x-horus-' . $key . ': ' . $key . ';' . $value;
                 }
             }
-            foreach ($vars as $key => $value){
-                if (strpos($key,'x-horus-')===0)
+            foreach ($vars as $key => $value) {
+                if (strpos($key, 'x-horus-') === 0)
                     $key2 = $key;
                 else
                     $key2 = 'x-horus-' . $key;
@@ -269,16 +286,16 @@ class HorusXml
         }
     }
 
-    function doInject($reqbody, $content_type, $proxy_mode, $matches, $preferredType, $queryParams, $genericError, $defaultNamespace = '',$rootSpan = null)
+    function doInject($reqbody, $content_type, $proxy_mode, $matches, $preferredType, $queryParams, $genericError, $defaultNamespace = '', $rootSpan = null)
     {
-        $input = $this->business->extractPayload($content_type, $reqbody, $genericError, $preferredType,$rootSpan);
+        $input = $this->business->extractPayload($content_type, $reqbody, $genericError, $preferredType, $rootSpan);
         libxml_use_internal_errors(true);
-        $rootSpan->log(['message'=>'Validating XML Input']);
+        $rootSpan->log(['message' => 'Validating XML Input']);
         $query = simplexml_load_string($input);
         if ($query === FALSE) {
             $errorMessage = "Input XML not properly formatted.\n";
             $errorMessage .= $this->common->libxml_display_errors();
-            $ret = $this->business->returnGenericError($preferredType, $genericError, $errorMessage, '',$rootSpan);
+            $ret = $this->business->returnGenericError($preferredType, $genericError, $errorMessage, '', $rootSpan);
 
             throw new HorusException($ret);
         }
@@ -287,7 +304,7 @@ class HorusXml
         $namespaces = $this->getRootNamespace($query, $defaultNamespace);
         $query->registerXPathNamespace('u', $namespaces);
 
-        $rootSpan->log(['message'=>'Finding XSD']);
+        $rootSpan->log(['message' => 'Finding XSD']);
         $selectedXsd = $this->findSchema($query, $defaultNamespace);
 
         if ('' !== $selectedXsd) {
@@ -296,31 +313,31 @@ class HorusXml
                 $errorMessage = "Found match, but filtered out\n";
                 $errorMessage .= "XSD = $selectedXsd";
                 $this->common->mlog($errorMessage . "\n", 'INFO');
-                throw new HorusException($this->business->returnGenericError($preferredType, $genericError, $errorMessage, '',$rootSpan));
+                throw new HorusException($this->business->returnGenericError($preferredType, $genericError, $errorMessage, '', $rootSpan));
             }
             $this->registerExtraNamespaces($query, $this->business->findMatch($matches, $selected, "extraNamespaces"));
             $vars = $this->getVariables($query, $matches, $selected);
 
             $this->common->mlog("Match comment : " . $this->business->findMatch($matches, $selected, "comment") . "\n", 'INFO');
-            $rootSpan->setTag('section',$this->business->findMatch($matches, $selected, "comment"));
-            $vars = array_merge($queryParams, $vars, $this->http->filterMQHeaders(apache_request_headers(),'UNPACK'));
+            $rootSpan->setTag('section', $this->business->findMatch($matches, $selected, "comment"));
+            $vars = array_merge($queryParams, $vars, $this->http->filterMQHeaders(apache_request_headers(), 'UNPACK'));
             $this->common->mlog("Variables: " . print_r($vars, true) . "\n", 'INFO');
 
             $validator = $this->business->findMatch($matches, $selected, "validator");
 
-            if(''!==$validator){
+            if ('' !== $validator) {
                 $this->common->mlog('Attempting to validate Signature/Digest', 'INFO');
-                $rootSpan->log(['message'=>'Attempt to validate Signature/Digest']);
-                try{
-                    HorusXml::validateSignature($reqbody,$vars,$validator,$this->common->cnf);
+                $rootSpan->log(['message' => 'Attempt to validate Signature/Digest']);
+                try {
+                    HorusXml::validateSignature($reqbody, $vars, $validator, $this->common->cnf);
                     $this->common->mlog('Signature/Digest checked OK', 'INFO');
-                }catch(HorusException $e){
-                    $this->common->mlog('Signature/Digest validation failed ' . $e->getMessage(),'ERROR');
+                } catch (HorusException $e) {
+                    $this->common->mlog('Signature/Digest validation failed ' . $e->getMessage(), 'ERROR');
                     throw new HorusException($e->getMessage());
                 }
             }
 
-            $rootSpan->log(['message'=>'Finding Response Template']);
+            $rootSpan->log(['message' => 'Finding Response Template']);
             $templs = $this->business->findMatch($matches, $selected, "responseTemplate");
             if (is_array($templs)) {
                 $this->common->mlog("Selected template : " . implode(',', $templs) . "\n", 'INFO');
@@ -332,7 +349,7 @@ class HorusXml
             $errorTemplate = (($errorTemplate == null) ? $genericError : $errorTemplate);
             $errorTemplate = 'templates/' . $errorTemplate;
             if ($this->business->findMatch($matches, $selected, "displayError") === "On") {
-                throw new HorusException($this->business->returnGenericError($preferredType, $errorTemplate, "Requested error", '',$rootSpan));
+                throw new HorusException($this->business->returnGenericError($preferredType, $errorTemplate, "Requested error", '', $rootSpan));
             }
             $response = '';
             $multiple = false;
@@ -351,8 +368,8 @@ class HorusXml
             $mime_boundary = md5(time());
 
             try {
-                $rootSpan->log(['message'=>'Generate XML Response']);
-                $resp = $this->getResponses($templates, $vars, $formats, $preferredType, $errorTemplate,$rootSpan);
+                $rootSpan->log(['message' => 'Generate XML Response']);
+                $resp = $this->getResponses($templates, $vars, $formats, $preferredType, $errorTemplate, $rootSpan, $multiple);
             } catch (HorusException $e) {
                 throw new HorusException($e->getMessage());
             }
@@ -362,66 +379,66 @@ class HorusXml
             if ($multiple) {
                 $response = '';
                 foreach ($resp as $i => $r) {
-                    $response .= $this->http->formMultiPart("response_$i", $r, $mime_boundary, $eol, $preferredType);
+                    $response .= $this->http->formMultiPart("response_$i", $r['data'], $mime_boundary, $eol, $preferredType, $r['headers']);
                 }
-                $ret=null;
-                if (''===$proxy_mode)
-                    $ret=$this->http->returnWithContentType($response . "--" . $mime_boundary . "--" . $eol . $eol, "multipart/form-data; boundary=$mime_boundary", 200, $proxy_mode,false,'POST',$forwardData,$rootSpan);
+                $ret = null;
+                if ('' === $proxy_mode)
+                    $ret = $this->http->returnWithContentType($response . "--" . $mime_boundary . "--" . $eol . $eol, "multipart/form-data; boundary=$mime_boundary", 200, $proxy_mode, false, 'POST', $forwardData, $rootSpan);
                 else
-                    $ret=$this->http->returnWithContentType($response . "--" . $mime_boundary . "--" . $eol . $eol, "multipart/form-data; boundary=$mime_boundary", 200, $forwardData,false,'POST',$vars,$rootSpan);
+                    $ret = $this->http->returnWithContentType($response . "--" . $mime_boundary . "--" . $eol . $eol, "multipart/form-data; boundary=$mime_boundary", 200, $forwardData, false, 'POST', $vars, $rootSpan);
             } else {
-                if (''===$proxy_mode)
-                    $ret=$this->http->returnWithContentType($resp, $preferredType, 200, $proxy_mode, false, 'POST', $forwardData,$rootSpan);
+                if ('' === $proxy_mode)
+                    $ret = $this->http->returnWithContentType($resp, $preferredType, 200, $proxy_mode, false, 'POST', $forwardData, $rootSpan);
                 else
-                    $ret=$this->http->returnWithContentType($resp, $preferredType, 200, $forwardData, false, 'POST', $vars,$rootSpan);
+                    $ret = $this->http->returnWithContentType($resp, $preferredType, 200, $forwardData, false, 'POST', $vars, $rootSpan);
             }
             return $ret;
         } else {
             $errorMessage = "Unable to find appropriate response.\n";
             $errorMessage .= $this->common->libxml_display_errors();
             $this->common->mlog($errorMessage . "\n", 'ERROR');
-            $rootSpan->log(['message'=>'Generate Error']);
-            $res = $this->business->returnGenericError($preferredType, $genericError, $errorMessage, '',$rootSpan);
+            $rootSpan->log(['message' => 'Generate Error']);
+            $res = $this->business->returnGenericError($preferredType, $genericError, $errorMessage, '', $rootSpan);
             //if ('' === $proxy_mode)
             throw new HorusException($res);
         }
     }
 
-    static function getSignaturePart($fragment,$url,$transforms){
-        foreach($transforms as $transform){
-
+    static function getSignaturePart($fragment, $url, $transforms)
+    {
+        foreach ($transforms as $transform) {
         }
     }
 
-    static function validateSignature($document, $headers, $definition,$conf){
-        if('HMAC'===$definition['method']){
-            $totest='';
-            foreach($definition['parameters'] as $field){
-                if('Document'===$field)
+    static function validateSignature($document, $headers, $definition, $conf)
+    {
+        if ('HMAC' === $definition['method']) {
+            $totest = '';
+            foreach ($definition['parameters'] as $field) {
+                if ('Document' === $field)
                     $totest .= rtrim($document);
-                else{
-                    if(array_key_exists($field,$headers))
+                else {
+                    if (array_key_exists($field, $headers))
                         $totest .= $headers[$field];
-                    else if(array_key_exists($conf[HorusCommon::RFH_PREFIX] . $field,$headers))
+                    else if (array_key_exists($conf[HorusCommon::RFH_PREFIX] . $field, $headers))
                         $totest .= $headers[$conf[HorusCommon::RFH_PREFIX] . $field];
-                    else if(array_key_exists($conf[HorusCommon::MQMD_PREFIX] . $field,$headers))
+                    else if (array_key_exists($conf[HorusCommon::MQMD_PREFIX] . $field, $headers))
                         $totest .= $headers[$conf[HorusCommon::MQMD_PREFIX] . $field];
                 }
             }
-error_log('Digest variables : key=' . $definition['key'] . "\nXXX" . $totest . "XXX\n",3,'/var/log/horus/horus_http.log');
-file_put_contents('/var/log/horus/test.txt',$totest);
-            $digest = base64_encode(hash_hmac($definition['algorithm'],$totest,hex2bin($definition['key']),true));
+            //error_log('Digest variables : key=' . $definition['key'] . "\nXXX" . $totest . "XXX\n", 3, '/var/log/horus/horus_http.log');
+            //file_put_contents('/var/log/horus/test.txt', $totest);
+            $digest = base64_encode(hash_hmac($definition['algorithm'], $totest, hex2bin($definition['key']), true));
 
             $expectedDigest = '';
 
-            if (array_key_exists($definition['valueField'],$headers))
+            if (array_key_exists($definition['valueField'], $headers))
                 $expectedDigest = $headers[$definition['valueField']];
-            else if (array_key_exists($conf[HorusCommon::RFH_PREFIX] . $definition['valueField'],$headers))
+            else if (array_key_exists($conf[HorusCommon::RFH_PREFIX] . $definition['valueField'], $headers))
                 $expectedDigest = $headers[$conf[HorusCommon::RFH_PREFIX] . $definition['valueField']];
-            
-            if($digest != $expectedDigest)
-                throw new HorusException('Digest Verification Failed (found ' . $digest . ', expected ' . $expectedDigest . ')' );
 
+            if ($digest != $expectedDigest)
+                throw new HorusException('Digest Verification Failed (found ' . $digest . ', expected ' . $expectedDigest . ')');
         }
     }
 }

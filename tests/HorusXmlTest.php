@@ -130,7 +130,7 @@ class HorusXmlTest extends HorusTestCase
 
         $this->expectException(HorusException::class);
 
-        $xmlinject->getResponses($templates, $vars, $formats, $preferredType, $errorTemplate, self::$rootSpan);
+        $xmlinject->getResponses($templates, $vars, $formats, $preferredType, $errorTemplate, self::$rootSpan,true);
     }
 
     function testGetResponses(): void
@@ -143,12 +143,12 @@ class HorusXmlTest extends HorusTestCase
         $errorTemplate = 'templates/genericError.xml';
         $proxy_mode = '';
 
-        $r = $xmlinject->getResponses($templates, $vars, $formats, $preferredType, $errorTemplate, $proxy_mode);
+        $r = $xmlinject->getResponses($templates, $vars, $formats, $preferredType, $errorTemplate, $proxy_mode,true);
 
         $this::assertEquals(2, count($r), 'Response array should have 2 elements');
-        $r1 = simplexml_load_string($r[0]);
+        $r1 = simplexml_load_string($r[0]['data']);
         $this::assertEquals($r1->getDocNamespaces(), array('' => 'urn:iso:std:iso:20022:tech:xsd:pacs.002.001.03'), 'First response should be pacs2');
-        $r2 = simplexml_load_string($r[1]);
+        $r2 = simplexml_load_string($r[1]['data']);
         $this::assertEquals($r2->getDocNamespaces(), array('' => 'urn:iso:std:iso:20022:tech:xsd:pacs.002.001.03'), 'Second response should be pacs2');
         $r1->registerXPathNamespace('a', 'urn:iso:std:iso:20022:tech:xsd:pacs.002.001.03');
         $node = $r1->xpath('/a:Document/a:FIToFIPmtStsRpt/a:GrpHdr/a:InstgAgt/a:FinInstnId/a:BIC');
@@ -258,7 +258,7 @@ class HorusXmlTest extends HorusTestCase
         $res = $xmlinject->doInject($input, 'application/xml', 'http://localhost', json_decode($matches, true), 'application/xml', $queryParams, 'templates/genericError.xml','',self::$rootSpan);
         $this::assertNotNull($res, 'Response is not empty');
         //$this::assertEquals(count($res), 1, 'Should get only 1 response');
-        $this::assertEquals(self::$curls[0]['url'], 'http://localhost?forwardkey1=forwardvalue1&forwardkey2=forwardvalue2&id=1234567890&txid=1234567890&endtoendid=1234567890&frombic=BNPAFRPPXXX&tobic=BNPAFRPPXXX&txdt=2012-12-13T12%3A12%3A12.000Z&forwardkey1=forwardvalue1&forwardkey2=forwardvalue2');
+        $this::assertEquals(self::$curls[0]['url'], 'http://localhost?forwardkey1=forwardvalue1&forwardkey2=forwardvalue2&id=1234567890&txid=1234567890&endtoendid=1234567890&frombic=BNPAFRPPXXX&tobic=BNPAFRPPXXX&txdt=2012-12-13T12%3A12%3A12.000Z&nb=0&forwardkey1=forwardvalue1&forwardkey2=forwardvalue2');
         $xml = simplexml_load_string($res);
 
         $this::assertEquals($xml->getDocNamespaces(), array('' => 'urn:iso:std:iso:20022:tech:xsd:pacs.002.001.03'), 'Document is from expected namespace');
@@ -319,7 +319,7 @@ class HorusXmlTest extends HorusTestCase
 
         $this::assertNotNull($res, 'Response is not empty');
         //$this::assertEquals(count($res), 1, 'Should get only 1 response');
-        $this::assertEquals(self::$curls[0]['url'], 'http://localhost?forwardkey1=forwardvalue1&forwardkey2=forwardvalue2&id=1234567890&txid=1234567890&endtoendid=1234567890&frombic=BNPAFRPPXXX&tobic=BNPAFRPPXXX&txdt=2012-12-13T12%3A12%3A12.000Z&forwardkey1=forwardvalue1&forwardkey2=forwardvalue2');
+        $this::assertEquals(self::$curls[0]['url'], 'http://localhost?forwardkey1=forwardvalue1&forwardkey2=forwardvalue2&id=1234567890&txid=1234567890&endtoendid=1234567890&frombic=BNPAFRPPXXX&tobic=BNPAFRPPXXX&txdt=2012-12-13T12%3A12%3A12.000Z&nb=1&forwardkey1=forwardvalue1&forwardkey2=forwardvalue2');
 
         preg_match('/--(.*)\r\n/', $res, $mm);
         $this::assertNotNull($mm[0], "Should find a multipath boundary");

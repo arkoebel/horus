@@ -23,13 +23,16 @@ class HorusHttp
      * function formMultiPart
      * Generate a HTTP MultiPart section
      */
-    function formMultiPart($file, $data, $mime_boundary, $eol, $content_type)
+    function formMultiPart($file, $data, $mime_boundary, $eol, $content_type, $extraHeaders=array())
     {
         $cc = '';
         $cc .= '--' . $mime_boundary . $eol;
         $cc .= "Content-Disposition: form-data; name=\"$file\"; filename=\"$file\"" . $eol;
         $cc .= 'Content-Type: ' . $content_type . $eol;
-        $cc .= 'Content-Transfer-Encoding: base64' . $eol . $eol;
+        $cc .= 'Content-Transfer-Encoding: base64' . $eol;
+        foreach($extraHeaders as $key => $value)
+            $cc .= $key . ': ' . $value . $eol;
+        $cc .= $eol;
         return $cc . chunk_split(base64_encode($data)) . $eol;
     }
 
@@ -46,7 +49,7 @@ class HorusHttp
                     if (count($tmp)>1){
                         $key = array_shift($tmp);
                         $val = ltrim(implode(':',$tmp));
-                        error_log('MQ Header : ' . $key . ', ' . $val . "\n",3,'/var/log/horus/horus_http.log');
+                        //error_log('MQ Header : ' . $key . ', ' . $val . "\n",3,'/var/log/horus/horus_http.log');
                         $res[$key] = $val;
                     }else{
                         $res[$header] = $value;
@@ -81,7 +84,9 @@ class HorusHttp
                 else
                   if(mb_strpos($value, ':') !== false){
                     $elt = explode(':',$value);
-                    $outHeaders[] = strtolower($elt[0]) . ': ' . ltrim(rtrim($elt[1]));
+                    $key = array_shift($elt);
+                    $value = implode(':',$elt);
+                    $outHeaders[] = strtolower($key) . ': ' . ltrim(rtrim($value));
                   }
             }else{
                 $outHeaders[] = strtolower($key) . ': ' . ltrim(rtrim($value));

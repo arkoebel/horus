@@ -61,6 +61,7 @@ class HorusTestCase extends TestCase
         runkit_function_rename('curl_close', 'curl_close_old');
         runkit_function_rename('curl_multi_close', 'curl_multi_close_old');
         runkit_function_rename('curl_exec','curl_exec_old');
+        runkit_function_add('apache_request_headers','','return HorusTestCase::$mockheaders;');
         runkit_function_add(
             'curl_multi_init',
             '',

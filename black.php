@@ -91,9 +91,6 @@ if(array_key_exists('stripSection',$section)){
     $i1 = strpos($returnData,'<' . $section['stripSection'] . '>');
     $i2 = strpos($returnData,'</' . $section['stripSection'] . '>',$i1) + strlen($section['stripSection'])+3;
     $tostrip = substr($returnData,$i1,$i2-$i1);
-    error_log($section['stripSection'] . ' ' . $i1 . ' ' . $i2);
-    error_log('XXX' . $tostrip . 'YYY');
-    //$xml = simplexml_load_string($tostrip);
     $xsi = new SimpleXMLIterator($tostrip);
     for($xsi->rewind(); $xsi->valid(); $xsi->next()){
         if(!array_key_exists($xsi->key(),$queryParams))

@@ -8,6 +8,8 @@ class HorusCommon
     public $cnf = array();
     public const RFH_PREFIX = 'rfh2Prefix';
     public const MQMD_PREFIX = 'mqmdPrefix';
+    public const ENC_PREFIX = 'B64PRF-';
+    public const ENC_SEP = '#!#';
 
     function __construct($business_id, $log_location, $colour = 'GREEN')
     {

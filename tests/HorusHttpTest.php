@@ -43,7 +43,7 @@ class HorusHttpTest extends HorusTestCase
                                 'errorMessage'=>'',
                                 'returnBody'=>'<html>Test</html>');
 
-        $result = $this->http->forwardHttpQueries($queries,self::$rootSpan);
+        $result = $this->http->forwardHttpQueries($queries,self::$rootSpan,'rfh-','mqmd-');
         $this::assertEquals($result[0]['response_code'], 200);
         $this::assertEquals($result[0]['response_data'],'<html>Test</html>');
     }

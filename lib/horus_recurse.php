@@ -114,6 +114,17 @@ class HorusRecurse
             $this->xml->registerExtraNamespaces($xmlBody, $section['namespaces']);
         }
 
+        if (array_key_exists('validator',$section)){
+            try{
+                $span->log(['message'=>'Validating signature']);
+                HorusXML::validateSignature($body,$queryParams,$section['validator'],$this->common->cnf);
+                $this->common->mlog('Validated XMLDSIG Signature','INFO');
+            }catch(HorusException $e){
+                $this->common->mlog('XMLDSIG Signature failed : ' . $e->getMessage(),'ERROR');
+                throw new HorusException($e);
+            }
+        }
+
         $headers = array();
 
         foreach ($section['parts'] as $part) {

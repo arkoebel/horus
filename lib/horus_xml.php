@@ -15,6 +15,7 @@ class HorusXml
     public const XMLENVSIG = "http://www.w3.org/2000/09/xmldsig#enveloped-signature";
     public const XMLC14N = "http://www.w3.org/2001/10/xml-exc-c14n#";
     public const XMLAES = "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256";
+    public const XMLDSIGNS = "http://www.w3.org/2000/09/xmldsig#";
 
     function __construct($business_id, $log_location, $colour = 'GREEN', $tracer)
     {
@@ -410,6 +411,31 @@ class HorusXml
         }
     }
 
+    static function getSignatureFragment($namespaces, $digests, $signature){
+        $dsigns = 'http://www.w3.org/2000/09/xmldsig#';
+        $doc = new DOMDocument();
+        $fragment = $doc->appendChild($doc->createElementNS($dsigns,'ds:Signature'));
+        $signedInfo = $fragment->appendChild(new DOMElement('ds:SignedInfo',null,$dsigns));
+        $cmethod = $signedInfo->appendChild(new DOMElement('ds:CanonicalizationMethod',null,$dsigns));
+        $cmethod->setAttribute('Algorithm','http://www.w3.org/2001/10/xmlexc-c14n#');
+        $sigMethod = $signedInfo->appendChild(new DOMElement('ds:SignatureMethod',null,$dsigns));
+        $sigMethod->setAttribute('Algorithm','http://www.w3.org/2001/04/xmldsigmore#hmac-sha256');
+        foreach ($namespaces as $i=>$namespace){
+            $ref = $signedInfo->appendChild(new DOMElement('ds:Reference',null,$dsigns));
+            $ref->setAttribute('URI',$namespace);
+            $transforms = $ref->appendChild(new DOMElement('ds:Transforms',null,$dsigns));
+            $envsig = $transforms->appendChild(new DOMElement('ds:Transform',null,$dsigns));
+            $envsig->setAttribute('Algorithm','http://www.w3.org/2000/09/xmldsig#enveloped-signature');
+            $c14n = $transforms->appendChild(new DOMElement('ds:Transform',null,$dsigns));
+            $c14n->setAttribute('Algorithm','http://www.w3.org/2001/10/xml-excc14n#');
+            $digestmethod = $ref->appendChild(new DOMElement('ds:DigestMethod',null,$dsigns));
+            $digestmethod->setAttribute('Algorithm','http://www.w3.org/2001/04/xmlenc#sha256');
+            $ref->appendChild(new DOMElement('ds:DigestValue',$digests[$i],$dsigns));
+        }
+        $fragment->appendChild(new DOMElement('ds:SignatureValue',$signature,$dsigns));
+        return $doc->saveXML();
+    }
+
     static function validateSignature($document, $headers, $definition, $conf)
     {
         if ('HMAC' === $definition['method']) {
@@ -439,6 +465,69 @@ class HorusXml
 
             if ($digest != $expectedDigest)
                 throw new HorusException('Digest Verification Failed (found ' . $digest . ', expected ' . $expectedDigest . ')');
+        }else if ('XMLDSIG' === $definition['method']){
+            // Load original document, preserving its format.
+            $xml = new DOMDocument();
+            $xml->preserveWhiteSpace = true;
+            $xml->formatOutput = false;
+            $xml->loadXML($document);
+
+            // Lookup the XMLDSIG Signature Element 
+            $sig = $xml->getElementsByTagNameNS(HorusXml::XMLDSIGNS,'Signature');
+            if($sig->length==0){
+                throw new HorusException('Document doesn\'t appear to be signed');
+            }
+
+            // Lookup the XMLDSIG SignedInfo Element
+            $signedInfo = $sig->item(0)->getElementsByTagNameNS(HorusXML::XMLDSIGNS,'SignedInfo');
+            if($signedInfo->length==0){
+                throw new HorusException('Malformed Signature (missing SignedInfo)');
+            }
+
+            // While the signature is still there, canonicalize the SignedInfo and extract the Digest value
+            $canonical2 = $signedInfo->item(0)->c14N(true,false,null,array('ds'));
+            error_log('Canonical Signed Info XXXX' . $canonical2 . 'XXXX' . "\n");
+            $digest = $signedInfo->item(0)->getElementsByTagNameNS(HorusXML::XMLDSIGNS,'DigestValue');
+            if($digest->length==0){
+                throw new HorusException('Malformed Signature (missing DigestValue)');
+            }
+            $digestValue = $digest->item(0)->nodeValue;
+
+            // While the signature is still there, extract its value
+            $signature = $sig->item(0)->getElementsByTagNameNS(HorusXML::XMLDSIGNS,'SignatureValue');
+            if($signature->length==0){
+                throw new HorusException('Malformed Signature (missing SignatureValue)');
+            }
+            $signatureValue = $signature->item(0)->nodeValue;
+
+            // Remove the Signature element from the original XML (http://www.w3.org/2000/09/xmldsig#enveloped-signature)
+            $sig->item(0)->parentNode->removeChild($sig->item(0));
+
+            // Canonicalize the original document without the signature (http://www.w3.org/2001/10/xml-exc-c14n#)
+            $canonical1 = $xml->c14N(false,false);
+            error_log('Canonical Document XXXX' . $canonical1 . 'XXXX' . "\n");
+
+            // Calculate the digest for the whole document
+            $digest = base64_encode(openssl_digest($canonical1,$definition['digestAlgorithm'],true));
+            if($digest!==$digestValue){
+                throw new HorusException('Wrong Digest (Found: ' . $digestValue . ', Computed: ' . $digest);
+            }
+
+            // Calculate the signature using the supplied Key and algorithm.
+            if(preg_match('/^RSA/',$definition['signatureAlgorithm'])){
+                // If we had the private key
+                $private = openssl_pkey_get_private($definition['key'],$definition['passphrase']);
+                
+                openssl_sign($canonical2,$computedSignature,$private,$definition['signatureAlgorithm']);
+                $computedSignature = base64_encode($computedSignature);
+
+            }else{
+                $computedSignature = base64_encode(hash_hmac($definition['signatureAlgorithm'],$canonical2,$definition['key'],true));
+            }
+            if($signatureValue!==$computedSignature){
+                throw new HorusException('Wrong Signature (Found: ' . $signatureValue . ', Computed: ' . $computedSignature);
+            }
+
         }
     }
 }

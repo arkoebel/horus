@@ -1,30 +1,60 @@
-[{
-	"section": "section1",
-	"content-type": "application/xml",
-	"comment": "Main PACS structure",
-	"schema": "cristal.xsd",
-	"namespaces": [{
-			"prefix": "h",
-			"namespace": "urn:swift:xsd:iws.ApplicationHeader$ahV10"
-		}, {
-			"prefix": "u",
-			"element": "Document"
-		}
-	],
-	"rootElement": "body",
-	"parts": [{
-			"order": "1",
-			"comment": "Header transformation",
-			"path": "/body/h:AppHdr",
-			"transformUrl": "http://monitoring.arnaudkoebel.com/horus/HorusNew.php",
-			"targetPath": "/body/h:AppHdr"
-		}, {
-			"order": "2",
-			"comment": "PACS Document transformation",
-			"path": "/body/u:Document",
-			"transformUrl": "http://monitoring.arnaudkoebel.com/horus/HorusNew.php",
-			"targetElement": "Document",
-			"targetElementOrder": "2"
-		}
-	]
-}]
+[
+	{
+		"section": "section1",
+		"content-type": "application/xml",
+		"comment": "Main PACS structure",
+		"schema": "cristal.xsd",
+		"namespaces": [
+			{
+				"prefix": "h",
+				"namespace": "urn:swift:xsd:iws.ApplicationHeader$ahV10"
+			},
+			{
+				"prefix": "u",
+				"element": "Document"
+			}
+		],
+		"rootElement": "body",
+		"validator": {
+				"method": "XMLDSIG", 
+				"digestAlgorithm": "SHA256",
+				"signatureAlgorithm" : "SHA256",
+				"key": "AAABCDEF01234567AAABCDEF01234567",
+				"destinationXPath": "/saa:DataPDU/saa:LAU",
+				"wholeDocument": "true"
+			},
+		"parts": [
+			{
+				"order": "1",
+				"comment": "Header transformation",
+				"path": "/body/h:AppHdr",
+				"transformUrl": "http://192.168.68.107/HorusNew.php",
+				"targetPath": "/body/h:AppHdr",
+				"signaturePart": {
+					"URL": "",
+					"digestMethod":"http://www.w3.org/2001/04/xmldsig-more#rsa-sha256",
+					"transforms": [
+						"http://www.w3.org/2000/09/xmldsig#enveloped-signature",
+						"http://www.w3.org/2001/10/xml-exc-c14n#"
+					]
+				}
+			},
+			{
+				"order": "2",
+				"comment": "PACS Document transformation",
+				"path": "/body/u:Document",
+				"transformUrl": "http://192.168.68.107/HorusNew.php",
+				"targetElement": "Document",
+				"signaturePart": {
+					"URL": "null",
+					"digestMethod":"http://www.w3.org/2001/04/xmldsig-more#rsa-sha256",
+					"transforms": [
+						"http://www.w3.org/2000/09/xmldsig#enveloped-signature",
+						"http://www.w3.org/2001/10/xml-exc-c14n#"
+					]
+				},
+				"targetElementOrder": "2"
+			}
+		]
+	}
+]

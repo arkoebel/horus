@@ -91,6 +91,9 @@ class HorusSignatureTest extends HorusTestCase{
                 'signatureAlgorithm'=>'SHA256',
                 'digestAlgorithm'=>'SHA256', 
                 'method'=>'XMLDSIG', 
+                'documentNSPrefix'=>'Saa',
+                'documentNSURI'=>'urn:swift:saa:xsd:saa.2.0',
+                'destinationXPath'=>'/Saa:DataPDU/Saa:LAU',
                 'key'=>'Abcd1234abcd1234Abcd1234abcd1234'), 
             null);
     }
@@ -187,12 +190,16 @@ class HorusSignatureTest extends HorusTestCase{
 "\t" . '</Saa:LAU>' . "\n" .
 '</Saa:DataPDU>';
 
+//file_put_contents('sample.xml',$input);
    HorusXML::validateSignature($input,
             null,
             array(
                 'signatureAlgorithm'=>'SHA256',
                 'digestAlgorithm'=>'SHA256', 
-                'method'=>'XMLDSIG', 
+                'method'=>'XMLDSIG',
+                'documentNSPrefix'=>'Saa',
+                'documentNSURI'=>'urn:swift:saa:xsd:saa.2.0',
+                'destinationXPath'=>'/Saa:DataPDU/Saa:LAU',
                 'key'=>'Abcd1234abcd1234Abcd1234abcd1234'), 
             null);
     }
@@ -278,7 +285,12 @@ p0C2hJlc6p46IWZaINQXGstTbJMh+mJ7i1lrbG2kvZ2Twf9R+RaLp2mPHjb1
 m58j81sGZUEAB3aFEbPxoX3y+qYlOnt1OfdY7WnNdyr9ZzI09fkrTvujF4LU
 nycqE+MXerf0PxkNu1qv9bQvCoH8x3J2EVdMxPBtH1Fb7SbE66cNyh//qzZo
 B9Je
------END ENCRYPTED PRIVATE KEY-----', 'passphrase'=>'password','digestAlgorithm'=>'SHA1', 'signatureAlgorithm'=>'RSA-SHA1');
+-----END ENCRYPTED PRIVATE KEY-----', 
+'passphrase'=>'password','digestAlgorithm'=>'SHA1', 'signatureAlgorithm'=>'RSA-SHA1',
+'documentNSPrefix'=>'a',
+'documentNSURI'=>'http://example.org/envelope',
+'destinationXPath'=>'/a:Envelope'
+);
         HorusXML::validateSignature($input,null,$params,null);
     }
 

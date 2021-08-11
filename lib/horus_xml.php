@@ -472,8 +472,18 @@ class HorusXml
             $xml->formatOutput = false;
             $xml->loadXML($document);
 
+            $xpath = new DOMXPath($xml);
+            $xpath->registerNamespace('ds',HorusXml::XMLDSIGNS);
+            if((array_key_exists('documentNSPrefix',$definition))&&(array_key_exists('documentNSURI',$definition)))
+                $xpath->registerNamespace($definition['documentNSPrefix'],$definition['documentNSURI']);
+            else
+                $xpath->registerNamespace('u',$xml->namespaceURI);
+
             // Lookup the XMLDSIG Signature Element 
-            $sig = $xml->getElementsByTagNameNS(HorusXml::XMLDSIGNS,'Signature');
+            if(array_key_exists('destinationXPath',$definition))
+                $sig = $xpath->query($definition['destinationXPath'] . '/ds:Signature');
+            else
+                $sig = $xml->getElementsByTagNameNS(HorusXml::XMLDSIGNS,'Signature');
             if($sig->length==0){
                 throw new HorusException('Document doesn\'t appear to be signed');
             }

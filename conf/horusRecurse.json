@@ -20,6 +20,8 @@
 				"digestAlgorithm": "SHA256",
 				"signatureAlgorithm" : "SHA256",
 				"key": "AAABCDEF01234567AAABCDEF01234567",
+				"documentNSPrefix": "saa",
+				"documentNSURI": "urn:swift:saa:xsd:saa.2.0",
 				"destinationXPath": "/saa:DataPDU/saa:LAU",
 				"wholeDocument": "true"
 			},

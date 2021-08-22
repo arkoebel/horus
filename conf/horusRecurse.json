@@ -16,15 +16,36 @@
 		],
 		"rootElement": "body",
 		"validator": {
-				"method": "XMLDSIG", 
-				"digestAlgorithm": "SHA256",
-				"signatureAlgorithm" : "SHA256",
-				"key": "AAABCDEF01234567AAABCDEF01234567",
-				"documentNSPrefix": "saa",
-				"documentNSURI": "urn:swift:saa:xsd:saa.2.0",
-				"destinationXPath": "/saa:DataPDU/saa:LAU",
-				"wholeDocument": "true"
-			},
+			"digestAlgorithm": "SHA256",
+			"method": "DATAPDUSIG",
+			"documentns": [
+				{
+					"Saa": "urn:swift:saa:xsd:saa.2.0"
+				},
+				{
+					"h": "urn:iso:std:iso:20022:tech:xsd:head.001.001.01"
+				}
+			],
+			"destinationXPath": "/Saa:DataPDU/Saa:Body/h:AppHdr/h:Sgntr",
+			"references": [
+				{
+					"comment": "Key",
+					"xpath": "/Saa:DataPDU/Saa:Body/h:AppHdr/h:Sgntr/ds:Signature/ds:KeyInfo",
+					"sigxpath": "/ds:Signature/ds:SignedInfo/ds:Reference[starts-with(@URI,\"#\")]"
+				},
+				{
+					"comment": "AppHdr",
+					"xpath": "/Saa:DataPDU/Saa:Body/h:AppHdr",
+					"removeSignature": "true",
+					"sigxpath": "/ds:Signature/ds:SignedInfo/ds:Reference[@URI=\"\"]"
+				},
+				{
+					"comment": "Document",
+					"xpath": "/Saa:DataPDU/Saa:Body/*[name() = \"Document\"]",
+					"sigxpath": "/ds:Signature/ds:SignedInfo/ds:Reference[not(@URI)]"
+				}
+			]
+		},
 		"parts": [
 			{
 				"order": "1",
@@ -34,7 +55,7 @@
 				"targetPath": "/body/h:AppHdr",
 				"signaturePart": {
 					"URL": "",
-					"digestMethod":"http://www.w3.org/2001/04/xmldsig-more#rsa-sha256",
+					"digestMethod": "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256",
 					"transforms": [
 						"http://www.w3.org/2000/09/xmldsig#enveloped-signature",
 						"http://www.w3.org/2001/10/xml-exc-c14n#"
@@ -49,7 +70,7 @@
 				"targetElement": "Document",
 				"signaturePart": {
 					"URL": "null",
-					"digestMethod":"http://www.w3.org/2001/04/xmldsig-more#rsa-sha256",
+					"digestMethod": "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256",
 					"transforms": [
 						"http://www.w3.org/2000/09/xmldsig#enveloped-signature",
 						"http://www.w3.org/2001/10/xml-exc-c14n#"

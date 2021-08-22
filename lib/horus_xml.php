@@ -422,7 +422,7 @@ class HorusXml
         $xpath = new DOMXPath($xml);
         $xpath->registerNamespace('ds', HorusXml::XMLDSIGNS);
         $signature = $xpath->query($signatureXpath);
-        error_log(print_r($signature,true));
+        error_log(print_r($signature, true));
         if ($signature->length == 1) {
             error_log('Got Signature');
             $signedInfo = $xpath->query('./ds:SignedInfo', $signature->item(0));
@@ -440,7 +440,7 @@ class HorusXml
 
                     $signatureVal = $xpath->query('./ds:SignatureValue', $signature->item(0))->item(0)->nodeValue;
                     error_log('Got Signature : ' . $signatureVal);
-                    error_log('Public Key : ' . print_r($publicKey,true));
+                    error_log('Public Key : ' . print_r($publicKey, true));
                     return openssl_verify($digest, base64_decode($signatureVal), $publicKey, OPENSSL_ALGO_SHA256);
                 }
             }
@@ -548,6 +548,11 @@ class HorusXml
             else
                 $xpath->registerNamespace('u', $xml->namespaceURI);
 
+            if (array_key_exists('documentns', $definition)) {
+                foreach ($definition['documentns'] as $prefix => $ns)
+                    $xpath->registerNamespace($prefix, $ns);
+            }
+
             // Lookup the XMLDSIG Signature Element 
             if (array_key_exists('destinationXPath', $definition))
                 $sig = $xpath->query($definition['destinationXPath'] . '/ds:Signature');
@@ -618,6 +623,106 @@ class HorusXml
             }
             if ($signatureValue !== $computedSignature) {
                 throw new HorusException('Wrong Signature (Found: ' . $signatureValue . ', Computed: ' . $computedSignature);
+            }
+        } else if ('DATAPDUSIG' === $definition['method']) {
+            error_log('Enter DataPDU Sign');
+            // Load original document, preserving its format.
+            $xml = new DOMDocument();
+            $xml->preserveWhiteSpace = true;
+            $xml->formatOutput = false;
+            $xml->loadXML($document);
+
+            $xpath = new DOMXPath($xml);
+            $xpath->registerNamespace('ds', HorusXml::XMLDSIGNS);
+
+            if (array_key_exists('documentns', $definition)) {
+                foreach ($definition['documentns'] as $prefix => $ns)
+                    $xpath->registerNamespace($prefix, $ns);
+            }
+
+            // Lookup the XMLDSIG Signature Element 
+            if (array_key_exists('destinationXPath', $definition))
+                $sig = $xpath->query($definition['destinationXPath'] . '/ds:Signature');
+            else
+                $sig = $xml->getElementsByTagNameNS(HorusXml::XMLDSIGNS, 'Signature');
+            error_log(print_r($sig, true));
+            if ($sig->length == 0) {
+                throw new HorusException('Document doesn\'t appear to be signed');
+            }
+
+            // Lookup the XMLDSIG SignedInfo Element
+            $signedInfo = $sig->item(0)->getElementsByTagNameNS(HorusXML::XMLDSIGNS, 'SignedInfo');
+            if ($signedInfo->length == 0) {
+                throw new HorusException('Malformed Signature (missing SignedInfo)');
+            }
+
+            $savedSign = $xml->saveXMl($sig->item(0));
+            $ss = new DOMDocument();
+            $ss->preserveWhiteSpace = true;
+            $ss->formatOutput = false;
+            $ss->loadXML($savedSign);
+            $xpathsign = new DOMXpath($ss);
+            $xpathsign->registerNamespace('ds', HorusXML::XMLDSIGNS);
+            error_log('signature=' . $savedSign);
+            // Test digests
+
+            foreach ($definition['references'] as $reference) {
+error_log($reference['comment']);
+                // Extract reference data
+                $refdata = $xpath->query($reference['xpath']);
+                if ($refdata->length === 0)
+                    throw new HorusException('Reference not found at xpath ' . $reference['xpath']);
+//error_log($xml->saveXML($refdata->item(0)));
+                // Remove signature if needed
+                if (array_key_exists('removeSignature', $reference) && $reference['removeSignature']) {
+                    $sig = $xml->getElementsByTagNameNS(HorusXML::XMLDSIGNS, 'Signature');
+//error_log($xml->saveXML($sig->item(0)));
+                    if ($sig->length === 1){
+                        $sg = $sig->item(0);
+                        $sg->parentNode->removeChild($sg);
+                    }
+                }
+
+                // External canonicalisation
+                $c14 = $refdata->item(0)->C14N(true, false);
+error_log('C14(' . $reference['comment'] . ')=' . $c14);
+                // Digest
+                $dgst = base64_encode(openssl_digest($c14, $definition['digestAlgorithm'], true));
+
+                // Find reference in the signature
+
+                $refsig = $xpathsign->query($reference['sigxpath'] . '/ds:DigestValue');
+
+                if ($refsig->length === 0)
+                    throw new HorusException('Reference digest not found in signature ' . $reference['comment']);
+
+                $digest = $refsig->item(0)->nodeValue;
+
+                if ($digest != $dgst)
+                   error_log('Mismatched digest for reference ' . $reference['comment'] . ' : expected ' . $digest . ', calculated ' . $dgst);
+            }
+
+            // Test signature
+            $ss = $xpathsign->query('/ds:Signature/ds:SignatureValue');
+            if ($ss->length === 0)
+                throw new HorusException('Signature Value not found');
+            $expectedSignatureValue = $ss->item(0)->nodeValue;
+
+            $si = $xpathsign->query('/ds:Signature/ds:SignedInfo');
+            if ($si->length === 0)
+                throw new HorusException('SignedInfo not found');
+            $canon = $si->item(0)->C14N(true, false);
+
+            $cert = $xpathsign->query('/ds:Signature/ds:KeyInfo/ds:X509Data/ds:X509Certificate');
+            if ($cert->length === 0)
+                throw new HorusException('x509 Certificate not found');
+            $certificate = HorusXML::X509HEADER . $cert->item(0)->nodeValue . HorusXML::X509FOOTER;
+            $pk = openssl_get_publickey($certificate);
+            if ($pk === FALSE)
+                throw new HorusException('Invalid x509 Certificate: ' . openssl_error_string());
+
+            if (!openssl_verify($canon, base64_decode($expectedSignatureValue), $pk, OPENSSL_ALGO_SHA256)){
+                throw new HorusException('Signature check failed : ' . openssl_error_string());
             }
         }
     }

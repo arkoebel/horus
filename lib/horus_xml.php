@@ -507,6 +507,11 @@ class HorusXml
 
     static function validateSignature($document, $headers, $definition, $conf)
     {
+        if(array_key_exists('logLocation',$conf))
+            $logLocation = $conf['logLocation'];
+        else
+            $logLocation = HorusCommon::DEFAULT_LOG_LOCATION;
+
         if ('HMAC' === $definition['method']) {
             $totest = '';
             foreach ($definition['parameters'] as $field) {
@@ -625,7 +630,7 @@ class HorusXml
                 throw new HorusException('Wrong Signature (Found: ' . $signatureValue . ', Computed: ' . $computedSignature);
             }
         } else if ('DATAPDUSIG' === $definition['method']) {
-            error_log('Enter DataPDU Sign');
+            HorusCommon::logger('Enter DataPDU Sign','INFO','TXT','INDIGO',$conf['business_id'],$logLocation);
             // Load original document, preserving its format.
             $xml = new DOMDocument();
             $xml->preserveWhiteSpace = true;
@@ -645,8 +650,8 @@ class HorusXml
                 $sig = $xpath->query($definition['destinationXPath'] . '/ds:Signature');
             else
                 $sig = $xml->getElementsByTagNameNS(HorusXml::XMLDSIGNS, 'Signature');
-            error_log(print_r($sig, true));
-            if ($sig->length == 0) {
+            
+                if ($sig->length == 0) {
                 throw new HorusException('Document doesn\'t appear to be signed');
             }
 
@@ -663,11 +668,11 @@ class HorusXml
             $ss->loadXML($savedSign);
             $xpathsign = new DOMXpath($ss);
             $xpathsign->registerNamespace('ds', HorusXML::XMLDSIGNS);
-            error_log('signature=' . $savedSign);
+            
             // Test digests
 
             foreach ($definition['references'] as $reference) {
-error_log($reference['comment']);
+                HorusCommon::logger('Analyse Reference ' . $reference['comment'],'DEBUG','TXT','INDIGO',$conf['business_id'],$logLocation);
                 // Extract reference data
                 $refdata = $xpath->query($reference['xpath']);
                 if ($refdata->length === 0)
@@ -685,7 +690,8 @@ error_log($reference['comment']);
 
                 // External canonicalisation
                 $c14 = $refdata->item(0)->C14N(true, false);
-error_log('C14(' . $reference['comment'] . ')=' . $c14);
+                HorusCommon::logger('C14(' . $reference['comment'] . ')=' . $c14,'DEBUG','TXT','INDIGO',$conf['business_id'],$logLocation);
+            
                 // Digest
                 $dgst = base64_encode(openssl_digest($c14, $definition['digestAlgorithm'], true));
 
@@ -698,8 +704,13 @@ error_log('C14(' . $reference['comment'] . ')=' . $c14);
 
                 $digest = $refsig->item(0)->nodeValue;
 
-                if ($digest != $dgst)
-                   error_log('Mismatched digest for reference ' . $reference['comment'] . ' : expected ' . $digest . ', calculated ' . $dgst);
+                if ($digest != $dgst){
+                    $err = 'Mismatched digest for reference ' . $reference['comment'] . ' : input=' . $digest . ', calculated=' . $dgst;
+                    HorusCommon::logger($err,'ERROR','TXT','INDIGO',$conf['business_id'],$logLocation);
+                    throw new HorusException($err);
+                }else
+                    HorusCommon::logger('Digest for ' . $reference['comment'] . ' matched','INFO','TXT','INDIGO',$conf['business_id'],$logLocation);
+
             }
 
             // Test signature
@@ -713,6 +724,7 @@ error_log('C14(' . $reference['comment'] . ')=' . $c14);
                 throw new HorusException('SignedInfo not found');
             $canon = $si->item(0)->C14N(true, false);
 
+            HorusCommon::logger('C14(SignedInfo) = ' . $canon,'DEBUG','TXT','INDIGO',$conf['business_id'],$logLocation);
             $cert = $xpathsign->query('/ds:Signature/ds:KeyInfo/ds:X509Data/ds:X509Certificate');
             if ($cert->length === 0)
                 throw new HorusException('x509 Certificate not found');
@@ -723,6 +735,8 @@ error_log('C14(' . $reference['comment'] . ')=' . $c14);
 
             if (!openssl_verify($canon, base64_decode($expectedSignatureValue), $pk, OPENSSL_ALGO_SHA256)){
                 throw new HorusException('Signature check failed : ' . openssl_error_string());
+            }else{
+                HorusCommon::logger('Signature ' . $definition['name'] . ' checked ok.','INFO','TXT','INDIGO',$conf['business_id'],$logLocation);
             }
         }
     }

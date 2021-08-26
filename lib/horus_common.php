@@ -10,6 +10,7 @@ class HorusCommon
     public const MQMD_PREFIX = 'mqmdPrefix';
     public const ENC_PREFIX = 'B64PRF-';
     public const ENC_SEP = '#!#';
+    public const DEFAULT_LOG_LOCATION='/var/log/horus/horus_http.log';
 
     function __construct($business_id, $log_location, $colour = 'GREEN')
     {
@@ -73,23 +74,33 @@ class HorusCommon
      */
     public function mlog($message, $log_level, $format = 'TXT')
     {
+        HorusCommon::logger($message,$log_level,$format,$this->colour,$this->business_id,$this->log_location);
+
+    }
+
+    /**
+     * Function mlog
+     * Private logging facilities. Format message into JSON for easy ES integration.
+     */
+    public static function logger($message, $log_level, $format = 'TXT', $colour='BLANK', $business_id, $log_location=HorusCommon::DEFAULT_LOG_LOCATION)
+    {
 
         $alog = array();
         $alog['timestamp'] = HorusCommon::utc_time(5);
-        $alog['program'] = $this->colour;
+        $alog['program'] = $colour;
         $alog['log_level'] = $log_level;
         $alog['file'] = $_SERVER["PHP_SELF"];
-        $alog['business_id'] = $this->business_id;
+        $alog['business_id'] = $business_id;
         $alog['pid'] = getmypid();
         if ($format === 'TXT') {
             $alog['message'] = $message;
         } else {
             $alog['message'] = HorusCommon::escapeJsonString($message);
         }
-        if (is_null($this->log_location)){
+        if (is_null($log_location)){
             error_log(json_encode($alog) . "\n");
         }else{
-            error_log(json_encode($alog) . "\n", 3, $this->log_location);
+            error_log(json_encode($alog) . "\n", 3, $log_location);
         }
 
         if (json_last_error() != 0){

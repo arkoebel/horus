@@ -9,10 +9,85 @@ require_once('lib/horus_common.php');
 require_once('lib/horus_xml.php');
 require_once('HorusTestCase.php');
 require_once('lib/horus_exception.php');
+use RobRichards\XMLSecLibs\XMLSecurityDSig;
+use RobRichards\XMLSecLibs\XMLSecurityKey;
+
 
 class HorusSignatureTest extends HorusTestCase{
 
-    function testSample(): void {
+
+    public static $input1LAU =  '<?xml version="1.0" encoding="UTF-8"?>' . "\n" .
+    '<Saa:DataPDU xmlns:Saa="urn:swift:saa:xsd:saa.2.0" xmlns:Sw="urn:swift:snl:ns.Sw" xmlns:SwInt="urn:swift:snl:ns.SwInt" xmlns:SwGbl="urn:swift:snl:ns.SwGbl" xmlns:SwSec="urn:swift:snl:ns.SwSec">' . "\n" .
+    '    <Saa:Revision>2.0.6</Saa:Revision>' . "\n" .
+    '    <Saa:Header>' . "\n" .
+    '        <Saa:Message>' . "\n" .
+    '            <Saa:SenderReference>Ref760FA1234</Saa:SenderReference>' . "\n" .
+    '            <Saa:MessageIdentifier>tsrv.fin.mt7xx.gteesstandbys</Saa:MessageIdentifier>' . "\n" .
+    '            <Saa:Format>File</Saa:Format>' . "\n" .
+    '            <Saa:SubFormat>Input</Saa:SubFormat>' . "\n" .
+    '            <Saa:Sender>' . "\n" .
+    '                <Saa:DN>cn=su8,o=ptsqgbbb,o=swift</Saa:DN>' . "\n" .
+    '                <Saa:FullName>' . "\n" .
+    '                    <Saa:X1>PTSQGBBBXXX</Saa:X1>' . "\n" .
+    '                </Saa:FullName>' . "\n" .
+    '            </Saa:Sender>' . "\n" .
+    '            <Saa:Receiver>' . "\n" .
+    '                <Saa:DN>cn=abc,ou=saa,o=xxx,o=swift</Saa:DN>' . "\n" .
+    '                <Saa:FullName>' . "\n" .
+    '                    <Saa:X1>PTSXXXXXXXX</Saa:X1>' . "\n" .
+    '                    <Saa:X2>saa</Saa:X2>' . "\n" .
+    '                </Saa:FullName>' . "\n" .
+    '            </Saa:Receiver>' . "\n" .
+    '            <Saa:InterfaceInfo>' . "\n" .
+    '                <Saa:UserReference>CRE...</Saa:UserReference>' . "\n" .
+    '                <Saa:MessageCreator>ApplicationInterface</Saa:MessageCreator>' . "\n" .
+    '                <Saa:MessageContext>Original</Saa:MessageContext>' . "\n" .
+    '                <Saa:MessageNature>Financial</Saa:MessageNature>' . "\n" .
+    '            </Saa:InterfaceInfo>' . "\n" .
+    '            <Saa:NetworkInfo>' . "\n" .
+    '                <Saa:Priority>Normal</Saa:Priority>' . "\n" .
+    '                <Saa:IsPossibleDuplicate>true</Saa:IsPossibleDuplicate>' . "\n" .
+    '                <Saa:Service>swift.corp.fast!x</Saa:Service>' . "\n" .
+    '                <Saa:Network>Application</Saa:Network>' . "\n" .
+    '                <Saa:SessionNr>0080</Saa:SessionNr>' . "\n" .
+    '                <Saa:SeqNr>000001</Saa:SeqNr>' . "\n" .
+    '                <Saa:SWIFTNetNetworkInfo>' . "\n" .
+    '                    <Saa:RequestType>tsrv.fin.mt7xx.gteesstandbys</Saa:RequestType>' . "\n" .
+    '                    <Saa:Reference>2f949999-d32e-49eb-9999-9a819b9b9c0d</Saa:Reference>' . "\n" .
+    '                    <Saa:FileInfo>SwCompression=Zip</Saa:FileInfo>' . "\n" .
+    '                </Saa:SWIFTNetNetworkInfo>' . "\n" .
+    '            </Saa:NetworkInfo>' . "\n" .
+    '            <Saa:SecurityInfo>' . "\n" .
+    '                <Saa:SWIFTNetSecurityInfo>' . "\n" .
+    '                    <Saa:FileDigestAlgorithm>SHA-256</Saa:FileDigestAlgorithm>' . "\n" .
+    '                    <Saa:FileDigestValue>9tnnjIgsowPSU+ehm8Rb0J5TvZIvhCYnySzFkpur1aw=</Saa:FileDigestValue>' . "\n" .
+    '                </Saa:SWIFTNetSecurityInfo>' . "\n" .
+    '            </Saa:SecurityInfo>' . "\n" .
+    '            <Saa:FileLogicalName>Payload.ZIP</Saa:FileLogicalName>' . "\n" .
+    '            <Saa:ExpiryDateTime>20210712074808</Saa:ExpiryDateTime>' . "\n" .
+    '        </Saa:Message>' . "\n" .
+    '    </Saa:Header>' . "\n" .
+    '    <Saa:Body>Payload.ZIP</Saa:Body>' . "\n" .
+    '   <Saa:LAU>' . "\n" .
+    "\t\t" . '<ds:Signature xmlns:ds="http://www.w3.org/2000/09/xmldsig#">' . "\n" .
+    "\t\t\t" . '<ds:SignedInfo>' . "\n" .
+    "\t\t\t\t" . '<ds:CanonicalizationMethod Algorithm="http://www.w3.org/2001/10/xmlexc-c14n#" />' . "\n" .
+    "\t\t\t\t" . '<ds:SignatureMethod Algorithm="http://www.w3.org/2001/04/xmldsigmore#hmac-sha256" />' . "\n" .
+    "\t\t\t\t" . '<ds:Reference URI="">' . "\n" .
+    "\t\t\t\t\t" . '<ds:Transforms>' . "\n" .
+    "\t\t\t\t\t\t" . '<ds:Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature" />' . "\n" .
+    "\t\t\t\t\t\t" . '<ds:Transform Algorithm="http://www.w3.org/2001/10/xml-excc14n#"/>' . "\n" .
+    "\t\t\t\t\t" . '</ds:Transforms>' . "\n" .
+    "\t\t\t\t\t" . '<ds:DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256" />' . "\n" .
+    "\t\t\t\t\t" . '<ds:DigestValue>d793Xkjuzq7vkT38tu6EPt3vQj2XQL1QbzF7tmHMMg4=</ds:DigestValue>' . "\n" .
+    "\t\t\t\t" . '</ds:Reference>' . "\n" .
+    "\t\t\t" . '</ds:SignedInfo>' . "\n" .
+    "\t\t\t" . '<ds:SignatureValue>zDVHg3NDF8yRpPgpEGUfxYoWeq8QChbC0bnfJ9tIsnU=</ds:SignatureValue>' . "\n" .
+    "\t\t" . '</ds:Signature>' . "\n" .
+    '   </Saa:LAU>' . "\n" .
+    '</Saa:DataPDU>';
+
+    function stestSample(): void {
 
         $input = '<?xml version="1.0" encoding="UTF-8"?>' . "\n" .
             '<Saa:DataPDU xmlns:Saa="urn:swift:saa:xsd:saa.2.0" xmlns:Sw="urn:swift:snl:ns.Sw" xmlns:SwInt="urn:swift:snl:ns.SwInt" xmlns:SwGbl="urn:swift:snl:ns.SwGbl" xmlns:SwSec="urn:swift:snl:ns.SwSec">' . "\n" .
@@ -104,7 +179,7 @@ class HorusSignatureTest extends HorusTestCase{
 '<Saa:DataPDU xmlns:Saa="urn:swift:saa:xsd:saa.2.0"' . "\n" .
 'xmlns:Sw="urn:swift:snl:ns.Sw" xmlns:SwGbl="urn:swift:snl:ns.SwGbl"' . "\n" .
 'xmlns:SwInt="urn:swift:snl:ns.SwInt" xmlns:SwSec="urn:swift:snl:ns.SwSec">' . "\n" .
-"\t" . '<Saa:Revision>2.0.7</Saa:Revision>' . "\n" .
+"\t" . '<Saa:Revision>2.0.9</Saa:Revision>' . "\n" .
 "\t" . '<Saa:Header>' . "\n" .
 "\t\t" . '<Saa:Message>' . "\n" .
 "\t\t\t" . '<Saa:SenderReference>f70530bb1633fe8863b20001000001</Saa:SenderReference>' . "\n" .
@@ -182,15 +257,15 @@ class HorusSignatureTest extends HorusTestCase{
 "\t\t\t\t\t\t" . '<ds:Transform Algorithm="http://www.w3.org/2001/10/xml-excc14n#"/>' . "\n" .
 "\t\t\t\t\t" . '</ds:Transforms>' . "\n" .
 "\t\t\t\t\t" . '<ds:DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256" />' . "\n" .
-"\t\t\t\t\t" . '<ds:DigestValue>9fs32Gyh75JDbf8/94p5vB3O8hReLJgmlmaNK/vTbfY=</ds:DigestValue>' . "\n" .
+"\t\t\t\t\t" . '<ds:DigestValue>K6NH7o+dj/D5N2tqhQelvR2aFrZlyZWySusZhS+1Mu8=</ds:DigestValue>' . "\n" .
 "\t\t\t\t" . '</ds:Reference>' . "\n" .
 "\t\t\t" . '</ds:SignedInfo>' . "\n" .
-"\t\t\t" . '<ds:SignatureValue>vh+rl8JqVdMdLboYTbEVScJ3dB1fOL/LKedh/itX4mQ=</ds:SignatureValue>' . "\n" .
+"\t\t\t" . '<ds:SignatureValue>/+v2SH3w593Jvok7WPB2A9JP8njZk6uPooj7fYz705k=</ds:SignatureValue>' . "\n" .
 "\t\t" . '</ds:Signature>' . "\n" .
 "\t" . '</Saa:LAU>' . "\n" .
 '</Saa:DataPDU>';
 
-//file_put_contents('sample.xml',$input);
+file_put_contents('sample.xml',$input);
    HorusXML::validateSignature($input,
             null,
             array(
@@ -204,7 +279,7 @@ class HorusSignatureTest extends HorusTestCase{
             null);
     }
 
-    function test3():void {
+    function stest3():void {
 
         $input = '<?xml version="1.0" encoding="UTF-8"?><Envelope xmlns="http://example.org/envelope"><Body>Olá mundo</Body><Signature xmlns="http://www.w3.org/2000/09/xmldsig#"><SignedInfo><CanonicalizationMethod Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315" /><SignatureMethod Algorithm="http://www.w3.org/2000/09/xmldsig#rsa-sha1" /><Reference URI=""><Transforms><Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature" /></Transforms><DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1" /><DigestValue>AzgXlUQAvdSKPKnHlP4O8S0kvro=</DigestValue></Reference></SignedInfo><SignatureValue>E8GWQYMa9spOyrLxQR/tXLdRcHbteI1RgwgO6owGJkyYh+zAqD93Ndiw7g7pu0DHWXsgSyYY6+UBcgBe6YQAJKp+Xx1/WQK409HnRk8d/0SlBlaxiBBxjjXxrT9IJJge95cUJH/e1RR4DC4S62GvloRK9xzHUlSfEfXUvzKnlfY=</SignatureValue><KeyInfo><KeyValue><RSAKeyValue><Modulus>4IlzOY3Y9fXoh3Y5f06wBbtTg94Pt6vcfcd1KQ0FLm0S36aGJtTSb6pYKfyX7PqCUQ8wgL6xUJ5GRPEsu9gyz8ZobwfZsGCsvu40CWoT9fcFBZPfXro1Vtlh/xl/yYHm+Gzqh0Bw76xtLHSfLfpVOrmZdwKmSFKMTvNXOFd0V18=</Modulus><Exponent>AQAB</Exponent></RSAKeyValue></KeyValue></KeyInfo></Signature></Envelope>';
         $xml = new DOMDocument();
@@ -266,7 +341,7 @@ B9Je
         $this::assertEquals('AzgXlUQAvdSKPKnHlP4O8S0kvro=',$digest);
     }
 
-    function test4(): void {
+    function stest4(): void {
         $input = '<?xml version="1.0" encoding="UTF-8"?><Envelope xmlns="http://example.org/envelope"><Body>Olá mundo</Body><Signature xmlns="http://www.w3.org/2000/09/xmldsig#"><SignedInfo><CanonicalizationMethod Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315" /><SignatureMethod Algorithm="http://www.w3.org/2000/09/xmldsig#rsa-sha1" /><Reference URI=""><Transforms><Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature" /></Transforms><DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1" /><DigestValue>AzgXlUQAvdSKPKnHlP4O8S0kvro=</DigestValue></Reference></SignedInfo><SignatureValue>E8GWQYMa9spOyrLxQR/tXLdRcHbteI1RgwgO6owGJkyYh+zAqD93Ndiw7g7pu0DHWXsgSyYY6+UBcgBe6YQAJKp+Xx1/WQK409HnRk8d/0SlBlaxiBBxjjXxrT9IJJge95cUJH/e1RR4DC4S62GvloRK9xzHUlSfEfXUvzKnlfY=</SignatureValue><KeyInfo><KeyValue><RSAKeyValue><Modulus>4IlzOY3Y9fXoh3Y5f06wBbtTg94Pt6vcfcd1KQ0FLm0S36aGJtTSb6pYKfyX7PqCUQ8wgL6xUJ5GRPEsu9gyz8ZobwfZsGCsvu40CWoT9fcFBZPfXro1Vtlh/xl/yYHm+Gzqh0Bw76xtLHSfLfpVOrmZdwKmSFKMTvNXOFd0V18=</Modulus><Exponent>AQAB</Exponent></RSAKeyValue></KeyValue></KeyInfo></Signature></Envelope>';
         $params = array('method'=>'XMLDSIG', 'key'=> '-----BEGIN ENCRYPTED PRIVATE KEY-----
 MIICojAcBgoqhkiG9w0BDAEDMA4ECFleZ90vhGrRAgIEAASCAoA9rti16XVH
@@ -294,4 +369,135 @@ B9Je
         HorusXML::validateSignature($input,null,$params,null);
     }
 
+    function test5():void {
+      $cert = "-----BEGIN CERTIFICATE-----\n" . 'MIIE3DCCAsSgAwIBAgIEYGl6AjANBgkqhkiG9w0BAQsFADAQMQ4wDAYDVQQKEwVTV0lGVDAeFw0yMTA1MjAwNjQ4MjFaFw0yMzA1MjAwNzE4MjFaMEExDjAMBgNVBAoTBXN3aWZ0MREwDwYDVQQKEwhzd2h0YmViMzENMAsGA1UECxMEdHN0MjENMAsGA1UEAxMEcnRnczCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBALcuSaNaWz6UxbdbcxHH71MkD8TmE5Mm+X+Q9ArQCHYEC1RO2tOAkfJtVjtwSBFraHrw7ax3QxguTFeQQwRgRGIs8jL9bGXq7HPM6eiA40vwC/JE0s4sEf5SJj12EHP+EOwWbN4eyrAWAjePAGTCIesyUk2rCHddO3SS3VYrOoe4Kx2u4s/d2n3baU+RzV5obs2iL/cBdMdZab+Aynrch7gU+ZGXKZkyvTALX4vLfDxvgO2rbiwOcoW39Jd/ySaMDWJQGobA/ptGGNVf9pWqYeMpFNioMFJWDPWH9v0XvDOe7MAeLU9bo7c+IYUptGgTByEtPV6v3eDvxHrp3Kkgy8ECAwEAAaOCAQswggEHMAsGA1UdDwQEAwIGwDARBgNVHSAECjAIMAYGBCsVBgIwGwYDVR0JBBQwEjAQBgkqhkiG9n0HRB0xAwIBDzA1BgNVHR8ELjAsMCqgKKAmpCQwIjEOMAwGA1UEChMFU1dJRlQxEDAOBgNVBAMTB0NSTDQyOTkwKwYDVR0QBCQwIoAPMjAyMTA1MjAwNjQ4MjFagQ8yMDIyMTExODE5MTgyMVowHwYDVR0jBBgwFoAUUqMBKGDZlSdB4hCeCZ+rg9DxlkIwHQYDVR0OBBYEFGNS/RRl0xdB0eFnysKtVf5/algPMAkGA1UdEwQCMAAwGQYJKoZIhvZ9B0EABAwwChsEVjguMgMCBLAwDQYJKoZIhvcNAQELBQADggIBAK7YYCXsc37LUSpEj4+6HZ1DWo5xxwIQLwUDAnqDdOWgwsS+Ovj1gfjjfiWkKTZCUBjc7H8TuKlaqdyAzvVJ+CW/eV2YgfBZq6sWIYOJIeyNGY6lYcIg0Qy6dB4CPCxFN6IpsBkG6b8MPfpXBk00B3HizkY6JL6ehN3brui9Mml+GlnM6/rBTX/T6krUTIcM3NNr1IwoBGlRicBo1PyxwO40NdYtiBZc7W4K1p91CKGzl3jYF0qofFRN8T30PXcRXNcvi4MwhjFDbGXkWQdKJrrMcOPwXs/c6ic7z7/PSOyBOs5U/UPvMkkZ5egH517/Zm4s7IhdoX3YNeFNRZ5DfD6udFG6Rox5F70uywVLt03GtI3uzHuVirrBhs78RdhV7XL6Yt31WZrwYycwE7JP59H0+gbjciAysTGw1vtA9H6twmTCpqEyCYwJzFjb+AbILcIhDrJfFchlYy7zMNFQp3Ds99D0y9LgzpMFRuaAwz0pD5rJQJ0sckv6GKzUoUMZXWXSoyR2FV0wSC/gsVOKjKqVvQxUh+5UGAFpHYi3X0U7qu+EHBSBM/6pQHAqLyZHrsUXppB5dofln7vtTDPCs7AbfojkeeqOl4v0oljVFwxv5p3No/uV2UKIWBllkLbT0rEwX9dY0yN1DeRdBZ47nhCJ66yAHCmw9eChOH5X5VTT' . "\n-----END CERTIFICATE-----\n";
+      $key = openssl_pkey_get_public($cert);
+      $input = file_get_contents('samples/exampleFromOutside.xml');
+      $xml = new DOMDocument();
+      $xml->preserveWhiteSpace = true;
+      $xml->formatOutput = false;
+      $xml->loadXML($input);
+      $xpath = new DOMXPath($xml);
+      $xpath->registerNamespace('ds',HorusXML::XMLDSIGNS);
+
+      $namespaces = array('Saa'=>'','h'=>'urn:iso:std:iso:20022:tech:xsd:head.001.001.01','ds'=>HorusXML::XMLDSIGNS,'u'=>'urn:iso:std:iso:20022:tech:xsd:pacs.009.001.08');
+      $digest1 = HorusXML::calculateDigestPart($input,'/Saa:DataPDU/Saa:Body/h:AppHdr','sha256',$namespaces,true);
+      $digest2 = HorusXML::calculateDigestPart($input,'/Saa:DataPDU/Saa:Body/u:Document','sha256',$namespaces,false);
+      $digest3 = HorusXML::calculateDigestPart($input,'/Saa:DataPDU/Saa:Body/h:AppHdr/h:Sgntr/ds:Signature/ds:KeyInfo','sha256',$namespaces,false);
+
+      error_log('Digests : ' . $digest1 . '/' . $digest2 . '/' . $digest3);
+
+      $ss = HorusXml::validateSignedInfoSignature($input, '//ds:Signature', '//ds:X509Certificate');
+      $this::assertTrue($ss);
+      $this::assertEquals('EmY7SKQtbB+x98wIxPs4OYPxK1428Mi4jIrBD55AUzs=',$digest1);
+      $this::assertEquals('O4rpwReHDnneKO/2JToJOnTGJAdYxQC1IublevKcbbk=',$digest2);
+      $this::assertEquals('YKL/CYQi8tJsablKmYeqdq/q0nBpxBJihnayvpDEHb8=',$digest3);
+      
+      
+     
+    }
+
+    function test6():void {
+      $input = file_get_contents('samples/xmldsig.xml');
+      
+      HorusXML::validateSignature($input,
+            null,
+            array(
+                'signatureAlgorithm'=>'SHA256',
+                'digestAlgorithm'=>'SHA256', 
+                'method'=>'XMLDSIG',
+                'documentNSPrefix'=>'Saa',
+                'documentNSURI'=>'urn:swift:saa:xsd:saa.2.0',
+                'destinationXPath'=>'/Saa:DataPDU/Saa:LAU',
+                'key'=>'secret'), 
+            null);
+
+    }
+
+    function test7():void{
+      $input = HorusSignatureTest::$input1LAU;
+      $dsig = new XMLSecurityDSig('ds');
+      $dom = new DOMDocument();
+      $dom->loadXML($input);
+      $objDSig = $dsig->locateSignature($dom);
+
+      if (! $objDSig) {
+	      throw new Exception("Cannot locate Signature Node");
+      }
+      $dsig->canonicalizeSignedInfo();
+	
+      try {
+	      $retVal = $dsig->validateReference();
+	      echo "Reference Validation Succeeded\n";
+        $this::assertTrue(true);
+      } catch (Exception $e) {
+	      echo "Reference Validation Failed : " . $e->getMessage() . "\n";
+      }
+    }
+
+    function test8(): void {
+      $input = file_get_contents('samples/exempleDAAOut.xml');
+      $sign = "\t" . '<LAU>' . "\n" .
+"\t\t" . '<ds:Signature xmlns:ds="http://www.w3.org/2000/09/xmldsig#">' . "\n" .
+"\t\t\t" . '<ds:SignedInfo>' . "\n" .
+"\t\t\t\t" . '<ds:CanonicalizationMethod Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#" />' . "\n" .
+"\t\t\t\t" . '<ds:SignatureMethod Algorithm="http://www.w3.org/2001/04/xmldsig-more#hmac-sha256" />' . "\n" .
+"\t\t\t\t" . '<ds:Reference URI="">' . "\n" .
+"\t\t\t\t\t" . '<ds:Transforms>' . "\n" .
+"\t\t\t\t\t\t" . '<ds:Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature" />' . "\n" .
+"\t\t\t\t\t\t" . '<ds:Transform Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/>' . "\n" .
+"\t\t\t\t\t" . '</ds:Transforms>' . "\n" .
+"\t\t\t\t\t" . '<ds:DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256" />' . "\n" .
+"\t\t\t\t\t" . '<ds:DigestValue>WMeBJ8rRAgx3y1Q3NUKBz7CP+tM7fFtcn4BgOE4A5Pw=</ds:DigestValue>' . "\n" .
+"\t\t\t\t" . '</ds:Reference>' . "\n" .
+"\t\t\t" . '</ds:SignedInfo>' . "\n" .
+"\t\t\t" . '<ds:SignatureValue>NuHSwllRR5E1BSKU2qNGEQGOQrYFQ10zgN4cTcBDYzc=</ds:SignatureValue>' . "\n" .
+"\t\t" . '</ds:Signature>' . "\n" .
+"\t" . '</LAU>' . "\n" . '</DataPDU>';
+
+  $xml = str_replace('</DataPDU>',$sign,$input);
+  file_put_contents('sample2.xml',$xml);
+   HorusXML::validateSignature($xml,
+            null,
+            array(
+                'signatureAlgorithm'=>'SHA256',
+                'digestAlgorithm'=>'SHA256', 
+                'method'=>'XMLDSIG',
+                'documentNSPrefix'=>'Saa',
+                'documentNSURI'=>'urn:swift:saa:xsd:saa.2.0',
+                'destinationXPath'=>'/Saa:DataPDU/Saa:LAU',
+                'key'=>'secret'), 
+            null);
+    }
+
+function test9():void {
+  $input = file_get_contents('samples/real_sample2.xml');
+  $params = array(
+    'signatureAlgorithm'=>'RSA_SHA256',
+    'digestAlgorithm'=>'SHA256', 
+    'method'=>'DATAPDUSIG',
+    'name'=>'BHA',
+    'documentns'=> array('Saa'=>'urn:swift:saa:xsd:saa.2.0', 'h'=>'urn:iso:std:iso:20022:tech:xsd:head.001.001.01', 'd'=> 'urn:iso:std:iso:20022:tech:xsd:pacs.008.001.08'),
+    'destinationXPath'=>'/Saa:DataPDU/Saa:Body/h:AppHdr/h:Sgntr',
+    'references'=>array(
+      array(  'comment'=>'Key',
+              'xpath'=>'/Saa:DataPDU/Saa:Body/h:AppHdr/h:Sgntr/ds:Signature/ds:KeyInfo',
+              'sigxpath'=>'/ds:Signature/ds:SignedInfo/ds:Reference[starts-with(@URI,"#")]'
+            ),
+        array(  'comment'=>'AppHdr',
+                'xpath'=>'/Saa:DataPDU/Saa:Body/h:AppHdr',
+                'removeSignature'=>'true',
+                'sigxpath'=>'/ds:Signature/ds:SignedInfo/ds:Reference[@URI=""]'
+              ),
+        array(  'comment'=>'Document',
+                'xpath'=>'/Saa:DataPDU/Saa:Body/*[name() = "Document"]',
+                'sigxpath'=>'/ds:Signature/ds:SignedInfo/ds:Reference[not(@URI)]'
+              )
+         )
+            );
+
+  $res =  HorusXML::validateSignature($input,null,$params, array('logLocation'=>'php://stdout', 'business_id'=>'123456'));
+
+      $this::assertEquals(0,$res);
+    }
 }

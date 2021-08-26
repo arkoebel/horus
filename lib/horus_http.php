@@ -10,6 +10,7 @@ class HorusHttp
     public $common = null;
     public $business_id = '';
     private $tracer = null;
+    public const DELETE_TAG = 'TO_DELETE';
 
     function __construct($business_id, $log_location, $colour, $tracer)
     {
@@ -34,14 +35,16 @@ class HorusHttp
         $cc .= 'Content-Type: ' . $content_type . $eol;
         $cc .= 'Content-Transfer-Encoding: base64' . $eol;
         foreach ($extraHeaders as $key => $value)
-            $cc .= HorusHttp::formatMQOutHeader($key,$value,$rfhprefix,$mqmdprefix) . $eol;
+            if(HorusHttp::DELETE_TAG!==$value)
+                $cc .= HorusHttp::formatMQOutHeader($key, $value, $rfhprefix, $mqmdprefix) . $eol;
         $cc .= $eol;
         return $cc . chunk_split(base64_encode($data)) . $eol;
     }
 
-    static function formatMQOutHeader($key,$value,$rfhprefix,$mqmdprefix){
-        if(preg_match('/^' . $rfhprefix . '/',$key)||preg_match('/^' . $mqmdprefix . '/',$key))
-            if(preg_match('/^' . HorusCommon::ENC_PREFIX . '/', $value))
+    static function formatMQOutHeader($key, $value, $rfhprefix, $mqmdprefix)
+    {
+        if (preg_match('/^' . $rfhprefix . '/', $key) || preg_match('/^' . $mqmdprefix . '/', $key))
+            if (preg_match('/^' . HorusCommon::ENC_PREFIX . '/', $value))
                 return $key . ': ' . $value;
             else
                 return $key . ': ' . HorusCommon::ENC_PREFIX . urlencode(base64_encode($key . HorusCommon::ENC_SEP . $value));
@@ -56,27 +59,27 @@ class HorusHttp
 
         $res = array();
         foreach ($headers as $header => $value) {
-            if (preg_match('/' . $mqmdprefix . '/', $header) || preg_match('/' . $rfhprefix . '/', $header)) {
-                if ('EXPAND' === $outformat){
+            if ((preg_match('/' . $mqmdprefix . '/', $header) || preg_match('/' . $rfhprefix . '/', $header)) && (HorusHttp::DELETE_TAG !== $value)) {
+                if ('EXPAND' === $outformat) {
                     //error_log('Expand ' . $header . ',' . $value . ' ',3,'/var/log/horus/horus_http.log' );
-                    if(preg_match('/^' . HorusCommon::ENC_PREFIX . '/',$value)){
+                    if (preg_match('/^' . HorusCommon::ENC_PREFIX . '/', $value)) {
                         $res[$header] = $value;
                         //error_log('Unchanged ' . $header . '/' . $value . "\n",3,'/var/log/horus/horus_http.log' );
-                        
-                    }else if (preg_match('/^' . $rfhprefix . '/',$header)||preg_match('/^' . $mqmdprefix . '/',$header)){
+
+                    } else if (preg_match('/^' . $rfhprefix . '/', $header) || preg_match('/^' . $mqmdprefix . '/', $header)) {
                         $res[$header] = HorusCommon::ENC_PREFIX . urlencode(base64_encode($header . HorusCommon::ENC_SEP . $value));
                         //error_log('Encoded ' . $header . '/' . $res[$header] . "\n",3,'/var/log/horus/horus_http.log' );
-                    }else{
+                    } else {
                         $res[$header] = $header . ': ' . $value;
                         //error_log('Appended ' . $header . '/' . $res[$header] . "\n",3,'/var/log/horus/horus_http.log' );
                     }
-                }else if ('NOTHING' == $outformat)
+                } else if ('NOTHING' == $outformat)
                     $res[$header] = $value;
                 else if ('UNPACK' === $outformat) {
                     //error_log('Unpack ' . $header . ',' . $value . ' ',3,'/var/log/horus/horus_http.log' );
-    
+
                     if (preg_match('/^' . HorusCommon::ENC_PREFIX . '/', $value)) {
-                        
+
                         $val = base64_decode(urldecode(substr($value, strlen(HorusCommon::ENC_PREFIX))));
                         $tmp = explode(HorusCommon::ENC_SEP, $val);
 
@@ -118,32 +121,34 @@ class HorusHttp
         return $outHeaders;
     }
 
-    static function formatOutHeaders($inHeaders, $rfhprefix='rfh2-', $mqmdprefix = 'mqmd-')
+    static function formatOutHeaders($inHeaders, $rfhprefix = 'rfh2-', $mqmdprefix = 'mqmd-')
     {
         $outHeaders = array();
         foreach ($inHeaders as $key => $value) {
-            if (is_int($key)) {
-                if (is_array($value)){
-                    $a=strtolower($value[0]);
-                    $b=ltrim(rtrim($value[1]));
-                }else if (mb_strpos($value, ':') !== false) {
-                    $elt = explode(':', $value);
-                    $key = array_shift($elt);
-                    $value = implode(':', $elt);
+            if (HorusHttp::DELETE_TAG !== $value) {
+                if (is_int($key)) {
+                    if (is_array($value)) {
+                        $a = strtolower($value[0]);
+                        $b = ltrim(rtrim($value[1]));
+                    } else if (mb_strpos($value, ':') !== false) {
+                        $elt = explode(':', $value);
+                        $key = array_shift($elt);
+                        $value = implode(':', $elt);
+                        $a = strtolower($key);
+                        $b = ltrim(rtrim($value));
+                    }
+                } else {
                     $a = strtolower($key);
                     $b = ltrim(rtrim($value));
                 }
-            } else {
-                $a = strtolower($key);
-                $b = ltrim(rtrim($value));
+                //error_log('Conv Out Headers 1 = ' . $a . '/' . $b . "\n",3,'/var/log/horus/horus_http.log' );
+                if ((preg_match('/^' . $rfhprefix . '/', $a) || preg_match('/^' . $mqmdprefix . '/', $a)) && (preg_match('/^' . HorusCommon::ENC_PREFIX . '/', $b) === false)) {
+                    $b = HorusCommon::ENC_PREFIX . base64_encode($a . HorusCommon::ENC_SEP . $b);
+                }
+                //error_log('Conv Out Headers 2 = ' . $a . '/' . $b . "\n",3,'/var/log/horus/horus_http.log' );
+                if(HorusHttp::DELETE_TAG!==$b)
+                    $outHeaders[] = $a . ': ' . $b;
             }
-            //error_log('Conv Out Headers 1 = ' . $a . '/' . $b . "\n",3,'/var/log/horus/horus_http.log' );
-            if((preg_match('/^' . $rfhprefix . '/',$a)||preg_match('/^' . $mqmdprefix . '/',$a))&&(preg_match('/^' . HorusCommon::ENC_PREFIX . '/',$b)===false)){
-                $b = HorusCommon::ENC_PREFIX . base64_encode($a . HorusCommon::ENC_SEP . $b);
-            }
-            //error_log('Conv Out Headers 2 = ' . $a . '/' . $b . "\n",3,'/var/log/horus/horus_http.log' );
-            $outHeaders[] = $a . ': ' . $b;
-
         }
         return $outHeaders;
     }
@@ -166,7 +171,7 @@ class HorusHttp
      * function returnArrayWithContentType
      * Send a set of http queries to the same destination
      */
-    function returnArrayWithContentType($data, $content_type, $status, $forward = '', $exitafter = true, $no_conversion = false, $method = 'POST', $rootSpan = null,$rfhprefix='rfh-',$mqmdprefix='mqmd-')
+    function returnArrayWithContentType($data, $content_type, $status, $forward = '', $exitafter = true, $no_conversion = false, $method = 'POST', $rootSpan = null, $rfhprefix = 'rfh-', $mqmdprefix = 'mqmd-')
     {
 
         $injectSpan = $this->tracer->startSpan('Http Call Lib for Arrays', ['child_of' => $rootSpan]);
@@ -189,7 +194,7 @@ class HorusHttp
                 $queries[] = $query;
             }
 
-            $result = $this->forwardHttpQueries($queries, $injectSpan,$rfhprefix,$mqmdprefix);
+            $result = $this->forwardHttpQueries($queries, $injectSpan, $rfhprefix, $mqmdprefix);
             $responses = array();
             $json = false;
 
@@ -227,7 +232,7 @@ class HorusHttp
      * function returnWithContentType
      * Sends a http query to the next step or returns response
      */
-    function returnWithContentType($data, $content_type, $status, $forward = '', $no_conversion = false, $method = 'POST', $returnHeaders = array(), $rootSpan = null,$rfhprefix='rfh-',$mqmdprefix='mqmd-')
+    function returnWithContentType($data, $content_type, $status, $forward = '', $no_conversion = false, $method = 'POST', $returnHeaders = array(), $rootSpan = null, $rfhprefix = 'rfh-', $mqmdprefix = 'mqmd-')
     {
 
         $injectSpan = $this->tracer->startSpan('Http call lib', ['child_of' => $rootSpan]);
@@ -251,7 +256,7 @@ class HorusHttp
             //$injectSpan->setTag('destination',$forward);
 
             $headers = array('Content-Type' => $content_type, 'Accept' => 'application/json', 'Expect' => '', 'X-Business-Id' => $this->business_id);
-            $mqheaders = $this->filterMQHeaders($returnHeaders,'EXPAND');
+            $mqheaders = $this->filterMQHeaders($returnHeaders, 'EXPAND');
 
             if (preg_match('/multipart/', $content_type) !== false)
                 $headersoff = array_merge($mqheaders, $headers);
@@ -261,7 +266,7 @@ class HorusHttp
             $query = array('url' => $forward, 'method' => $method, 'headers' => $headersoff, 'data' => is_array($data) ? $data[0] : $data);
             $queries = array($query);
 
-            $result = $this->forwardHttpQueries($queries, $injectSpan,$rfhprefix,$mqmdprefix);
+            $result = $this->forwardHttpQueries($queries, $injectSpan, $rfhprefix, $mqmdprefix);
             header("Content-type: " . $result[0]['response_headers']['Content-Type']);
             foreach ($returnHeaders as $rh) {
                 header($rh);
@@ -357,7 +362,8 @@ class HorusHttp
         $out_headers = array();
 
         foreach ($headers as $header => $value) {
-            $out_headers[] = $header . ': ' . $value;
+            if(HorusHttp::DELETE_TAG!==$value)
+                $out_headers[] = $header . ': ' . $value;
         }
 
         return $out_headers;
@@ -378,7 +384,7 @@ class HorusHttp
      *      response_code
      *      response_data
      */
-    function forwardHttpQueries($queries, $rootSpan, $rfhprefix,$mqmdprefix)
+    function forwardHttpQueries($queries, $rootSpan, $rfhprefix, $mqmdprefix)
     {
 
         if (is_null($queries) || !is_array($queries) || count($queries) == 0) {
@@ -414,8 +420,8 @@ class HorusHttp
                 curl_setopt($ch[$id], CURLOPT_POSTFIELDS, $query['data']);
             }
             if (array_key_exists('headers', $query) && (count($query['headers']) != 0)) {
-                curl_setopt($ch[$id], CURLOPT_HTTPHEADER, HorusHttp::formatOutHeaders($query['headers'],$rfhprefix,$mqmdprefix));
-                $this->common->mlog('VVVVVVVVV actual headers : ' . print_r(HorusHttp::formatOutHeaders($query['headers'],$rfhprefix,$mqmdprefix), true), 'DEBUG');
+                curl_setopt($ch[$id], CURLOPT_HTTPHEADER, HorusHttp::formatOutHeaders($query['headers'], $rfhprefix, $mqmdprefix));
+                $this->common->mlog('Actual headers passed to the next query : ' . print_r(HorusHttp::formatOutHeaders($query['headers'], $rfhprefix, $mqmdprefix), true), 'DEBUG');
                 //curl_setopt($ch[$id], CURLOPT_HTTPHEADER, $this->formatHeaders($query['headers']));
             }
 
@@ -474,7 +480,7 @@ class HorusHttp
     }
 
 
-    function forwardSingleHttpQuery($dest_url, $headers, $data, $method = 'POST', $span,$rfhprefix='rfh2-', $mqmdprefix='mqmd-')
+    function forwardSingleHttpQuery($dest_url, $headers, $data, $method = 'POST', $span, $rfhprefix = 'rfh2-', $mqmdprefix = 'mqmd-')
     {
         $currentSpan = $this->tracer->startSpan('Forward Http query', ['child_of' => $span]);
         $this->tracer->inject($currentSpan->spanContext, Formats\TEXT_MAP, $headers);
@@ -488,7 +494,7 @@ class HorusHttp
         } else {
             curl_setopt($handle, CURLOPT_CUSTOMREQUEST, $method);
         }
-        curl_setopt($handle, CURLOPT_HTTPHEADER, HorusHttp::formatOutHeaders($headers,$rfhprefix,$mqmdprefix));
+        curl_setopt($handle, CURLOPT_HTTPHEADER, HorusHttp::formatOutHeaders($headers, $rfhprefix, $mqmdprefix));
         curl_setopt($handle, CURLOPT_POSTFIELDS, $data);
         curl_setopt(
             $handle,
@@ -569,7 +575,8 @@ class HorusHttp
         }
 
         foreach ($pp as $key => $value)
-            $res .= '&' . urlencode($key) . '=' . urlencode($value);
+            if(HorusHttp::DELETE_TAG!==$value)
+                $res .= '&' . urlencode($key) . '=' . urlencode($value);
 
         if (!strpos($url, '?')) {
             if (strlen($res) > 0)

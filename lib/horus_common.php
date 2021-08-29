@@ -11,6 +11,7 @@ class HorusCommon
     public const ENC_PREFIX = 'B64PRF-';
     public const ENC_SEP = '#!#';
     public const DEFAULT_LOG_LOCATION='/var/log/horus/horus_http.log';
+    public const QUERY_PARAM_CUTOFF = 80;
 
     function __construct($business_id, $log_location, $colour = 'GREEN')
     {
@@ -131,7 +132,12 @@ class HorusCommon
 
     public static function getNewBusinessId() {
 
-        return md5(microtime() . rand());
+        $data = random_bytes(16);
+
+        $data[6] = chr(ord($data[6]) & 0x0f | 0x40); // set version to 0100
+        $data[8] = chr(ord($data[8]) & 0x3f | 0x80); // set bits 6-7 to 10
+
+        return vsprintf('%s%s-%s-%s-%s-%s%s%s', str_split(bin2hex($data), 4));
     }
 
     /**
@@ -168,7 +174,7 @@ class HorusCommon
         ksort($converted);
 
         foreach ($converted as $key=>$value){
-            if(strlen(urlencode($value))<50)
+            if(strlen(urlencode($value))<HorusCommon::QUERY_PARAM_CUTOFF)
                 $query .= '&' . urlencode($key) . '=' . urlencode($value);
             //else
               //  mlog('Parameter ' . $key . ' too long, filtering out.','DEBUG');

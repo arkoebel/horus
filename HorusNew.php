@@ -13,7 +13,7 @@ use Jaeger\Config;
 
 $loglocation = '/var/log/horus/horus_http.log';
 
-$business_id = HorusHttp::extractHeader('X-Business-Id');
+$business_id = HorusHttp::extractHeader('X-Business-Id','X_BUSINESS_ID');
 
 if ($business_id === '') {
     $business_id = HorusCommon::getNewBusinessId();

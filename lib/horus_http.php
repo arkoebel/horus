@@ -330,13 +330,14 @@ class HorusHttp
      * function extractHeader
      * Extracts a specific Http Header value
      */
-    static function extractHeader($header)
+    static function extractHeader($header,$alternate=null)
     {
         if (function_exists('apache_request_headers')) {
             $request_headers = apache_request_headers();
             if (array_key_exists($header, $request_headers)) {
                 return $request_headers[$header];
-            }
+            }else if(!($alternate===null) && array_key_exists($alternate,$request_headers))
+                return $request_headers[$alternate];
         } else {
             $request_headers = $_SERVER;
         }
@@ -566,7 +567,7 @@ class HorusHttp
                 $kk = $key;
                 if ($i !== FALSE)
                     $kk = substr($key, $i + 8);
-                if (strlen(urlencode($value)) < 50) {
+                if (strlen(urlencode($value)) < HorusCommon::QUERY_PARAM_CUTOFF) {
                     $pp[$kk] = $value;
                 } else {
                     //error_log('QQQ4 dropped ' . $value . "\n");

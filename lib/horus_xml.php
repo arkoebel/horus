@@ -186,7 +186,7 @@ class HorusXml
                     else {
                         $value = urlencode($forwardparam['value']);
                     }
-                    if (strlen($value) < 50)
+                    if (strlen($value) < HorusCommon::QUERY_PARAM_CUTOFF)
                         $fwd_params[] = $key . '=' . $value;
                 }
                 $this->common->mlog('query out (urlparameters) : ' . print_r($fwd_params, true), 'INFO');
@@ -197,7 +197,7 @@ class HorusXml
                 }
                 $vv1 = array();
                 foreach ($vars as $k => $v)
-                    if (strlen($v) < 50)
+                    if (strlen($v) < HorusCommon::QUERY_PARAM_CUTOFF)
                         $vv1[] = urlencode($k) . "=" . urlencode($v);
 
                 $vv = array_merge($vv1, $fwd_params);

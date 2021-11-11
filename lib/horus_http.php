@@ -11,7 +11,7 @@ class HorusHttp
     public $business_id = '';
     private $tracer = null;
     public const DELETE_TAG = 'TO_DELETE';
-    public const EOL = '\r\n';
+    public const EOL = "\r\n";
 
     function __construct($business_id, $log_location, $colour, $tracer)
     {
@@ -535,7 +535,7 @@ class HorusHttp
         $currentSpan->setTag('Return Code', $response_code);
         if (200 !== $response_code) {
             $this->common->mlog('Request to ' . $dest_url . ' produced error ' . curl_getinfo($handle, CURLINFO_HTTP_CODE), 'ERROR');
-            $this->common->mlog('Call stack was : ' . curl_getinfo($handle), 'DEBUG');
+            $this->common->mlog('Call stack was : ' . print_r(curl_getinfo($handle)), 'DEBUG');
             $currentSpan->finish();
             throw new HorusException('HTTP Error ' . $response_code . ' for ' . $dest_url);
         } else {

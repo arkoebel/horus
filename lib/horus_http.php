@@ -11,6 +11,7 @@ class HorusHttp
     public $business_id = '';
     private $tracer = null;
     public const DELETE_TAG = 'TO_DELETE';
+    public const EOL = '\r\n';
 
     function __construct($business_id, $log_location, $colour, $tracer)
     {
@@ -39,6 +40,22 @@ class HorusHttp
                 $cc .= HorusHttp::formatMQOutHeader($key, $value, $rfhprefix, $mqmdprefix) . $eol;
         $cc .= $eol;
         return $cc . chunk_split(base64_encode($data)) . $eol;
+    }
+
+    static function rebuildMultipart($files,$boundary,$eol){
+        $cc='';
+        foreach($files as $file){
+            $cc .= '--' . $boundary . $eol;
+            $content = file_get_contents($file['tmp_name']);
+            $content_type = $file['type'];
+            $name = $file['name'];
+            $cc .= "Content-Disposition: form-data; name=\"$name\"; filename=\"$name\"" . $eol;
+            $cc .= 'Content-Type: ' . $content_type . $eol;
+            $cc .= 'Content-Transfer-Encoding: base64' . $eol;
+            $cc .= $eol;
+            $cc .= chunk_split(base64_encode($content)) . $eol;
+        }
+        return $cc . '--' . $boundary . '--';
     }
 
     static function formatMQOutHeader($key, $value, $rfhprefix, $mqmdprefix)

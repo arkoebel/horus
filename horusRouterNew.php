@@ -47,7 +47,8 @@ $source = array_key_exists('source', $_GET) ? $_GET['source'] : '';
 $content_type = array_key_exists('CONTENT_TYPE',$_SERVER) ? $_SERVER['CONTENT_TYPE'] : 'application/json';
 $accept = array_key_exists('HTTP_ACCEPT',$_SERVER) ? $_SERVER['HTTP_ACCEPT'] : "application/json";
 if(substr($content_type,0,9)==='multipart'){
-    $boundary = md5(time());
+    preg_match('/boundary=(.*)/',$content_type,$mm);
+    $boundary = $mm[1];
     $data = HorusHttp::rebuildMultipart($_FILES,$boundary,HorusHttp::EOL);
 }else
     $data = file_get_contents('php://input');

@@ -79,5 +79,111 @@
 				"targetElementOrder": "2"
 			}
 		]
-	}
+	},{
+        "section": "Reverse the payment",
+        "content-type": "application/xml",
+        "comment": "Décompose le paiement pour valider chaque partie, puis change les DN",
+        "schema": "saa.2.0.9.xsd",
+        "namespaces": [{
+                "prefix": "saa",
+                "namespace": "urn:swift:saa:xsd:saa.2.0"
+            }, {
+                "prefix": "sah",
+                "element": "Header"
+            }, {
+                "prefix": "h",
+                "namespace": "urn:iso:std:iso:20022:tech:xsd:head.001.001.01"
+            }, {
+                "prefix": "u",
+                "element": "Document"
+            }
+        ],
+        "rootElement": "/saa:DataPDU",
+        "validator": [{
+                "name": "LAU",
+                "method": "XMLDSIG",
+                "digestAlgorithm": "SHA256",
+                "signatureAlgorithm": "SHA256",
+                "key": "secret",
+                "documentNSPrefix": "saa",
+                "documentNSURI": "urn:swift:saa:xsd:saa.2.0",
+                "destinationXPath": "/saa:DataPDU/saa:LAU",
+                "wholeDocument": "true"
+            }, {
+                "name": "BAH",
+                "digestAlgorithm": "SHA256",
+                "method": "DATAPDUSIG",
+                "documentns": {
+                    "Saa": "urn:swift:saa:xsd:saa.2.0",
+                    "h": "urn:iso:std:iso:20022:tech:xsd:head.001.001.01"
+                },
+                "destinationXPath": "/Saa:DataPDU/Saa:Body/h:AppHdr/h:Sgntr",
+                "references": [{
+                        "comment": "Key",
+                        "xpath": "/Saa:DataPDU/Saa:Body/h:AppHdr/h:Sgntr/ds:Signature/ds:KeyInfo",
+                        "sigxpath": "/ds:Signature/ds:SignedInfo/ds:Reference[starts-with(@URI,\"#\")]"
+                    }, {
+                        "comment": "AppHdr",
+                        "xpath": "/Saa:DataPDU/Saa:Body/h:AppHdr",
+                        "removeSignature": "true",
+                        "sigxpath": "/ds:Signature/ds:SignedInfo/ds:Reference[@URI=\"\"]"
+                    }, {
+                        "comment": "Document",
+                        "xpath": "/Saa:DataPDU/Saa:Body/*[name() = \"Document\"]",
+                        "sigxpath": "/ds:Signature/ds:SignedInfo/ds:Reference[not(@URI)]"
+                    }
+                ]
+            }
+        ],
+        "parts": [{
+                "order": "1",
+                "comment": "PDU transformation - revision",
+                "constant": {
+                    "namespace": "urn:swift:saa:xsd:saa.2.0",
+                    "elementName": "Revision",
+                    "variableName": "testVar"
+                },
+                "variables": {
+                    "testVar": "/saa:DataPDU/saa:Revision"
+                },
+                "targetPath": "/saa:DataPDU/saa:Revision"
+            }, {
+                "order": "2",
+                "comment": "PDU transformation - header",
+                "path": "/saa:DataPDU/saa:Header",
+                "variables": {
+
+                    "varBizMsgIdr": "/saa:DataPDU/saa:Body/h:AppHdr/h:BizMsgIdr",
+                    "varReceiverDN": "/saa:DataPDU/sah:Header/sah:Message/sah:Receiver/sah:DN",
+                    "varSenderDN": "/saa:DataPDU/sah:Header/sah:Message/sah:Sender/sah:DN",
+                    "varService": "/saa:DataPDU/sah:Header/sah:Message/sah:NetworkInfo/sah:Service",
+                    "varReceiverBIC": "/saa:DataPDU/saa:Body/h:AppHdr/h:To/h:FIId/h:FinInstnId/h:BICFI",
+                    "varMsg": "/saa:DataPDU/sah:Header"
+                },
+                "transformUrl": "http://opaline/horus2021_T2S/horus.php",
+                "targetPath": "/saa:DataPDU/saa:Header"
+            }, {
+                "order": "3",
+                "comment": "Header transformation",
+                "path": "/saa:DataPDU/saa:Body/h:AppHdr",
+                "variables": {
+                    "varMsg": "/saa:DataPDU/saa:Body/h:AppHdr"
+                },
+
+                "transformUrl": "http://opaline/horus2021_T2S/horus.php",
+                "targetPath": "/saa:DataPDU/saa:Body/h:AppHdr"
+            }, {
+                "order": "4",
+                "comment": "Document transformation",
+                "path": "/saa:DataPDU/saa:Body/u:Document",
+                "variables": {
+                    "varBizMsgIdr": "/saa:DataPDU/saa:Body/h:AppHdr/h:BizMsgIdr",
+                    "varReceiverBIC": "/saa:DataPDU/saa:Body/h:AppHdr/h:Fr/h:FIId/h:FinInstnId/h:BICFI"
+                },
+                "transformUrl": "http://opaline/horus2021_T2S/horus.php",
+                "targetPath": "/saa:DataPDU/saa:Body/u:Document"
+            }
+
+        ]
+    }
 ]

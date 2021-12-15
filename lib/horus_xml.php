@@ -265,6 +265,10 @@ class HorusXml
                 $this->common->mlog('Element ' . $elementName . ' not found', 'DEBUG');
             } else {
                 $this->common->mlog('Found too many elements named ' . $elementName . ' (' . $list->length . ')', 'DEBUG');
+                for ($i=0;$i<$list->length;$i++)
+                    $this->common->mlog('Possible NS: ' . $list->item($i)->namespaceURI . ($i==0 ?' (SELECTED)=':''), 'DEBUG');
+            
+                return $list->item(0)->namespaceURI;
             }
             return '';
         }

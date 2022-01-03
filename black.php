@@ -96,7 +96,7 @@ if(array_key_exists('stripSection',$section)){
         if(!array_key_exists($xsi->key(),$queryParams))
             $queryParams[$xsi->key()] = strval($xsi->current());
     }
-    $returnData = substr($returnData,$i2);
+    $returnData = ltrim(substr($returnData,$i2));
     $returnContent = 'application/xml';
     $common->mlog('Found Header parameters ' . print_r($queryParams,true),'DEBUG');
 }

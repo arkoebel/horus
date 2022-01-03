@@ -52,8 +52,9 @@ class HorusHttp
             $cc .= "Content-Disposition: form-data; name=\"$name\"; filename=\"$name\"" . $eol;
             $cc .= 'Content-Type: ' . $content_type . $eol;
             $cc .= 'Content-Transfer-Encoding: base64' . $eol;
-            $cc .= $eol;
-            $cc .= chunk_split(base64_encode($content)) . $eol;
+            //$cc .= $eol;
+            $cc .= $content;
+            //$cc .= chunk_split(base64_encode($content)) . $eol;
         }
         return $cc . '--' . $boundary . '--';
     }
@@ -535,7 +536,8 @@ class HorusHttp
         $currentSpan->setTag('Return Code', $response_code);
         if (200 !== $response_code) {
             $this->common->mlog('Request to ' . $dest_url . ' produced error ' . curl_getinfo($handle, CURLINFO_HTTP_CODE), 'ERROR');
-            $this->common->mlog('Call stack was : ' . print_r(curl_getinfo($handle)), 'DEBUG');
+            $this->common->mlog('Call stack was : ' . print_r(curl_getinfo($handle),true), 'DEBUG');
+            $this->common->mlog('Error response : ' . $response,'DEBUG');
             $currentSpan->finish();
             throw new HorusException('HTTP Error ' . $response_code . ' for ' . $dest_url);
         } else {

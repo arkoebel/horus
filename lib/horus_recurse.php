@@ -124,7 +124,7 @@ class HorusRecurse
                     $this->common->mlog('Validated ' . $validator['name'] . ' Signature', 'INFO');
                 } catch (HorusException $e) {
                     $this->common->mlog($validator['name'] . ' Signature failed : ' . $e->getMessage(), 'ERROR');
-                    throw new HorusException($e);
+                    //throw new HorusException($e);
                 }
             }
         }

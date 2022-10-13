@@ -633,6 +633,98 @@ class HorusXml
             if ($signatureValue !== $computedSignature) {
                 throw new HorusException('Wrong Signature (Found: ' . $signatureValue . ', Computed: ' . $computedSignature);
             }
+        } else if ('SWIFTLAU' === $definition['method']) {
+            // Load original document, preserving its format.
+            $xml = new DOMDocument();
+            $xml->preserveWhiteSpace = true;
+            $xml->formatOutput = false;
+            $xml->loadXML($document);
+
+            $xpath = new DOMXPath($xml);
+            $xpath->registerNamespace('ds', HorusXml::XMLDSIGNS);
+            if ((array_key_exists('documentNSPrefix', $definition)) && (array_key_exists('documentNSURI', $definition)))
+                $xpath->registerNamespace($definition['documentNSPrefix'], $definition['documentNSURI']);
+            else
+                $xpath->registerNamespace('u', $xml->namespaceURI);
+
+            if (array_key_exists('documentns', $definition)) {
+                foreach ($definition['documentns'] as $prefix => $ns)
+                    $xpath->registerNamespace($prefix, $ns);
+            }
+
+            // Lookup the XMLDSIG Signature Element 
+            if (array_key_exists('destinationXPath', $definition))
+                $sig = $xpath->query($definition['destinationXPath'] . '/ds:Signature');
+            else
+                $sig = $xml->getElementsByTagNameNS(HorusXml::XMLDSIGNS, 'Signature');
+
+            if ($sig->length == 0) {
+                throw new HorusException('Document doesn\'t appear to be LAU-signed');
+            }
+
+            // Lookup the XMLDSIG SignedInfo Element
+            $signedInfo = $sig->item(0)->getElementsByTagNameNS(HorusXML::XMLDSIGNS, 'SignedInfo');
+            if ($signedInfo->length == 0) {
+                throw new HorusException('Malformed LAU Signature (missing SignedInfo)');
+            }
+
+            // While the signature is still there, canonicalize the SignedInfo and extract the Digest value
+            $canonical2 = $signedInfo->item(0)->c14N(true, false, null, array('ds'));
+            //error_log('LAU Canonical Signed Info XXXX' . $canonical2 . 'XXXX' . "\n");
+            $digest = $signedInfo->item(0)->getElementsByTagNameNS(HorusXML::XMLDSIGNS, 'DigestValue');
+            if ($digest->length == 0) {
+                throw new HorusException('Malformed LAU Signature (missing DigestValue)');
+            }
+            $digestValue = $digest->item(0)->nodeValue;
+
+            // While the signature is still there, extract its value
+            $signature = $sig->item(0)->getElementsByTagNameNS(HorusXML::XMLDSIGNS, 'SignatureValue');
+            if ($signature->length == 0) {
+                throw new HorusException('Malformed LAU Signature (missing SignatureValue)');
+            }
+            $signatureValue = $signature->item(0)->nodeValue;
+
+            // Remove the Signature element from the original XML (http://www.w3.org/2000/09/xmldsig#enveloped-signature)
+            // LAU-Specific : also remove ds:Signature's parent because of reasons...
+            $sig->item(0)->parentNode->parentNode->removeChild($sig->item(0)->parentNode);
+
+            // Canonicalize the original document without the signature (http://www.w3.org/2001/10/xml-exc-c14n#)
+            $canonical1 = $xml->c14N(true, false);
+            error_log('Canonical Document XXXX' . $canonical1 . 'XXXX' . "\n");
+
+            // Calculate the digest for the whole document
+            $digest = base64_encode(openssl_digest($canonical1, $definition['digestAlgorithm'], true));
+            if ($digest !== $digestValue) {
+                throw new HorusException('Wrong LAU Digest (Found: ' . $digestValue . ', Computed: ' . $digest);
+            }
+
+            // Calculate the signature using the supplied Key and algorithm.
+            if (preg_match('/^RSA/', $definition['signatureAlgorithm'])) {
+                // If we had the private key
+                if (array_key_exists('key', $definition)) {
+                    $private = openssl_pkey_get_private($definition['key'], $definition['passphrase']);
+                    openssl_sign($canonical2, $computedSignature, $private, $definition['signatureAlgorithm']);
+                    $computedSignature = base64_encode($computedSignature);
+                } else {
+                    $key = $sig->item(0)->getElementsByTagNameNS(HorusXML::XMLDSIGNS, 'X509Data');
+                    if ($key->length !== 0) {
+                        $cert = "-----BEGIN CERTIFICATE-----\n" . $key->item(0)->nodeValue . "\n-----END CERTIFICATE-----\n";
+                        $pubkey = openssl_pkey_get_public($cert);
+                        if ($pubkey === false) {
+                            throw new HorusException('Incorrect Cert Found' . openssl_error_string());
+                        }
+                        if (1 !== openssl_verify($canonical2, $signatureValue, $pubkey, $definition['signatureAlgorithm'])) {
+                            throw new HorusException('Mismatched signature ' . openssl_error_string());
+                        }
+                    }
+                }
+            } else {
+                $computedSignature = base64_encode(hash_hmac($definition['signatureAlgorithm'], $canonical2, $definition['key'], true));
+            }
+            if ($signatureValue !== $computedSignature) {
+                throw new HorusException('Wrong LAU Signature (Found: ' . $signatureValue . ', Computed: ' . $computedSignature);
+            }
+            HorusCommon::logger('LAU Signature validated with bogus algorithm','DEBUG','TXT','GREEN',$conf['business_id']);
         } else if ('DATAPDUSIG' === $definition['method']) {
             HorusCommon::logger('Enter DataPDU Sign','INFO','TXT','INDIGO',$conf['business_id'],$logLocation);
             // Load original document, preserving its format.

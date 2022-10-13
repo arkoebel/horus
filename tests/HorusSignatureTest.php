@@ -500,4 +500,19 @@ function test9():void {
 
       $this::assertEquals(0,$res);
     }
+
+    function testLau():void {
+      $input = '<?xml version="1.0" encoding="UTF-8"?><DataPDU xmlns="urn:swift:saa:xsd:saa.2.0"><Revision>2.0.10</Revision><Header><Message><SenderReference>AX20222800717240</SenderReference><MessageIdentifier>camt.003.001.07</MessageIdentifier><Format>MX</Format><Sender><DN>cn=cristaltest,ou=rec,ou=esmig,o=bpcefrpp,o=swift</DN></Sender><Receiver><DN>cn=clm,o=trgtxepm,o=swift</DN></Receiver><InterfaceInfo><UserReference>AX20222800717240</UserReference><MessageNature>Financial</MessageNature></InterfaceInfo><NetworkInfo><Service>esmig.t2.ia!pu</Service></NetworkInfo></Message></Header><Body><AppHdr xmlns="urn:iso:std:iso:20022:tech:xsd:head.001.001.01"><Fr><FIId><FinInstnId><BICFI>BPCEFRPPXXX</BICFI><ClrSysMmbId><MmbId>BPCEFRPPXXX</MmbId></ClrSysMmbId></FinInstnId></FIId></Fr><To><FIId><FinInstnId><BICFI>TRGTXEPMCLM</BICFI></FinInstnId></FIId></To><BizMsgIdr>AX20222800717240</BizMsgIdr><MsgDefIdr>camt.003.001.07</MsgDefIdr><CreDt>2022-10-07T10:49:20Z</CreDt></AppHdr><Document xmlns="urn:iso:std:iso:20022:tech:xsd:camt.003.001.07"><GetAcct><MsgHdr><MsgId>NONREF</MsgId></MsgHdr><AcctQryDef><AcctCrit><NewCrit><SchCrit><AcctId><EQ><Othr><Id>MFREURBPCEFRPPXXX-MCA</Id></Othr></EQ></AcctId></SchCrit></NewCrit></AcctCrit></AcctQryDef></GetAcct></Document></Body><LAU><ds:Signature xmlns:ds="http://www.w3.org/2000/09/xmldsig#"><ds:SignedInfo><ds:CanonicalizationMethod Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/><ds:SignatureMethod Algorithm="http://www.w3.org/2001/04/xmldsig-more#hmac-sha256"/><ds:Reference URI=""><ds:Transforms><ds:Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature"/><ds:Transform Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/></ds:Transforms><ds:DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/><ds:DigestValue>kzK9Z065o/JiZEtbNciQo7rhGcOgRjitCS5wCR+/onE=</ds:DigestValue></ds:Reference></ds:SignedInfo><ds:SignatureValue>fVbRwMPOBddTXIE9uMYvHUOgqFjVNpNaHmlAXuzUpOc=</ds:SignatureValue></ds:Signature></LAU></DataPDU>';
+        HorusXML::validateSignature($input,
+        null,
+        array(
+            'signatureAlgorithm'=>'SHA256',
+            'digestAlgorithm'=>'SHA256', 
+            'method'=>'SWIFTLAU',
+            'documentNSPrefix'=>'Saa',
+            'documentNSURI'=>'urn:swift:saa:xsd:saa.2.0',
+            'destinationXPath'=>'/Saa:DataPDU/Saa:LAU',
+            'key'=>'abcdeFGHIJ123456abcdeFGHIJ123456'), 
+        array('business_id'=>'122345'));
+    }
 }

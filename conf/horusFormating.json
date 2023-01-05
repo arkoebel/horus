@@ -9,6 +9,11 @@
             "formatName": "SibesOut",
             "addSection": "SIBESOutHeader",
             "httpQueryPrefix": "s_"
+        }, 
+        {
+            "formatName": "EnrichXml",
+            "sourceXpath": "/File",
+            "destinationNameSpace": "toto"
         }
 
     ]

@@ -115,6 +115,12 @@ if (array_key_exists('addSection',$section)){
     $returnContent = 'text/plain';
 }
 
+if (array_key_exists('destinationNameSpace',$section)){
+    $common->mlog('Replacing namespace for element ' . $section['sourceXpath'] . ' to ' . $section['destinationNameSpace'],'INFO');
+    $returnContent = 'application/xml';
+    $returnData = HorusXml::replaceNameSpace($returnData,$section['sourceXPath'],$section['destinationNameSpace']);
+}
+
 if(''===$destination){
     $common->mlog('Return content is : ' . $returnData . "\n","INFO");
     $http->setHttpReturnCode(200);

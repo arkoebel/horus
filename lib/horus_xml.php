@@ -293,6 +293,28 @@ class HorusXml
         }
     }
 
+    static function replaceNameSpace($input,$sourceXpath,$destinationNameSpace){
+        // $xml = new DomDocument();
+        // $xml->load($input);
+        // if(!($xml===null)){
+        //     $xpath = new DOMXPath($xml,true);
+        //     $destxml = new DOMDocument();
+        //     $nodelist = $xpath->evaluate($sourceXpath);
+        //     error_log(' domlist: ' . $nodelist->count());
+        //     if (count($nodelist)>0)
+        //         foreach($nodelist as $node){
+        //             $replacement = $node->createElementNS($destinationNameSpace, $node->localName);    
+        //             foreach ($xpath->evaluate('node()|@*', $node) as $childNode) {
+        //                 $replacement->appendChild($childNode);
+        //             }    
+        //             $node->parentNode->replaceChild($replacement, $node);
+        //         }
+        //     return $xml->saveXML();
+        // }
+        $pattern = ltrim($sourceXpath,'/');
+        return str_replace('<' . $pattern . '>','<' . $pattern . ' xmlns="' . $destinationNameSpace . '">',$input);
+    }
+
     function doInject($reqbody, $content_type, $proxy_mode, $matches, $preferredType, $queryParams, $genericError, $defaultNamespace = '', $rootSpan = null)
     {
         $input = $this->business->extractPayload($content_type, $reqbody, $genericError, $preferredType, $rootSpan);

@@ -31,8 +31,8 @@ class HorusTestCase extends TestCase
         $config = Config::getInstance();
         $config::$propagator = \Jaeger\Constants\PROPAGATOR_ZIPKIN;
 
-        self::$tracer = $config->initTracer('GREEN_','localhost:5775');
-        self::$rootSpan = self::$tracer->startSpan('Test');
+      //  self::$tracer = $config->initTracer('GREEN_','localhost:5775');
+      //  self::$rootSpan = self::$tracer->startSpan('Test');
         if (!extension_loaded('runkit7')) {
             error_log("No Extension");
             return;
@@ -187,7 +187,7 @@ class HorusTestCase extends TestCase
      */
     protected function setUp()
     {
-        $this->http = new HorusHttp('testHorusHttp', null, 'GREEN',self::$tracer);
+        $this->http = new HorusHttp('testHorusHttp', 'php://stdout', 'GREEN',self::$tracer);
         self::$mockheaders = array();
         self::$curls = array();
         self::$curlCounter = 0;

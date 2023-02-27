@@ -312,7 +312,7 @@ class HorusHttp
      */
     function convertOutData($data, $content_type, $no_conversion = false)
     {
-        if (!$no_conversion && ($content_type == 'application/json')) {
+        if (!$no_conversion && (substr($content_type,0,16) == 'application/json')) {
             $this->common->mlog("Forced Conversion for $content_type", 'DEBUG');
             $dataJSON = array('payload' => $data);
             $this->common->mlog(json_encode($dataJSON), 'DEBUG', 'JSON');

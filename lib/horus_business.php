@@ -48,7 +48,7 @@ class HorusBusiness
         }
 
         foreach ($matches as $id => $match) {
-            if ($match['query'] === $found) {
+            if (array_key_exists('query',$match) && ($match['query'] === $found)) {
                 if (array_key_exists('queryMatch', $match) && $match['queryMatch'] != '') {
                     if (preg_match('/' . $match['queryMatch'] . '/', $value) === 1) {
                         $selected = $id;
@@ -118,7 +118,7 @@ class HorusBusiness
 
     function extractPayload($content_type, $body, $errorTemplate, $errorFormat,$span)
     {
-        if ($content_type == "application/json") {
+        if (substr($content_type,0,16) == "application/json") {
             $json = json_decode($body, true);
             if (json_last_error() != JSON_ERROR_NONE) {
                 $this->returnGenericError($errorFormat, $errorTemplate, 'JSON Malformed : ' . decodeJsonError(json_last_error()),'',$span);

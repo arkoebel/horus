@@ -77,7 +77,7 @@ if ("inject" === $request_type) {
         echo $e->getMessage();
     }
     $common->mlog('+++++ END INJECTOR MODE +++++', 'INFO');
-} else if (("simplejson" === $request_type) && ("application/json" === $content_type)) {
+} else if (("simplejson" === $request_type) && ("application/json" === substr($content_type,0,16))) {
     $rootSpan->log(['message' => 'Starting Json mode', 'path' => $path, 'BOX' => $colour]);
     $common->mlog('+++++ BEGIN SIMPLEJSON MODE +++++', 'INFO');
     $injector = new HorusSimpleJson($business_id, $loglocation, $simpleJsonMatches, $tracer);

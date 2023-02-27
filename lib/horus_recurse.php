@@ -81,7 +81,7 @@ class HorusRecurse
         if ('application/xml' === $content_type) {
             $result = $this->doRecurseXml($reqBody, $section, $params, $currentSpan);
             //Jaeger\Config::getInstance()->flush();
-        } elseif ('application/json' === $content_type) {
+        } elseif ('application/json' === substr($content_type,0,16)) {
             $result = $this->doRecurseJson($reqBody, $section, $params, $currentSpan);
         } else {
             throw new HorusException('Unsupported content-type ' . $content_type);

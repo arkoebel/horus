@@ -192,7 +192,9 @@ class HorusHttp
     function returnArrayWithContentType($data, $content_type, $status, $forward = '', $exitafter = true, $no_conversion = false, $method = 'POST', $rootSpan = null, $rfhprefix = 'rfh-', $mqmdprefix = 'mqmd-')
     {
 
-        $injectSpan = $this->tracer->startSpan('Http Call Lib for Arrays', ['child_of' => $rootSpan]);
+        //$injectSpan = $this->tracer->startSpan('Http Call Lib for Arrays', ['child_of' => $rootSpan]);
+        $injectSpan = $rootSpan;
+        $injectSpan->log(['message'=>'Http Call Lib for Arrays']);
 
         if ($no_conversion === FALSE) {
             $this->common->mlog('Forced conversion', 'DEBUG');
@@ -253,7 +255,9 @@ class HorusHttp
     function returnWithContentType($data, $content_type, $status, $forward = '', $no_conversion = false, $method = 'POST', $returnHeaders = array(), $rootSpan = null, $rfhprefix = 'rfh-', $mqmdprefix = 'mqmd-')
     {
 
-        $injectSpan = $this->tracer->startSpan('Http call lib', ['child_of' => $rootSpan]);
+        //$injectSpan = $this->tracer->startSpan('Http call lib', ['child_of' => $rootSpan]);
+        $injectSpan = $rootSpan;
+        $injectSpan->log(['message'=>'Http Call Lib']);
 
         if ($no_conversion === 'FALSE') {
             $this->common->mlog('Forced conversion to JSON', 'DEBUG');
@@ -501,7 +505,9 @@ class HorusHttp
 
     function forwardSingleHttpQuery($dest_url, $headers, $data, $method = 'POST', $span, $rfhprefix = 'rfh2-', $mqmdprefix = 'mqmd-')
     {
-        $currentSpan = $this->tracer->startSpan('Forward Http query', ['child_of' => $span]);
+        //$currentSpan = $this->tracer->startSpan('Forward Http query', ['child_of' => $span]);
+        $currentSpan = $span;
+        $currentSpan->log(['message'=>'Forward Http Query']);
         $this->tracer->inject($currentSpan->spanContext, Formats\TEXT_MAP, $headers);
 
         $handle = curl_init($dest_url);

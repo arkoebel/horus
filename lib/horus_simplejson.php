@@ -70,7 +70,9 @@ class HorusSimpleJson
 
     function doInject($reqbody, $proxy_mode, $preferredType, $queryParams,$rootSpan)
     {
-        $injectSpan = $this->tracer->startSpan('Inject JSON lib',['child_of'=>$rootSpan]);
+        //$injectSpan = $this->tracer->startSpan('Inject JSON lib',['child_of'=>$rootSpan]);
+        $injectSpan = $rootSpan;
+        $injectSpan->log(['message'=>'Inject JSON Lib']);
         $input = $this->business->extractSimpleJsonPayload($reqbody);
 
         try{

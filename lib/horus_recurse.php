@@ -309,7 +309,7 @@ class HorusRecurse
     static function getVar($name, $vars)
     {
         foreach ($vars as $var) {
-            if ($var['key'] == $name) {
+            if (is_array($var) && array_key_exists('key',$var) && ($var['key'] == $name)) {
                 return $var['value'];
             }
         }

@@ -2,8 +2,6 @@
 
 declare(strict_types=1);
 
-
-use Jaeger\Config;
 use PHPUnit\Framework\TestCase;
 //use HorusCommon;
 require_once('lib/horus_http.php');

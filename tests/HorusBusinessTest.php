@@ -1,20 +1,27 @@
 <?php
 
-declare(strict_types=1);
+declare (strict_types = 1);
 
-use PHPUnit\Framework\TestCase;
-//use HorusCommon;
-require_once('lib/horus_business.php');
-require_once('lib/horus_common.php');
-require_once('lib/horus_exception.php');
-require_once('HorusTestCase.php');
+require_once "lib/horus_utils.php";
+require_once 'lib/horus_curlInterface.php';
+require_once 'lib/horus_curl.php';
+require_once 'lib/horus_http.php';
+require_once 'lib/horus_common.php';
 
+require_once 'lib/horus_business.php';
+require_once 'lib/horus_common.php';
+require_once 'lib/horus_exception.php';
+require_once 'HorusTestCase.php';
+require_once 'HorusCurlMock.php';
+
+const TEST_OK = '{"test":"ok"}';
+const STATUS_OK = '{"Status":"OK"}';
 class HorusBusinessTest extends HorusTestCase
 {
 
     public function testFindMatch(): void
     {
-        $horus = new HorusBusiness('testFindMatch', null, 'XXXX',self::$tracer);
+        $horus = new HorusBusiness('testFindMatch', null, 'XXXX', self::$tracer, new Horus_CurlMock());
         $params = json_decode('[{"level1":"value1",
                                  "level2":"value2",
                                  "level3":{
@@ -22,7 +29,9 @@ class HorusBusinessTest extends HorusTestCase
                                      "key2":"value2"}},
                                 {"level1":"value10",
                                  "level2":"value20"},
-                                {"key3":"value3"}]', true);
+                                {"key3":"value3"}]',
+                                true
+                            );
         $this::assertEquals($horus->findMatch($params, 0, 'level1'), 'value1');
         $this::assertEquals($horus->findMatch($params, 1, 'level2'), 'value20');
         $this::assertEquals($horus->findMatch($params, 0, 'level3'), array('key1' => 'value1', 'key2' => 'value2'));
@@ -32,12 +41,14 @@ class HorusBusinessTest extends HorusTestCase
 
     public function testLocate(): void
     {
-        $horus = new HorusBusiness('testLocate', null, 'XXXX',self::$tracer);
+        $horus = new HorusBusiness('testLocate', null, 'XXXX', self::$tracer, new Horus_CurlMock());
         $params = json_decode('[{"query":"value1","queryMatch":"value2","comment":"line1"},
                                 {"query":"value10","queryMatch":"value20","comment":"line2"},
                                 {"query":"value10","queryMatch":"value21","comment":"line3"},
                                 {"query":"zip","comment":"line4"},
-                                {"query":"zip","comment":"line5"}]', true);
+                                {"query":"zip","comment":"line5"}]',
+                            true
+                        );
         $this::assertEquals($horus->locate($params, 'value1', 'isthisokforvalue2or not?'), 0);
         $this::assertEquals($horus->locate($params, 'value10', 'isthisokforvalue20or not?'), 1);
         $this::assertEquals($horus->locate($params, 'value10', 'isthisokforvalue21or not?'), 2);
@@ -53,16 +64,18 @@ class HorusBusinessTest extends HorusTestCase
     public function testLocateJson(): void
     {
 
-        $horus = new HorusBusiness('testLocateJson', null, 'XXXX',self::$tracer);
+        $horus = new HorusBusiness('testLocateJson', null, 'XXXX', self::$tracer, new Horus_CurlMock());
         $params = json_decode('[
-            {"query": {"key": "key1", "value": "value1"}},  
-            {"query": {"key": "key1", "value": "value1"}, "queryMatch": "match"}, 
+            {"query": {"key": "key1", "value": "value1"}},
+            {"query": {"key": "key1", "value": "value1"}, "queryMatch": "match"},
             {"query": {"key": "key1", "value": "value1", "queryKey": "qkey1", "queryValue": "qvalue1"}},
-            {"query": {"key": "key1", "value": "value1", "queryKey": "qkey1", "queryValue": "qvalue1"},"queryMatch": "match"}, 
-            {"query": {"key": "key1", "value": "value1", "queryKey": "qkey1", "queryValue": "qvalue1"},"queryMatch": "match"},           
-            {"query": {"key": "zip"},"queryMatch": "match3"}, 
+            {"query": {"key": "key1", "value": "value1", "queryKey": "qkey1", "queryValue": "qvalue1"},"queryMatch": "match"},
+            {"query": {"key": "key1", "value": "value1", "queryKey": "qkey1", "queryValue": "qvalue1"},"queryMatch": "match"},
+            {"query": {"key": "zip"},"queryMatch": "match3"},
             {"query": {"key": "zip"}}
-        ]', true);
+        ]',
+        true
+    );
         $input1 = array('key1' => 'value1', 'someotherkey' => 'XXX', 'parttomatch' => 'true');
         $input2 = array('key1' => 'value1', 'someotherkey' => 'XXX', 'part' => 'true');
         $qparams1 = array('qkey1' => 'nope');
@@ -79,16 +92,18 @@ class HorusBusinessTest extends HorusTestCase
         $this::assertEquals($horus->locateJson(null, array(), null), -1);
     }
 
-    function testPerformRoutingError(): void
+    public function testPerformRoutingError(): void
     {
-        $horus = new HorusBusiness('testPerformRoutingError', null, 'OOOO',self::$tracer);
+        $horus = new HorusBusiness('testPerformRoutingError', null, 'OOOO', self::$tracer, new Horus_CurlMock());
         $this->expectException(HorusException::class);
-        $horus->performRouting(null, 'application/json', 'application/json', '{"test":"ok"}',array(),self::$rootSpan);
+        $horus->performRouting(null, HorusCommon::JS_CT, HorusCommon::JS_CT, TEST_OK, array(), self::$rootSpan);
     }
 
-    function testPerformRoutingStandard(): void
+    public function testPerformRoutingStandard(): void
     {
-        $horus = new HorusBusiness('testPerformRouting', null, 'PPPP',self::$tracer);
+        $rootSpan = self::$tracer->spanBuilder('Test Business')->setAttribute('OTEL_SERVICE_NAME', 'toto')->startSpan();
+        $scope = $rootSpan->activate();
+        $horus = new HorusBusiness('testPerformRouting', null, 'PPPP', self::$tracer, new Horus_CurlMock());
         $route = json_decode('{
 			"source": "singlesource",
 			"parameters": [{
@@ -121,57 +136,87 @@ class HorusBusinessTest extends HorusTestCase
 					"destination": "http://direct/horustojms"
 				}
 			]
-        }', TRUE);
-        
+        }',
+        true
+    );
 
-        self::$curls[] = array( 'url'=>'https://www.xxx.com',
-                                'options'=>array(
-                                    CURLOPT_RETURNTRANSFER=>1,
-                                    CURLOPT_HTTPHEADER=>array('Content-type: application/json', 'Accept: application/json', 'Expect:', 'X-Business-Id: testHorusHttp'),
-                                    CURLOPT_SSL_VERIFYPEER=>False,
-                                    CURLOPT_VERBOSE=>True,
-                                    CURLOPT_HEADER=>True,
-                                    CURLINFO_HEADER_OUT=>True),
-                                'data'=>"HTTP/1.1 200 OK\nDate: Thu, 08 Aug 2019 20:22:04 GMT\nExpires: -1\nCache-Control: private, max-age=0\n" . 
-                                        "Content-Type: text/html; charset=ISO-8859-1\nAccept-Ranges: none\nVary: Accept-Encoding\nTransfer-Encoding: chunked\n" . 
-                                        "\n" . 
-                                        "{\"Status\":\"OK\"}",
-                                'returnHeaders'=>array(
-                                    CURLINFO_HTTP_CODE=>200,
-                                    CURLINFO_HEADER_SIZE=>212,
+        self::$curls[] = array('url' => 'https://www.xxx.com',
+            'options' => array(
+                CURLOPT_RETURNTRANSFER => 1,
+                CURLOPT_HTTPHEADER => array(
+                    'Content-type: application/json',
+                    'Accept: application/json',
+                    'Expect:',
+                    'X-Business-Id: testHorusHttp'),
+                CURLOPT_SSL_VERIFYPEER => false,
+                CURLOPT_VERBOSE => true,
+                CURLOPT_HEADER => true,
+                CURLINFO_HEADER_OUT => true),
+            'data' => "HTTP/1.1 200 OK\n" .
+                        "Date: Thu, 08 Aug 2019 20:22:04 GMT\n" .
+                        "Expires: -1\n" .
+                        "Cache-Control: private, max-age=0\n" .
+                        "Content-Type: text/html; charset=ISO-8859-1\n" .
+                        "Accept-Ranges: none\n" .
+                        "Vary: Accept-Encoding\n" .
+                        "Transfer-Encoding: chunked\n" .
+                        "\n" .
+                        STATUS_OK,
+            'returnHeaders' => array(
+                CURLINFO_HTTP_CODE => 200,
+                CURLINFO_HEADER_SIZE => 212,
 
-                                ),
-                                'returnCode'=>400,
-                                'errorMessage'=>'',
-                                'returnBody'=>'{"Status":"OK"}');
-        self::$curls[] = array( 'url'=>'https://www.yyy.com',
-                                'options'=>array(
-                                    CURLOPT_RETURNTRANSFER=>1,
-                                    CURLOPT_HTTPHEADER=>array('Content-type: application/json', 'Accept: application/json', 'Expect:', 'X-Business-Id: testHorusHttp'),
-                                    CURLOPT_SSL_VERIFYPEER=>False,
-                                    CURLOPT_VERBOSE=>True,
-                                    CURLOPT_HEADER=>True,
-                                    CURLINFO_HEADER_OUT=>True),
-                                'data'=>"HTTP/1.1 200 OK\nDate: Thu, 08 Aug 2019 20:22:04 GMT\nExpires: -1\nCache-Control: private, max-age=0\n" . 
-                                        "Content-Type: text/html; charset=ISO-8859-1\nAccept-Ranges: none\nVary: Accept-Encoding\nTransfer-Encoding: chunked\n" . 
-                                        "\n" . 
-                                        "{\"Status\":\"OK\"}",
-                                'returnHeaders'=>array(
-                                    CURLINFO_HTTP_CODE=>200,
-                                    CURLINFO_HEADER_SIZE=>212,
+            ),
+            'returnCode' => 400,
+            'errorMessage' => '',
+            'returnBody' => STATUS_OK);
+        self::$curls[] = array('url' => 'https://www.yyy.com',
+            'options' => array(
+                CURLOPT_RETURNTRANSFER => 1,
+                CURLOPT_HTTPHEADER => array(
+                    'Content-type: application/json',
+                    'Accept: application/json',
+                    'Expect:',
+                    'X-Business-Id: testHorusHttp'
+                ),
+                CURLOPT_SSL_VERIFYPEER => false,
+                CURLOPT_VERBOSE => true,
+                CURLOPT_HEADER => true,
+                CURLINFO_HEADER_OUT => true),
+            'data' => "HTTP/1.1 200 OK\n" .
+                        "Date: Thu, 08 Aug 2019 20:22:04 GMT\n" .
+                        "Expires: -1\n" .
+                        "Cache-Control: private, max-age=0\n" .
+                        "Content-Type: text/html; charset=ISO-8859-1\n" .
+                        "Accept-Ranges: none\n" .
+                        "Vary: Accept-Encoding\n" .
+                        "Transfer-Encoding: chunked\n" .
+                        "\n" .
+                        STATUS_OK,
+            'returnHeaders' => array(
+                CURLINFO_HTTP_CODE => 200,
+                CURLINFO_HEADER_SIZE => 212,
 
-                                ),
-                                'returnCode'=>400,
-                                'errorMessage'=>'',
-                                'returnBody'=>'{"Status":"OK"}');
+            ),
+            'returnCode' => 400,
+            'errorMessage' => '',
+            'returnBody' => '{"Status":"OK"}');
 
-        $res = $horus->performRouting($route, 'application/json', 'application/json', '{"test":"ok"}',array(),self::$rootSpan);
-        $this::assertEquals(2,sizeof($res),'2 queries should have responded');
+        $res = $horus->performRouting(
+            $route,
+            HorusCommon::JS_CT,
+            HorusCommon::JS_CT,
+            TEST_OK,
+            array(),
+            $rootSpan
+        );
+        $rootSpan->end();
+        $scope->detach();
+        $this::assertEquals(2, sizeof($res), '2 queries should have responded');
     }
 
-    function testPerformRoutingStopError(): void
+    public function testPerformRoutingStopError(): void
     {
-        $horus = new HorusBusiness('testPerformRouting', null, 'QQQQ',self::$tracer);
         $route = json_decode('{
             "source": "singlesource",
             "followOnError": "false",
@@ -205,57 +250,80 @@ class HorusBusinessTest extends HorusTestCase
 					"destination": "http://direct/horustojms"
 				}
 			]
-        }', TRUE);
-        
+        }',
+        true
+    );
 
-        self::$curls[] = array( 'url'=>'https://www.xxx.com',
-                                'options'=>array(
-                                    CURLOPT_RETURNTRANSFER=>1,
-                                    CURLOPT_HTTPHEADER=>array('Content-type: application/json', 'Accept: application/json', 'Expect:', 'X-Business-Id: testHorusHttp'),
-                                    CURLOPT_SSL_VERIFYPEER=>False,
-                                    CURLOPT_VERBOSE=>True,
-                                    CURLOPT_HEADER=>True,
-                                    CURLINFO_HEADER_OUT=>True),
-                                'data'=>"HTTP/1.1 400 OK\nDate: Thu, 08 Aug 2019 20:22:04 GMT\nExpires: -1\nCache-Control: private, max-age=0\n" . 
-                                        "Content-Type: text/html; charset=ISO-8859-1\nAccept-Ranges: none\nVary: Accept-Encoding\nTransfer-Encoding: chunked\n" . 
-                                        "\n" . 
-                                        "{\"Status\":\"KO\"}",
-                                'returnHeaders'=>array(
-                                    CURLINFO_HTTP_CODE=>400,
-                                    CURLINFO_HEADER_SIZE=>212,
+        $mock = new Horus_CurlMock();
+        $options = array(
+            CURLOPT_URL => 'https://www.xxx.com',
+            CURLOPT_RETURNTRANSFER => 1,
+            CURLOPT_SSL_VERIFYPEER => false,
+            CURLOPT_VERBOSE => true,
+            CURLOPT_HEADER => true);
+        $mock->setResponse(
+            "HTTP/1.1 400 OK\n" .
+            "Date: Thu, 08 Aug 2019 20:22:04 GMT\n" .
+            "Expires: -1\n" .
+            "Cache-Control: private, max-age=0\n" .
+            "Content-Type: text/html; charset=ISO-8859-1\n" .
+            "Accept-Ranges: none\n" .
+            "Vary: Accept-Encoding\n" .
+            "Transfer-Encoding: chunked\n" .
+            "\n" .
+            "{\"Status\":\"KO\"}",
+            $options
+        );
+        $mock->setInfo(array(
+            CURLINFO_HTTP_CODE => 400,
+            CURLINFO_HEADER_SIZE => 212,
+            CURLINFO_HEADER_OUT => true,
+        ), $options);
 
-                                ),
-                                'returnCode'=>400,
-                                'errorMessage'=>'',
-                                'returnBody'=>'{"Status":"OK"}');
-        self::$curls[] = array( 'url'=>'https://www.yyy.com',
-                                'options'=>array(
-                                    CURLOPT_RETURNTRANSFER=>1,
-                                    CURLOPT_HTTPHEADER=>array('Content-type: application/json', 'Accept: application/json', 'Expect:', 'X-Business-Id: testHorusHttp'),
-                                    CURLOPT_SSL_VERIFYPEER=>False,
-                                    CURLOPT_VERBOSE=>True,
-                                    CURLOPT_HEADER=>True,
-                                    CURLINFO_HEADER_OUT=>True),
-                                'data'=>"HTTP/1.1 200 OK\nDate: Thu, 08 Aug 2019 20:22:04 GMT\nExpires: -1\nCache-Control: private, max-age=0\n" . 
-                                        "Content-Type: text/html; charset=ISO-8859-1\nAccept-Ranges: none\nVary: Accept-Encoding\nTransfer-Encoding: chunked\n" . 
-                                        "\n" . 
-                                        "{\"Status\":\"OK\"}",
-                                'returnHeaders'=>array(
-                                    CURLINFO_HTTP_CODE=>400,
-                                    CURLINFO_HEADER_SIZE=>212,
+        $options2 = array(
+            CURLOPT_URL => 'https://www.yyy.com',
+            CURLOPT_RETURNTRANSFER => 1,
+            CURLOPT_SSL_VERIFYPEER => false,
+            CURLOPT_VERBOSE => true,
+            CURLOPT_HEADER => true);
+        $mock->setResponse(
+            "HTTP/1.1 400 OK\n" .
+            "Date: Thu, 08 Aug 2019 20:22:04 GMT\n" .
+            "Expires: -1\n" .
+            "Cache-Control: private, max-age=0\n" .
+            "Content-Type: text/html; charset=ISO-8859-1\n" .
+            "Accept-Ranges: none\n" .
+            "Vary: Accept-Encoding\n" .
+            "Transfer-Encoding: chunked\n" .
+            "\n" .
+            "{\"Status\":\"KO\"}",
+            $options2
+        );
+        $mock->setInfo(array(
+            CURLINFO_HTTP_CODE => 400,
+            CURLINFO_HEADER_SIZE => 212,
+            CURLINFO_HEADER_OUT => true,
+        ), $options2);
 
-                                ),
-                                'returnCode'=>400,
-                                'errorMessage'=>'',
-                                'returnBody'=>'{"Status":"OK"}');
+        $headerImpl = new Horus_HeaderMock();
+        $this->http->setCurlImpl($mock);
+        $this->http->setHeaderImpl($headerImpl);
+        $horus = new HorusBusiness('testPerformRouting', null, 'QQQQ', self::$tracer, $mock);
 
-        $res = $horus->performRouting($route, 'application/json', 'application/json', '{"test":"ok"}',array(),self::$rootSpan);
-        
-        $this::assertEquals(2,sizeof($res),'1 query should have responded');
+        $res = $horus->performRouting(
+            $route,
+            HorusCommon::JS_CT,
+            HorusCommon::JS_CT,
+            TEST_OK,
+            array(),
+            self::$rootSpan
+        );
+
+        $this::assertEquals(2, sizeof($res), '1 query should have responded');
     }
 
-    function testParametersMerge(): void {
-        $horus = new HorusBusiness('testPerformRouting', null, 'QQQQ',self::$tracer);
+    public function testParametersMerge(): void
+    {
         $route = json_decode('{
             "source": "singlesource",
             "followOnError": "false",
@@ -286,43 +354,63 @@ class HorusBusinessTest extends HorusTestCase
 					"delayafter": "2"
 				}
 			]
-        }', TRUE);
+        }',
+        true
+    );
 
-        self::$curls[] = array( 'url'=>'https://www.xxx.com',
-                                'options'=>array(
-                                    CURLOPT_RETURNTRANSFER=>1,
-                                    CURLOPT_HTTPHEADER=>array('Content-type: application/json', 'Accept: application/json', 'Expect:', 'X-Business-Id: testHorusHttp'),
-                                    CURLOPT_SSL_VERIFYPEER=>False,
-                                    CURLOPT_VERBOSE=>True,
-                                    CURLOPT_HEADER=>True,
-                                    CURLINFO_HEADER_OUT=>True),
-                                'data'=>"HTTP/1.1 200 OK\nDate: Thu, 08 Aug 2019 20:22:04 GMT\nExpires: -1\nCache-Control: private, max-age=0\n" . 
-                                        "Content-Type: text/html; charset=ISO-8859-1\nAccept-Ranges: none\nVary: Accept-Encoding\nTransfer-Encoding: chunked\n" . 
-                                        "\n" . 
-                                        "{\"Status\":\"KO\"}",
-                                'returnHeaders'=>array(
-                                    CURLINFO_HTTP_CODE=>200,
-                                    CURLINFO_HEADER_SIZE=>212,
+        $mock = new Horus_CurlMock();
+        $options = array(
+            CURLOPT_URL => 'http://proxy/horus/horus.php',
+            CURLOPT_RETURNTRANSFER => 1,
+            CURLOPT_SSL_VERIFYPEER => false,
+            CURLOPT_VERBOSE => true,
+            CURLOPT_HEADER => true);
+        $mock->setResponse(
+            "HTTP/1.1 200 OK\n" .
+            "Date: Thu, 08 Aug 2019 20:22:04 GMT\n" .
+            "Expires: -1\n" .
+            "Cache-Control: private, max-age=0\n" .
+            "Content-Type: text/html; charset=ISO-8859-1\n" .
+            "Accept-Ranges: none\n" .
+            "Vary: Accept-Encoding\n" .
+            "Transfer-Encoding: chunked\n" .
+            "\n" .
+            "{\"Status\":\"KO\"}",
+            $options
+        );
+        $mock->setInfo(array(
+            CURLINFO_HTTP_CODE => 200,
+            CURLINFO_HEADER_SIZE => 212,
+            CURLINFO_HEADER_OUT => true,
+        ), $options);
 
-                                ),
-                                'returnCode'=>200,
-                                'errorMessage'=>'',
-                                'returnBody'=>'{"Status":"OK"}');
+        $horus = new HorusBusiness('testPerformRouting', null, 'QQQQ', self::$tracer, $mock);
+        $horus->performRouting(
+            $route,
+            HorusCommon::JS_CT,
+            HorusCommon::JS_CT,
+            TEST_OK,
+            array('repeat' => '3', 'extra' => 'true'),
+            self::$rootSpan
+        );
 
-        $horus->performRouting($route, 'application/json', 'application/json', '{"test":"ok"}',array('repeat'=>'3','extra'=>'true'),self::$rootSpan);
-
-        $this::assertEquals('http://proxy/horus/horus.php?bic1=BNPAFRPPXXX&extra=true&param1=single&repeat=5&sourcex=cristal',self::$curls[0]['url'], 'Url params should be mixed');
+        $this::assertEquals(
+            'http://proxy/horus/horus.php?bic1=BNPAFRPPXXX&extra=true&param1=single&repeat=5&sourcex=cristal',
+            $mock->effective_urls[0],
+            'Url params should be mixed'
+        );
 
     }
 
-    function testGetTemplate():void {
+    public function testGetTemplate(): void
+    {
         $template1 = 'azer${test1}${test2}.ccc';
         $template2 = 'azer${test1}${test3}.ccc';
         $template3 = 'azer.ccc';
-        $variables = array('test1'=>'123','test2'=>'456');
-        $this::assertEquals('azer123456.ccc',HorusBusiness::getTemplateName($template1,$variables));
-        $this::assertEquals('azer123.ccc',HorusBusiness::getTemplateName($template2,$variables));
-        $this::assertEquals('azer.ccc',HorusBusiness::getTemplateName($template3,$variables));
-        $this::assertEquals('azer.ccc',HorusBusiness::getTemplateName($template1,array()));
+        $variables = array('test1' => '123', 'test2' => '456');
+        $this::assertEquals('azer123456.ccc', HorusBusiness::getTemplateName($template1, $variables));
+        $this::assertEquals('azer123.ccc', HorusBusiness::getTemplateName($template2, $variables));
+        $this::assertEquals('azer.ccc', HorusBusiness::getTemplateName($template3, $variables));
+        $this::assertEquals('azer.ccc', HorusBusiness::getTemplateName($template1, array()));
     }
 }

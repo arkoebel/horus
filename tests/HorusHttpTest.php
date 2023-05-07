@@ -8,6 +8,7 @@ require_once('lib/horus_http.php');
 require_once('lib/horus_common.php');
 require_once('HorusTestCase.php');
 require_once('lib/horus_exception.php');
+require_once('HorusCurlMock.php');
 
 class HorusHttpTest extends HorusTestCase
 {
@@ -16,36 +17,38 @@ class HorusHttpTest extends HorusTestCase
     function testForwardHttpQuery(): void
     {
 
+        $mock = new Horus_CurlMock();
+        $options = array(
+            CURLOPT_URL=>'https://www.google.com',
+            CURLOPT_RETURNTRANSFER=>1,
+            //CURLOPT_HTTPHEADER=>array('Content-type: application/json', 'Accept: application/json', 'Expect:', 'X-Business-Id: testHorusHttp'),
+            CURLOPT_SSL_VERIFYPEER=>False,
+            CURLOPT_VERBOSE=>True,
+            CURLOPT_HEADER=>True);
+        $mock->setResponse("Date: Thu, 08 Aug 2019 20:22:04 GMT\nExpires: -1\nCache-Control: private, max-age=0\nContent-Type: text/html; charset=ISO-8859-1\nAccept-Ranges: none\nVary: Accept-Encoding\nTransfer-Encoding: chunked\n" . 
+                            "\n" . 
+                            '<html>Test</html>', $options);
+        $mock->setInfo(array(
+            CURLINFO_HTTP_CODE=>200,
+            CURLINFO_HEADER_SIZE=>196,
+            CURLINFO_HEADER_OUT=>True
+        ),$options);
+
+        $headerImpl = new Horus_HeaderMock();
+        $this->http->setCurlImpl($mock);
+        $this->http->setHeaderImpl($headerImpl);
 
         $headers = array('Content-type' => 'application/json', 'Accept' => 'application/json', 'Expect' => '', 'X-Business-Id' => 'testHorusHttp');
         $query = array('url' => 'https://www.google.com', 'method' => 'GET', 'headers' => $headers);
         $queries = array();
         $queries[] = $query;
 
-        self::$curls[] = array( 'url'=>'https://www.google.com',
-                                'options'=>array(
-                                    CURLOPT_RETURNTRANSFER=>1,
-                                    CURLOPT_HTTPHEADER=>array('Content-type: application/json', 'Accept: application/json', 'Expect:', 'X-Business-Id: testHorusHttp'),
-                                    CURLOPT_SSL_VERIFYPEER=>False,
-                                    CURLOPT_VERBOSE=>True,
-                                    CURLOPT_HEADER=>True,
-                                    CURLINFO_HEADER_OUT=>True),
-                                'data'=>"HTTP/1.1 200 OK\nDate: Thu, 08 Aug 2019 20:22:04 GMT\nExpires: -1\nCache-Control: private, max-age=0\n" . 
-                                        "Content-Type: text/html; charset=ISO-8859-1\nAccept-Ranges: none\nVary: Accept-Encoding\nTransfer-Encoding: chunked\n" . 
-                                        "\n" . 
-                                        "<html>Test</html>",
-                                'returnHeaders'=>array(
-                                    CURLINFO_HTTP_CODE=>200,
-                                    CURLINFO_HEADER_SIZE=>212,
-
-                                ),
-                                'returnCode'=>200,
-                                'errorMessage'=>'',
-                                'returnBody'=>'<html>Test</html>');
-
+        $aa = $mock->curl_init();
+        
         $result = $this->http->forwardHttpQueries($queries,self::$rootSpan,'rfh-','mqmd-');
-        $this::assertEquals($result[0]['response_code'], 200);
-        $this::assertEquals($result[0]['response_data'],'<html>Test</html>');
+
+        $this::assertEquals(200,$result[0]['response_code']);
+        $this::assertEquals('<html>Test</html>',$result[0]['response_data']);
     }
 
     function testSetReturnType(): void
@@ -87,26 +90,26 @@ class HorusHttpTest extends HorusTestCase
     function testForwardSingleHttpQuery(): void 
     {
 
-        self::$curls[] = array( 'url'=>'https://www.google.com',
-                                'options'=>array(
-                                    CURLOPT_RETURNTRANSFER=>1,
-                                    CURLOPT_HTTPHEADER=>array('Content-type: application/json', 'Accept: application/json', 'Expect:', 'X-Business-Id: testHorusHttp'),
-                                    CURLOPT_SSL_VERIFYPEER=>False,
-                                    CURLOPT_VERBOSE=>True,
-                                    CURLOPT_HEADER=>True,
-                                    CURLINFO_HEADER_OUT=>True),
-                                'data'=>"HTTP/1.1 200 OK\nDate: Thu, 08 Aug 2019 20:22:04 GMT\nExpires: -1\nCache-Control: private, max-age=0\n" . 
-                                        "Content-Type: text/html; charset=ISO-8859-1\nAccept-Ranges: none\nVary: Accept-Encoding\nTransfer-Encoding: chunked\n" . 
-                                        "\n" . 
-                                        "<html>Test</html>",
-                                'returnHeaders'=>array(
-                                    CURLINFO_HTTP_CODE=>400,
-                                    CURLINFO_HEADER_SIZE=>212,
+        $mock = new Horus_CurlMock();
+        $options = array(
+            CURLOPT_URL=>'https://www.google.com',
+            CURLOPT_RETURNTRANSFER=>1,
+            //CURLOPT_HTTPHEADER=>array('Content-type: application/json', 'Accept: application/json', 'Expect:', 'X-Business-Id: testHorusHttp'),
+            CURLOPT_SSL_VERIFYPEER=>False,
+            CURLOPT_VERBOSE=>True,
+            CURLOPT_HEADER=>True);
+        $mock->setResponse("Date: Thu, 08 Aug 2019 20:22:04 GMT\nExpires: -1\nCache-Control: private, max-age=0\n" . 
+                            "Content-Type: text/html; charset=ISO-8859-1\nAccept-Ranges: none\nVary: Accept-Encoding\nTransfer-Encoding: chunked\n" . 
+                            "\n" . 
+                            '<html>Test</html>', $options);
+        $mock->setInfo(array(
+            CURLINFO_HTTP_CODE=>400,
+            CURLINFO_HEADER_SIZE=>196,
+            CURLINFO_HEADER_OUT=>True
+        ),$options);
 
-                                ),
-                                'returnCode'=>400,
-                                'errorMessage'=>'',
-                                'returnBody'=>'<html>Test</html>');
+        $this->http->setCurlImpl($mock);
+
         $this->expectException(HorusException::class);
         $this->http->forwardSingleHttpQuery('https://www.google.com', array('Content-type: application/json', 'Accept: application/json', 'Expect:', 'X-Business-Id: testHorusHttp') , null, 'POST',self::$rootSpan);
    

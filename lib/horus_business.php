@@ -1,18 +1,23 @@
 <?php
 
+use OpenTelemetry\API\Trace\SpanKind;
+
 class HorusBusiness
 {
 
     public $common = '';
     public $http = '';
-    private $business_id = '';
+    private $businessId = '';
     public $tracer = null;
 
-    function __construct($business_id, $log_location, $colour,$tracer)
+    public function __construct($businessId, $logLocation, $colour, $tracer, Horus_CurlInterface $httpImpl = null)
     {
-        $this->business_id = $business_id;
-        $this->common = new HorusCommon($business_id, $log_location, $colour);
-        $this->http = new HorusHttp($business_id, $log_location, $colour,$tracer);
+        $this->businessId = $businessId;
+        $this->common = new HorusCommon($businessId, $logLocation, $colour);
+        if (is_null($httpImpl)) {
+            $httpImpl = new Horus_Curl();
+        }
+        $this->http = new HorusHttp($businessId, $logLocation, $colour, $tracer, $httpImpl);
         $this->tracer = $tracer;
     }
 
@@ -48,18 +53,24 @@ class HorusBusiness
         }
 
         foreach ($matches as $id => $match) {
-            if (array_key_exists('query',$match) && ($match['query'] === $found)) {
+            if (array_key_exists('query', $match) && ($match['query'] === $found)) {
                 if (array_key_exists('queryMatch', $match) && $match['queryMatch'] != '') {
                     if (preg_match('/' . $match['queryMatch'] . '/', $value) === 1) {
                         $selected = $id;
-                         $this->common->mlog('Current match: ' . $match['comment'] . ' ' . $match['queryMatch'],'DEBUG');
+                        $this->common->mlog(
+                           'Current match: ' . $match['comment'] . ' ' . $match['queryMatch'],
+                           'DEBUG'
+                        );
                     } else {
-                       // $this->common->mlog('QueryMatch failed for param line #' . $id, 'DEBUG');
-                       // $this->common->mlog($match['comment'] . ' ' . $match['queryMatch'],'DEBUG');
+                        //for later $this->common->mlog('QueryMatch failed for param line #' . $id, 'DEBUG');
+                        //for later $this->common->mlog($match['comment'] . ' ' . $match['queryMatch'],'DEBUG');
                     }
                 } else {
                     $this->common->mlog('Param line #' . $id . ' could be selected (if last).', 'DEBUG');
-                    $this->common->mlog($match['comment'] . ' ' . (array_key_exists('queryMatch',$match) ? $match['queryMatch'] : ''),'DEBUG');
+                    $this->common->mlog(
+                        $match['comment'] . ' ' . (array_key_exists('queryMatch', $match) ? $match['queryMatch'] : ''),
+                        'DEBUG'
+                    );
                     $selected = $id;
                 }
             }
@@ -70,18 +81,24 @@ class HorusBusiness
     function locateJson($matches, $input, $queryParams = array())
     {
         $selected = -1;
-        if (is_null($input) || is_null($matches) || (is_array($matches) && count($matches) == 0) || (is_array($input) && count($input) == 0)) {
+        if (is_null($input) ||
+            is_null($matches) ||
+            (is_array($matches) && count($matches) == 0) ||
+            (is_array($input) && empty($input))
+        ) {
             return $selected;
         }
 
-        if (is_null($queryParams)){
+        if (is_null($queryParams)) {
             $queryParams = array();
         }
 
         foreach ($matches as $id => $match) {
             if (array_key_exists($match['query']['key'], $input)) {
                 if (array_key_exists('queryKey', $match['query'])) {
-                    if (array_key_exists($match['query']['queryKey'], $queryParams) && $match['query']['queryValue'] === $queryParams[$match['query']['queryKey']]) {
+                    if (
+                        array_key_exists($match['query']['queryKey'], $queryParams) &&
+                        $match['query']['queryValue'] === $queryParams[$match['query']['queryKey']]) {
                         $this->common->mlog($id . ': trying -- Matched query param', 'DEBUG');
                         if ($input[$match['query']['key']] === $match['query']['value']) {
                             if (array_key_exists('queryMatch', $match) && $match['queryMatch'] != '') {
@@ -116,17 +133,23 @@ class HorusBusiness
         return $selected;
     }
 
-    function extractPayload($content_type, $body, $errorTemplate, $errorFormat,$span)
+    function extractPayload($contentType, $body, $errorTemplate, $errorFormat, $span)
     {
-        if (substr($content_type,0,16) == "application/json") {
+        if (substr($contentType, 0, 16) == "application/json") {
             $json = json_decode($body, true);
             if (json_last_error() != JSON_ERROR_NONE) {
-                $this->returnGenericError($errorFormat, $errorTemplate, 'JSON Malformed : ' . decodeJsonError(json_last_error()),'',$span);
+                $this->returnGenericError(
+                    $errorFormat,
+                    $errorTemplate,
+                    'JSON Malformed : ' . $this->common->decodeJsonError(json_last_error()),
+                    '',
+                    $span
+                );
             } else {
-                if (array_key_exists('payload',$json) && $json['payload'] != null){
+                if (array_key_exists('payload', $json) && $json['payload'] != null) {
                     return $json['payload'];
-                }else{
-                    $this->returnGenericError($content_type, $errorTemplate, 'Empty JSON Payload','',$span);
+                } else {
+                    $this->returnGenericError($contentType, $errorTemplate, 'Empty JSON Payload', '', $span);
                 }
             }
         } else {
@@ -134,66 +157,67 @@ class HorusBusiness
         }
     }
 
-    function extractSimpleJsonPayload($body)
+    public function extractSimpleJsonPayload($body)
     {
         return json_decode($body, true);
     }
 
-    function returnGenericError($format, $template, $errorMessage, $forward = '',$span)
+    public function returnGenericError($format, $template, $errorMessage, $forward = '', $span = null)
     {
 
         $this->common->mlog("Error being generated. Cause: $errorMessage", 'INFO');
         ob_start();
-        include $template;
+        include_once $template;
         $errorOutput = ob_get_contents();
         ob_end_clean();
 
-        $ret = $this->http->returnWithContentType($errorOutput, $format, 400, $forward,true,'POST',array(),$span);
-        if ('' === $forward){
+        $ret = $this->http->returnWithContentType($errorOutput, $format, 400, $forward, true, 'POST', array(), $span);
+        if ('' === $forward) {
             return $ret;
         }
     }
 
-    function returnGenericJsonError($format, $template, $errorMessage, $forward = '',$span)
+    public function returnGenericJsonError($format, $template, $errorMessage, $forward = '', $span = null)
     {
 
         $this->common->mlog("Error JSON being generated. Cause: $errorMessage", 'INFO');
         ob_start();
-        include $template;
+        include_once $template;
         $errorOutput = ob_get_contents();
         ob_end_clean();
 
         $this->common->mlog($errorOutput, 'DEBUG', 'JSON');
-        return $this->http->returnWithContentType($errorOutput, $format, 400, $forward, true,'POST',array(),$span);
-      
+        return $this->http->returnWithContentType($errorOutput, $format, 400, $forward, true, 'POST', array(), $span);
     }
 
-    function transformGetParams($inParams){
+    public function transformGetParams($inParams)
+    {
         $outParams = array();
-        foreach ($inParams as $key=>$value){
-            $outParams[] = array('key'=>$key,'value'=>$value);
+        foreach ($inParams as $key => $value) {
+            $outParams[] = array('key' => $key, 'value' => $value);
         }
         return $outParams;
     }
 
-    public static function getTemplateName($template,$variables){
-        preg_match_all('/\$\{([A-z0-9_\-]*)\}/',$template,$list);
-        if(count($list)==0){
+    public static function getTemplateName($template, $variables)
+    {
+        preg_match_all('/\$\{([A-z0-9_\-]*)\}/', $template, $list);
+        if (empty($list)) {
             return $template;
-        }else{
+        } else {
             $tmpl = $template;
-            foreach($list[1] as $item){
-                if(array_key_exists($item,$variables)){
-                    $tmpl = preg_replace('/\$\{' . $item . '\}/',$variables[$item],$tmpl);
-                }else{
-                    $tmpl = preg_replace('/\$\{' . $item . '\}/','',$tmpl);
+            foreach ($list[1] as $item) {
+                if (array_key_exists($item, $variables)) {
+                    $tmpl = preg_replace('/\$\{' . $item . '\}/', $variables[$item], $tmpl);
+                } else {
+                    $tmpl = preg_replace('/\$\{' . $item . '\}/', '', $tmpl);
                 }
             }
             return $tmpl;
         }
     }
 
-    public function performRouting($route, $content_type, $accept, $data, $queryParams = array(),$span)
+    public function performRouting($route, $contentType, $accept, $data, $queryParams = array(), $span = null)
     {
         if (is_null($route) || $route === false) {
             $this->common->mlog('No route found with provided source value', 'WARNING');
@@ -203,7 +227,7 @@ class HorusBusiness
         $followOnError = array_key_exists('followOnError', $route) ? $route['followOnError'] : true;
         $this->common->mlog("FollowOnError $followOnError", "INFO");
         $globalParams = array_key_exists('parameters', $route) ? $route['parameters'] : array();
-        $globalParams = array_merge($this->transformGetParams($queryParams),$globalParams);
+        $globalParams = array_merge($this->transformGetParams($queryParams), $globalParams);
         $responses = array();
 
         $ii = 0;
@@ -211,41 +235,59 @@ class HorusBusiness
         foreach ($route['destinations'] as $destination) {
             $ii++;
 
-            $routeSpan = $this->tracer->startSpan('Destination ' . $destination['comment'],['child_of'=>$span]);
+            $routeSpan = $this
+                ->tracer
+                ->spanBuilder('Destination ' . $destination['comment'])
+                ->setSpanKind(SpanKind::KIND_SERVER)
+                ->startSpan();
 
             $this->common->mlog("Destination : $ii " . $destination['comment'] . "\n", "INFO");
 
 
-            $destParams = array_key_exists('destParameters', $destination) ? $destination['destParameters'] : array();
-            $proxyParams = array_key_exists('proxyParameters', $destination) ? $destination['proxyParameters'] : array();
+            $destParams = array_key_exists('destParameters', $destination)
+                ? $destination['destParameters']
+                : array();
+            $proxyParams = array_key_exists('proxyParameters', $destination)
+                ? $destination['proxyParameters']
+                : array();
 
-            $destinationUrl = HorusCommon::formatQueryString($destination['destination'], array_merge($globalParams, $destParams), TRUE);
-            $proxyUrl = array_key_exists('proxy', $destination) ? HorusCommon::formatQueryString($destination['proxy'], array_merge($globalParams, $proxyParams), TRUE) : '';
+            $destinationUrl = HorusCommon::formatQueryString(
+                $destination['destination'],
+                array_merge($globalParams, $destParams),
+                true);
+            $proxyUrl = array_key_exists('proxy', $destination)
+                ? HorusCommon::formatQueryString($destination['proxy'], array_merge($globalParams, $proxyParams), true)
+                : '';
 
             $this->common->mlog("Send http request to " . $proxyUrl . "\n", 'DEBUG');
             $this->common->mlog("Final destination : " . $destinationUrl . "\n", 'DEBUG');
-            $this->common->mlog("Content-type: " . $content_type . ", Accept: " . $accept, 'DEBUG');
+            $this->common->mlog("Content-type: " . $contentType . ", Accept: " . $accept, 'DEBUG');
 
-            $routeSpan->setTag('destination',$destinationUrl);
-            $routeSpan->setTag('proxy',$proxyUrl);
-            $routeSpan->setTag('content-type',$content_type);
-            $routeSpan->setTag('accept',$accept);
+            $routeSpan->setAttribute('destination', $destinationUrl);
+            $routeSpan->setAttribute('proxy', $proxyUrl);
+            $routeSpan->setAttribute('content-type', $contentType);
+            $routeSpan->setAttribute('accept', $accept);
 
-            $headers = array('Content-type: ' . $content_type, 'Accept: ' . $accept, 'Expect: ', 'X-Business-Id: ' . $this->business_id);
+            $headers = array(
+                'Content-type: ' . $contentType,
+                'Accept: ' . $accept,
+                'Expect: ',
+                'X-Business-Id: ' . $this->businessId
+            );
 
             if (!array_key_exists('proxy', $destination)) {
-                $dest_url = $destinationUrl;
+                $destUrl = $destinationUrl;
             } else {
-                $dest_url = $proxyUrl;
+                $destUrl = $proxyUrl;
                 $headers[] = 'X_DESTINATION_URL: ' . $destinationUrl;
             }
 
             try {
-                $response = $this->http->forwardSingleHttpQuery($dest_url, $headers, $data, 'POST',$routeSpan);
+                $response = $this->http->forwardSingleHttpQuery($destUrl, $headers, $data, 'POST', $routeSpan);
             } catch (HorusException $e) {
                 $response = json_encode(array("error" => $e->getMessage()));
-                if (!$followOnError){
-                    $routeSpan->finish();
+                if (!$followOnError) {
+                    $routeSpan->end();
                     throw new HorusException('Flow interrupted after error ' . $e->getMessage(), 503);
                 }
             }
@@ -253,12 +295,12 @@ class HorusBusiness
             $responses[] = $response;
 
             if (array_key_exists('delayafter', $destination)) {
-                $routeSpan->log(['message'=>'Start delay ' . $destination['delayafter'] . 's']);
+                $routeSpan->addEvent('Start delay ' . $destination['delayafter'] . 's');
                 $this->common->mlog('Waiting ' . $destination['delayafter'] . 'sec for next destination', 'INFO');
                 sleep($destination['delayafter']);
-                $routeSpan->log(['message'=>'End delay']);
+                $routeSpan->addEvent('End delay');
             }
-            $routeSpan->finish();
+            $routeSpan->end();
         }
         return $responses;
     }

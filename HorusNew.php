@@ -7,36 +7,40 @@ require_once('lib/horus_inject.php');
 require_once('lib/horus_simplejson.php');
 require_once('lib/horus_xml.php');
 require_once('lib/horus_exception.php');
+require_once('lib/horus_utils.php');
+require_once('lib/horus_curlInterface.php');
+require_once('lib/horus_curl.php');
 require_once('vendor/autoload.php');
-
-use Jaeger\Config;
 
 $loglocation = '/var/log/horus/horus_http.log';
 
-$business_id = HorusHttp::extractHeader('X-Business-Id','X_BUSINESS_ID');
+$businessId = HorusHttp::extractHeader(HorusCommon::TID_HEADER, 'X_BUSINESS_ID');
 
-if ($business_id === '') {
-    $business_id = HorusCommon::getNewBusinessId();
+$headerInt = new Horus_Header();
+
+if ($businessId === '') {
+    $businessId = HorusCommon::getNewBusinessId();
 }
 
-$request_type = array_key_exists('type', $_GET) ? $_GET["type"] : '';
+$requestType = array_key_exists('type', $_GET) ? $_GET["type"] : '';
 
 
-$colour = ("inject" === $request_type) ? 'YELLOW' : 'GREEN';
-
-$tracer = HorusCommon::getTracer(Config::getInstance(),$colour,HorusCommon::getPath($_SERVER));
-$rootSpan = HorusCommon::getStartSpan($tracer,apache_request_headers(),'Start Green/Yellow');
+$colour = ("inject" === $requestType) ? 'YELLOW' : 'GREEN';
+ 
+$tracerProvider = HorusCommon::getTracerProvider($colour, HorusCommon::getPath($_SERVER));
+$tracer = HorusCommon::getTracer($tracerProvider, $colour, HorusCommon::getPath($_SERVER));
+$rootSpan = HorusCommon::getStartSpan($tracer, apache_request_headers(), 'Start Green/Yellow');
 
 $mmatches = json_decode(file_get_contents('conf/horusParams.json'), true);
 
-$common = new HorusCommon($business_id, $loglocation, $colour);
+$common = new HorusCommon($businessId, $loglocation, $colour);
 
 $common->mlog("===== BEGIN HORUS CALL =====", "INFO");
-$common->mlog('Destination is : ' . HorusHttp::extractHeader('x_destination_url'), 'DEBUG');
+$common->mlog('Destination is : ' . HorusHttp::extractHeader(HorusCommon::DEST_HEADER), 'DEBUG');
 
 if (json_last_error() !== JSON_ERROR_NONE) {
-    header("HTTP/1.1 500 SERVER ERROR", true, 500);
-    header('X-Business-Id: ' . $business_id);
+    $headerInt->sendHeader("HTTP/1.1 500 SERVER ERROR", true, 500);
+    $headerInt->sendHeader(HorusCommon::TID_HEADER . ': ' . $businessId);
     $common->mlog("Error while decoding horusParams.json : " . json_last_error_msg() . "\n", "ERROR");
     echo "Error while decoding horusParams.json : " . json_last_error_msg() . "\n";
     exit;
@@ -50,37 +54,33 @@ $simpleJsonMatches = array_key_exists('simplejson', $mmatches) ? $mmatches['simp
 $matches = array_key_exists('pacs', $mmatches) ? $mmatches["pacs"] : null;
 
 $reqbody = file_get_contents('php://input');
-$content_type = $_SERVER['CONTENT_TYPE'];
+$contentType = $_SERVER['CONTENT_TYPE'];
 
-$proxy_mode = HorusHttp::extractHeader('x_destination_url');
+$proxyMode = HorusHttp::extractHeader('x_destination_url');
 $accept = HorusHttp::extractHeader('Accept');
 
-$rootSpan->setTag('destination',$proxy_mode);
-$rootSpan->setTag('content-type',$content_type);
-$rootSpan->setTag('accept',$accept);
-
-if ("inject" === $request_type) {
-    $rootSpan->log(['message' => 'Starting Injector mode', 'path' => $path, 'BOX' => $colour]);
+if ("inject" === $requestType) {
+    $rootSpan->addEvent('message', array('Starting Injector mode', 'path' => $path, 'BOX' => $colour));
     $common->mlog('+++++ BEGIN INJECTOR MODE +++++', 'INFO');
-    $injector = new HorusInjector($business_id, $loglocation, $tracer);
+    $injector = new HorusInjector($businessId, $loglocation, $tracer);
     $common->mlog("Request : " . print_r($_SERVER, true) . "\n", 'DEBUG');
     $common->mlog("Received POST Data : '" . $reqbody . "'", 'INFO', 'TXT', $colour);
 
     try {
-        $res = $injector->doInject($reqbody, $proxy_mode, $rootSpan);
-        header("HTTP/1.1 200 OK", true, 200);
-        header("X-Business-Id: $business_id");
+        $res = $injector->doInject($reqbody, $proxyMode, $rootSpan);
+        $headerInt->sendHeader(HorusCommon::HTTP_200_RETURN, true, 200);
+        $headerInt->sendHeader(HorusCommon::TID_HEADER . ': ' . $businessId);
         echo $res;
     } catch (Exception $e) {
-        header("HTTP/1.1 200 OK", true, 200);
-        header("X-Business-Id: $business_id");
+        $headerInt->sendHeader(HorusCommon::HTTP_200_RETURN, true, 200);
+        $headerInt->sendHeader(HorusCommon::TID_HEADER . ': ' . $businessId);
         echo $e->getMessage();
     }
     $common->mlog('+++++ END INJECTOR MODE +++++', 'INFO');
-} else if (("simplejson" === $request_type) && ("application/json" === substr($content_type,0,16))) {
-    $rootSpan->log(['message' => 'Starting Json mode', 'path' => $path, 'BOX' => $colour]);
+} elseif (("simplejson" === $requestType) && ("application/json" === substr($contentType, 0, 16))) {
+    $rootSpan->addEvent('Starting Json mode', array('path' => $path, 'BOX' => $colour));
     $common->mlog('+++++ BEGIN SIMPLEJSON MODE +++++', 'INFO');
-    $injector = new HorusSimpleJson($business_id, $loglocation, $simpleJsonMatches, $tracer);
+    $injector = new HorusSimpleJson($businessId, $loglocation, $simpleJsonMatches, $tracer);
 
     $common->mlog("Request : " . print_r($_SERVER, true) . "\n", 'DEBUG');
     $common->mlog("Received POST Data : '" . $reqbody . "'", 'INFO', 'TXT', $colour);
@@ -88,51 +88,63 @@ if ("inject" === $request_type) {
     $common->mlog("Preferred mime type : " . $preferredType, 'DEBUG', 'TXT', $colour);
 
     try {
-        $res =  $injector->doInject($reqbody, $proxy_mode, $preferredType, $_GET, $rootSpan);
-        header("HTTP/1.1 200 OK", true, 200);
-        header("X-Business-Id: $business_id");
+        $res =  $injector->doInject($reqbody, $proxyMode, $preferredType, $_GET, $rootSpan);
+        $headerInt->sendHeader(HorusCommon::HTTP_200_RETURN, true, 200);
+        $headerInt->sendHeader("X-Business-Id: $businessId");
         if (is_array($res)) {
             echo implode("\n", $res);
         } else {
             echo $res;
         }
     } catch (Exception $e) {
-        header("HTTP/1.1 200 OK", true, 200);
-        header("X-Business-Id: $business_id");
+        $headerInt->sendHeader(HorusCommon::HTTP_200_RETURN, true, 200);
+        $headerInt->sendHeader("X-Business-Id: $businessId");
         echo $e->getMessage();
     }
     $common->mlog('+++++ END SIMPLEJSON MODE +++++', 'INFO');
 } else {
     $common->mlog('+++++ BEGIN XML MODE +++++', 'INFO');
-    $rootSpan->log(['message' => 'Starting XML mode', 'path' => HorusCommon::getPath($_SERVER), 'BOX' => $colour]);
-    $injector = new HorusXml($business_id, $loglocation, 'GREEN', $tracer);
+    $rootSpan->addEvent('Starting XML mode', array('path' => HorusCommon::getPath($_SERVER), 'BOX' => $colour));
+    $injector = new HorusXml($businessId, $loglocation, 'GREEN', $tracer);
 
     $common->mlog("Request : " . print_r($_SERVER, true) . "\n", 'DEBUG');
     $common->mlog("Received POST Data : '" . $reqbody . "'", 'INFO', 'TXT', $colour);
 
-    $defaultOutContentType = array_key_exists('pacsDefaultOutputContentType', $mmatches) ? $mmatches['pacsDefaultOutputContentType'] : 'application/xml';
+    $defaultOutContentType = array_key_exists('pacsDefaultOutputContentType', $mmatches)
+        ? $mmatches['pacsDefaultOutputContentType']
+        : HorusCommon::XML_CT;
     $preferredType = $injector->http->setReturnType($defaultOutContentType, $errorFormat);
     $common->mlog("Generated documents will be converted to : " . $preferredType, 'DEBUG', 'TXT', $colour);
 
 
     try {
-        $res = $injector->doInject($reqbody, $content_type, $proxy_mode, $matches, $preferredType, $_GET, $genericError, '', $rootSpan);
+        $res = $injector->doInject(
+            $reqbody,
+            $contentType,
+            $proxyMode,
+            $matches,
+            $preferredType,
+            $_GET,
+            $genericError,
+            '',
+            $rootSpan
+        );
 
-        header("HTTP/1.1 200 OK", true, 200);
-        header("X-Business-Id: $business_id");
+        $headerInt->sendHeader(HorusCommon::HTTP_200_RETURN, true, 200);
+        $headerInt->sendHeader(HorusCommon::TID_HEADER . ': ' . $businessId);
         if (is_array($res)) {
             echo implode("\n", $res);
         } else {
             echo $res;
         }
     } catch (Exception $e) {
-        header("HTTP/1.1 200 OK", true, 200);
-        header("X-Business-Id: $business_id");
+        $headerInt->sendHeader(HorusCommon::HTTP_200_RETURN, true, 200);
+        $headerInt->sendHeader(HorusCommon::TID_HEADER . ': ' . $businessId);
         echo $e->getMessage();
     }
     $common->mlog('+++++ END XML MODE +++++', 'INFO');
 }
-$rootSpan->finish();
-Config::getInstance()->flush();
+$rootSpan->end();
+$tracerProvider->shutdown();
 
 $common->mlog("===== END HORUS CALL =====", "INFO");

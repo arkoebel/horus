@@ -1,0 +1,8 @@
+.git
+.vscode
+.DS_Store
+*xml
+*log
+tests
+samples
+

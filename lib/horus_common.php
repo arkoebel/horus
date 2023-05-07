@@ -1,51 +1,95 @@
 <?php
 
+use OpenTelemetry\API\Trace\SpanKind;
+use OpenTelemetry\Contrib\Zipkin\Exporter as ZipkinExporter;
+use OpenTelemetry\Extension\Propagator\B3\B3MultiPropagator;
+use OpenTelemetry\SDK\Common\Export\Http\PsrTransportFactory;
+use OpenTelemetry\SDK\Common\Time\ClockFactory;
+use OpenTelemetry\SDK\Logs\SimplePsrFileLogger;
+use OpenTelemetry\SDK\Trace\Sampler\AlwaysOnSampler;
+use OpenTelemetry\SDK\Trace\SpanExporter\LoggerDecorator;
+use OpenTelemetry\SDK\Trace\SpanProcessor\BatchSpanProcessor;
+use OpenTelemetry\SDK\Trace\TracerProvider;
+
+//should use require_once 'vendor/autoload.php';
+
 class HorusCommon
 {
-    private $log_location = '';
-    private $business_id = '';
+    private $logLocation = '';
+    private $businessId = '';
     private $colour = '';
     public $cnf = array();
     public const RFH_PREFIX = 'rfh2Prefix';
     public const MQMD_PREFIX = 'mqmdPrefix';
     public const ENC_PREFIX = 'B64PRF-';
     public const ENC_SEP = '#!#';
-    public const DEFAULT_LOG_LOCATION='/var/log/horus/horus_http.log';
+    public const DEFAULT_LOG_LOCATION = '/var/log/horus/horus_http.log';
     public const QUERY_PARAM_CUTOFF = 80;
+    public const XML_CT = 'application/xml';
+    public const JS_CT = 'application/json';
+    public const TID_HEADER = 'X-Business-Id';
+    public const DEST_HEADER = 'X_destination_url';
+    public const HTTP_200_RETURN = 'HTTP/1.1 200 OK';
+    public const HTTP_500_RETURN = 'HTTP/1.1 500 SERVER ERROR';
 
-    function __construct($business_id, $log_location, $colour = 'GREEN')
+    public function __construct($businessId, $logLocation, $colour = 'GREEN')
     {
-        $this->log_location = $log_location;
-        $this->business_id = $business_id;
+        $this->logLocation = $logLocation;
+        $this->businessId = $businessId;
         $this->colour = $colour;
-        $this->cnf = json_decode(file_get_contents('conf/horusConfig.json'),true);
+        $this->cnf = json_decode(file_get_contents('conf/horusConfig.json'), true);
     }
 
-    public static function getPath($vars){
-        $patharray = explode('/',$vars['SCRIPT_FILENAME']);
-        $tmp = array_pop($patharray);
-        $path = array_pop($patharray);
-        return $path;
+    public static function getPath($vars)
+    {
+        $patharray = explode('/', $vars['SCRIPT_FILENAME']);
+        array_pop($patharray);
+        return array_pop($patharray);
     }
 
-    public static function getTracer($config,$prefix,$path){
-        $cnf = json_decode(file_get_contents('conf/horusConfig.json'),true);
-        $config = Jaeger\Config::getInstance();
-        $config::$propagator = \Jaeger\Constants\PROPAGATOR_ZIPKIN;
-        return $config->initTracer($prefix . '_' . $path,$cnf['tracerCollectorHost']);
+    public static function getTracerProvider($prefix, $path)
+    {
+        $cnf = json_decode(file_get_contents('conf/horusConfig.json'), true);
+
+        $transport = PsrTransportFactory::discover()->create($cnf['zipkinUrl'], 'application/json');
+        $zipkinExporter = new ZipkinExporter(
+            $transport
+        );
+        $decorator = new LoggerDecorator(
+            $zipkinExporter,
+            new SimplePsrFileLogger(__DIR__ . '/../otel.log')
+        );
+
+        putenv('OTEL_SERVICE_NAME=' . $prefix . '_' . $path);
+        return new TracerProvider(
+            new BatchSpanProcessor($decorator, ClockFactory::getDefault()),
+            new AlwaysOnSampler()
+        );
     }
 
-    public static function getStartSpan($tracer,$headers,$title){
+    public static function getTracer($tracerProvider, $prefix, $path)
+    {
+
+        return $tracerProvider->getTracer($prefix . '_' . $path);
+    }
+
+    public static function getStartSpan($tracer, $headers, $title)
+    {
         $h = array();
-        foreach ($headers as $key=>$value)
+        foreach ($headers as $key => $value) {
             $h[strtolower($key)] = $value;
-    
-        $rootContext = $tracer->extract(OpenTracing\Formats\TEXT_MAP,$h);
+        }
 
-        if(null !== $rootContext)
-            return $tracer->startSpan($title,['child_of'=>$rootContext]);
-        else
-            return $tracer->startSpan($title);
+        $propagator = B3MultiPropagator::getInstance();
+
+        $rootContext = $propagator->extract($h);
+
+        //start a root span
+        return  $tracer
+                    ->spanBuilder($title)->setParent($rootContext)
+                    ->setSpanKind(SpanKind::KIND_SERVER)
+                    ->setAttribute('OTEL_SERVICE_NAME', 'toto')
+                    ->startSpan();
     }
     /**
      * Function echoerror
@@ -64,7 +108,7 @@ class HorusCommon
     public function myErrorHandler($errno, $errstr, $errfile, $errline)
     {
 
-        mlog("Error $errno at $errfile ( $errline ) : $errstr", 'ERROR', 'TXT');
+        $this->mlog("Error $errno at $errfile ( $errline ) : $errstr", 'ERROR', 'TXT');
 
         return false;
     }
@@ -73,69 +117,76 @@ class HorusCommon
      * Function mlog
      * Private logging facilities. Format message into JSON for easy ES integration.
      */
-    public function mlog($message, $log_level, $format = 'TXT')
+    public function mlog($message, $logLevel, $format = 'TXT')
     {
-        HorusCommon::logger($message,$log_level,$format,$this->colour,$this->business_id,$this->log_location);
-
+        HorusCommon::logger($message, $logLevel, $format, $this->colour, $this->businessId, $this->logLocation);
     }
 
     /**
-     * Function mlog
-     * Private logging facilities. Format message into JSON for easy ES integration.
+     * Function logger
+     * Private logging facilities for use in static functions. Format message into JSON for easy ES integration.
      */
-    public static function logger($message, $log_level, $format = 'TXT', $colour='BLANK', $business_id, $log_location=HorusCommon::DEFAULT_LOG_LOCATION)
+    public static function logger(
+       $message,
+       $logLevel,
+       $format = 'TXT',
+       $colour = 'BLANK',
+       $businessId = '123',
+       $logLocation = HorusCommon::DEFAULT_LOG_LOCATION
+    )
     {
 
         $alog = array();
-        $alog['timestamp'] = HorusCommon::utc_time(5);
+        $alog['timestamp'] = HorusCommon::utcTime(5);
         $alog['program'] = $colour;
-        $alog['log_level'] = $log_level;
+        $alog['log_level'] = $logLevel;
         $alog['file'] = $_SERVER["PHP_SELF"];
-        $alog['business_id'] = $business_id;
+        $alog['business_id'] = $businessId;
         $alog['pid'] = getmypid();
         if ($format === 'TXT') {
             $alog['message'] = $message;
         } else {
             $alog['message'] = HorusCommon::escapeJsonString($message);
         }
-        if (is_null($log_location)){
+        if (is_null($logLocation)) {
             error_log(json_encode($alog) . "\n");
-        }else{
-            error_log(json_encode($alog) . "\n", 3, $log_location);
+        } else {
+            error_log(json_encode($alog) . "\n", 3, $logLocation);
         }
 
-        if (json_last_error() != 0){
+        if (json_last_error() != 0) {
             error_log(json_last_error_msg());
         }
     }
 
     /**
-     * function utc_time
+     * function utcTime
      * Gets back the current date in ISO-8601 format with variable precision on seconds.
      */
-    public static function utc_time($precision = 0)
+    public static function utcTime($precision = 0)
     {
         $time = gettimeofday();
 
         if (is_int($precision) && $precision >= 0 && $precision <= 6) {
             $total = (string) $time['sec'] . '.' . str_pad((string) $time['usec'], 6, '0', STR_PAD_LEFT);
-            $total_rounded = bcadd($total, '0.' . str_repeat('0', $precision) . '5', $precision);
-            @list($integer, $fraction) = explode('.', $total_rounded);
+            $totalRounded = bcadd($total, '0.' . str_repeat('0', $precision) . '5', $precision);
+            @list($integer, $fraction) = explode('.', $totalRounded);
             $format = $precision == 0
-                ? "Y-m-d\TH:i:s\Z"
-                : "Y-m-d\TH:i:s," . $fraction . "\Z";
+            ? "Y-m-d\TH:i:s\Z"
+            : "Y-m-d\TH:i:s," . $fraction . "\Z";
             return gmdate($format, $integer);
         }
 
         return false;
     }
 
-    public static function getNewBusinessId() {
+    public static function getNewBusinessId()
+    {
 
         $data = random_bytes(16);
 
-        $data[6] = chr(ord($data[6]) & 0x0f | 0x40); // set version to 0100
-        $data[8] = chr(ord($data[8]) & 0x3f | 0x80); // set bits 6-7 to 10
+        $data[6] = chr(ord($data[6])&0x0f | 0x40); // set version to 0100
+        $data[8] = chr(ord($data[8])&0x3f | 0x80); // set bits 6-7 to 10
 
         return vsprintf('%s%s-%s-%s-%s-%s%s%s', str_split(bin2hex($data), 4));
     }
@@ -151,11 +202,12 @@ class HorusCommon
         return str_replace($escapers, $replacements, $value);
     }
 
-    public static function formatQueryString($baseUrl, $params, $wholeUrl=FALSE){
+    public static function formatQueryString($baseUrl, $params, $wholeUrl = false)
+    {
         if (is_null($params)) {
-            if (TRUE===$wholeUrl){
+            if (true === $wholeUrl) {
                 return $baseUrl;
-            }else{
+            } else {
                 return '';
             }
         }
@@ -163,24 +215,23 @@ class HorusCommon
         $query = '';
         $converted = array();
         // Cycles all parameters; key duplicates are set as the last encountered value
-        foreach ($params as $id=>$param){
-                if((is_array($param))&&(array_key_exists('key',$param))&&(array_key_exists('value',$param))){
-                    $converted[$param['key']] = $param['value'];
-                }else if(!is_array($param)){
-                    $converted[$id] = $param;
-                }
+        foreach ($params as $id => $param) {
+            if ((is_array($param)) && (array_key_exists('key', $param)) && (array_key_exists('value', $param))) {
+                $converted[$param['key']] = $param['value'];
+            } elseif (!is_array($param)) {
+                $converted[$id] = $param;
+            }
         }
 
         ksort($converted);
 
-        foreach ($converted as $key=>$value){
-            if(strlen(urlencode($value))<HorusCommon::QUERY_PARAM_CUTOFF)
+        foreach ($converted as $key => $value) {
+            if (strlen(urlencode($value)) < HorusCommon::QUERY_PARAM_CUTOFF) {
                 $query .= '&' . urlencode($key) . '=' . urlencode($value);
-            //else
-              //  mlog('Parameter ' . $key . ' too long, filtering out.','DEBUG');
+            }
         }
-        if((stripos($baseUrl,'?')===FALSE)&&($query!=='')){
-            $query = '?' . substr($query,1);
+        if ((stripos($baseUrl, '?') === false) && ($query !== '')) {
+            $query = '?' . substr($query, 1);
         }
 
         return ($wholeUrl) ? $baseUrl . $query : $query;
@@ -190,7 +241,7 @@ class HorusCommon
      * function libxml_display_error
      * Custom SimpleXML error handler.
      */
-    function libxml_display_error($error)
+    public function libxml_display_error($error)
     {
         $ret = "";
         switch ($error->level) {
@@ -215,7 +266,7 @@ class HorusCommon
      * function libxml_display_errors
      * Custom SimpleXML error handler.
      */
-    function libxml_display_errors()
+    public function libxml_display_errors()
     {
         $ret = "";
         $errors = libxml_get_errors();
@@ -230,7 +281,7 @@ class HorusCommon
      * function decodeJsonError
      * Convert json unmarshalling errors into something human-readable.
      */
-    function decodeJsonError($errnum)
+    public function decodeJsonError($errnum)
     {
         switch ($errnum) {
             case JSON_ERROR_NONE:

@@ -1,8 +1,7 @@
 <?php
 
-use OpenTracing\Formats;
-use OpenTracing\GlobalTracer;
-use Jaeger\Config;
+use OpenTelemetry\API\Trace\SpanKind;
+use OpenTelemetry\Context\Context;
 
 class HorusRecurse
 {
@@ -10,20 +9,20 @@ class HorusRecurse
     public $http = null;
     public $business = null;
     public $xml = null;
-    public $business_id = '';
+    public $businessId = '';
     public $tracer = null;
 
-    function __construct($business_id, $log_location, $tracer)
+    public function __construct($businessId, $logLocation, $tracer, Horus_CurlInterface $curl = null)
     {
-        $this->common = new HorusCommon($business_id, $log_location, 'INDIGO');
-        $this->http = new HorusHttp($business_id, $log_location, 'INDIGO', $tracer);
-        $this->business = new HorusBusiness($business_id, $log_location, 'INDIGO', $tracer);
-        $this->xml = new HorusXml($business_id, $log_location, 'INDIGO', $tracer);
-        $this->business_id = $business_id;
+        $this->common = new HorusCommon($businessId, $logLocation, 'INDIGO');
+        $this->http = new HorusHttp($businessId, $logLocation, 'INDIGO', $tracer, $curl);
+        $this->business = new HorusBusiness($businessId, $logLocation, 'INDIGO', $tracer, $curl);
+        $this->xml = new HorusXml($businessId, $logLocation, 'INDIGO', $tracer);
+        $this->businessId = $businessId;
         $this->tracer = $tracer;
     }
 
-    function getPart($order, $matches)
+    public function getPart($order, $matches)
     {
         foreach ($matches['parts'] as $part) {
             if ($order == $part['order']) {
@@ -33,17 +32,18 @@ class HorusRecurse
         return array();
     }
 
-    function flattenHeaders($headersArray)
+    public function flattenHeaders($headersArray)
     {
         $result = array();
         foreach ($headersArray as $elt) {
             foreach ($elt as $key => $value) {
                 if (strpos($key, 'x-horus-') === 0) {
                     $zkey = substr($value, 8);
-                    if (strpos($value, ';') >= 0)
+                    if (strpos($value, ';') >= 0) {
                         $mkey = explode(';', $value, 2);
-                    else
+                    } else {
                         $mkey = array($zkey, $value);
+                    }
                     $result[] = array('key' => $mkey[0], 'value' => $mkey[1]);
                 }
             }
@@ -51,7 +51,7 @@ class HorusRecurse
         return $result;
     }
 
-    function findSection($name, $matches)
+    public function findSection($name, $matches)
     {
         foreach ($matches as $section) {
             if ($section['section'] === $name) {
@@ -61,10 +61,9 @@ class HorusRecurse
         return null;
     }
 
-    function doRecurse($reqBody, $content_type, $proxy_mode, $matches, $accept, $params, $span)
+    public function doRecurse($reqBody, $contentType, $proxyMode, $matches, $params, $span)
     {
         $currentSpan = $span;
-        //$this->tracer->startSpan('Begin Recurse',['child_of'=>$span]);
 
         if (!array_key_exists('section', $params)) {
             throw new HorusException('Section URL parameter is unknown');
@@ -72,42 +71,56 @@ class HorusRecurse
 
         $section = $this->findSection($params['section'], $matches);
 
-        //$span->log(['message'=>$params['section']]);
-
-        if ($content_type !== $section['content-type']) {
-            throw new HorusException('Section ' . $params['section'] . " was supposed to be of type " . $section['content-type'] . ' but found ' . $content_type . ' instead');
+        if ($contentType !== $section['content-type']) {
+            throw new HorusException(
+                'Section '
+                . $params['section']
+                . " was supposed to be of type "
+                . $section['content-type']
+                . ' but found '
+                . $contentType
+                . ' instead'
+            );
         }
         $result = null;
-        if ('application/xml' === $content_type) {
+        if (HorusCommon::XML_CT === $contentType) {
             $result = $this->doRecurseXml($reqBody, $section, $params, $currentSpan);
-            //Jaeger\Config::getInstance()->flush();
-        } elseif ('application/json' === substr($content_type,0,16)) {
+        } elseif (HorusCommon::JS_CT === substr($contentType, 0, 16)) {
             $result = $this->doRecurseJson($reqBody, $section, $params, $currentSpan);
         } else {
-            throw new HorusException('Unsupported content-type ' . $content_type);
+            throw new HorusException('Unsupported content-type ' . $contentType);
         }
 
         $urlparams = array_merge($params, $this->flattenHeaders($result['headers']));
 
         $returnHeaders = array();
-        if ('' !== $proxy_mode) {
-            $destination = HorusHttp::formatQueryString($proxy_mode, $urlparams, array('section'));
+        if ('' !== $proxyMode) {
+            $destination = HorusHttp::formatQueryString($proxyMode, $urlparams, array('section'));
         } else {
             $destination = '';
             $returnHeaders = $urlparams;
         }
-        //$this->tracer->reportSpan();
+
         try {
-            $ret = $this->http->returnWithContentType($result['xml'], $content_type, 200, $destination, false, 'POST', $returnHeaders, $currentSpan);
+            $ret = $this->http->returnWithContentType(
+                $result['xml'],
+                $contentType,
+                200,
+                $destination,
+                false,
+                'POST',
+                $returnHeaders,
+                $currentSpan
+            );
         } catch (Exception $e) {
-            //error_log($e->getMessage());
+            //
         }
 
         return $ret;
     }
 
 
-    function doRecurseXml($body, $section, $queryParams, $span)
+    public function doRecurseXml($body, $section, $queryParams, $span)
     {
         $elements = array();
         $xmlBody = simplexml_load_string($body);
@@ -118,27 +131,32 @@ class HorusRecurse
         if (array_key_exists('validator', $section)) {
             foreach ($section['validator'] as $validator) {
                 try {
-                    $span->log(['message' => 'Validating signature ' . $validator['name']]);
+                    $span->addEvent('Validating signature ' . $validator['name']);
 
                     HorusXML::validateSignature($body, $queryParams, $validator, $this->common->cnf);
                     $this->common->mlog('Validated ' . $validator['name'] . ' Signature', 'INFO');
                 } catch (HorusException $e) {
                     $this->common->mlog($validator['name'] . ' Signature failed : ' . $e->getMessage(), 'ERROR');
-                    //throw new HorusException($e);
                 }
             }
         }
 
         $headers = array();
 
+        $ctx = $span->storeInContext(Context::getCurrent());
         foreach ($section['parts'] as $part) {
-            $currentSpan = $this->tracer->startSpan('Part ' . $part['order'] . ' ' . $part['comment'], ['child_of' => $span]);
+            $currentSpan = $this->tracer->spanBuilder(
+                'Part '
+                . $part['order']
+                . ' '
+                . $part['comment']
+                )->setParent($ctx)->setSpanKind(SpanKind::KIND_SERVER)->startSpan();
             $this->common->mlog('Dealing with part #' . $part['order'] . ' : ' . $part['comment'], 'INFO');
             $inputXmlPart = null;
             $vars = $queryParams;
             if (array_key_exists('variables', $part)) {
                 $this->common->mlog('Extracting variables for part #' . $part['order'], 'DEBUG');
-                $currentSpan->log(['message' => 'Get variables']);
+                $currentSpan->addEvent('Get variables');
                 foreach ($part['variables'] as $name => $xpath) {
                     $elt = array('key' => $name, 'value' => $this->xml->getXpathVariable($xmlBody, $xpath));
                     $this->common->mlog('  Variable ' . $elt['key'] . ' = ' . $elt['value'], 'DEBUG');
@@ -146,10 +164,10 @@ class HorusRecurse
                 }
             }
             if (array_key_exists('path', $part)) {
-                $currentSpan->log(['message' => 'Get document part']);
+                $currentSpan->addEvent('Get document part');
                 $this->common->mlog('Extracting document from XPath=' . $part['path'], 'DEBUG');
                 $inputXmlPart = $xmlBody->xpath($part['path']);
-                if (FALSE !== $inputXmlPart && is_array($inputXmlPart) && (count($inputXmlPart) > 0)) {
+                if (false !== $inputXmlPart && is_array($inputXmlPart) && (!empty($inputXmlPart))) {
                     $xpathResult = $inputXmlPart[0];
 
                     $ddom = dom_import_simplexml($xpathResult);
@@ -159,18 +177,30 @@ class HorusRecurse
 
                     $correctedxmlpart =  $newdom->saveXml($newdom->documentElement);
                     $this->common->mlog('Part Contents : ' . $correctedxmlpart, 'DEBUG');
-                    $finalUrl = $this->common->formatQueryString($part['transformUrl'], $vars, TRUE);
+                    $finalUrl = $this->common->formatQueryString($part['transformUrl'], $vars, false);
                     $this->common->mlog('Transformation URL is : ' . $finalUrl, 'DEBUG');
-                    $currentSpan->log(['message' => 'Forward to ' . $finalUrl]);
-                    $resp = $this->http->forwardSingleHttpQuery($finalUrl, array('Content-type: application/xml', 'Accept: application/xml', 'Expect: ', 'X-Business-Id: ' . $this->business_id), $correctedxmlpart, 'POST', $currentSpan);
-                    $currentSpan->log(['message' => 'Got response']);
+                    $currentSpan->addEvent('Forward to ' . $finalUrl);
+                    $resp = $this->http->forwardSingleHttpQuery(
+                        $finalUrl,
+                        array(
+                            'Content-type: application/xml',
+                            'Accept: application/xml',
+                            'Expect: ',
+                            'X-Business-Id: ' . $this->businessId
+                        ),
+                        $correctedxmlpart,
+                        'POST',
+                        $currentSpan
+                    );
+                    $currentSpan->addEvent('Got response');
                     $headers[$part['order']] = $resp['headers'];
                     $rr = simplexml_load_string($resp['body']);
                     $this->common->mlog('Part Transformed : ' . $rr->saveXML(), 'DEBUG');
                     $elements[$part['order']] = $rr;
                 } else {
-                    $currentSpan->finish();
-                    throw new HorusException('Could not extract location ' . $part['path'] . ' for part #' . $part['order']);
+                    $currentSpan->end();
+                    throw new HorusException(
+                        'Could not extract location ' . $part['path'] . ' for part #' . $part['order']);
                 }
             } else {
                 if (array_key_exists('constant', $part)) {
@@ -182,15 +212,13 @@ class HorusRecurse
                     $rr = simplexml_load_string('<' . $tag . ' xmlns="' . $nsp . '">' . $value . '</' . $tag . '>');
                     $elements[$part['order']] = $rr;
                 } else {
-                    $currentSpan->finish();
+                    $currentSpan->end();
                     throw new HorusException('No XPath to search for in configuration');
                 }
             }
-            $currentSpan->finish();
+            $currentSpan->end();
         }
 
-        //$nextSpan = $this->tracer->startSpan('Build Document',['child_of'=>$span]);
-        //$nextSpan->log(['message'=>'Build initial document']);
         $dom = new DomDocument();
 
         $rootns = '';
@@ -228,8 +256,6 @@ class HorusRecurse
         }
         $dom->appendChild($root);
 
-        //$nextSpan->log(['message'=>'Build document']);
-
         foreach ($elements as $index => $element) {
             $part = $this->getPart($index, $section);
             if (array_key_exists('targetPath', $part)) {
@@ -241,21 +267,28 @@ class HorusRecurse
             }
             $this->common->mlog("Parent Element is " . $node->localName . ' (' . $node->namespaceURI . ')', 'DEBUG');
 
-            $domElement = $dom->importNode(dom_import_simplexml($element), TRUE);
+            $domElement = $dom->importNode(dom_import_simplexml($element), true);
             $node->appendChild($domElement);
         }
-
-        //$nextSpan->finish();
 
         return array('xml' => $dom->saveXml(), 'headers' => $headers);
     }
 
-    function doRecurseJson($reqBody, $matches, $queryParams)
+    public function doRecurseJson($reqBody, $matches, $queryParams)
     {
-        $this->common->mlog("Called Recurse Json with parameters " . print_r($matches, true) . ' and document = ' . print_r($reqBody, true) . ' and queryParameters = ' . $queryParams, 'INFO');
+        $this->common->mlog(
+            "Called Recurse Json with parameters "
+            . print_r($matches, true)
+            . ' and document = '
+            . print_r($reqBody, true)
+            . ' and queryParameters = '
+            . $queryParams,
+            'INFO'
+        );
+        return null;
     }
 
-    function addPath($root, $targetPath, $namespaces)
+    public function addPath($root, $targetPath, $namespaces)
     {
         $tree = explode('/', $targetPath);
         array_shift($tree);   // Remove First element (coming from the heading slash in XPath)
@@ -281,7 +314,15 @@ class HorusRecurse
             $this->common->mlog(' Elements count = ' . $cc->length, 'DEBUG');
 
             if ($cc->length !== 1) {
-                $this->common->mlog("Testing output XML : element " . $path . ' not found. Creating it under node ' . $node->prefix . ':' . $node->localName, 'DEBUG');
+                $this->common->mlog(
+                    "Testing output XML : element "
+                        . $path
+                        . ' not found. Creating it under node '
+                        . $node->prefix
+                        . ':'
+                        . $node->localName,
+                    'DEBUG'
+                );
                 $elt = new DomElement($path, '', $uri);
                 $node->appendChild($elt);
             }
@@ -291,10 +332,16 @@ class HorusRecurse
         return $node;
     }
 
-    static function getNSUriFromPrefix($prefix, $namespaces)
+    public static function getNSUriFromPrefix($prefix, $namespaces)
     {
 
-        if (is_null($prefix) || !is_array($namespaces) || (count($namespaces) == 0) || is_null($prefix) || ($prefix == '')) {
+        if (
+            is_null($prefix)
+            || !is_array($namespaces)
+            || (count($namespaces) == 0)
+            || is_null($prefix)
+            || ($prefix == '')
+        ) {
             return '';
         }
 
@@ -306,10 +353,10 @@ class HorusRecurse
         return '';
     }
 
-    static function getVar($name, $vars)
+    public static function getVar($name, $vars)
     {
         foreach ($vars as $var) {
-            if (is_array($var) && array_key_exists('key',$var) && ($var['key'] == $name)) {
+            if (is_array($var) && array_key_exists('key', $var) && ($var['key'] == $name)) {
                 return $var['value'];
             }
         }

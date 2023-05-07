@@ -12,7 +12,22 @@
         "stevegrunwell/runkit7-installer": "^1.1.1"
     },
     "require": {
-        "jukylin/jaeger-php": "dev-master"
+        "open-telemetry/sdk": "*",
+        "symfony/http-client": "5.4.x-dev",
+        "guzzlehttp/promises": "^1.5@dev",
+        "php-http/message-factory": "^1.0@dev",
+        "nyholm/psr7": "^1.5",
+        "psr/http-client": "1.0.x-dev",
+        "open-telemetry/exporter-zipkin": "dev-main",
+        "open-telemetry/extension-propagator-b3": "dev-main"
     },
-    "minimum-stability": "dev"
+    "minimum-stability": "dev",
+    "config": {
+        "platform": {
+            "php": "7.4"
+        },
+        "allow-plugins": {
+            "php-http/discovery": true
+        }
+    }
 }

@@ -7,18 +7,6 @@ jQuery(document).ready(function () {
 	$("#save").click(save);
 	$("#restore").click(retrieve);
 	$("#fileselect").change(getFileName);
-	/*   $('a[href*="#templatelink"]').click(function(){
-	$("#templateslist").addClass("hidden");
-	$("#templatescontenttype").addClass("hidden");
-	$("#querycontent").removeClass("hidden");
-	$("#querytext").removeClass("hidden");
-	});
-	$('a[href*="#freelink"]').click(function(){
-	$("#templateslist").removeClass("hidden");
-	$("#templatescontenttype").removeClass("hidden");
-	$("#querycontent").addClass("hidden");
-	$("#querytext").addClass("hidden");
-	});*/
 });
 
 function getTemplates(res) {

@@ -1,7 +1,6 @@
 <?php
 
-class HorusException extends Exception {
+class HorusException extends Exception
+{
 
  }
-
-?>

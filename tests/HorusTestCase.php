@@ -3,7 +3,6 @@
 declare(strict_types=1);
 
 use PHPUnit\Framework\TestCase;
-//use HorusCommon;
 
 require_once "lib/horus_utils.php";
 require_once('lib/horus_curlInterface.php');
@@ -27,28 +26,11 @@ class HorusTestCase extends TestCase
     /**
      * Use runkit to create a new header function.
      */
-    public static function setUpBeforeClass(){
-        self::$tracerProvider = HorusCommon::getTracerProvider('Test','mytest');
-        self::$tracer = HorusCommon::getTracer(self::$tracerProvider,'Test','mytest');
-        self::$rootSpan = HorusCommon::getStartSpan(self::$tracer,array(),'Start Test');
-
-        if (!extension_loaded('runkit7')) {
-            error_log("No Extension");
-            return;
-        }
-
-        // First backup the real header function so we can restore it.
-        //runkit_function_rename('header', 'header_old');
-
-        // Now, create a new header function that makes things testable.
-        //runkit_function_add(
-        //    'header',
-        //    '$string,$replace=true,$http_response_code=null',
-        //    'HorusTestCase::$mockheaders[] = array($string,$replace,$http_response_code);'
-        //);
-
-        //runkit_function_add('apache_request_headers','','return HorusTestCase::$mockheaders;');
-        
+    public static function setUpBeforeClass()
+    {
+        self::$tracerProvider = HorusCommon::getTracerProvider('Test', 'mytest');
+        self::$tracer = HorusCommon::getTracer(self::$tracerProvider, 'Test', 'mytest');
+        self::$rootSpan = HorusCommon::getStartSpan(self::$tracer, array(), 'Start Test');
     }
 
     /**
@@ -56,14 +38,7 @@ class HorusTestCase extends TestCase
      */
     public static function tearDownAfterClass()
     {
-        if (!extension_loaded('runkit7')) {
-            return;
-        }
-        // Get rid of our new header function.
-        //runkit_function_remove('header');
 
-        // Move our backup to restore header to its original glory.
-        //runkit_function_rename('header_old', 'header');
 
     }
 
@@ -72,7 +47,7 @@ class HorusTestCase extends TestCase
      */
     protected function setUp()
     {
-        $this->http = new HorusHttp('testHorusHttp', 'php://stdout', 'GREEN',self::$tracer);
+        $this->http = new HorusHttp('testHorusHttp', 'php://stdout', 'GREEN', self::$tracer);
         self::$mockheaders = array();
         self::$curls = array();
         self::$curlCounter = 0;

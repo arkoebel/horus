@@ -8,63 +8,69 @@ class Horus_Curl_Handle
 class Horus_CurlMock implements Horus_CurlInterface
 {
     private $mcurls = array();
-    public $effective_urls = array();
-    private $_lastHandle = -1;
-    private $_lastMultiHandle = -1;
+    public $effectiveUrls = array();
+    private $lastHandle = -1;
+    private $lastMultiHandle = -1;
 
-    private $_mapOptionCounts = array();
-    private $_mapOptions = array();
-    private $_mapResponses = array();
-    private $_mapErrorCodes = array();
-    private $_mapInfo = array();
+    private $mapOptionCounts = array();
+    private $mapOptions = array();
+    private $mapResponses = array();
+    private $mapErrorCodes = array();
+    private $mapInfo = array();
 
 
-    private $_handles = array();
+    private $handles = array();
 
-    public function zz(){
-        return $this->_mapResponses;
+    public function zz()
+    {
+        return $this->mapResponses;
     }
 
     public function curl_close($ch)
     {
-        unset($this->_handles[$ch]);
+        unset($this->handles[$ch]);
     }
 
     public function curl_errno($ch)
     {
-        if(!isset($this->_handles[$ch]))
+        if (!isset($this->handles[$ch])) {
             return 0;
+        }
 
-        return $this->_getErrorCode($this->_handles[$ch]);
+        return $this->_getErrorCode($this->handles[$ch]);
     }
 
     public function curl_error($ch)
     {
         $errno = $this->curl_errno($ch);
-        if (0 == $errno)
+        if (0 == $errno) {
             return '';
-        else
+        } else {
             return self::$errorLookup[$errno];
+        }
     }
 
     public function curl_exec($ch)
     {
-        if(!isset($this->_handles[$ch]))
+        if (!isset($this->handles[$ch])) {
             return false;
+        }
 
         /**
          * @var $handle SAI_Curl_Handle
          */
-        $handle = $this->_handles[$ch];
-        $this->effective_urls[$ch] = $handle->options[CURLOPT_URL];
+        $handle = $this->handles[$ch];
+        $this->effectiveUrls[$ch] = $handle->options[CURLOPT_URL];
         
         $response = $this->_getResponse($handle);
 
-        if($response === null)
+        if ($response === null) {
             return false;
+        }
 
-        if($handle->options[CURLOPT_RETURNTRANSFER])
+        if ($handle->options[CURLOPT_RETURNTRANSFER]) {
             return $response;
+        }
 
         echo $response;
         return true;
@@ -72,30 +78,31 @@ class Horus_CurlMock implements Horus_CurlInterface
 
     public function curl_getinfo($ch, $opt = 0)
     {
-        // TODO: Include logic to build CURLINFO_EFFECTIVE_URL?
-        if(!isset($this->_handles[$ch]))
-            trigger_error(__FUNCTION__.'(): '.$ch.' is not a valid cURL handle resource', E_USER_WARNING);
+        if (!isset($this->handles[$ch])) {
+            trigger_error(__FUNCTION__.'(): ' . $ch . ' is not a valid cURL handle resource', E_USER_WARNING);
+        }
 
-        if($opt == 0)
-            return $this->_getInfoArray($this->_handles[$ch]);
-
-        return $this->_getInfo($this->_handles[$ch], $opt);
+        if ($opt == 0) {
+            return $this->_getInfoArray($this->handles[$ch]);
+        } else {
+            return $this->_getInfo($this->handles[$ch], $opt);
+        }
     }
 
     public function curl_init($url = null)
     {
-        $ch = ++$this->_lastHandle;
+        $ch = ++$this->lastHandle;
 
         $handle = new Horus_Curl_Handle();
         $handle->options = array(
             CURLOPT_RETURNTRANSFER => false
         );
 
-        $this->_handles[$ch] = $handle;
+        $this->handles[$ch] = $handle;
 
-        if($url !== null){
+        if ($url !== null) {
             $this->curl_setopt($ch, CURLOPT_URL, $url);
-            $this->effective_urls[$ch] = $url;
+            $this->effectiveUrls[$ch] = $url;
         }
         return $ch;
     }
@@ -104,7 +111,7 @@ class Horus_CurlMock implements Horus_CurlInterface
     {
         
         $this->mcurls[$mh][$ch]=1;
-        error_log('Multi add handle ' . print_r($this->mcurls,true)) ;
+        error_log('Multi add handle ' . print_r($this->mcurls, true)) ;
        return 0;
     }
 
@@ -113,23 +120,23 @@ class Horus_CurlMock implements Horus_CurlInterface
         unset($this->mcurls[$mh]);
     }
 
-    public function curl_multi_exec($mh, &$still_running)
+    public function curl_multi_exec($mh, &$stillRunning)
     {
-        foreach($this->mcurls[$mh] as $ch){
-            $this->effective_urls[$ch] = $this->_handles[$ch]->options[CURLOPT_URL];
+        foreach ($this->mcurls[$mh] as $ch) {
+            $this->effectiveUrls[$ch] = $this->handles[$ch]->options[CURLOPT_URL];
         }
-        $still_running = false;
+        $stillRunning = false;
         return CURLM_OK;
     }
 
     public function curl_multi_getcontent($ch)
     {
-        return $this->_getResponse($this->_handles[$ch]);
+        return $this->_getResponse($this->handles[$ch]);
     }
 
     public function curl_multi_init()
     {
-        $ch = ++$this->_lastMultiHandle;
+        $ch = ++$this->lastMultiHandle;
         $this->mcurls[$ch] = array();
         return 0;
     }
@@ -147,20 +154,21 @@ class Horus_CurlMock implements Horus_CurlInterface
 
     public function curl_setopt_array($ch, $options)
     {
-        foreach($options as $option => $value)
-        {
-            if(!$this->curl_setopt($ch, $option, $value))
+        foreach ($options as $option => $value) {
+            if (!$this->curl_setopt($ch, $option, $value)) {
                 return false;
+            }
         }
         return true;
     }
 
     public function curl_setopt($ch, $option, $value)
     {
-        if(!isset($this->_handles[$ch]))
+        if (!isset($this->handles[$ch])) {
             return false;
+        }
 
-        $this->_handles[$ch]->options[$option] = $value;
+        $this->handles[$ch]->options[$option] = $value;
 
         return true;
     }
@@ -173,19 +181,19 @@ class Horus_CurlMock implements Horus_CurlInterface
     public function setResponse($expectedResponse, $requiredOptions = array())
     {
         $hash = $this->_getHashAndSetOptionMaps($requiredOptions);
-        $this->_mapResponses[$hash] = $expectedResponse;
+        $this->mapResponses[$hash] = $expectedResponse;
     }
 
     public function setErrorCode($expectedErrorCode, $requiredOptions = array())
     {
         $hash = $this->_getHashAndSetOptionMaps($requiredOptions);
-        $this->_mapErrorCodes[$hash] = $expectedErrorCode;
+        $this->mapErrorCodes[$hash] = $expectedErrorCode;
     }
 
     public function setInfo($expectedInfo, $requiredOptions = array())
     {
         $hash = $this->_getHashAndSetOptionMaps($requiredOptions);
-        $this->_mapInfo[$hash] = $expectedInfo;
+        $this->mapInfo[$hash] = $expectedInfo;
     }
 
     private function _getHashAndSetOptionMaps($requiredOptions)
@@ -193,9 +201,9 @@ class Horus_CurlMock implements Horus_CurlInterface
         ksort($requiredOptions);
         $hash = md5(http_build_query($requiredOptions));
 
-        $this->_mapOptionCounts[$hash] = count($requiredOptions);
-        arsort($this->_mapOptionCounts);
-        $this->_mapOptions[$hash] = $requiredOptions;
+        $this->mapOptionCounts[$hash] = count($requiredOptions);
+        arsort($this->mapOptionCounts);
+        $this->mapOptions[$hash] = $requiredOptions;
         return $hash;
     }
 
@@ -203,10 +211,11 @@ class Horus_CurlMock implements Horus_CurlInterface
     {
         $response = false;
         
-        $key = $this->_determineKey($handle, "_mapResponses");
+        $key = $this->_determineKey($handle, "mapResponses");
 
-        if($key !== null)
-            $response = $this->_mapResponses[$key];
+        if ($key !== null) {
+            $response = $this->mapResponses[$key];
+        }
 
         return $response;
     }
@@ -215,10 +224,11 @@ class Horus_CurlMock implements Horus_CurlInterface
     {
         $errorCode = 0;
 
-        $key = $this->_determineKey($handle, "_mapErrorCodes");
+        $key = $this->_determineKey($handle, "mapErrorCodes");
 
-        if($key !== null)
-            $errorCode = $this->_mapErrorCodes[$key];
+        if ($key !== null) {
+            $errorCode = $this->mapErrorCodes[$key];
+        }
 
         return $errorCode;
     }
@@ -227,12 +237,13 @@ class Horus_CurlMock implements Horus_CurlInterface
     {
         $info = null;
 
-        $key = $this->_determineKey($handle, "_mapInfo");
+        $key = $this->_determineKey($handle, "mapInfo");
         
-        if($key !== null && isset($this->_mapInfo[$key][$opt]))
-            $info = ($this->_mapInfo[$key][$opt]);
-        else
+        if ($key !== null && isset($this->mapInfo[$key][$opt])) {
+            $info = ($this->mapInfo[$key][$opt]);
+        } else {
             $info='';
+        }
         return $info;
     }
 
@@ -240,17 +251,14 @@ class Horus_CurlMock implements Horus_CurlInterface
     {
         $infoArray = array();
 
-        foreach(self::$infoLookup as $strKey)
-        {
+        foreach (self::$infoLookup as $strKey) {
             $infoArray[$strKey] = '';
         }
 
-        $handleKey = $this->_determineKey($handle, "_mapInfo");
+        $handleKey = $this->_determineKey($handle, "mapInfo");
 
-        if($handleKey !== null)
-        {
-            foreach($this->_mapInfo[$handleKey] as $intKey => $value)
-            {
+        if ($handleKey !== null) {
+            foreach ($this->mapInfo[$handleKey] as $intKey => $value) {
                 $strKey = self::$infoLookup[$intKey];
                 $infoArray[$strKey] = $value;
             }
@@ -261,23 +269,21 @@ class Horus_CurlMock implements Horus_CurlInterface
 
     private function _determineKey($handle, $map)
     {
-        // TODO: Treat URL option separately, so that order of parameters does not matter
-        // TODO: Treat HEADER option as array of individual options
         $returnValue = null;
        
         $zoptions = $handle->options;
-        foreach($this->_mapOptionCounts as $hash => $optionCount)
-        {
-            foreach($this->_mapOptions[$hash] as $option => $value)
-            {
-                if(!isset($zoptions[$option]) || $zoptions[$option] != $value)
+        foreach ($this->mapOptionCounts as $hash => $optionCount) {
+            foreach ($this->mapOptions[$hash] as $option => $value) {
+                if (!isset($zoptions[$option]) || $zoptions[$option] != $value) {
                     continue 2;
+                }
             }
 
-            // We need this check, because the element in _mapOptionCounts might have been created
+            // We need this check, because the element in mapOptionCounts might have been created
             // for a different type of output. In this case, we need to continue searching
-            if(!isset($this->{$map}[$hash]))
+            if (!isset($this->{$map}[$hash])) {
                 continue;
+            }
 
             $returnValue = $hash;
             break;
@@ -334,7 +340,7 @@ class Horus_CurlMock implements Horus_CurlInterface
         25 => 'CURLE_UPLOAD_FAILED',
         26 => 'CURLE_READ_ERROR',
         27 => 'CURLE_OUT_OF_MEMORY',
-        28 => 'CURLE_OPERATION_TIMEOUTED', 
+        28 => 'CURLE_OPERATION_TIMEOUTED',
         30 => 'CURLE_FTP_PORT_FAILED',
         31 => 'CURLE_FTP_COULDNT_USE_REST',
         33 => 'CURLE_RANGE_ERROR',

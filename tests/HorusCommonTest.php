@@ -28,7 +28,20 @@ final class HorusCommonTest extends TestCase
 
     public function testFormatQueryString():void
     {
-        $params = array(array('key'=>"a",'value'=>1),array('key'=>"b",'value'=>2),array('key'=>"c", 'value'=>"A AA"));
+        $params = array(
+            array(
+                'key'=>"a",
+                'value'=>1
+            ),
+            array(
+                'key'=>"b",
+                'value'=>2
+            ),
+            array(
+                'key'=>"c",
+                'value'=>"A AA"
+            )
+        );
         $url1 = "http://localhost:9000/test";
         $url2 = $url1 . "?zz=1&qq=2";
         $this->assertEquals(
@@ -72,10 +85,10 @@ final class HorusCommonTest extends TestCase
             'Test 4 with empty params'
         );
         $paramsUnsorted = array(
-            array('key'=>'d','value'=>'1'),
-            array('key'=>'b','value'=>'2'),
-            array('key'=>'a','value'=>'3'),
-            array('key'=>'c','value'=>'4')
+            array('key'=>'d', 'value'=>'1'),
+            array('key'=>'b', 'value'=>'2'),
+            array('key'=>'a', 'value'=>'3'),
+            array('key'=>'c', 'value'=>'4')
         );
         $this->assertEquals(
             '?a=3&b=2&c=4&d=1',
@@ -83,11 +96,11 @@ final class HorusCommonTest extends TestCase
             'Test with parameters out of order'
         );
         $paramsDuplicates = array(
-            array('key'=>'d','value'=>'1'),
-            array('key'=>'b','value'=>'2'),
-            array('key'=>'a','value'=>'3'),
-            array('key'=>'c','value'=>'4'),
-            array('key'=>'a','value'=>'1')
+            array('key'=>'d', 'value'=>'1'),
+            array('key'=>'b', 'value'=>'2'),
+            array('key'=>'a', 'value'=>'3'),
+            array('key'=>'c', 'value'=>'4'),
+            array('key'=>'a', 'value'=>'1')
         );
         $this->assertEquals(
             '?a=1&b=2&c=4&d=1',

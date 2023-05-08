@@ -2,8 +2,6 @@
 
 declare(strict_types=1);
 
-use PHPUnit\Framework\TestCase;
-//use HorusCommon;
 require_once('lib/horus_http.php');
 require_once('lib/horus_common.php');
 require_once('lib/horus_xml.php');
@@ -13,221 +11,377 @@ require_once('lib/horus_exception.php');
 class HorusXmlTest extends HorusTestCase
 {
 
-    function testNotXmlInput(): void
+    public function testNotXmlInput(): void
     {
-        $xmlinject = new HorusXml('1234', null,'GREEN',self::$tracer);
+        $xmlinject = new HorusXml('1234', null, 'GREEN', self::$tracer);
         $input = 'not xml!';
-        try {   
-            $res = $xmlinject->doInject($input, 'application/xml', '', array(), 'application/xml', array(), 'templates/genericError.xml','',self::$rootSpan);
+        try {
+            $xmlinject->doInject(
+                $input,
+                HorusCommon::XML_CT,
+                '',
+                array(),
+                HorusCommon::XML_CT,
+                array(),
+                'templates/genericError.xml',
+                '',
+                self::$rootSpan
+            );
         } catch (HorusException $e) {
             $xml = simplexml_load_string($e->getMessage());
 
             $this::assertNotFalse($xml, 'Output should be XML');
             $namespaces = $xml->getDocNamespaces();
-            $this::assertEquals($namespaces, array('' => 'urn:iso:std:iso:20022:tech:xsd:DRAFT2admi.007.001.01'), 'Return should be in the admin namespace');
+            $this::assertEquals(
+                array('' => 'urn:iso:std:iso:20022:tech:xsd:DRAFT2admi.007.001.01'),
+                $namespaces,
+                'Return should be in the admin namespace'
+            );
         }
     }
 
-    function testNoResultFound(): void
+    public function testNoResultFound(): void
     {
-        $xmlinject = new HorusXml('1234', null,'GREEN',self::$tracer);
-        $input = '<Document xmlns="urn:iso:std:iso:20022:tech:xsd:DRAFT2admi.007.001.01"><RctAck><MsgId><MsgId>342678185325910</MsgId></MsgId><Rpt><RltdRef><Ref>UNKNOWN</Ref></RltdRef><ReqHdlg><StsCd>T098</StsCd><Desc>Input XML not properly formatted.</Desc></ReqHdlg></Rpt></RctAck></Document>';
-        $matches = json_decode('[{
+        $xmlinject = new HorusXml('1234', null, 'GREEN', self::$tracer);
+        $input = '<Document xmlns="urn:iso:std:iso:20022:tech:xsd:DRAFT2admi.007.001.01"><RctAck>' .
+            '<MsgId><MsgId>342678185325910</MsgId></MsgId><Rpt><RltdRef><Ref>UNKNOWN</Ref></RltdRef>' .
+            '<ReqHdlg><StsCd>T098</StsCd><Desc>Input XML not properly formatted.</Desc></ReqHdlg></Rpt>' .
+            '</RctAck></Document>';
+        $matches = json_decode(
+            '[{
             "query": "pacs.008.001.02.xsd",
             "comment": "Cas pour acquisition fixe pacs.008 : pacs.008",
             "responseFormat": "pacs.008.001.02.xsd",
             "responseTemplate": "pacs.008_1.xml",
             "errorTemplate": "errorTemplate.xml"
-          },
-          {
+            },
+            {
             "query": "pacs.008.001.02.xsd",
             "comment": "Cas pour reception fixe pacs.008",
             "responseFormat": "pacs.008.001.02.xsd",
             "responseTemplate": "Rpacs008IP-01-RT1.xml",
             "errorTemplate": "errorTemplate.xml"
-          }]', true);
+            }]',
+            true
+        );
 
         try {
-            //$this->expectException(HorusException::class);
-            $res = $xmlinject->doInject($input, 'application/xml', '', $matches, 'application/xml', array(), 'templates/genericError.xml','',self::$rootSpan);
+            $xmlinject->doInject(
+                $input,
+                HorusCommon::XML_CT,
+                '',
+                $matches,
+                HorusCommon::XML_CT,
+                array(),
+                'templates/genericError.xml',
+                '',
+                self::$rootSpan
+            );
         } catch (HorusException $e) {
 
             $xml = simplexml_load_string($e->getMessage());
 
             $this::assertNotFalse($xml, 'Output should be XML');
             $namespaces = $xml->getDocNamespaces();
-            $this::assertEquals($namespaces, array('' => 'urn:iso:std:iso:20022:tech:xsd:DRAFT2admi.007.001.01'), 'Return should be in the admin namespace');
+            $this::assertEquals(
+                array('' => 'urn:iso:std:iso:20022:tech:xsd:DRAFT2admi.007.001.01'),
+                $namespaces,
+                'Return should be in the admin namespace'
+            );
             $xml->registerXPathNamespace('a', 'urn:iso:std:iso:20022:tech:xsd:DRAFT2admi.007.001.01');
             $node = $xml->xpath('/a:Document/a:RctAck/a:Rpt/a:ReqHdlg/a:Desc');
 
-            $this::assertEquals((string) $node[0], "Unable to find appropriate response.\n", 'Should return Unable to find appropriate response');
+            $this::assertEquals(
+                "Unable to find appropriate response.\n",
+                (string) $node[0],
+                'Should return Unable to find appropriate response'
+            );
         }
     }
 
-    function testFindSchemaFound(): void
+    public function testFindSchemaFound(): void
     {
-        $xmlinject = new HorusXml('XXXX', null,'GREEN',self::$tracer);
-        $input = '<Document xmlns="urn:iso:std:iso:20022:tech:xsd:pacs.002.001.03"><FIToFIPmtStsRpt><GrpHdr><MsgId>1234567890</MsgId><CreDtTm>2012-12-13T12:12:12.000Z</CreDtTm><InstgAgt><FinInstnId><BIC>BNPAFRPPXXX</BIC></FinInstnId></InstgAgt><InstdAgt><FinInstnId><BIC>BNPAFRPPXXX</BIC></FinInstnId></InstdAgt></GrpHdr><OrgnlGrpInfAndSts><OrgnlMsgId>1234567890</OrgnlMsgId><OrgnlMsgNmId>pacs.008</OrgnlMsgNmId><GrpSts>ACCP</GrpSts></OrgnlGrpInfAndSts><TxInfAndSts><StsId>1234567890</StsId><OrgnlEndToEndId>1234567890</OrgnlEndToEndId><OrgnlTxId>1234567890</OrgnlTxId><AccptncDtTm>2012-12-13T12:12:12.000Z</AccptncDtTm><OrgnlTxRef><PmtTpInf><SvcLvl><Cd>SEPA</Cd></SvcLvl><LclInstrm><Cd>INST</Cd></LclInstrm><CtgyPurp><Cd>PURP</Cd></CtgyPurp></PmtTpInf><DbtrAgt><FinInstnId><BIC>BNPAFRPPXXX</BIC></FinInstnId></DbtrAgt></OrgnlTxRef></TxInfAndSts></FIToFIPmtStsRpt></Document>';
+        $xmlinject = new HorusXml('XXXX', null, 'GREEN', self::$tracer);
+        $input = '<Document xmlns="urn:iso:std:iso:20022:tech:xsd:pacs.002.001.03">' .
+            '<FIToFIPmtStsRpt><GrpHdr><MsgId>1234567890</MsgId><CreDtTm>2012-12-13T12:12:12.000Z</CreDtTm>' .
+            '<InstgAgt><FinInstnId><BIC>BNPAFRPPXXX</BIC></FinInstnId></InstgAgt><InstdAgt><FinInstnId>' .
+            '<BIC>BNPAFRPPXXX</BIC></FinInstnId></InstdAgt></GrpHdr><OrgnlGrpInfAndSts>' .
+            '<OrgnlMsgId>1234567890</OrgnlMsgId><OrgnlMsgNmId>pacs.008</OrgnlMsgNmId><GrpSts>ACCP</GrpSts>' .
+            '</OrgnlGrpInfAndSts><TxInfAndSts><StsId>1234567890</StsId><OrgnlEndToEndId>1234567890</OrgnlEndToEndId>' .
+            '<OrgnlTxId>1234567890</OrgnlTxId><AccptncDtTm>2012-12-13T12:12:12.000Z</AccptncDtTm><OrgnlTxRef>' .
+            '<PmtTpInf><SvcLvl><Cd>SEPA</Cd></SvcLvl><LclInstrm><Cd>INST</Cd></LclInstrm><CtgyPurp><Cd>PURP</Cd>' .
+            '</CtgyPurp></PmtTpInf><DbtrAgt><FinInstnId><BIC>BNPAFRPPXXX</BIC></FinInstnId></DbtrAgt></OrgnlTxRef>' .
+            '</TxInfAndSts></FIToFIPmtStsRpt></Document>';
         $xsd = $xmlinject->findSchema(simplexml_load_string($input));
-        $this::assertEquals($xsd, 'pacs.002.001.03.xsd');
+        $this::assertEquals('pacs.002.001.03.xsd', $xsd, 'Should extract the right schema.');
     }
 
-    function testFindSchemaNotFound(): void
+    public function testFindSchemaNotFound(): void
     {
-        $xmlinject = new HorusXml('XXXX', null,'GREEN',self::$tracer);
-        $input = '<Document xmlns="urn:iso:std:iso:20022:tech:xsd:pacs.XXX.YYY.ZZ"><FIToFIPmtStsRpt><GrpHdr><MsgId>1234567890</MsgId><CreDtTm>2012-12-13T12:12:12.000Z</CreDtTm><InstgAgt><FinInstnId><BIC>BNPAFRPPXXX</BIC></FinInstnId></InstgAgt><InstdAgt><FinInstnId><BIC>BNPAFRPPXXX</BIC></FinInstnId></InstdAgt></GrpHdr><OrgnlGrpInfAndSts><OrgnlMsgId>1234567890</OrgnlMsgId><OrgnlMsgNmId>pacs.008</OrgnlMsgNmId><GrpSts>ACCP</GrpSts></OrgnlGrpInfAndSts><TxInfAndSts><StsId>1234567890</StsId><OrgnlEndToEndId>1234567890</OrgnlEndToEndId><OrgnlTxId>1234567890</OrgnlTxId><AccptncDtTm>2012-12-13T12:12:12.000Z</AccptncDtTm><OrgnlTxRef><PmtTpInf><SvcLvl><Cd>SEPA</Cd></SvcLvl><LclInstrm><Cd>INST</Cd></LclInstrm><CtgyPurp><Cd>PURP</Cd></CtgyPurp></PmtTpInf><DbtrAgt><FinInstnId><BIC>BNPAFRPPXXX</BIC></FinInstnId></DbtrAgt></OrgnlTxRef></TxInfAndSts></FIToFIPmtStsRpt></Document>';
+        $xmlinject = new HorusXml('XXXX', null, 'GREEN', self::$tracer);
+        $input = '<Document xmlns="urn:iso:std:iso:20022:tech:xsd:pacs.XXX.YYY.ZZ"><FIToFIPmtStsRpt><GrpHdr>' .
+            '<MsgId>1234567890</MsgId><CreDtTm>2012-12-13T12:12:12.000Z</CreDtTm><InstgAgt><FinInstnId>' .
+            '<BIC>BNPAFRPPXXX</BIC></FinInstnId></InstgAgt><InstdAgt><FinInstnId><BIC>BNPAFRPPXXX</BIC>' .
+            '</FinInstnId></InstdAgt></GrpHdr><OrgnlGrpInfAndSts><OrgnlMsgId>1234567890</OrgnlMsgId>' .
+            '<OrgnlMsgNmId>pacs.008</OrgnlMsgNmId><GrpSts>ACCP</GrpSts></OrgnlGrpInfAndSts><TxInfAndSts>' .
+            '<StsId>1234567890</StsId><OrgnlEndToEndId>1234567890</OrgnlEndToEndId><OrgnlTxId>1234567890</OrgnlTxId>' .
+            '<AccptncDtTm>2012-12-13T12:12:12.000Z</AccptncDtTm><OrgnlTxRef><PmtTpInf><SvcLvl><Cd>SEPA</Cd>' .
+            '</SvcLvl><LclInstrm><Cd>INST</Cd></LclInstrm><CtgyPurp><Cd>PURP</Cd></CtgyPurp></PmtTpInf><DbtrAgt>' .
+            '<FinInstnId><BIC>BNPAFRPPXXX</BIC></FinInstnId></DbtrAgt></OrgnlTxRef></TxInfAndSts></FIToFIPmtStsRpt>' .
+            '</Document>';
         $xsd = $xmlinject->findSchema(simplexml_load_string($input));
-        $this::assertEquals($xsd, '');
+        $this::assertEquals('', $xsd, 'XSD should be empty.');
     }
 
-    function testFindSchemaNotValidated(): void
+    public function testFindSchemaNotValidated(): void
     {
-        $xmlinject = new HorusXml('XXXX', null,'GREEN',self::$tracer);
-        $input = '<Document xmlns="urn:iso:std:iso:20022:tech:xsd:pacs.002.001.03IPS"><FIToFIPmtStsRpt><GrpHdr><MsgId>1234567890</MsgId><CreDtTm>2012-12-13T12:12:12.000Z</CreDtTm><InstgAgt><FinInstnId><BIC>BNPAFRPPXXX</BIC></FinInstnId></InstgAgt><InstdAgt><FinInstnId><BIC>BNPAFRPPXXX</BIC></FinInstnId></InstdAgt></GrpHdr><OrgnlGrpInfAndSts><OrgnlMsgId>1234567890</OrgnlMsgId><OrgnlMsgNmId>pacs.008</OrgnlMsgNmId><GrpSts>ACCP</GrpSts></OrgnlGrpInfAndSts><TxInfAndSts><StsId>1234567890</StsId><OrgnlEndToEndId>1234567890</OrgnlEndToEndId><OrgnlTxId>1234567890</OrgnlTxId><AccptncDtTm>2012-12-13T12:12:12.000Z</AccptncDtTm><OrgnlTxRef><PmtTpInf><SvcLvl><Cd>SEPA</Cd></SvcLvl><LclInstrm><Cd>INST</Cd></LclInstrm><CtgyPurp><Cd>PURP</Cd></CtgyPurp></PmtTpInf><DbtrAgt><FinInstnId><BIC>BNPAFRPPXXX</BIC></FinInstnId></DbtrAgt></OrgnlTxRef></TxInfAndSts></FIToFIPmtStsRpt></Document>';
+        $xmlinject = new HorusXml('XXXX', null, 'GREEN', self::$tracer);
+        $input = '<Document xmlns="urn:iso:std:iso:20022:tech:xsd:pacs.002.001.03IPS"><FIToFIPmtStsRpt><GrpHdr>' .
+            '<MsgId>1234567890</MsgId><CreDtTm>2012-12-13T12:12:12.000Z</CreDtTm><InstgAgt><FinInstnId>' .
+            '<BIC>BNPAFRPPXXX</BIC></FinInstnId></InstgAgt><InstdAgt><FinInstnId><BIC>BNPAFRPPXXX</BIC>' .
+            '</FinInstnId></InstdAgt></GrpHdr><OrgnlGrpInfAndSts><OrgnlMsgId>1234567890</OrgnlMsgId>' .
+            '<OrgnlMsgNmId>pacs.008</OrgnlMsgNmId><GrpSts>ACCP</GrpSts></OrgnlGrpInfAndSts><TxInfAndSts>' .
+            '<StsId>1234567890</StsId><OrgnlEndToEndId>1234567890</OrgnlEndToEndId><OrgnlTxId>1234567890</OrgnlTxId>' .
+            '<AccptncDtTm>2012-12-13T12:12:12.000Z</AccptncDtTm><OrgnlTxRef><PmtTpInf><SvcLvl><Cd>SEPA</Cd></SvcLvl>' .
+            '<LclInstrm><Cd>INST</Cd></LclInstrm><CtgyPurp><Cd>PURP</Cd></CtgyPurp></PmtTpInf><DbtrAgt><FinInstnId>' .
+            '<BIC>BNPAFRPPXXX</BIC></FinInstnId></DbtrAgt></OrgnlTxRef></TxInfAndSts></FIToFIPmtStsRpt></Document>';
         $xsd = $xmlinject->findSchema(simplexml_load_string($input));
-        $this::assertEquals($xsd, '');
+        $this::assertEquals('', $xsd, 'XSD should be empty.');
     }
 
-    function testGetVariables(): void
+    public function testGetVariables(): void
     {
-        $xmlinject = new HorusXml('ZZZZ', null,'GREEN',self::$tracer);
-        $input = '<Document xmlns="urn:iso:std:iso:20022:tech:xsd:pacs.002.001.03"><FIToFIPmtStsRpt><GrpHdr><MsgId>1234567890</MsgId><CreDtTm>2012-12-13T12:12:12.000Z</CreDtTm><InstgAgt><FinInstnId><BIC>BNPAFRPPXXX</BIC></FinInstnId></InstgAgt><InstdAgt><FinInstnId><BIC>BNPAFRPPXXX</BIC></FinInstnId></InstdAgt></GrpHdr><OrgnlGrpInfAndSts><OrgnlMsgId>1234567890</OrgnlMsgId><OrgnlMsgNmId>pacs.008</OrgnlMsgNmId><GrpSts>ACCP</GrpSts></OrgnlGrpInfAndSts><TxInfAndSts><StsId>1234567890</StsId><OrgnlEndToEndId>1234567890</OrgnlEndToEndId><OrgnlTxId>1234567890</OrgnlTxId><AccptncDtTm>2012-12-13T12:12:12.000Z</AccptncDtTm><OrgnlTxRef><PmtTpInf><SvcLvl><Cd>SEPA</Cd></SvcLvl><LclInstrm><Cd>INST</Cd></LclInstrm><CtgyPurp><Cd>PURP</Cd></CtgyPurp></PmtTpInf><DbtrAgt><FinInstnId><BIC>BNPAFRPPXXX</BIC></FinInstnId></DbtrAgt></OrgnlTxRef></TxInfAndSts></FIToFIPmtStsRpt></Document>';
+        $xmlinject = new HorusXml('ZZZZ', null, 'GREEN', self::$tracer);
+        $input = '<Document xmlns="urn:iso:std:iso:20022:tech:xsd:pacs.002.001.03"><FIToFIPmtStsRpt><GrpHdr>' .
+            '<MsgId>1234567890</MsgId><CreDtTm>2012-12-13T12:12:12.000Z</CreDtTm><InstgAgt><FinInstnId>' .
+            '<BIC>BNPAFRPPXXX</BIC></FinInstnId></InstgAgt><InstdAgt><FinInstnId><BIC>BNPAFRPPXXX</BIC>' .
+            '</FinInstnId></InstdAgt></GrpHdr><OrgnlGrpInfAndSts><OrgnlMsgId>1234567890</OrgnlMsgId>' .
+            '<OrgnlMsgNmId>pacs.008</OrgnlMsgNmId><GrpSts>ACCP</GrpSts></OrgnlGrpInfAndSts><TxInfAndSts>' .
+            '<StsId>1234567890</StsId><OrgnlEndToEndId>1234567890</OrgnlEndToEndId><OrgnlTxId>1234567890</OrgnlTxId>' .
+            '<AccptncDtTm>2012-12-13T12:12:12.000Z</AccptncDtTm><OrgnlTxRef><PmtTpInf><SvcLvl><Cd>SEPA</Cd>' .
+            '</SvcLvl><LclInstrm><Cd>INST</Cd></LclInstrm><CtgyPurp><Cd>PURP</Cd></CtgyPurp></PmtTpInf><DbtrAgt>' .
+            '<FinInstnId><BIC>BNPAFRPPXXX</BIC></FinInstnId></DbtrAgt></OrgnlTxRef></TxInfAndSts></FIToFIPmtStsRpt>' .
+            '</Document>';
         $matches = '[{
             "query": "pacs.002.001.03.xsd",
             "comment": "Cas pour acquisition fixe pacs.008 : pacs.008",
             "responseFormat": "pacs.008.001.02.xsd",
             "responseTemplate": "pacs.008_1.xml",
             "errorTemplate": "errorTemplate.xml",
-            "parameters" : {    "msgid":"/u:Document/u:FIToFIPmtStsRpt/u:GrpHdr/u:MsgId", 
-                                "bic":"/u:Document/u:FIToFIPmtStsRpt/u:GrpHdr/u:InstgAgt/u:FinInstnId/u:BIC", 
+            "parameters" : {    "msgid":"/u:Document/u:FIToFIPmtStsRpt/u:GrpHdr/u:MsgId",
+                                "bic":"/u:Document/u:FIToFIPmtStsRpt/u:GrpHdr/u:InstgAgt/u:FinInstnId/u:BIC",
                                 "test":"/u:Document/u:FIToFIPmtStsRpt/u:XXX",
                                 "fragment":"/u:Document/u:FIToFIPmtStsRpt/u:GrpHdr/u:InstgAgt",
                                 "whole": "/u:Document"}
           }]';
         $xml = simplexml_load_string($input);
-        $namespaces = $xml->getDocNamespaces();
         $xml->registerXPathNamespace('u', 'urn:iso:std:iso:20022:tech:xsd:pacs.002.001.03');
         $vars = $xmlinject->getVariables($xml, json_decode($matches, true), 0);
-        $expectedvars = array('msgid' => '1234567890', 
-                                'bic' => 'BNPAFRPPXXX', 
-                                'test' => '', 
-                                'fragment' => '<InstgAgt><FinInstnId><BIC>BNPAFRPPXXX</BIC></FinInstnId></InstgAgt>',
-                                'whole' => '<?xml version="1.0"?>
-<Document xmlns="urn:iso:std:iso:20022:tech:xsd:pacs.002.001.03"><FIToFIPmtStsRpt><GrpHdr><MsgId>1234567890</MsgId><CreDtTm>2012-12-13T12:12:12.000Z</CreDtTm><InstgAgt><FinInstnId><BIC>BNPAFRPPXXX</BIC></FinInstnId></InstgAgt><InstdAgt><FinInstnId><BIC>BNPAFRPPXXX</BIC></FinInstnId></InstdAgt></GrpHdr><OrgnlGrpInfAndSts><OrgnlMsgId>1234567890</OrgnlMsgId><OrgnlMsgNmId>pacs.008</OrgnlMsgNmId><GrpSts>ACCP</GrpSts></OrgnlGrpInfAndSts><TxInfAndSts><StsId>1234567890</StsId><OrgnlEndToEndId>1234567890</OrgnlEndToEndId><OrgnlTxId>1234567890</OrgnlTxId><AccptncDtTm>2012-12-13T12:12:12.000Z</AccptncDtTm><OrgnlTxRef><PmtTpInf><SvcLvl><Cd>SEPA</Cd></SvcLvl><LclInstrm><Cd>INST</Cd></LclInstrm><CtgyPurp><Cd>PURP</Cd></CtgyPurp></PmtTpInf><DbtrAgt><FinInstnId><BIC>BNPAFRPPXXX</BIC></FinInstnId></DbtrAgt></OrgnlTxRef></TxInfAndSts></FIToFIPmtStsRpt></Document>
-');
+        $expectedvars = array(
+            'msgid' => '1234567890',
+            'bic' => 'BNPAFRPPXXX',
+            'test' => '',
+            'fragment' => '<InstgAgt><FinInstnId><BIC>BNPAFRPPXXX</BIC></FinInstnId></InstgAgt>',
+            'whole' => '<?xml version="1.0"?>' . "\n" .
+                    '<Document xmlns="urn:iso:std:iso:20022:tech:xsd:pacs.002.001.03"><FIToFIPmtStsRpt><GrpHdr>' .
+                    '<MsgId>1234567890</MsgId><CreDtTm>2012-12-13T12:12:12.000Z</CreDtTm><InstgAgt><FinInstnId>' .
+                    '<BIC>BNPAFRPPXXX</BIC></FinInstnId></InstgAgt><InstdAgt><FinInstnId><BIC>BNPAFRPPXXX</BIC>' .
+                    '</FinInstnId></InstdAgt></GrpHdr><OrgnlGrpInfAndSts><OrgnlMsgId>1234567890</OrgnlMsgId>' .
+                    '<OrgnlMsgNmId>pacs.008</OrgnlMsgNmId><GrpSts>ACCP</GrpSts></OrgnlGrpInfAndSts><TxInfAndSts>' .
+                    '<StsId>1234567890</StsId><OrgnlEndToEndId>1234567890</OrgnlEndToEndId>' .
+                    '<OrgnlTxId>1234567890</OrgnlTxId><AccptncDtTm>2012-12-13T12:12:12.000Z</AccptncDtTm>' .
+                    '<OrgnlTxRef><PmtTpInf><SvcLvl><Cd>SEPA</Cd></SvcLvl><LclInstrm><Cd>INST</Cd></LclInstrm>' .
+                    '<CtgyPurp><Cd>PURP</Cd></CtgyPurp></PmtTpInf><DbtrAgt><FinInstnId><BIC>BNPAFRPPXXX</BIC>' .
+                    '</FinInstnId></DbtrAgt></OrgnlTxRef></TxInfAndSts></FIToFIPmtStsRpt></Document>');
         $this::assertEquals($expectedvars, $vars);
     }
 
-    function testGetResponseError(): void
+    public function testGetResponseError(): void
     {
-        $xmlinject = new HorusXml('TTTT', null,'GREEN',self::$tracer);
-        $vars = array('id' => 'id12345', 'txid' => 'txid12345', 'endtoendid' => 'endtoendid', 'txdt' => '2019-10-17T22:00:00.000Z', 'frombic' => 'BNPAFRPPXXX', 'tobic' => 'BNPAFRPPXXX21111111111111111111111111');
+        $xmlinject = new HorusXml('TTTT', null, 'GREEN', self::$tracer);
+        $vars = array(
+            'id' => 'id12345',
+            'txid' => 'txid12345',
+            'endtoendid' => 'endtoendid',
+            'txdt' => '2019-10-17T22:00:00.000Z',
+            'frombic' => 'BNPAFRPPXXX',
+            'tobic' => 'BNPAFRPPXXX21111111111111111111111111'
+        );
         $templates = array('pacs.002_ACCP.xml', 'pacs.002_RJCT.xml');
         $formats = array('pacs.002.001.03.xsd', 'pacs.002.001.03.xsd');
-        $preferredType = 'application/xml';
+        $preferredType = HorusCommon::XML_CT;
         $errorTemplate = 'templates/genericError.xml';
-        $proxy_mode = '';
 
         $this->expectException(HorusException::class);
 
-        $xmlinject->getResponses($templates, $vars, $formats, $preferredType, $errorTemplate, self::$rootSpan,true);
+        $xmlinject->getResponses($templates, $vars, $formats, $preferredType, $errorTemplate, self::$rootSpan, true);
     }
 
-    function testGetResponses(): void
+    public function testGetResponses(): void
     {
-        $xmlinject = new HorusXml('TTTT', null,'GREEN',self::$tracer);
-        $vars = array('id' => 'id12345', 'txid' => 'txid12345', 'endtoendid' => 'endtoendid', 'txdt' => '2019-10-17T22:00:00.000Z', 'frombic' => 'BNPAFRPPXXX', 'tobic' => 'BNPAFRPPXXX');
+        $xmlinject = new HorusXml('TTTT', null, 'GREEN', self::$tracer);
+        $vars = array(
+            'id' => 'id12345',
+            'txid' => 'txid12345',
+            'endtoendid' => 'endtoendid',
+            'txdt' => '2019-10-17T22:00:00.000Z',
+            'frombic' => 'BNPAFRPPXXX',
+            'tobic' => 'BNPAFRPPXXX'
+        );
         $templates = array('pacs.002_ACCP.xml', 'pacs.002_RJCT.xml');
         $formats = array('pacs.002.001.03.xsd', 'pacs.002.001.03.xsd');
-        $preferredType = 'application/xml';
+        $preferredType = HorusCommon::XML_CT;
         $errorTemplate = 'templates/genericError.xml';
-        $proxy_mode = '';
 
-        $r = $xmlinject->getResponses($templates, $vars, $formats, $preferredType, $errorTemplate, $proxy_mode,true);
+        $r = $xmlinject->getResponses($templates, $vars, $formats, $preferredType, $errorTemplate, '', true);
 
         $this::assertEquals(2, count($r), 'Response array should have 2 elements');
         $r1 = simplexml_load_string($r[0]['data']);
-        $this::assertEquals($r1->getDocNamespaces(), array('' => 'urn:iso:std:iso:20022:tech:xsd:pacs.002.001.03'), 'First response should be pacs2');
+        $this::assertEquals(
+            array('' => 'urn:iso:std:iso:20022:tech:xsd:pacs.002.001.03'),
+            $r1->getDocNamespaces(),
+            'First response should be pacs2'
+        );
         $r2 = simplexml_load_string($r[1]['data']);
-        $this::assertEquals($r2->getDocNamespaces(), array('' => 'urn:iso:std:iso:20022:tech:xsd:pacs.002.001.03'), 'Second response should be pacs2');
+        $this::assertEquals(
+            array('' => 'urn:iso:std:iso:20022:tech:xsd:pacs.002.001.03'),
+            $r2->getDocNamespaces(),
+            'Second response should be pacs2'
+        );
         $r1->registerXPathNamespace('a', 'urn:iso:std:iso:20022:tech:xsd:pacs.002.001.03');
         $node = $r1->xpath('/a:Document/a:FIToFIPmtStsRpt/a:GrpHdr/a:InstgAgt/a:FinInstnId/a:BIC');
-        $this::assertEquals(((string) $node[0]), 'BNPAFRPP', 'Valid data in first response');
+        $this::assertEquals('BNPAFRPP', ((string) $node[0]), 'Valid data in first response');
     }
 
 
-    function testOutQuery(): void
+    public function testOutQuery(): void
     {
-        $xmlinject = new HorusXml('UUUU', null,'GREEN',self::$tracer);
+        $xmlinject = new HorusXml('UUUU', null, 'GREEN', self::$tracer);
 
-        $forwardparams = json_decode('[{"key":"onekey","value":"onevalue"},{"key":"two keys","value":"two values"}]', true);
+        $forwardparams = json_decode(
+            '[{"key":"onekey","value":"onevalue"},{"key":"two keys","value":"two values"}]',
+            true
+        );
         $url1 = 'http://localhost/?a=b';
         $url2 = 'http://localhost/';
 
-        $this::assertEquals($xmlinject->formOutQuery(null, ''), '', 'Shouldn\'t throw any error');
-        $this::assertEquals($xmlinject->formOutQuery($forwardparams, ''), '', 'Should return empty without URL');
-        $this::assertEquals($xmlinject->formOutQuery(array(), ''), '', 'Shouldn\'t throw error either');
-        $this::assertEquals($xmlinject->formOutQuery(null, $url1), $url1, 'Should return original URL');
-        $this::assertEquals($xmlinject->formOutQuery(array(), $url1), $url1, 'Should return original URL as well');
-        $this::assertEquals($xmlinject->formOutQuery(array($forwardparams), $url1), $url1 . '&onekey=onevalue&two+keys=two+values', 'Should return parameters urlencoded');
-        $this::assertEquals($xmlinject->formOutQuery(array($forwardparams), $url2), $url2 . '?onekey=onevalue&two+keys=two+values', 'Should return query string');
+        $this::assertEquals('', $xmlinject->formOutQuery(null, ''), 'Shouldn\'t throw any error');
+        $this::assertEquals('', $xmlinject->formOutQuery($forwardparams, ''), 'Should return empty without URL');
+        $this::assertEquals('', $xmlinject->formOutQuery(array(), ''), 'Shouldn\'t throw error either');
+        $this::assertEquals($url1, $xmlinject->formOutQuery(null, $url1), 'Should return original URL');
+        $this::assertEquals($url1, $xmlinject->formOutQuery(array(), $url1), 'Should return original URL as well');
+        $this::assertEquals(
+            $url1 . '&onekey=onevalue&two+keys=two+values',
+            $xmlinject->formOutQuery(array($forwardparams), $url1),
+            'Should return parameters urlencoded'
+        );
+        $this::assertEquals(
+            $url2 . '?onekey=onevalue&two+keys=two+values',
+            $xmlinject->formOutQuery(array($forwardparams), $url2),
+            'Should return query string'
+        );
     }
 
 
-    function testXmlInjectNoProxySingle(): void
+    public function testXmlInjectNoProxySingle(): void
     {
-        $xmlinject = new HorusXml('PPPP', null,'GREEN',self::$tracer);
-        $input = '<Document xmlns="urn:iso:std:iso:20022:tech:xsd:pacs.002.001.03"><FIToFIPmtStsRpt><GrpHdr><MsgId>1234567890</MsgId><CreDtTm>2012-12-13T12:12:12.000Z</CreDtTm><InstgAgt><FinInstnId><BIC>BNPAFRPPXXX</BIC></FinInstnId></InstgAgt><InstdAgt><FinInstnId><BIC>BNPAFRPPXXX</BIC></FinInstnId></InstdAgt></GrpHdr><OrgnlGrpInfAndSts><OrgnlMsgId>1234567890</OrgnlMsgId><OrgnlMsgNmId>pacs.008</OrgnlMsgNmId><GrpSts>ACCP</GrpSts></OrgnlGrpInfAndSts><TxInfAndSts><StsId>1234567890</StsId><OrgnlEndToEndId>1234567890</OrgnlEndToEndId><OrgnlTxId>1234567890</OrgnlTxId><AccptncDtTm>2012-12-13T12:12:12.000Z</AccptncDtTm><OrgnlTxRef><PmtTpInf><SvcLvl><Cd>SEPA</Cd></SvcLvl><LclInstrm><Cd>INST</Cd></LclInstrm><CtgyPurp><Cd>PURP</Cd></CtgyPurp></PmtTpInf><DbtrAgt><FinInstnId><BIC>BNPAFRPPXXX</BIC></FinInstnId></DbtrAgt></OrgnlTxRef></TxInfAndSts></FIToFIPmtStsRpt></Document>';
+        $xmlinject = new HorusXml('PPPP', null, 'GREEN', self::$tracer);
+
+        $input = '<Document xmlns="urn:iso:std:iso:20022:tech:xsd:pacs.002.001.03"><FIToFIPmtStsRpt><GrpHdr>' .
+            '<MsgId>1234567890</MsgId><CreDtTm>2012-12-13T12:12:12.000Z</CreDtTm><InstgAgt><FinInstnId>' .
+            '<BIC>BNPAFRPPXXX</BIC></FinInstnId></InstgAgt><InstdAgt><FinInstnId><BIC>BNPAFRPPXXX</BIC>' .
+            '</FinInstnId></InstdAgt></GrpHdr><OrgnlGrpInfAndSts><OrgnlMsgId>1234567890</OrgnlMsgId>' .
+            '<OrgnlMsgNmId>pacs.008</OrgnlMsgNmId><GrpSts>ACCP</GrpSts></OrgnlGrpInfAndSts><TxInfAndSts>' .
+            '<StsId>1234567890</StsId><OrgnlEndToEndId>1234567890</OrgnlEndToEndId><OrgnlTxId>1234567890</OrgnlTxId>' .
+            '<AccptncDtTm>2012-12-13T12:12:12.000Z</AccptncDtTm><OrgnlTxRef><PmtTpInf><SvcLvl><Cd>SEPA</Cd>' .
+            '</SvcLvl><LclInstrm><Cd>INST</Cd></LclInstrm><CtgyPurp><Cd>PURP</Cd></CtgyPurp></PmtTpInf><DbtrAgt>' .
+            '<FinInstnId><BIC>BNPAFRPPXXX</BIC></FinInstnId></DbtrAgt></OrgnlTxRef></TxInfAndSts></FIToFIPmtStsRpt>' .
+            '</Document>';
         $mat = '[{
             "query": "pacs.002.001.03.xsd",
             "comment": "Cas pour acquisition fixe pacs.002 : pacs.002",
             "responseFormat": "pacs.002.001.03.xsd",
             "responseTemplate": "pacs.002_ACCP.xml",
             "errorTemplate": "errorTemplate.xml",
-            "parameters" : {    "id":"/u:Document/u:FIToFIPmtStsRpt/u:GrpHdr/u:MsgId", 
-                                "txid":"/u:Document/u:FIToFIPmtStsRpt/u:GrpHdr/u:MsgId", 
-                                "endtoendid":"/u:Document/u:FIToFIPmtStsRpt/u:GrpHdr/u:MsgId", 
-                                "frombic":"/u:Document/u:FIToFIPmtStsRpt/u:GrpHdr/u:InstgAgt/u:FinInstnId/u:BIC", 
-                                "tobic":"/u:Document/u:FIToFIPmtStsRpt/u:GrpHdr/u:InstgAgt/u:FinInstnId/u:BIC", 
+            "parameters" : {    "id":"/u:Document/u:FIToFIPmtStsRpt/u:GrpHdr/u:MsgId",
+                                "txid":"/u:Document/u:FIToFIPmtStsRpt/u:GrpHdr/u:MsgId",
+                                "endtoendid":"/u:Document/u:FIToFIPmtStsRpt/u:GrpHdr/u:MsgId",
+                                "frombic":"/u:Document/u:FIToFIPmtStsRpt/u:GrpHdr/u:InstgAgt/u:FinInstnId/u:BIC",
+                                "tobic":"/u:Document/u:FIToFIPmtStsRpt/u:GrpHdr/u:InstgAgt/u:FinInstnId/u:BIC",
                                 "txdt":"/u:Document/u:FIToFIPmtStsRpt/u:GrpHdr/u:CreDtTm",
                                 "fragment":"/u:Document/u:FIToFIPmtStsRpt/u:GrpHdr/u:InstgAgt"},
-            "destParameters": [{"key":"forwardkey1","value":"forwardvalue1"}, 
+            "destParameters": [{"key":"forwardkey1","value":"forwardvalue1"},
                                {"key":"forwardkey2","value":"forwardvalue2"}]
           }]';
 
         $matches = json_decode($mat, true);
         $queryParams = array('querykey1' => 'queryvalue1', 'querykey2' => 'queryvalue2');
     
-        $res = $xmlinject->doInject($input, 'application/xml', '', $matches, 'application/xml', $queryParams, 'templates/genericError.xml','',self::$rootSpan);
+        $res = $xmlinject->doInject(
+            $input,
+            HorusCommon::XML_CT,
+            '',
+            $matches,
+            HorusCommon::XML_CT,
+            $queryParams,
+            'templates/genericError.xml',
+            '',
+            self::$rootSpan
+        );
 
         $this::assertNotNull($res, 'Response is not empty');
         $this::assertEquals(count($res), 1, 'Should get only 1 response');
         $xml = simplexml_load_string($res[0]);
-        $this::assertEquals($xml->getDocNamespaces(), array('' => 'urn:iso:std:iso:20022:tech:xsd:pacs.002.001.03'), 'Document is from expected namespace');
+        $this::assertEquals(
+            array('' => 'urn:iso:std:iso:20022:tech:xsd:pacs.002.001.03'),
+            $xml->getDocNamespaces(),
+            'Document is from expected namespace'
+        );
         $xml->registerXPathNamespace('u', 'urn:iso:std:iso:20022:tech:xsd:pacs.002.001.03');
-        $this::assertEquals($xml->xpath('/u:Document/u:FIToFIPmtStsRpt/u:GrpHdr/u:MsgId'), $xml->xpath('/u:Document/u:FIToFIPmtStsRpt/u:GrpHdr/u:MsgId'), 'These 2 elements should have the same value');
-        $this::assertEquals($this::$mockheaders[0][0], 'HTTP/1.1 200 OK', 'We should return HTTP/200');
-        $this::assertEquals($this::$mockheaders[1][0], 'Content-Type: application/xml', 'We should return xml content-type');
+        $this::assertEquals(
+            $xml->xpath('/Document/FIToFIPmtStsRpt/GrpHdr/MsgId'),
+            $xml->xpath('/u:Document/u:FIToFIPmtStsRpt/u:GrpHdr/u:MsgId'),
+            'These 2 elements should have the same value'
+        );
+        $this::assertEquals(
+            HorusCommon::HTTP_200_RETURN,
+            $this::$mockheaders[0][0],
+            'We should return HTTP/200'
+        );
+        $this::assertEquals(
+            'Content-Type: ' . HorusCommon::XML_CT,
+            $this::$mockheaders[1][0],
+            'We should return xml content-type'
+        );
     }
 
-    function testXmlInjectProxySingle(): void
+    public function testXmlInjectProxySingle(): void
     {
-        $xmlinject = new HorusXml('PPPP', null,'GREEN',self::$tracer);
-        $input = '<Document xmlns="urn:iso:std:iso:20022:tech:xsd:pacs.002.001.03"><FIToFIPmtStsRpt><GrpHdr><MsgId>1234567890</MsgId><CreDtTm>2012-12-13T12:12:12.000Z</CreDtTm><InstgAgt><FinInstnId><BIC>BNPAFRPPXXX</BIC></FinInstnId></InstgAgt><InstdAgt><FinInstnId><BIC>BNPAFRPPXXX</BIC></FinInstnId></InstdAgt></GrpHdr><OrgnlGrpInfAndSts><OrgnlMsgId>1234567890</OrgnlMsgId><OrgnlMsgNmId>pacs.008</OrgnlMsgNmId><GrpSts>ACCP</GrpSts></OrgnlGrpInfAndSts><TxInfAndSts><StsId>1234567890</StsId><OrgnlEndToEndId>1234567890</OrgnlEndToEndId><OrgnlTxId>1234567890</OrgnlTxId><AccptncDtTm>2012-12-13T12:12:12.000Z</AccptncDtTm><OrgnlTxRef><PmtTpInf><SvcLvl><Cd>SEPA</Cd></SvcLvl><LclInstrm><Cd>INST</Cd></LclInstrm><CtgyPurp><Cd>PURP</Cd></CtgyPurp></PmtTpInf><DbtrAgt><FinInstnId><BIC>BNPAFRPPXXX</BIC></FinInstnId></DbtrAgt></OrgnlTxRef></TxInfAndSts></FIToFIPmtStsRpt></Document>';
+        $xmlinject = new HorusXml('PPPP', null, 'GREEN', self::$tracer);
+        $input = '<Document xmlns="urn:iso:std:iso:20022:tech:xsd:pacs.002.001.03"><FIToFIPmtStsRpt><GrpHdr>' .
+            '<MsgId>1234567890</MsgId><CreDtTm>2012-12-13T12:12:12.000Z</CreDtTm><InstgAgt><FinInstnId' .
+            '<BIC>BNPAFRPPXXX</BIC></FinInstnId></InstgAgt><InstdAgt><FinInstnId><BIC>BNPAFRPPXXX</BIC>' .
+            '</FinInstnId></InstdAgt></GrpHdr><OrgnlGrpInfAndSts><OrgnlMsgId>1234567890</OrgnlMsgId>' .
+            '<OrgnlMsgNmId>pacs.008</OrgnlMsgNmId><GrpSts>ACCP</GrpSts></OrgnlGrpInfAndSts><TxInfAndSts>' .
+            '<StsId>1234567890</StsId><OrgnlEndToEndId>1234567890</OrgnlEndToEndId><OrgnlTxId>1234567890</OrgnlTxId>' .
+            '<AccptncDtTm>2012-12-13T12:12:12.000Z</AccptncDtTm><OrgnlTxRef><PmtTpInf><SvcLvl><Cd>SEPA</Cd>' .
+            '</SvcLvl><LclInstrm><Cd>INST</Cd></LclInstrm><CtgyPurp><Cd>PURP</Cd></CtgyPurp></PmtTpInf><DbtrAgt>' .
+            '<FinInstnId><BIC>BNPAFRPPXXX</BIC></FinInstnId></DbtrAgt></OrgnlTxRef></TxInfAndSts>' .
+            '</FIToFIPmtStsRpt></Document>';
         $matches = '[{
             "query": "pacs.002.001.03.xsd",
             "comment": "Cas pour acquisition fixe pacs.002 : pacs.002",
             "responseFormat": "pacs.002.001.03.xsd",
             "responseTemplate": "pacs.002_ACCP.xml",
             "errorTemplate": "errorTemplate.xml",
-            "parameters" : {    "id":"/u:Document/u:FIToFIPmtStsRpt/u:GrpHdr/u:MsgId", 
-                                "txid":"/u:Document/u:FIToFIPmtStsRpt/u:GrpHdr/u:MsgId", 
-                                "endtoendid":"/u:Document/u:FIToFIPmtStsRpt/u:GrpHdr/u:MsgId", 
-                                "frombic":"/u:Document/u:FIToFIPmtStsRpt/u:GrpHdr/u:InstgAgt/u:FinInstnId/u:BIC", 
-                                "tobic":"/u:Document/u:FIToFIPmtStsRpt/u:GrpHdr/u:InstgAgt/u:FinInstnId/u:BIC", 
+            "parameters" : {    "id":"/u:Document/u:FIToFIPmtStsRpt/u:GrpHdr/u:MsgId",
+                                "txid":"/u:Document/u:FIToFIPmtStsRpt/u:GrpHdr/u:MsgId",
+                                "endtoendid":"/u:Document/u:FIToFIPmtStsRpt/u:GrpHdr/u:MsgId",
+                                "frombic":"/u:Document/u:FIToFIPmtStsRpt/u:GrpHdr/u:InstgAgt/u:FinInstnId/u:BIC",
+                                "tobic":"/u:Document/u:FIToFIPmtStsRpt/u:GrpHdr/u:InstgAgt/u:FinInstnId/u:BIC",
                                 "txdt":"/u:Document/u:FIToFIPmtStsRpt/u:GrpHdr/u:CreDtTm",
                                 "fragment":"/u:Document/u:FIToFIPmtStsRpt/u:GrpHdr/u:InstgAgt"},
-            "destParameters": [{"key":"forwardkey1","value":"forwardvalue1"}, 
+            "destParameters": [{"key":"forwardkey1","value":"forwardvalue1"},
                                {"key":"forwardkey2","value":"forwardvalue2"}]
           }]';
         $queryParams = array('forwardkey1' => 'forwardvalue1', 'forwardkey2' => 'forwardvalue2');
@@ -236,16 +390,37 @@ class HorusXmlTest extends HorusTestCase
             'url' => 'http://localhost',
             'options' => array(
                 CURLOPT_RETURNTRANSFER => 1,
-                CURLOPT_HTTPHEADER => array('Content-Type: application/xml', 'Accept: application/xml', 'Expect:', 'X-Business-Id: PPPP'),
-                CURLOPT_SSL_VERIFYPEER => False,
-                CURLOPT_VERBOSE => True,
-                CURLOPT_HEADER => True,
-                CURLINFO_HEADER_OUT => True
+                CURLOPT_HTTPHEADER => array(
+                    'Content-Type: application/xml',
+                    'Accept: application/xml',
+                    'Expect:',
+                    'X-Business-Id: PPPP'
+                ),
+                CURLOPT_SSL_VERIFYPEER => false,
+                CURLOPT_VERBOSE => true,
+                CURLOPT_HEADER => true,
+                CURLINFO_HEADER_OUT => true
             ),
-            'data' => "HTTP/1.1 200 OK\nDate: Sun, 20 Oct 2019 11:22:04 GMT\nExpires: -1\nCache-Control: private, max-age=0\n" .
-                "Content-Type: application/xml; charset=ISO-8859-1\nAccept-Ranges: none\nVary: Accept-Encoding\nTransfer-Encoding: chunked\n" .
+            'data' => "HTTP/1.1 200 OK\n" .
+                "Date: Sun, 20 Oct 2019 11:22:04 GMT\n" .
+                "Expires: -1\n" .
+                "Cache-Control: private, max-age=0\n" .
+                "Content-Type: application/xml; charset=ISO-8859-1\n" .
+                "Accept-Ranges: none\n" .
+                "Vary: Accept-Encoding\n" .
+                "Transfer-Encoding: chunked\n" .
                 "\n" .
-                '<?xml version="1.0"?>' . "\n" . '<Document xmlns="urn:iso:std:iso:20022:tech:xsd:pacs.002.001.03"><FIToFIPmtStsRpt><GrpHdr><MsgId>RE34567890</MsgId><CreDtTm>2019-10-20T11:56:36</CreDtTm><InstgAgt><FinInstnId><BIC>BNPAFRPP</BIC></FinInstnId></InstgAgt><InstdAgt><FinInstnId><BIC>BNPAFRPP</BIC></FinInstnId></InstdAgt></GrpHdr><OrgnlGrpInfAndSts><OrgnlMsgId>1234567890</OrgnlMsgId><OrgnlMsgNmId>pacs.008</OrgnlMsgNmId><GrpSts>ACCP</GrpSts></OrgnlGrpInfAndSts><TxInfAndSts><StsId>1234567890</StsId><OrgnlEndToEndId>1234567890</OrgnlEndToEndId><OrgnlTxId>1234567890</OrgnlTxId><AccptncDtTm>2012-12-13T12:12:12.000Z</AccptncDtTm><OrgnlTxRef><PmtTpInf><SvcLvl><Cd>SEPA</Cd></SvcLvl><LclInstrm><Cd>INST</Cd></LclInstrm><CtgyPurp><Cd>PURP</Cd></CtgyPurp></PmtTpInf><DbtrAgt><FinInstnId><BIC>BNPAFRPPXXX</BIC></FinInstnId></DbtrAgt></OrgnlTxRef></TxInfAndSts></FIToFIPmtStsRpt></Document>' . "\n",
+                '<?xml version="1.0"?>' . "\n" .
+                '<Document xmlns="urn:iso:std:iso:20022:tech:xsd:pacs.002.001.03"><FIToFIPmtStsRpt><GrpHdr>' .
+                '<MsgId>RE34567890</MsgId><CreDtTm>2019-10-20T11:56:36</CreDtTm><InstgAgt><FinInstnId>' .
+                '<BIC>BNPAFRPP</BIC></FinInstnId></InstgAgt><InstdAgt><FinInstnId><BIC>BNPAFRPP</BIC>' .
+                '</FinInstnId></InstdAgt></GrpHdr><OrgnlGrpInfAndSts><OrgnlMsgId>1234567890</OrgnlMsgId>' .
+                '<OrgnlMsgNmId>pacs.008</OrgnlMsgNmId><GrpSts>ACCP</GrpSts></OrgnlGrpInfAndSts><TxInfAndSts>' .
+                '<StsId>1234567890</StsId><OrgnlEndToEndId>1234567890</OrgnlEndToEndId>' .
+                '<OrgnlTxId>1234567890</OrgnlTxId><AccptncDtTm>2012-12-13T12:12:12.000Z</AccptncDtTm>' .
+                '<OrgnlTxRef><PmtTpInf><SvcLvl><Cd>SEPA</Cd></SvcLvl><LclInstrm><Cd>INST</Cd></LclInstrm>' .
+                '<CtgyPurp><Cd>PURP</Cd></CtgyPurp></PmtTpInf><DbtrAgt><FinInstnId><BIC>BNPAFRPPXXX</BIC>' .
+                '</FinInstnId></DbtrAgt></OrgnlTxRef></TxInfAndSts></FIToFIPmtStsRpt></Document>' . "\n",
             'returnHeaders' => array(
                 CURLINFO_HTTP_CODE => 200,
                 CURLINFO_HEADER_SIZE => 218
@@ -255,37 +430,67 @@ class HorusXmlTest extends HorusTestCase
             'returnBody' => '<html>Test</html>'
         );
 
-        $res = $xmlinject->doInject($input, 'application/xml', 'http://localhost', json_decode($matches, true), 'application/xml', $queryParams, 'templates/genericError.xml','',self::$rootSpan);
+        $res = $xmlinject->doInject(
+            $input,
+            HorusCommon::XML_CT,
+            'http://localhost',
+            json_decode($matches, true),
+            HorusCommon::XML_CT,
+            $queryParams,
+            'templates/genericError.xml',
+            '',
+            self::$rootSpan
+        );
         $this::assertNotNull($res, 'Response is not empty');
-        //$this::assertEquals(count($res), 1, 'Should get only 1 response');
-        $this::assertEquals(self::$curls[0]['url'], 'http://localhost?forwardkey1=forwardvalue1&forwardkey2=forwardvalue2&id=1234567890&txid=1234567890&endtoendid=1234567890&frombic=BNPAFRPPXXX&tobic=BNPAFRPPXXX&txdt=2012-12-13T12%3A12%3A12.000Z&nb=0&forwardkey1=forwardvalue1&forwardkey2=forwardvalue2');
+        
+        $this::assertEquals(
+            'http://localhost?forwardkey1=forwardvalue1&forwardkey2=forwardvalue2&id=1234567890' .
+                '&txid=1234567890&endtoendid=1234567890&frombic=BNPAFRPPXXX&tobic=BNPAFRPPXXX' .
+                '&txdt=2012-12-13T12%3A12%3A12.000Z&nb=0&forwardkey1=forwardvalue1&forwardkey2=forwardvalue2',
+            self::$curls[0]['url']
+            );
         $xml = simplexml_load_string($res);
 
-        $this::assertEquals($xml->getDocNamespaces(), array('' => 'urn:iso:std:iso:20022:tech:xsd:pacs.002.001.03'), 'Document is from expected namespace');
+        $this::assertEquals(
+            array('' => 'urn:iso:std:iso:20022:tech:xsd:pacs.002.001.03'),
+            $xml->getDocNamespaces(),
+            'Document is from expected namespace'
+        );
         $xml->registerXPathNamespace('u', 'urn:iso:std:iso:20022:tech:xsd:pacs.002.001.03');
-        $this::assertEquals($xml->xpath('/u:Document/u:FIToFIPmtStsRpt/u:GrpHdr/u:MsgId'), $xml->xpath('/u:Document/u:FIToFIPmtStsRpt/u:GrpHdr/u:MsgId'), 'These 2 elements should have the same value');
-        //$this::assertEquals($this::$mockheaders[0][0], 'HTTP/1.1 200 OK', 'We should return HTTP/200');
-        //$this::assertEquals(explode(';', $this::$mockheaders[1][0])[0], 'Content-type: application/xml', 'We should return xml content-type');
+        $this::assertEquals(
+            $xml->xpath('/Document/FIToFIPmtStsRpt/GrpHdr/MsgId'),
+            $xml->xpath('/u:Document/u:FIToFIPmtStsRpt/u:GrpHdr/u:MsgId'),
+            'These 2 elements should have the same value'
+        );
     }
 
-    function testXmlInjectProxyMult(): void
+    public function testXmlInjectProxyMult(): void
     {
-        $xmlinject = new HorusXml('QQQQ', null,'GREEN',self::$tracer);
-        $input = '<Document xmlns="urn:iso:std:iso:20022:tech:xsd:pacs.002.001.03"><FIToFIPmtStsRpt><GrpHdr><MsgId>1234567890</MsgId><CreDtTm>2012-12-13T12:12:12.000Z</CreDtTm><InstgAgt><FinInstnId><BIC>BNPAFRPPXXX</BIC></FinInstnId></InstgAgt><InstdAgt><FinInstnId><BIC>BNPAFRPPXXX</BIC></FinInstnId></InstdAgt></GrpHdr><OrgnlGrpInfAndSts><OrgnlMsgId>1234567890</OrgnlMsgId><OrgnlMsgNmId>pacs.008</OrgnlMsgNmId><GrpSts>ACCP</GrpSts></OrgnlGrpInfAndSts><TxInfAndSts><StsId>1234567890</StsId><OrgnlEndToEndId>1234567890</OrgnlEndToEndId><OrgnlTxId>1234567890</OrgnlTxId><AccptncDtTm>2012-12-13T12:12:12.000Z</AccptncDtTm><OrgnlTxRef><PmtTpInf><SvcLvl><Cd>SEPA</Cd></SvcLvl><LclInstrm><Cd>INST</Cd></LclInstrm><CtgyPurp><Cd>PURP</Cd></CtgyPurp></PmtTpInf><DbtrAgt><FinInstnId><BIC>BNPAFRPPXXX</BIC></FinInstnId></DbtrAgt></OrgnlTxRef></TxInfAndSts></FIToFIPmtStsRpt></Document>';
+        $xmlinject = new HorusXml('QQQQ', null, 'GREEN', self::$tracer);
+        $input = '<Document xmlns="urn:iso:std:iso:20022:tech:xsd:pacs.002.001.03"><FIToFIPmtStsRpt><GrpHdr>' .
+            '<MsgId>1234567890</MsgId><CreDtTm>2012-12-13T12:12:12.000Z</CreDtTm><InstgAgt><FinInstnId>' .
+            '<BIC>BNPAFRPPXXX</BIC></FinInstnId></InstgAgt><InstdAgt><FinInstnId><BIC>BNPAFRPPXXX</BIC>' .
+            '</FinInstnId></InstdAgt></GrpHdr><OrgnlGrpInfAndSts><OrgnlMsgId>1234567890</OrgnlMsgId>' .
+            '<OrgnlMsgNmId>pacs.008</OrgnlMsgNmId><GrpSts>ACCP</GrpSts></OrgnlGrpInfAndSts><TxInfAndSts>' .
+            '<StsId>1234567890</StsId><OrgnlEndToEndId>1234567890</OrgnlEndToEndId><OrgnlTxId>1234567890</OrgnlTxId>' .
+            '<AccptncDtTm>2012-12-13T12:12:12.000Z</AccptncDtTm><OrgnlTxRef><PmtTpInf><SvcLvl><Cd>SEPA</Cd></SvcLvl>' .
+            '<LclInstrm><Cd>INST</Cd></LclInstrm><CtgyPurp><Cd>PURP</Cd></CtgyPurp></PmtTpInf><DbtrAgt>' .
+            '<FinInstnId><BIC>BNPAFRPPXXX</BIC></FinInstnId></DbtrAgt></OrgnlTxRef></TxInfAndSts>' .
+            '</FIToFIPmtStsRpt></Document>';
         $mat = '[{
             "query": "pacs.002.001.03.xsd",
             "comment": "Cas pour acquisition fixe pacs.002 : pacs.002",
             "responseFormat": ["pacs.002.001.03.xsd","pacs.002.001.03.xsd"],
             "responseTemplate": ["pacs.002_ACCP.xml","pacs.002_RJCT.xml"],
             "errorTemplate": "errorTemplate.xml",
-            "parameters" : {    "id":"/u:Document/u:FIToFIPmtStsRpt/u:GrpHdr/u:MsgId", 
-                                "txid":"/u:Document/u:FIToFIPmtStsRpt/u:GrpHdr/u:MsgId", 
-                                "endtoendid":"/u:Document/u:FIToFIPmtStsRpt/u:GrpHdr/u:MsgId", 
-                                "frombic":"/u:Document/u:FIToFIPmtStsRpt/u:GrpHdr/u:InstgAgt/u:FinInstnId/u:BIC", 
-                                "tobic":"/u:Document/u:FIToFIPmtStsRpt/u:GrpHdr/u:InstgAgt/u:FinInstnId/u:BIC", 
+            "parameters" : {    "id":"/u:Document/u:FIToFIPmtStsRpt/u:GrpHdr/u:MsgId",
+                                "txid":"/u:Document/u:FIToFIPmtStsRpt/u:GrpHdr/u:MsgId",
+                                "endtoendid":"/u:Document/u:FIToFIPmtStsRpt/u:GrpHdr/u:MsgId",
+                                "frombic":"/u:Document/u:FIToFIPmtStsRpt/u:GrpHdr/u:InstgAgt/u:FinInstnId/u:BIC",
+                                "tobic":"/u:Document/u:FIToFIPmtStsRpt/u:GrpHdr/u:InstgAgt/u:FinInstnId/u:BIC",
                                 "txdt":"/u:Document/u:FIToFIPmtStsRpt/u:GrpHdr/u:CreDtTm",
                                 "fragment":"/u:Document/u:FIToFIPmtStsRpt/u:GrpHdr/u:InstgAgt"},
-            "destParameters": [{"key":"forwardkey1","value":"forwardvalue1"}, 
+            "destParameters": [{"key":"forwardkey1","value":"forwardvalue1"},
                                {"key":"forwardkey2","value":"forwardvalue2"}]
           }]';
         $queryParams = array('forwardkey1' => 'forwardvalue1', 'forwardkey2' => 'forwardvalue2');
@@ -294,16 +499,68 @@ class HorusXmlTest extends HorusTestCase
             'url' => 'http://localhost',
             'options' => array(
                 CURLOPT_RETURNTRANSFER => 1,
-                CURLOPT_HTTPHEADER => array('Content-Type: application/xml', 'Accept: application/xml', 'Expect:', 'X-Business-Id: PPPP'),
-                CURLOPT_SSL_VERIFYPEER => False,
-                CURLOPT_VERBOSE => True,
-                CURLOPT_HEADER => True,
-                CURLINFO_HEADER_OUT => True
+                CURLOPT_HTTPHEADER => array(
+                    'Content-Type: application/xml',
+                    'Accept: application/xml',
+                    'Expect:',
+                    'X-Business-Id: PPPP'
+                ),
+                CURLOPT_SSL_VERIFYPEER => false,
+                CURLOPT_VERBOSE => true,
+                CURLOPT_HEADER => true,
+                CURLINFO_HEADER_OUT => true
             ),
-            'data' => "HTTP/1.1 200 OK\nDate: Sun, 20 Oct 2019 11:22:04 GMT\nExpires: -1\nCache-Control: private, max-age=0\n" .
-                "Content-Type: application/xml; charset=ISO-8859-1\nAccept-Ranges: none\nVary: Accept-Encoding\nTransfer-Encoding: chunked\n" .
+            'data' => "HTTP/1.1 200 OK\n" .
+                "Date: Sun, 20 Oct 2019 11:22:04 GMT\n" .
+                "Expires: -1\n" .
+                "Cache-Control: private, max-age=0\n" .
+                "Content-Type: application/xml; charset=ISO-8859-1\n" .
+                "Accept-Ranges: none\n" .
+                "Vary: Accept-Encoding\n" .
+                "Transfer-Encoding: chunked\n" .
                 "\n" .
-                "--b75a6e9befe222c24c10d5c9fa3007ee\r\nContent-Disposition: form-data; name=\"response_0\"; filename=\"response_0\"\r\nContent-Type: application/xml\r\nContent-Transfer-Encoding: base64\r\n\r\nPD94bWwgdmVyc2lvbj0iMS4wIj8+CjxEb2N1bWVudCB4bWxucz0idXJuOmlzbzpzdGQ6aXNvOjIw\r\nMDIyOnRlY2g6eHNkOnBhY3MuMDAyLjAwMS4wMyI+PEZJVG9GSVBtdFN0c1JwdD48R3JwSGRyPjxN\r\nc2dJZD5SRTM0NTY3ODkwPC9Nc2dJZD48Q3JlRHRUbT4yMDE5LTEwLTIwVDE0OjIyOjEyPC9DcmVE\r\ndFRtPjxJbnN0Z0FndD48RmluSW5zdG5JZD48QklDPkJOUEFGUlBQPC9CSUM+PC9GaW5JbnN0bklk\r\nPjwvSW5zdGdBZ3Q+PEluc3RkQWd0PjxGaW5JbnN0bklkPjxCSUM+Qk5QQUZSUFA8L0JJQz48L0Zp\r\nbkluc3RuSWQ+PC9JbnN0ZEFndD48L0dycEhkcj48T3JnbmxHcnBJbmZBbmRTdHM+PE9yZ25sTXNn\r\nSWQ+MTIzNDU2Nzg5MDwvT3JnbmxNc2dJZD48T3JnbmxNc2dObUlkPnBhY3MuMDA4PC9PcmdubE1z\r\nZ05tSWQ+PEdycFN0cz5BQ0NQPC9HcnBTdHM+PC9PcmdubEdycEluZkFuZFN0cz48VHhJbmZBbmRT\r\ndHM+PFN0c0lkPjEyMzQ1Njc4OTA8L1N0c0lkPjxPcmdubEVuZFRvRW5kSWQ+MTIzNDU2Nzg5MDwv\r\nT3JnbmxFbmRUb0VuZElkPjxPcmdubFR4SWQ+MTIzNDU2Nzg5MDwvT3JnbmxUeElkPjxBY2NwdG5j\r\nRHRUbT4yMDEyLTEyLTEzVDEyOjEyOjEyLjAwMFo8L0FjY3B0bmNEdFRtPjxPcmdubFR4UmVmPjxQ\r\nbXRUcEluZj48U3ZjTHZsPjxDZD5TRVBBPC9DZD48L1N2Y0x2bD48TGNsSW5zdHJtPjxDZD5JTlNU\r\nPC9DZD48L0xjbEluc3RybT48Q3RneVB1cnA+PENkPlBVUlA8L0NkPjwvQ3RneVB1cnA+PC9QbXRU\r\ncEluZj48RGJ0ckFndD48RmluSW5zdG5JZD48QklDPkJOUEFGUlBQWFhYPC9CSUM+PC9GaW5JbnN0\r\nbklkPjwvRGJ0ckFndD48L09yZ25sVHhSZWY+PC9UeEluZkFuZFN0cz48L0ZJVG9GSVBtdFN0c1Jw\r\ndD48L0RvY3VtZW50Pgo=\r\n\r\n--b75a6e9befe222c24c10d5c9fa3007ee\r\nContent-Disposition: form-data; name=\"response_1\"; filename=\"response_1\"\r\nContent-Type: application/xml\r\nContent-Transfer-Encoding: base64\r\n\r\nPD94bWwgdmVyc2lvbj0iMS4wIj8+CjxEb2N1bWVudCB4bWxucz0idXJuOmlzbzpzdGQ6aXNvOjIw\r\nMDIyOnRlY2g6eHNkOnBhY3MuMDAyLjAwMS4wMyI+PEZJVG9GSVBtdFN0c1JwdD48R3JwSGRyPjxN\r\nc2dJZD5SRTM0NTY3ODkwPC9Nc2dJZD48Q3JlRHRUbT4yMDE5LTEwLTIwVDE0OjIyOjEyPC9DcmVE\r\ndFRtPjxJbnN0Z0FndD48RmluSW5zdG5JZD48QklDPkJOUEFGUlBQPC9CSUM+PC9GaW5JbnN0bklk\r\nPjwvSW5zdGdBZ3Q+PEluc3RkQWd0PjxGaW5JbnN0bklkPjxCSUM+Qk5QQUZSUFBYWFg8L0JJQz48\r\nL0Zpbkluc3RuSWQ+PC9JbnN0ZEFndD48L0dycEhkcj48T3JnbmxHcnBJbmZBbmRTdHM+PE9yZ25s\r\nTXNnSWQ+MTIzNDU2Nzg5MDwvT3JnbmxNc2dJZD48T3JnbmxNc2dObUlkPnBhY3MuMDA4PC9Pcmdu\r\nbE1zZ05tSWQ+PEdycFN0cz5SSkNUPC9HcnBTdHM+PFN0c1JzbkluZj48T3JndHI+PE5tPlJUMTwv\r\nTm0+PC9Pcmd0cj48UnNuPjxDZD5GRjAxPC9DZD48L1Jzbj48L1N0c1JzbkluZj48L09yZ25sR3Jw\r\nSW5mQW5kU3RzPjxUeEluZkFuZFN0cz48U3RzSWQ+MTIzNDU2Nzg5MDwvU3RzSWQ+PE9yZ25sRW5k\r\nVG9FbmRJZD4xMjM0NTY3ODkwPC9PcmdubEVuZFRvRW5kSWQ+PE9yZ25sVHhJZD4xMjM0NTY3ODkw\r\nPC9PcmdubFR4SWQ+PEFjY3B0bmNEdFRtPjIwMTItMTItMTNUMTI6MTI6MTIuMDAwWjwvQWNjcHRu\r\nY0R0VG0+PE9yZ25sVHhSZWY+PFBtdFRwSW5mPjxTdmNMdmw+PENkPlNFUEE8L0NkPjwvU3ZjTHZs\r\nPjxMY2xJbnN0cm0+PENkPklOU1Q8L0NkPjwvTGNsSW5zdHJtPjxDdGd5UHVycD48Q2Q+UFVSUDwv\r\nQ2Q+PC9DdGd5UHVycD48L1BtdFRwSW5mPjxEYnRyQWd0PjxGaW5JbnN0bklkPjxCSUM+Qk5QQUZS\r\nUFBYWFg8L0JJQz48L0Zpbkluc3RuSWQ+PC9EYnRyQWd0PjwvT3JnbmxUeFJlZj48L1R4SW5mQW5k\r\nU3RzPjwvRklUb0ZJUG10U3RzUnB0PjwvRG9jdW1lbnQ+Cg==\r\n\r\n--b75a6e9befe222c24c10d5c9fa3007ee--\r\n\r\n",
+                "--b75a6e9befe222c24c10d5c9fa3007ee\r\n" .
+                "Content-Disposition: form-data; name=\"response_0\"; filename=\"response_0\"\r\n" .
+                "Content-Type: application/xml\r\n" .
+                "Content-Transfer-Encoding: base64\r\n\r\n" .
+                "PD94bWwgdmVyc2lvbj0iMS4wIj8+CjxEb2N1bWVudCB4bWxucz0idXJuOmlzbzpzdGQ6aXNvOjIw\r\n" .
+                "MDIyOnRlY2g6eHNkOnBhY3MuMDAyLjAwMS4wMyI+PEZJVG9GSVBtdFN0c1JwdD48R3JwSGRyPjxN\r\n" .
+                "c2dJZD5SRTM0NTY3ODkwPC9Nc2dJZD48Q3JlRHRUbT4yMDE5LTEwLTIwVDE0OjIyOjEyPC9DcmVE\r\n" .
+                "dFRtPjxJbnN0Z0FndD48RmluSW5zdG5JZD48QklDPkJOUEFGUlBQPC9CSUM+PC9GaW5JbnN0bklk\r\n" .
+                "PjwvSW5zdGdBZ3Q+PEluc3RkQWd0PjxGaW5JbnN0bklkPjxCSUM+Qk5QQUZSUFA8L0JJQz48L0Zp\r\n" .
+                "bkluc3RuSWQ+PC9JbnN0ZEFndD48L0dycEhkcj48T3JnbmxHcnBJbmZBbmRTdHM+PE9yZ25sTXNn\r\n" .
+                "SWQ+MTIzNDU2Nzg5MDwvT3JnbmxNc2dJZD48T3JnbmxNc2dObUlkPnBhY3MuMDA4PC9PcmdubE1z\r\n" .
+                "Z05tSWQ+PEdycFN0cz5BQ0NQPC9HcnBTdHM+PC9PcmdubEdycEluZkFuZFN0cz48VHhJbmZBbmRT\r\n" .
+                "dHM+PFN0c0lkPjEyMzQ1Njc4OTA8L1N0c0lkPjxPcmdubEVuZFRvRW5kSWQ+MTIzNDU2Nzg5MDwv\r\n" .
+                "T3JnbmxFbmRUb0VuZElkPjxPcmdubFR4SWQ+MTIzNDU2Nzg5MDwvT3JnbmxUeElkPjxBY2NwdG5j\r\n" .
+                "RHRUbT4yMDEyLTEyLTEzVDEyOjEyOjEyLjAwMFo8L0FjY3B0bmNEdFRtPjxPcmdubFR4UmVmPjxQ\r\n" .
+                "bXRUcEluZj48U3ZjTHZsPjxDZD5TRVBBPC9DZD48L1N2Y0x2bD48TGNsSW5zdHJtPjxDZD5JTlNU\r\n" .
+                "PC9DZD48L0xjbEluc3RybT48Q3RneVB1cnA+PENkPlBVUlA8L0NkPjwvQ3RneVB1cnA+PC9QbXRU\r\n" .
+                "cEluZj48RGJ0ckFndD48RmluSW5zdG5JZD48QklDPkJOUEFGUlBQWFhYPC9CSUM+PC9GaW5JbnN0\r\n" .
+                "bklkPjwvRGJ0ckFndD48L09yZ25sVHhSZWY+PC9UeEluZkFuZFN0cz48L0ZJVG9GSVBtdFN0c1Jw\r\n" .
+                "dD48L0RvY3VtZW50Pgo=\r\n\r\n" .
+                "--b75a6e9befe222c24c10d5c9fa3007ee\r\n" .
+                "Content-Disposition: form-data; name=\"response_1\"; filename=\"response_1\"\r\n" .
+                "Content-Type: application/xml\r\n" .
+                "Content-Transfer-Encoding: base64\r\n\r\n" .
+                "PD94bWwgdmVyc2lvbj0iMS4wIj8+CjxEb2N1bWVudCB4bWxucz0idXJuOmlzbzpzdGQ6aXNvOjIw\r\n" .
+                "MDIyOnRlY2g6eHNkOnBhY3MuMDAyLjAwMS4wMyI+PEZJVG9GSVBtdFN0c1JwdD48R3JwSGRyPjxN\r\n" .
+                "c2dJZD5SRTM0NTY3ODkwPC9Nc2dJZD48Q3JlRHRUbT4yMDE5LTEwLTIwVDE0OjIyOjEyPC9DcmVE\r\n" .
+                "dFRtPjxJbnN0Z0FndD48RmluSW5zdG5JZD48QklDPkJOUEFGUlBQPC9CSUM+PC9GaW5JbnN0bklk\r\n" .
+                "PjwvSW5zdGdBZ3Q+PEluc3RkQWd0PjxGaW5JbnN0bklkPjxCSUM+Qk5QQUZSUFBYWFg8L0JJQz48\r\n" .
+                "L0Zpbkluc3RuSWQ+PC9JbnN0ZEFndD48L0dycEhkcj48T3JnbmxHcnBJbmZBbmRTdHM+PE9yZ25s\r\n" .
+                "TXNnSWQ+MTIzNDU2Nzg5MDwvT3JnbmxNc2dJZD48T3JnbmxNc2dObUlkPnBhY3MuMDA4PC9Pcmdu\r\n" .
+                "bE1zZ05tSWQ+PEdycFN0cz5SSkNUPC9HcnBTdHM+PFN0c1JzbkluZj48T3JndHI+PE5tPlJUMTwv\r\n" .
+                "Tm0+PC9Pcmd0cj48UnNuPjxDZD5GRjAxPC9DZD48L1Jzbj48L1N0c1JzbkluZj48L09yZ25sR3Jw\r\n" .
+                "SW5mQW5kU3RzPjxUeEluZkFuZFN0cz48U3RzSWQ+MTIzNDU2Nzg5MDwvU3RzSWQ+PE9yZ25sRW5k\r\n" .
+                "VG9FbmRJZD4xMjM0NTY3ODkwPC9PcmdubEVuZFRvRW5kSWQ+PE9yZ25sVHhJZD4xMjM0NTY3ODkw\r\n" .
+                "PC9PcmdubFR4SWQ+PEFjY3B0bmNEdFRtPjIwMTItMTItMTNUMTI6MTI6MTIuMDAwWjwvQWNjcHRu\r\n" .
+                "Y0R0VG0+PE9yZ25sVHhSZWY+PFBtdFRwSW5mPjxTdmNMdmw+PENkPlNFUEE8L0NkPjwvU3ZjTHZs\r\n" .
+                "PjxMY2xJbnN0cm0+PENkPklOU1Q8L0NkPjwvTGNsSW5zdHJtPjxDdGd5UHVycD48Q2Q+UFVSUDwv\r\n" .
+                "Q2Q+PC9DdGd5UHVycD48L1BtdFRwSW5mPjxEYnRyQWd0PjxGaW5JbnN0bklkPjxCSUM+Qk5QQUZS\r\n" .
+                "UFBYWFg8L0JJQz48L0Zpbkluc3RuSWQ+PC9EYnRyQWd0PjwvT3JnbmxUeFJlZj48L1R4SW5mQW5k\r\n" .
+                "U3RzPjwvRklUb0ZJUG10U3RzUnB0PjwvRG9jdW1lbnQ+Cg==\r\n\r\n" .
+                "--b75a6e9befe222c24c10d5c9fa3007ee--\r\n\r\n",
             'returnHeaders' => array(
                 CURLINFO_HTTP_CODE => 200,
                 CURLINFO_HEADER_SIZE => 218
@@ -315,47 +572,130 @@ class HorusXmlTest extends HorusTestCase
 
         $matches = json_decode($mat, true);
 
-        $res = $xmlinject->doInject($input, 'application/xml', 'http://localhost', $matches, 'application/xml', $queryParams, 'templates/genericError.xml','',self::$rootSpan);
+        $res = $xmlinject->doInject(
+            $input,
+            HorusCommon::XML_CT,
+            'http://localhost',
+            $matches,
+            HorusCommon::XML_CT,
+            $queryParams,
+            'templates/genericError.xml',
+            '',
+            self::$rootSpan
+        );
 
         $this::assertNotNull($res, 'Response is not empty');
-        //$this::assertEquals(count($res), 1, 'Should get only 1 response');
-        $this::assertEquals(self::$curls[0]['url'], 'http://localhost?forwardkey1=forwardvalue1&forwardkey2=forwardvalue2&id=1234567890&txid=1234567890&endtoendid=1234567890&frombic=BNPAFRPPXXX&tobic=BNPAFRPPXXX&txdt=2012-12-13T12%3A12%3A12.000Z&nb=1&forwardkey1=forwardvalue1&forwardkey2=forwardvalue2');
+        
+        $this::assertEquals(
+            'http://localhost?forwardkey1=forwardvalue1&forwardkey2=forwardvalue2&id=1234567890&' .
+                'txid=1234567890&endtoendid=1234567890&frombic=BNPAFRPPXXX&tobic=BNPAFRPPXXX&' .
+                'txdt=2012-12-13T12%3A12%3A12.000Z&nb=1&forwardkey1=forwardvalue1&forwardkey2=forwardvalue2',
+            self::$curls[0]['url']
+        );
 
         preg_match('/--(.*)\r\n/', $res, $mm);
         $this::assertNotNull($mm[0], "Should find a multipath boundary");
         $results = explode($mm[0], $res);
-        $this::assertEquals(count($results), 3, 'Should find 3 multipart boundary markers for 2 files downloaded');
+        $this::assertEquals(3, count($results), 'Should find 3 multipart boundary markers for 2 files downloaded');
         $first = explode("\r\n", $results[1]);
         $b64 = '';
-        for ($i = 4; $i < count($first) - 2; $i++){
+        for ($i = 4; $i < count($first) - 2; $i++) {
             $b64 .= $first[$i];
         }
         $b64 = base64_decode($b64);
 
         $xml = simplexml_load_string($b64);
 
-        $this::assertEquals($xml->getDocNamespaces(), array('' => 'urn:iso:std:iso:20022:tech:xsd:pacs.002.001.03'), 'Document is from expected namespace');
+        $this::assertEquals(
+            $xml->getDocNamespaces(),
+            array('' => 'urn:iso:std:iso:20022:tech:xsd:pacs.002.001.03'),
+            'Document is from expected namespace'
+        );
         $xml->registerXPathNamespace('u', 'urn:iso:std:iso:20022:tech:xsd:pacs.002.001.03');
-        $this::assertEquals($xml->xpath('/u:Document/u:FIToFIPmtStsRpt/u:GrpHdr/u:MsgId'), $xml->xpath('/u:Document/u:FIToFIPmtStsRpt/u:GrpHdr/u:MsgId'), 'These 2 elements should have the same value');
-        //$this::assertEquals($this::$mockheaders[0][0], 'HTTP/1.1 200 OK', 'We should return HTTP/200');
-        //$this::assertEquals(explode(';', $this::$mockheaders[1][0])[0], 'Content-type: application/xml', 'We should return xml content-type');
+        $this::assertEquals(
+            $xml->xpath('/Document/FIToFIPmtStsRpt/GrpHdr/MsgId'),
+            $xml->xpath('/u:Document/u:FIToFIPmtStsRpt/u:GrpHdr/u:MsgId'),
+            'These 2 elements should have the same value'
+        );
     }
 
-    function testSearchNamespace(): void {
-        $xmlinject = new HorusXml('WWWW', null,'GREEN',self::$tracer);
-        $xmlinject->common->mlog("Testing search headers","INFO");
-        $testmsg = '<body><AppHdr xmlns="urn:iso:std:iso:20022:tech:xsd:head.001.001.01"><Fr><FIId><FinInstnId><BICFI>SOGEFRP0XXX</BICFI></FinInstnId></FIId></Fr><To><FIId><FinInstnId><BICFI>ZYEXFRP0XXX</BICFI></FinInstnId></FIId></To><BizMsgIdr>AV20190030001321</BizMsgIdr><MsgDefIdr>pacs.008.001.07</MsgDefIdr><CreDt>2019-11-28T12:24:40Z</CreDt></AppHdr><Document xmlns="urn:iso:std:iso:20022:tech:xsd:pacs.008.001.08" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="urn:iso:std:iso:20022:tech:xsd:pacs.008.001.08.xsd"><FIToFICstmrCdtTrf><GrpHdr><MsgId>NONREF</MsgId><CreDtTm>2019-11-14T09:30:47.0Z</CreDtTm><NbOfTxs>1</NbOfTxs><SttlmInf><SttlmMtd>CLRG</SttlmMtd></SttlmInf></GrpHdr><CdtTrfTxInf><PmtId><InstrId>ChampRef</InstrId><EndToEndId>NOTPROVIDED</EndToEndId><UETR>d747fc5c-59c5-41e9-be4c-d45102fc807d</UETR><ClrSysRef>AV20190030001321</ClrSysRef></PmtId><IntrBkSttlmAmt Ccy="EUR">1900.50</IntrBkSttlmAmt><IntrBkSttlmDt>2019-11-14</IntrBkSttlmDt><SttlmPrty>NORM</SttlmPrty><SttlmTmIndctn><CdtDtTm>2019-11-14T11:03:47.0Z</CdtDtTm></SttlmTmIndctn><InstdAmt Ccy="EUR">15550.00</InstdAmt><ChrgBr>DEBT</ChrgBr><ChrgsInf><Amt Ccy="EUR">2.00</Amt><Agt><FinInstnId><BICFI>CEPAFRPP888</BICFI></FinInstnId></Agt></ChrgsInf><InstgAgt><FinInstnId><BICFI>AGRIFRPXXXX</BICFI></FinInstnId></InstgAgt><InstdAgt><FinInstnId><BICFI>ZYEXFRPXXXX</BICFI></FinInstnId></InstdAgt><IntrmyAgt1><FinInstnId><BICFI>BPCEFRP0XXX</BICFI></FinInstnId></IntrmyAgt1><IntrmyAgt1Acct><Id><Othr><Id>34567890123456789012345678901234</Id></Othr></Id></IntrmyAgt1Acct><Dbtr><Nm>LAMBERT PIERRE FR/35000 RENNES</Nm></Dbtr><DbtrAcct><Id><IBAN>FR7640168000191924101877984</IBAN></Id></DbtrAcct><DbtrAgt><FinInstnId><BICFI>CEPAFRPP888</BICFI></FinInstnId></DbtrAgt><CdtrAgt><FinInstnId><BICFI>CEPAFRPP888</BICFI></FinInstnId></CdtrAgt><CdtrAgtAcct><Id><Othr><Id>rien</Id></Othr></Id></CdtrAgtAcct><Cdtr><Nm>JAN VAN GALEN</Nm></Cdtr><Purp><Cd>TYP</Cd></Purp><RmtInf><Ustrd>12345678901234657890123456789012345123456789012346578901234567890123451234567890123465789012345678901234512345678901234657890123456789012345</Ustrd></RmtInf></CdtTrfTxInf></FIToFICstmrCdtTrf></Document></body>';
+    public function testSearchNamespace(): void
+    {
+        $xmlinject = new HorusXml('WWWW', null, 'GREEN', self::$tracer);
+        $xmlinject->common->mlog("Testing search headers", "INFO");
+        $testmsg = '<body><AppHdr xmlns="urn:iso:std:iso:20022:tech:xsd:head.001.001.01"><Fr><FIId><FinInstnId>' .
+            '<BICFI>SOGEFRP0XXX</BICFI></FinInstnId></FIId></Fr><To><FIId><FinInstnId><BICFI>ZYEXFRP0XXX</BICFI>' .
+            '</FinInstnId></FIId></To><BizMsgIdr>AV20190030001321</BizMsgIdr><MsgDefIdr>pacs.008.001.07</MsgDefIdr>' .
+            '<CreDt>2019-11-28T12:24:40Z</CreDt></AppHdr><Document xmlns="urn:iso:std:iso:20022:tech:xsd:' .
+            'pacs.008.001.08" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="urn:iso:std:' .
+            'iso:20022:tech:xsd:pacs.008.001.08.xsd"><FIToFICstmrCdtTrf><GrpHdr><MsgId>NONREF</MsgId>' .
+            '<CreDtTm>2019-11-14T09:30:47.0Z</CreDtTm><NbOfTxs>1</NbOfTxs><SttlmInf><SttlmMtd>CLRG</SttlmMtd>' .
+            '</SttlmInf></GrpHdr><CdtTrfTxInf><PmtId><InstrId>ChampRef</InstrId><EndToEndId>NOTPROVIDED</EndToEndId>' .
+            '<UETR>d747fc5c-59c5-41e9-be4c-d45102fc807d</UETR><ClrSysRef>AV20190030001321</ClrSysRef></PmtId>' .
+            '<IntrBkSttlmAmt Ccy="EUR">1900.50</IntrBkSttlmAmt><IntrBkSttlmDt>2019-11-14</IntrBkSttlmDt>' .
+            '<SttlmPrty>NORM</SttlmPrty><SttlmTmIndctn><CdtDtTm>2019-11-14T11:03:47.0Z</CdtDtTm></SttlmTmIndctn>' .
+            '<InstdAmt Ccy="EUR">15550.00</InstdAmt><ChrgBr>DEBT</ChrgBr><ChrgsInf><Amt Ccy="EUR">2.00</Amt>' .
+            '<Agt><FinInstnId><BICFI>CEPAFRPP888</BICFI></FinInstnId></Agt></ChrgsInf><InstgAgt><FinInstnId>' .
+            '<BICFI>AGRIFRPXXXX</BICFI></FinInstnId></InstgAgt><InstdAgt><FinInstnId><BICFI>ZYEXFRPXXXX</BICFI>' .
+            '</FinInstnId></InstdAgt><IntrmyAgt1><FinInstnId><BICFI>BPCEFRP0XXX</BICFI></FinInstnId></IntrmyAgt1>' .
+            '<IntrmyAgt1Acct><Id><Othr><Id>34567890123456789012345678901234</Id></Othr></Id></IntrmyAgt1Acct><Dbtr>' .
+            '<Nm>LAMBERT PIERRE FR/35000 RENNES</Nm></Dbtr><DbtrAcct><Id><IBAN>FR7640168000191924101877984</IBAN>' .
+            '</Id></DbtrAcct><DbtrAgt><FinInstnId><BICFI>CEPAFRPP888</BICFI></FinInstnId></DbtrAgt><CdtrAgt>' .
+            '<FinInstnId><BICFI>CEPAFRPP888</BICFI></FinInstnId></CdtrAgt><CdtrAgtAcct><Id><Othr><Id>rien</Id>' .
+            '</Othr></Id></CdtrAgtAcct><Cdtr><Nm>JAN VAN GALEN</Nm></Cdtr><Purp><Cd>TYP</Cd></Purp><RmtInf>' .
+            '<Ustrd>123456789012346578901234567890123451234567890123465789012345678901234512345678901234657890' .
+            '12345678901234512345678901234657890123456789012345</Ustrd></RmtInf></CdtTrfTxInf>' .
+            '</FIToFICstmrCdtTrf></Document></body>';
         $xml = simplexml_load_string($testmsg);
-        $this::assertEquals('urn:iso:std:iso:20022:tech:xsd:head.001.001.01', $xmlinject->searchNameSpace('AppHdr',$xml),'Find NS on first element');
-        $this::assertEquals('urn:iso:std:iso:20022:tech:xsd:pacs.008.001.08', $xmlinject->searchNameSpace('Document',$xml), 'Find NS on next element');
-        $this::assertEquals('',$xmlinject->searchNameSpace('test',$xml),'Unknown element should return empty ns');
+        $this::assertEquals(
+            'urn:iso:std:iso:20022:tech:xsd:head.001.001.01',
+            $xmlinject->searchNameSpace('AppHdr', $xml),
+            'Find NS on first element'
+        );
+        $this::assertEquals(
+            'urn:iso:std:iso:20022:tech:xsd:pacs.008.001.08',
+            $xmlinject->searchNameSpace('Document', $xml),
+            'Find NS on next element'
+        );
+        $this::assertEquals(
+            '',
+            $xmlinject->searchNameSpace('test', $xml),
+            'Unknown element should return empty ns'
+        );
     }
 
-    function testRegisterExtraNamespaces(): void {
-        $xmlinject = new HorusXml('WZWZ', null,'GREEN',self::$tracer);
-        $testmsg = '<body><AppHdr xmlns="urn:iso:std:iso:20022:tech:xsd:head.001.001.01"><Fr><FIId><FinInstnId><BICFI>SOGEFRP0XXX</BICFI></FinInstnId></FIId></Fr><To><FIId><FinInstnId><BICFI>ZYEXFRP0XXX</BICFI></FinInstnId></FIId></To><BizMsgIdr>AV20190030001321</BizMsgIdr><MsgDefIdr>pacs.008.001.07</MsgDefIdr><CreDt>2019-11-28T12:24:40Z</CreDt></AppHdr><Document xmlns="urn:iso:std:iso:20022:tech:xsd:pacs.008.001.08" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="urn:iso:std:iso:20022:tech:xsd:pacs.008.001.08.xsd"><FIToFICstmrCdtTrf><GrpHdr><MsgId>NONREF</MsgId><CreDtTm>2019-11-14T09:30:47.0Z</CreDtTm><NbOfTxs>1</NbOfTxs><SttlmInf><SttlmMtd>CLRG</SttlmMtd></SttlmInf></GrpHdr><CdtTrfTxInf><PmtId><InstrId>ChampRef</InstrId><EndToEndId>NOTPROVIDED</EndToEndId><UETR>d747fc5c-59c5-41e9-be4c-d45102fc807d</UETR><ClrSysRef>AV20190030001321</ClrSysRef></PmtId><IntrBkSttlmAmt Ccy="EUR">1900.50</IntrBkSttlmAmt><IntrBkSttlmDt>2019-11-14</IntrBkSttlmDt><SttlmPrty>NORM</SttlmPrty><SttlmTmIndctn><CdtDtTm>2019-11-14T11:03:47.0Z</CdtDtTm></SttlmTmIndctn><InstdAmt Ccy="EUR">15550.00</InstdAmt><ChrgBr>DEBT</ChrgBr><ChrgsInf><Amt Ccy="EUR">2.00</Amt><Agt><FinInstnId><BICFI>CEPAFRPP888</BICFI></FinInstnId></Agt></ChrgsInf><InstgAgt><FinInstnId><BICFI>AGRIFRPXXXX</BICFI></FinInstnId></InstgAgt><InstdAgt><FinInstnId><BICFI>ZYEXFRPXXXX</BICFI></FinInstnId></InstdAgt><IntrmyAgt1><FinInstnId><BICFI>BPCEFRP0XXX</BICFI></FinInstnId></IntrmyAgt1><IntrmyAgt1Acct><Id><Othr><Id>34567890123456789012345678901234</Id></Othr></Id></IntrmyAgt1Acct><Dbtr><Nm>LAMBERT PIERRE FR/35000 RENNES</Nm></Dbtr><DbtrAcct><Id><IBAN>FR7640168000191924101877984</IBAN></Id></DbtrAcct><DbtrAgt><FinInstnId><BICFI>CEPAFRPP888</BICFI></FinInstnId></DbtrAgt><CdtrAgt><FinInstnId><BICFI>CEPAFRPP888</BICFI></FinInstnId></CdtrAgt><CdtrAgtAcct><Id><Othr><Id>rien</Id></Othr></Id></CdtrAgtAcct><Cdtr><Nm>JAN VAN GALEN</Nm></Cdtr><Purp><Cd>TYP</Cd></Purp><RmtInf><Ustrd>12345678901234657890123456789012345123456789012346578901234567890123451234567890123465789012345678901234512345678901234657890123456789012345</Ustrd></RmtInf></CdtTrfTxInf></FIToFICstmrCdtTrf></Document></body>';
+    public function testRegisterExtraNamespaces(): void
+    {
+        $xmlinject = new HorusXml('WZWZ', null, 'GREEN', self::$tracer);
+        $testmsg = '<body><AppHdr xmlns="urn:iso:std:iso:20022:tech:xsd:head.001.001.01"><Fr><FIId>' .
+            '<FinInstnId><BICFI>SOGEFRP0XXX</BICFI></FinInstnId></FIId></Fr><To><FIId><FinInstnId>' .
+            '<BICFI>ZYEXFRP0XXX</BICFI></FinInstnId></FIId></To><BizMsgIdr>AV20190030001321</BizMsgIdr>' .
+            '<MsgDefIdr>pacs.008.001.07</MsgDefIdr><CreDt>2019-11-28T12:24:40Z</CreDt></AppHdr>' .
+            '<Document xmlns="urn:iso:std:iso:20022:tech:xsd:pacs.008.001.08" ' .
+            'xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation=' .
+            '"urn:iso:std:iso:20022:tech:xsd:pacs.008.001.08.xsd"><FIToFICstmrCdtTrf><GrpHdr>' .
+            '<MsgId>NONREF</MsgId><CreDtTm>2019-11-14T09:30:47.0Z</CreDtTm><NbOfTxs>1</NbOfTxs>' .
+            '<SttlmInf><SttlmMtd>CLRG</SttlmMtd></SttlmInf></GrpHdr><CdtTrfTxInf><PmtId>' .
+            '<InstrId>ChampRef</InstrId><EndToEndId>NOTPROVIDED</EndToEndId>' .
+            '<UETR>d747fc5c-59c5-41e9-be4c-d45102fc807d</UETR><ClrSysRef>AV20190030001321</ClrSysRef>' .
+            '</PmtId><IntrBkSttlmAmt Ccy="EUR">1900.50</IntrBkSttlmAmt><IntrBkSttlmDt>2019-11-14</IntrBkSttlmDt>' .
+            '<SttlmPrty>NORM</SttlmPrty><SttlmTmIndctn><CdtDtTm>2019-11-14T11:03:47.0Z</CdtDtTm>' .
+            '</SttlmTmIndctn><InstdAmt Ccy="EUR">15550.00</InstdAmt><ChrgBr>DEBT</ChrgBr><ChrgsInf>' .
+            '<Amt Ccy="EUR">2.00</Amt><Agt><FinInstnId><BICFI>CEPAFRPP888</BICFI></FinInstnId></Agt>' .
+            '</ChrgsInf><InstgAgt><FinInstnId><BICFI>AGRIFRPXXXX</BICFI></FinInstnId></InstgAgt><InstdAgt>' .
+            '<FinInstnId><BICFI>ZYEXFRPXXXX</BICFI></FinInstnId></InstdAgt><IntrmyAgt1><FinInstnId>' .
+            '<BICFI>BPCEFRP0XXX</BICFI></FinInstnId></IntrmyAgt1><IntrmyAgt1Acct><Id><Othr>' .
+            '<Id>34567890123456789012345678901234</Id></Othr></Id></IntrmyAgt1Acct><Dbtr>' .
+            '<Nm>LAMBERT PIERRE FR/35000 RENNES</Nm></Dbtr><DbtrAcct><Id><IBAN>FR7640168000191924101877984</IBAN>' .
+            '</Id></DbtrAcct><DbtrAgt><FinInstnId><BICFI>CEPAFRPP888</BICFI></FinInstnId></DbtrAgt><CdtrAgt>' .
+            '<FinInstnId><BICFI>CEPAFRPP888</BICFI></FinInstnId></CdtrAgt><CdtrAgtAcct><Id><Othr><Id>rien</Id>' .
+            '</Othr></Id></CdtrAgtAcct><Cdtr><Nm>JAN VAN GALEN</Nm></Cdtr><Purp><Cd>TYP</Cd></Purp><RmtInf>' .
+            '<Ustrd>123456789012346578901234567890123451234567890123465789012345678901234512345678901234657' .
+            '89012345678901234512345678901234657890123456789012345</Ustrd></RmtInf></CdtTrfTxInf></FIToFICs' .
+            'tmrCdtTrf></Document></body>';
         $xml = simplexml_load_string($testmsg);
-        $matches = json_decode('[
+        $matches = json_decode(
+            '[
             {
               "query": "isis.xsd",
               "comment": "body wrapper",
@@ -374,49 +714,118 @@ class HorusXmlTest extends HorusTestCase
                 "document" : "/body/d:Document",
                 "msgiddoc" : "/body/d:Document/d:FIToFICstmrCdtTrf/d:GrpHdr/d:MsgId"
               }
-            }]',true);
+            }]',
+            true
+        );
 
-            $xmlinject->registerExtraNamespaces($xml,$matches[0]['extraNamespaces']);
+            $xmlinject->registerExtraNamespaces($xml, $matches[0]['extraNamespaces']);
 
             $fragment1 = $xml->xpath('/body/h:AppHdr/h:MsgDefIdr');
             $fragment2 = $xml->xpath('/body/d:Document/d:FIToFICstmrCdtTrf/d:GrpHdr/d:MsgId');
 
-            $this::assertEquals('pacs.008.001.07',(string) $fragment1[0],'Should return valid value from fixed NS');
-            $this::assertEquals('NONREF',(string) $fragment2[0],'Should return valid value for NS derived by element name');
+            $this::assertEquals('pacs.008.001.07', (string) $fragment1[0], 'Should return valid value from fixed NS');
+            $this::assertEquals(
+                'NONREF',
+                (string) $fragment2[0],
+                'Should return valid value for NS derived by element name'
+            );
 
-            $vars = $xmlinject->getVariables($xml,$matches,0);
+            $vars = $xmlinject->getVariables($xml, $matches, 0);
 
             $this::assertEquals('SOGEFRP0XXX', $vars['frombic']);
-            $this::assertEquals('AV20190030001321',$vars['msgid']);
-            $this::assertEquals('NONREF',$vars['msgiddoc']);
+            $this::assertEquals('AV20190030001321', $vars['msgid']);
+            $this::assertEquals('NONREF', $vars['msgiddoc']);
 
             $fragment3 = simplexml_load_string($vars['document']);
 
-            $this::assertEquals(array(''=>'urn:iso:std:iso:20022:tech:xsd:pacs.008.001.08','xsi'=>'http://www.w3.org/2001/XMLSchema-instance'),$fragment3->getDocNamespaces());
+            $this::assertEquals(
+                array(
+                    ''=>'urn:iso:std:iso:20022:tech:xsd:pacs.008.001.08',
+                    'xsi'=>'http://www.w3.org/2001/XMLSchema-instance'
+                ),
+                $fragment3->getDocNamespaces()
+            );
            
 
     }
 
-    function testGlobalNamespace():void {
-        $xmlinject = new HorusXml('XXXX', null,'GREEN',self::$tracer);
+    public function testGlobalNamespace():void
+    {
+        $xmlinject = new HorusXml('XXXX', null, 'GREEN', self::$tracer);
         $input = '<a:test xmlns:a="urn:a"><a:test2>AAA</a:test2></a:test>';
-        $this::assertEquals('urn:a',$xmlinject->getRootNamespace(simplexml_load_string($input),'aa'));
+        $this::assertEquals('urn:a', $xmlinject->getRootNamespace(simplexml_load_string($input), 'aa'));
 
-        $input2 = simplexml_load_string('<?xml version="1.0"?><saa:DataPDU xmlns:saa="urn:swift:saa:xsd:saa.2.0"><saa:Revision>2.0.9</saa:Revision><saa:Header><saa:Message><saa:SenderReference>SR20190780000010</saa:SenderReference><saa:MessageIdentifier>pacs.008.001.08</saa:MessageIdentifier><saa:Format>AnyXML</saa:Format><saa:Sender><saa:DN>ou=bpce,ou=target2,o=bpcefrpp,o=swift</saa:DN></saa:Sender><saa:Receiver><saa:DN>cn=rtgs,o=trgtxepm,o=swift</saa:DN></saa:Receiver><saa:InterfaceInfo><saa:UserReference>UR20190780000010</saa:UserReference><saa:ValidationLevel>Minimum</saa:ValidationLevel><saa:MessageNature>Financial</saa:MessageNature><saa:ProductInfo><saa:Product><saa:VendorName>Diamis</saa:VendorName><saa:ProductName>Cristal</saa:ProductName><saa:ProductVersion>5.0</saa:ProductVersion></saa:Product></saa:ProductInfo></saa:InterfaceInfo><saa:NetworkInfo><saa:Service>esmig.t2.iast</saa:Service></saa:NetworkInfo><saa:SecurityInfo><saa:SWIFTNetSecurityInfo><saa:IsNRRequested>true</saa:IsNRRequested></saa:SWIFTNetSecurityInfo></saa:SecurityInfo></saa:Message></saa:Header><saa:Body><AppHdr xmlns="urn:iso:std:iso:20022:tech:xsd:head.001.001.01"><Fr><FIId><FinInstnId><BICFI>BPCEFRPPXXX</BICFI></FinInstnId></FIId></Fr><To><FIId><FinInstnId><BICFI>ZYEXFRP0XXX</BICFI></FinInstnId></FIId></To><BizMsgIdr>BizMsgIdr6520</BizMsgIdr><MsgDefIdr>pacs.008.001.08</MsgDefIdr><CreDt>2020-03-04T17:28:38Z</CreDt></AppHdr><Document xmlns="urn:iso:std:iso:20022:tech:xsd:pacs.008.001.08"><FIToFICstmrCdtTrf><GrpHdr><MsgId>NONREF</MsgId><CreDtTm>2020-03-17T15:08:49+01:00</CreDtTm><NbOfTxs>1</NbOfTxs><SttlmInf><SttlmMtd>CLRG</SttlmMtd><ClrSys><Cd>TGT</Cd></ClrSys></SttlmInf></GrpHdr><CdtTrfTxInf><PmtId><InstrId>InstrId6520</InstrId><EndToEndId>EndToEndId6520</EndToEndId><UETR>eb6305c9-1f7f-49de-aed0-16487c27b43d</UETR></PmtId><IntrBkSttlmAmt Ccy="EUR">27535371.01</IntrBkSttlmAmt><IntrBkSttlmDt>2020-01-03</IntrBkSttlmDt><SttlmPrty>HIGH</SttlmPrty><ChrgBr>DEBT</ChrgBr><InstgAgt><FinInstnId><BICFI>BNPAFRPPXXX</BICFI></FinInstnId></InstgAgt><InstdAgt><FinInstnId><BICFI>ZYFAFRP0XXX</BICFI></FinInstnId></InstdAgt><Dbtr/><DbtrAgt><FinInstnId/></DbtrAgt><CdtrAgt><FinInstnId/></CdtrAgt><Cdtr/></CdtTrfTxInf></FIToFICstmrCdtTrf></Document></saa:Body></saa:DataPDU>');
+        $input2 = simplexml_load_string(
+            '<?xml version="1.0"?><saa:DataPDU xmlns:saa="urn:swift:saa:xsd:saa.2.0">' .
+            '<saa:Revision>2.0.9</saa:Revision><saa:Header><saa:Message><saa:SenderRe' .
+            'ference>SR20190780000010</saa:SenderReference><saa:MessageIdentifier>pac' .
+            's.008.001.08</saa:MessageIdentifier><saa:Format>AnyXML</saa:Format><saa:Sender>' .
+            '<saa:DN>ou=bpce,ou=target2,o=bpcefrpp,o=swift</saa:DN></saa:Sender><saa:Receiver>' .
+            '<saa:DN>cn=rtgs,o=trgtxepm,o=swift</saa:DN></saa:Receiver><saa:InterfaceInfo>' .
+            '<saa:UserReference>UR20190780000010</saa:UserReference><saa:ValidationLeve' .
+            'l>Minimum</saa:ValidationLevel><saa:MessageNature>Financial</saa:MessageNature>' .
+            '<saa:ProductInfo><saa:Product><saa:VendorName>Diamis</saa:VendorName>' .
+            '<saa:ProductName>Cristal</saa:ProductName><saa:ProductVersion>5.0</saa:ProductVersion>' .
+            '</saa:Product></saa:ProductInfo></saa:InterfaceInfo><saa:NetworkInfo>' .
+            '<saa:Service>esmig.t2.iast</saa:Service></saa:NetworkInfo><saa:SecurityInfo>' .
+            '<saa:SWIFTNetSecurityInfo><saa:IsNRRequested>true</saa:IsNRRequested></saa:SWIFTNetSecurityInfo>' .
+            '</saa:SecurityInfo></saa:Message></saa:Header><saa:Body><AppHdr ' .
+            'xmlns="urn:iso:std:iso:20022:tech:xsd:head.001.001.01"><Fr><FIId><FinInstnId>' .
+            '<BICFI>BPCEFRPPXXX</BICFI></FinInstnId></FIId></Fr><To><FIId><FinInstnId>' .
+            '<BICFI>ZYEXFRP0XXX</BICFI></FinInstnId></FIId></To><BizMsgIdr>BizMsgIdr6520</BizMsgIdr>' .
+            '<MsgDefIdr>pacs.008.001.08</MsgDefIdr><CreDt>2020-03-04T17:28:38Z</CreDt></AppHdr>' .
+            '<Document xmlns="urn:iso:std:iso:20022:tech:xsd:pacs.008.001.08"><FIToFICstmrCdtTrf>' .
+            '<GrpHdr><MsgId>NONREF</MsgId><CreDtTm>2020-03-17T15:08:49+01:00</CreDtTm><NbOfTxs>1</NbOfTxs>' .
+            '<SttlmInf><SttlmMtd>CLRG</SttlmMtd><ClrSys><Cd>TGT</Cd></ClrSys></SttlmInf></GrpHdr>' .
+            '<CdtTrfTxInf><PmtId><InstrId>InstrId6520</InstrId><EndToEndId>EndToEndId6520</EndToEndId>' .
+            '<UETR>eb6305c9-1f7f-49de-aed0-16487c27b43d</UETR></PmtId><IntrBkSttlmAmt Ccy="EUR"' .
+            '>27535371.01</IntrBkSttlmAmt><IntrBkSttlmDt>2020-01-03</IntrBkSttlmDt><SttlmPrty>HIGH</Sttl' .
+            'mPrty><ChrgBr>DEBT</ChrgBr><InstgAgt><FinInstnId><BICFI>BNPAFRPPXXX</BICFI></FinInstnId><' .
+            '/InstgAgt><InstdAgt><FinInstnId><BICFI>ZYFAFRP0XXX</BICFI></FinInstnId></InstdAgt><Dbtr/>' .
+            '<DbtrAgt><FinInstnId/></DbtrAgt><CdtrAgt><FinInstnId/></CdtrAgt><Cdtr/></CdtTrfTxInf>' .
+            '</FIToFICstmrCdtTrf></Document></saa:Body></saa:DataPDU>');
 
-        $namespaces = $xmlinject->getRootNamespace($input2,'aaa');
-        $input2->registerXPathNamespace('u',$namespaces);
-        $xx = $xmlinject->getXpathVariable($input2,'/u:DataPDU/u:Revision');
-        $this::assertEquals('2.0.9',$xx);
-        $yy = $xmlinject->getXpathVariable($input2,'/u:DataPDU/*');
+        $namespaces = $xmlinject->getRootNamespace($input2, 'aaa');
+        $input2->registerXPathNamespace('u', $namespaces);
+        $xx = $xmlinject->getXpathVariable($input2, '/u:DataPDU/u:Revision');
+        $this::assertEquals('2.0.9', $xx);
+        $xmlinject->getXpathVariable($input2, '/u:DataPDU/*');
 
     }
 
-    function testSpecialRegisterExtraNamespaces():void {
+    public function testSpecialRegisterExtraNamespaces():void
+    {
         $xml = '<?xml version="1.0"?>
-        <saa:DataPDU xmlns:saa="urn:swift:saa:xsd:saa.2.0"><saa:Revision>2.0.9</saa:Revision><saa:Header><saa:Message><saa:SenderReference>SR20190780000010</saa:SenderReference><saa:MessageIdentifier>pacs.008.001.08</saa:MessageIdentifier><saa:Format>AnyXML</saa:Format><saa:Sender><saa:DN>ou=bpce,ou=target2,o=bpcefrpp,o=swift</saa:DN></saa:Sender><saa:Receiver><saa:DN>cn=rtgs,o=trgtxepm,o=swift</saa:DN></saa:Receiver><saa:InterfaceInfo><saa:UserReference>UR20190780000010</saa:UserReference><saa:ValidationLevel>Minimum</saa:ValidationLevel><saa:MessageNature>Financial</saa:MessageNature><saa:ProductInfo><saa:Product><saa:VendorName>Diamis</saa:VendorName><saa:ProductName>Cristal</saa:ProductName><saa:ProductVersion>5.0</saa:ProductVersion></saa:Product></saa:ProductInfo></saa:InterfaceInfo><saa:NetworkInfo><saa:Service>esmig.t2.iast</saa:Service></saa:NetworkInfo><saa:SecurityInfo><saa:SWIFTNetSecurityInfo><saa:IsNRRequested>true</saa:IsNRRequested></saa:SWIFTNetSecurityInfo></saa:SecurityInfo></saa:Message></saa:Header><saa:Body><AppHdr xmlns="urn:iso:std:iso:20022:tech:xsd:head.001.001.01"><Fr><FIId><FinInstnId><BICFI>BPCEFRPPXXX</BICFI></FinInstnId></FIId></Fr><To><FIId><FinInstnId><BICFI>ZYEXFRP0XXX</BICFI></FinInstnId></FIId></To><BizMsgIdr>BizMsgIdr7503</BizMsgIdr><MsgDefIdr>pacs.008.001.08</MsgDefIdr><CreDt>2020-03-04T17:28:38Z</CreDt></AppHdr><pacs:Document xmlns:pacs="urn:iso:std:iso:20022:tech:xsd:pacs.008.001.08"><pacs:FIToFICstmrCdtTrf><pacs:GrpHdr><pacs:MsgId>NONREF</pacs:MsgId><pacs:CreDtTm>2020-03-17T15:08:49+01:00</pacs:CreDtTm><pacs:NbOfTxs>1</pacs:NbOfTxs><pacs:SttlmInf><pacs:SttlmMtd>CLRG</pacs:SttlmMtd><pacs:ClrSys><pacs:Cd>TGT</pacs:Cd></pacs:ClrSys></pacs:SttlmInf></pacs:GrpHdr><pacs:CdtTrfTxInf><pacs:PmtId><pacs:InstrId>-C0</pacs:InstrId><pacs:EndToEndId>InstrIdnumid</pacs:EndToEndId><pacs:UETR>eb6305c9-1f7f-49de-aed0-16487c27b43d</pacs:UETR></pacs:PmtId><pacs:IntrBkSttlmAmt Ccy="EUR">27535371.01</pacs:IntrBkSttlmAmt><pacs:IntrBkSttlmDt>2020-01-03</pacs:IntrBkSttlmDt><pacs:SttlmPrty>HIGH</pacs:SttlmPrty><pacs:ChrgBr>DEBT</pacs:ChrgBr><pacs:InstgAgt><pacs:FinInstnId><pacs:BICFI>BNPAFRPPXXX</pacs:BICFI></pacs:FinInstnId></pacs:InstgAgt><pacs:InstdAgt><pacs:FinInstnId><pacs:BICFI>ZYFAFRP0XXX</pacs:BICFI></pacs:FinInstnId></pacs:InstdAgt><pacs:Dbtr/><pacs:DbtrAgt><pacs:FinInstnId/></pacs:DbtrAgt><pacs:CdtrAgt><pacs:FinInstnId/></pacs:CdtrAgt><pacs:Cdtr/></pacs:CdtTrfTxInf></pacs:FIToFICstmrCdtTrf><!-- HORUS:DetectedAction=ACK_CSM_OK-DetectedMsgType=pacs.008-DetectedCode=2-C0GO --></pacs:Document></saa:Body></saa:DataPDU>
+        <saa:DataPDU xmlns:saa="urn:swift:saa:xsd:saa.2.0"><saa:Revision>2.0.9</saa:Revision><saa:Header>' .
+        '<saa:Message><saa:SenderReference>SR20190780000010</saa:SenderReference><saa:MessageIdentifier>' .
+        'pacs.008.001.08</saa:MessageIdentifier><saa:Format>AnyXML</saa:Format><saa:Sender><saa:DN>ou=bp' .
+        'ce,ou=target2,o=bpcefrpp,o=swift</saa:DN></saa:Sender><saa:Receiver><saa:DN>cn=rtgs,o=trgtxepm,' .
+        'o=swift</saa:DN></saa:Receiver><saa:InterfaceInfo><saa:UserReference>UR20190780000010</saa:User' .
+        'Reference><saa:ValidationLevel>Minimum</saa:ValidationLevel><saa:MessageNature>Financial</saa:M' .
+        'essageNature><saa:ProductInfo><saa:Product><saa:VendorName>Diamis</saa:VendorName>' .
+        '<saa:ProductName>Cristal</saa:ProductName><saa:ProductVersion>5.0</saa:ProductVersion>' .
+        '</saa:Product></saa:ProductInfo></saa:InterfaceInfo><saa:NetworkInfo><saa:Service>esmig.t2.iast</' .
+        'saa:Service></saa:NetworkInfo><saa:SecurityInfo><saa:SWIFTNetSecurityInfo><saa:IsNRRequested>true' .
+        '</saa:IsNRRequested></saa:SWIFTNetSecurityInfo></saa:SecurityInfo></saa:Message></saa:Header>' .
+        '<saa:Body><AppHdr xmlns="urn:iso:std:iso:20022:tech:xsd:head.001.001.01"><Fr><FIId><FinInstnId>' .
+        '<BICFI>BPCEFRPPXXX</BICFI></FinInstnId></FIId></Fr><To><FIId><FinInstnId><BICFI>ZYEXFRP0XXX</BICFI>' .
+        '</FinInstnId></FIId></To><BizMsgIdr>BizMsgIdr7503</BizMsgIdr><MsgDefIdr>pacs.008.001.08</MsgDefIdr>' .
+        '<CreDt>2020-03-04T17:28:38Z</CreDt></AppHdr><pacs:Document xmlns:pacs="urn:iso:std:iso:20022:tech:xsd:' .
+        'pacs.008.001.08"><pacs:FIToFICstmrCdtTrf><pacs:GrpHdr><pacs:MsgId>NONREF</pacs:MsgId><pacs:CreDtTm>' .
+        '2020-03-17T15:08:49+01:00</pacs:CreDtTm><pacs:NbOfTxs>1</pacs:NbOfTxs><pacs:SttlmInf><pacs:SttlmMtd>' .
+        'CLRG</pacs:SttlmMtd><pacs:ClrSys><pacs:Cd>TGT</pacs:Cd></pacs:ClrSys></pacs:SttlmInf></pacs:GrpHdr>' .
+        '<pacs:CdtTrfTxInf><pacs:PmtId><pacs:InstrId>-C0</pacs:InstrId><pacs:EndToEndId>InstrIdnumid</pacs:End' .
+        'ToEndId><pacs:UETR>eb6305c9-1f7f-49de-aed0-16487c27b43d</pacs:UETR></pacs:PmtId><pacs:IntrBkSttlmAmt ' .
+        'Ccy="EUR">27535371.01</pacs:IntrBkSttlmAmt><pacs:IntrBkSttlmDt>2020-01-03</pacs:IntrBkSttlmDt><pacs:Stt' .
+        'lmPrty>HIGH</pacs:SttlmPrty><pacs:ChrgBr>DEBT</pacs:ChrgBr><pacs:InstgAgt><pacs:FinInstnId><pacs:BICFI' .
+        '>BNPAFRPPXXX</pacs:BICFI></pacs:FinInstnId></pacs:InstgAgt><pacs:InstdAgt><pacs:FinInstnId><pacs:BICFI' .
+        '>ZYFAFRP0XXX</pacs:BICFI></pacs:FinInstnId></pacs:InstdAgt><pacs:Dbtr/><pacs:DbtrAgt><pacs:FinInstnId/' .
+        '></pacs:DbtrAgt><pacs:CdtrAgt><pacs:FinInstnId/></pacs:CdtrAgt><pacs:Cdtr/></pacs:CdtTrfTxInf></pacs:FI' .
+        'ToFICstmrCdtTrf><!-- HORUS:DetectedAction=ACK_CSM_OK-DetectedMsgType=pacs.008-DetectedCode=2-C0GO --></p' .
+        'acs:Document></saa:Body></saa:DataPDU>
         ';
-        $config = json_decode('[
+        $config = json_decode(
+            '[
             {
               "query": "isis.xsd",
               "comment": "body wrapper",
@@ -431,36 +840,63 @@ class HorusXmlTest extends HorusTestCase
                 "header" : "/saa:DataPDU/saa:Body/sah:AppHdr",
                 "doc" : "/saa:DataPDU/saa:Body/d:Document"
               }
-            }]',true);
-        $xmlinject = new HorusXml('ABCABC',null,'GREEN',self::$tracer);
+            }]',
+            true
+        );
+        $xmlinject = new HorusXml('ABCABC', null, 'GREEN', self::$tracer);
         $input = simplexml_load_string($xml);
-        $xmlinject->registerExtraNamespaces($input,$config[0]['extraNamespaces']);
+        $xmlinject->registerExtraNamespaces($input, $config[0]['extraNamespaces']);
 
     }
  
-   function testDestOutQuery(): void
+   public function testDestOutQuery(): void
     {
-        $xmlinject = new HorusXml('ZAZA', null,'GREEN',self::$tracer);
+        $xmlinject = new HorusXml('ZAZA', null, 'GREEN', self::$tracer);
 
-        $forwardparams = json_decode('[{"key":"onekey","phpvalue":"echo \"onevalue\";"},{"key":"two keys","phpvalue":"echo $vars[\"test\"];"}]', true);
+        $forwardparams = json_decode(
+            '[{"key":"onekey","phpvalue":"echo \"onevalue\";"},' .
+            '{"key":"two keys","phpvalue":"echo $vars[\"test\"];"}]',
+            true
+        );
         $url1 = 'http://localhost/?a=b';
         $url2 = 'http://localhost/';
 
-        $this::assertEquals($xmlinject->formOutQuery(array($forwardparams), $url1, array('test' => 'XXX')), $url1 . '&test=XXX&onekey=onevalue&two+keys=XXX', 'Should return parameters urlencoded');
-        $this::assertEquals($xmlinject->formOutQuery(array($forwardparams), $url2), $url2 . '?onekey=onevalue&two+keys=', 'Should return query string');
+        $this::assertEquals(
+            $url1 . '&test=XXX&onekey=onevalue&two+keys=XXX',
+            $xmlinject->formOutQuery(
+                array($forwardparams),
+                $url1,
+                array('test' => 'XXX')
+            ),
+            'Should return parameters urlencoded'
+        );
+        $this::assertEquals(
+            $url2 . '?onekey=onevalue&two+keys=',
+            $xmlinject->formOutQuery(
+                array($forwardparams),
+                $url2
+            ),
+            'Should return query string'
+        );
     }
 
-    function testGetXpathVariables(): void
+    public function testGetXpathVariables(): void
     {
-        $xmlinject = new HorusXml('ZZZZ', null,'GREEN',self::$tracer);
+        $xmlinject = new HorusXml('ZZZZ', null, 'GREEN', self::$tracer);
         $input = '<Document xmlns="urn:iso:std:iso:20022:tech:xsd:pacs.002.001.03">
 
 <FIToFIPmtStsRpt><GrpHdr><MsgId>1234567890</MsgId>
 
-<CreDtTm>2012-12-13T12:12:12.000Z</CreDtTm><InstgAgt><FinInstnId><BIC>BNPAFRPPXXX</BIC></FinInstnId></InstgAgt><InstdAgt><FinInstnId><BIC>BNPAFRPPXXX</BIC></FinInstnId></InstdAgt></GrpHdr><OrgnlGrpInfAndSts><OrgnlMsgId>1234567890</OrgnlMsgId><OrgnlMsgNmId>pacs.008</OrgnlMsgNmId><GrpSts>ACCP</GrpSts></OrgnlGrpInfAndSts><TxInfAndSts><StsId>1234567890</StsId><OrgnlEndToEndId>1234567890</OrgnlEndToEndId><OrgnlTxId>1234567890</OrgnlTxId><AccptncDtTm>2012-12-13T12:12:12.000Z</AccptncDtTm><OrgnlTxRef><PmtTpInf><SvcLvl><Cd>SEPA</Cd></SvcLvl><LclInstrm><Cd>INST</Cd></LclInstrm><CtgyPurp><Cd>PURP</Cd></CtgyPurp></PmtTpInf><DbtrAgt><FinInstnId><BIC>BNPAFRPPXXX</BIC></FinInstnId></DbtrAgt></OrgnlTxRef></TxInfAndSts></FIToFIPmtStsRpt></Document>';
+<CreDtTm>2012-12-13T12:12:12.000Z</CreDtTm><InstgAgt><FinInstnId><BIC>BNPAFRPPXXX</BIC></FinInstnId>' .
+'</InstgAgt><InstdAgt><FinInstnId><BIC>BNPAFRPPXXX</BIC></FinInstnId></InstdAgt></GrpHdr><OrgnlGrpInfAndSts>' .
+'<OrgnlMsgId>1234567890</OrgnlMsgId><OrgnlMsgNmId>pacs.008</OrgnlMsgNmId><GrpSts>ACCP</GrpSts></OrgnlGrpInfAndSts>' .
+'<TxInfAndSts><StsId>1234567890</StsId><OrgnlEndToEndId>1234567890</OrgnlEndToEndId><OrgnlTxId>1234567890' .
+'</OrgnlTxId><AccptncDtTm>2012-12-13T12:12:12.000Z</AccptncDtTm><OrgnlTxRef><PmtTpInf><SvcLvl><Cd>SEPA</Cd>' .
+'</SvcLvl><LclInstrm><Cd>INST</Cd></LclInstrm><CtgyPurp><Cd>PURP</Cd></CtgyPurp></PmtTpInf><DbtrAgt><FinInstnId>' .
+'<BIC>BNPAFRPPXXX</BIC></FinInstnId></DbtrAgt></OrgnlTxRef></TxInfAndSts></FIToFIPmtStsRpt></Document>';
        
         $xml = simplexml_load_string($input);
-        $namespaces = $xml->getDocNamespaces();
+        $xml->getDocNamespaces();
         $xml->registerXPathNamespace('u', 'urn:iso:std:iso:20022:tech:xsd:pacs.002.001.03');
         $vars = $xmlinject->getXpathVariable($xml, '/u:Document');
         $expectedvars = '<?xml version="1.0"?>
@@ -468,12 +904,19 @@ class HorusXmlTest extends HorusTestCase
 
 <FIToFIPmtStsRpt><GrpHdr><MsgId>1234567890</MsgId>
 
-<CreDtTm>2012-12-13T12:12:12.000Z</CreDtTm><InstgAgt><FinInstnId><BIC>BNPAFRPPXXX</BIC></FinInstnId></InstgAgt><InstdAgt><FinInstnId><BIC>BNPAFRPPXXX</BIC></FinInstnId></InstdAgt></GrpHdr><OrgnlGrpInfAndSts><OrgnlMsgId>1234567890</OrgnlMsgId><OrgnlMsgNmId>pacs.008</OrgnlMsgNmId><GrpSts>ACCP</GrpSts></OrgnlGrpInfAndSts><TxInfAndSts><StsId>1234567890</StsId><OrgnlEndToEndId>1234567890</OrgnlEndToEndId><OrgnlTxId>1234567890</OrgnlTxId><AccptncDtTm>2012-12-13T12:12:12.000Z</AccptncDtTm><OrgnlTxRef><PmtTpInf><SvcLvl><Cd>SEPA</Cd></SvcLvl><LclInstrm><Cd>INST</Cd></LclInstrm><CtgyPurp><Cd>PURP</Cd></CtgyPurp></PmtTpInf><DbtrAgt><FinInstnId><BIC>BNPAFRPPXXX</BIC></FinInstnId></DbtrAgt></OrgnlTxRef></TxInfAndSts></FIToFIPmtStsRpt></Document>
+<CreDtTm>2012-12-13T12:12:12.000Z</CreDtTm><InstgAgt><FinInstnId><BIC>BNPAFRPPXXX</BIC></FinInstnId></InstgAgt>' .
+'<InstdAgt><FinInstnId><BIC>BNPAFRPPXXX</BIC></FinInstnId></InstdAgt></GrpHdr><OrgnlGrpInfAndSts><OrgnlMsgId>12' .
+'34567890</OrgnlMsgId><OrgnlMsgNmId>pacs.008</OrgnlMsgNmId><GrpSts>ACCP</GrpSts></OrgnlGrpInfAndSts><TxInfAndSt' .
+'s><StsId>1234567890</StsId><OrgnlEndToEndId>1234567890</OrgnlEndToEndId><OrgnlTxId>1234567890</OrgnlTxId><Accp' .
+'tncDtTm>2012-12-13T12:12:12.000Z</AccptncDtTm><OrgnlTxRef><PmtTpInf><SvcLvl><Cd>SEPA</Cd></SvcLvl><LclInstrm>' .
+'<Cd>INST</Cd></LclInstrm><CtgyPurp><Cd>PURP</Cd></CtgyPurp></PmtTpInf><DbtrAgt><FinInstnId><BIC>BNPAFRPPXXX</BIC>' .
+'</FinInstnId></DbtrAgt></OrgnlTxRef></TxInfAndSts></FIToFIPmtStsRpt></Document>
 ';
         $this::assertEquals($expectedvars, $vars);
     }
 
-    function testHMACDigest(): void {
+    public function testHMACDigest(): void
+    {
 
         $conf = array("rfh2Prefix"=>"rfh-","mqmdPrefix"=>"mqmd-");
 
@@ -549,25 +992,92 @@ class HorusXmlTest extends HorusTestCase
 	</n1:FIToFICstmrCdtTrf>
 </n1:Document>';
 
-        $definition = array("method"=>"HMAC", "algorithm"=>"sha256","key"=>"AAABCDEF01234567AAABCDEF01234567","valueField"=>"HMAC","parameters"=>array("Version","Service","Sender","Receiver","PrimitiveType","MsgType","MsgRef","AdditionalInfo","PossibleDuplicate","NotificationRequired","TechnicalAckRequired","Document"));
+        $definition = array(
+            "method"=>"HMAC",
+            "algorithm"=>"sha256",
+            "key"=>"AAABCDEF01234567AAABCDEF01234567",
+            "valueField"=>"HMAC",
+            "parameters"=>array(
+                "Version",
+                "Service",
+                "Sender",
+                "Receiver",
+                "PrimitiveType",
+                "MsgType",
+                "MsgRef",
+                "AdditionalInfo",
+                "PossibleDuplicate",
+                "NotificationRequired",
+                "TechnicalAckRequired",
+                "Document"
+            )
+        );
 
-        try{
-        HorusXml::validateSignature($document,$headers, $definition,$conf);
-        }catch(HorusException $exc){
+        try {
+            HorusXml::validateSignature($document, $headers, $definition, $conf);
+        } catch (HorusException $exc) {
             $this::fail('HMAC Mismatch ' . $exc->getMessage());
         }
     }
 
-    function testReplaceNameSpace():void
+    public function testReplaceNameSpace():void
     {
-        $xmlinject = new HorusXml('0000', null,'GREEN',self::$tracer);
         $xml = '<?xml version="1.0"?>
-        <file><saa:DataPDU xmlns:saa="urn:swift:saa:xsd:saa.2.0"><saa:Revision>2.0.9</saa:Revision><saa:Header><saa:Message><saa:SenderReference>SR20190780000010</saa:SenderReference><saa:MessageIdentifier>pacs.008.001.08</saa:MessageIdentifier><saa:Format>AnyXML</saa:Format><saa:Sender><saa:DN>ou=bpce,ou=target2,o=bpcefrpp,o=swift</saa:DN></saa:Sender><saa:Receiver><saa:DN>cn=rtgs,o=trgtxepm,o=swift</saa:DN></saa:Receiver><saa:InterfaceInfo><saa:UserReference>UR20190780000010</saa:UserReference><saa:ValidationLevel>Minimum</saa:ValidationLevel><saa:MessageNature>Financial</saa:MessageNature><saa:ProductInfo><saa:Product><saa:VendorName>Diamis</saa:VendorName><saa:ProductName>Cristal</saa:ProductName><saa:ProductVersion>5.0</saa:ProductVersion></saa:Product></saa:ProductInfo></saa:InterfaceInfo><saa:NetworkInfo><saa:Service>esmig.t2.iast</saa:Service></saa:NetworkInfo><saa:SecurityInfo><saa:SWIFTNetSecurityInfo><saa:IsNRRequested>true</saa:IsNRRequested></saa:SWIFTNetSecurityInfo></saa:SecurityInfo></saa:Message></saa:Header><saa:Body><AppHdr xmlns="urn:iso:std:iso:20022:tech:xsd:head.001.001.01"><Fr><FIId><FinInstnId><BICFI>BPCEFRPPXXX</BICFI></FinInstnId></FIId></Fr><To><FIId><FinInstnId><BICFI>ZYEXFRP0XXX</BICFI></FinInstnId></FIId></To><BizMsgIdr>BizMsgIdr7503</BizMsgIdr><MsgDefIdr>pacs.008.001.08</MsgDefIdr><CreDt>2020-03-04T17:28:38Z</CreDt></AppHdr><pacs:Document xmlns:pacs="urn:iso:std:iso:20022:tech:xsd:pacs.008.001.08"><pacs:FIToFICstmrCdtTrf><pacs:GrpHdr><pacs:MsgId>NONREF</pacs:MsgId><pacs:CreDtTm>2020-03-17T15:08:49+01:00</pacs:CreDtTm><pacs:NbOfTxs>1</pacs:NbOfTxs><pacs:SttlmInf><pacs:SttlmMtd>CLRG</pacs:SttlmMtd><pacs:ClrSys><pacs:Cd>TGT</pacs:Cd></pacs:ClrSys></pacs:SttlmInf></pacs:GrpHdr><pacs:CdtTrfTxInf><pacs:PmtId><pacs:InstrId>-C0</pacs:InstrId><pacs:EndToEndId>InstrIdnumid</pacs:EndToEndId><pacs:UETR>eb6305c9-1f7f-49de-aed0-16487c27b43d</pacs:UETR></pacs:PmtId><pacs:IntrBkSttlmAmt Ccy="EUR">27535371.01</pacs:IntrBkSttlmAmt><pacs:IntrBkSttlmDt>2020-01-03</pacs:IntrBkSttlmDt><pacs:SttlmPrty>HIGH</pacs:SttlmPrty><pacs:ChrgBr>DEBT</pacs:ChrgBr><pacs:InstgAgt><pacs:FinInstnId><pacs:BICFI>BNPAFRPPXXX</pacs:BICFI></pacs:FinInstnId></pacs:InstgAgt><pacs:InstdAgt><pacs:FinInstnId><pacs:BICFI>ZYFAFRP0XXX</pacs:BICFI></pacs:FinInstnId></pacs:InstdAgt><pacs:Dbtr/><pacs:DbtrAgt><pacs:FinInstnId/></pacs:DbtrAgt><pacs:CdtrAgt><pacs:FinInstnId/></pacs:CdtrAgt><pacs:Cdtr/></pacs:CdtTrfTxInf></pacs:FIToFICstmrCdtTrf><!-- HORUS:DetectedAction=ACK_CSM_OK-DetectedMsgType=pacs.008-DetectedCode=2-C0GO --></pacs:Document></saa:Body></saa:DataPDU></file';
+        <file><saa:DataPDU xmlns:saa="urn:swift:saa:xsd:saa.2.0"><saa:Revision>2.0.9</saa:Revision><saa:Header>' .
+        '<saa:Message><saa:SenderReference>SR20190780000010</saa:SenderReference><saa:MessageIdentifier>pacs.00' .
+        '8.001.08</saa:MessageIdentifier><saa:Format>AnyXML</saa:Format><saa:Sender><saa:DN>ou=bpce,ou=target2,o' .
+        '=bpcefrpp,o=swift</saa:DN></saa:Sender><saa:Receiver><saa:DN>cn=rtgs,o=trgtxepm,o=swift</saa:DN></saa:R' .
+        'eceiver><saa:InterfaceInfo><saa:UserReference>UR20190780000010</saa:UserReference><saa:ValidationLevel>' .
+        'Minimum</saa:ValidationLevel><saa:MessageNature>Financial</saa:MessageNature><saa:ProductInfo><saa:Prod' .
+        'uct><saa:VendorName>Diamis</saa:VendorName><saa:ProductName>Cristal</saa:ProductName><saa:ProductVersio' .
+        'n>5.0</saa:ProductVersion></saa:Product></saa:ProductInfo></saa:InterfaceInfo><saa:NetworkInfo><saa:Ser' .
+        'vice>esmig.t2.iast</saa:Service></saa:NetworkInfo><saa:SecurityInfo><saa:SWIFTNetSecurityInfo><saa:IsNR' .
+        'Requested>true</saa:IsNRRequested></saa:SWIFTNetSecurityInfo></saa:SecurityInfo></saa:Message></saa:Hea' .
+        'der><saa:Body><AppHdr xmlns="urn:iso:std:iso:20022:tech:xsd:head.001.001.01"><Fr><FIId><FinInstnId><BIC' .
+        'FI>BPCEFRPPXXX</BICFI></FinInstnId></FIId></Fr><To><FIId><FinInstnId><BICFI>ZYEXFRP0XXX</BICFI></FinIns' .
+        'tnId></FIId></To><BizMsgIdr>BizMsgIdr7503</BizMsgIdr><MsgDefIdr>pacs.008.001.08</MsgDefIdr><CreDt>2020-' .
+        '03-04T17:28:38Z</CreDt></AppHdr><pacs:Document xmlns:pacs="urn:iso:std:iso:20022:tech:xsd:pacs.008.001.' .
+        '08"><pacs:FIToFICstmrCdtTrf><pacs:GrpHdr><pacs:MsgId>NONREF</pacs:MsgId><pacs:CreDtTm>2020-03-17T15:08:' .
+        '49+01:00</pacs:CreDtTm><pacs:NbOfTxs>1</pacs:NbOfTxs><pacs:SttlmInf><pacs:SttlmMtd>CLRG</pacs:SttlmMtd>' .
+        '<pacs:ClrSys><pacs:Cd>TGT</pacs:Cd></pacs:ClrSys></pacs:SttlmInf></pacs:GrpHdr><pacs:CdtTrfTxInf><pacs:' .
+        'PmtId><pacs:InstrId>-C0</pacs:InstrId><pacs:EndToEndId>InstrIdnumid</pacs:EndToEndId><pacs:UETR>eb6305c' .
+        '9-1f7f-49de-aed0-16487c27b43d</pacs:UETR></pacs:PmtId><pacs:IntrBkSttlmAmt Ccy="EUR">27535371.01</pacs:' .
+        'IntrBkSttlmAmt><pacs:IntrBkSttlmDt>2020-01-03</pacs:IntrBkSttlmDt><pacs:SttlmPrty>HIGH</pacs:SttlmPrty>' .
+        '<pacs:ChrgBr>DEBT</pacs:ChrgBr><pacs:InstgAgt><pacs:FinInstnId><pacs:BICFI>BNPAFRPPXXX</pacs:BICFI></pa' .
+        'cs:FinInstnId></pacs:InstgAgt><pacs:InstdAgt><pacs:FinInstnId><pacs:BICFI>ZYFAFRP0XXX</pacs:BICFI></pac' .
+        's:FinInstnId></pacs:InstdAgt><pacs:Dbtr/><pacs:DbtrAgt><pacs:FinInstnId/></pacs:DbtrAgt><pacs:CdtrAgt><' .
+        'pacs:FinInstnId/></pacs:CdtrAgt><pacs:Cdtr/></pacs:CdtTrfTxInf></pacs:FIToFICstmrCdtTrf><!-- HORUS:Dete' .
+        'ctedAction=ACK_CSM_OK-DetectedMsgType=pacs.008-DetectedCode=2-C0GO --></pacs:Document></saa:Body></saa:' .
+        'DataPDU></file';
         $xmlout = '<?xml version="1.0"?>
-        <file xmlns="urn:test"><saa:DataPDU xmlns:saa="urn:swift:saa:xsd:saa.2.0"><saa:Revision>2.0.9</saa:Revision><saa:Header><saa:Message><saa:SenderReference>SR20190780000010</saa:SenderReference><saa:MessageIdentifier>pacs.008.001.08</saa:MessageIdentifier><saa:Format>AnyXML</saa:Format><saa:Sender><saa:DN>ou=bpce,ou=target2,o=bpcefrpp,o=swift</saa:DN></saa:Sender><saa:Receiver><saa:DN>cn=rtgs,o=trgtxepm,o=swift</saa:DN></saa:Receiver><saa:InterfaceInfo><saa:UserReference>UR20190780000010</saa:UserReference><saa:ValidationLevel>Minimum</saa:ValidationLevel><saa:MessageNature>Financial</saa:MessageNature><saa:ProductInfo><saa:Product><saa:VendorName>Diamis</saa:VendorName><saa:ProductName>Cristal</saa:ProductName><saa:ProductVersion>5.0</saa:ProductVersion></saa:Product></saa:ProductInfo></saa:InterfaceInfo><saa:NetworkInfo><saa:Service>esmig.t2.iast</saa:Service></saa:NetworkInfo><saa:SecurityInfo><saa:SWIFTNetSecurityInfo><saa:IsNRRequested>true</saa:IsNRRequested></saa:SWIFTNetSecurityInfo></saa:SecurityInfo></saa:Message></saa:Header><saa:Body><AppHdr xmlns="urn:iso:std:iso:20022:tech:xsd:head.001.001.01"><Fr><FIId><FinInstnId><BICFI>BPCEFRPPXXX</BICFI></FinInstnId></FIId></Fr><To><FIId><FinInstnId><BICFI>ZYEXFRP0XXX</BICFI></FinInstnId></FIId></To><BizMsgIdr>BizMsgIdr7503</BizMsgIdr><MsgDefIdr>pacs.008.001.08</MsgDefIdr><CreDt>2020-03-04T17:28:38Z</CreDt></AppHdr><pacs:Document xmlns:pacs="urn:iso:std:iso:20022:tech:xsd:pacs.008.001.08"><pacs:FIToFICstmrCdtTrf><pacs:GrpHdr><pacs:MsgId>NONREF</pacs:MsgId><pacs:CreDtTm>2020-03-17T15:08:49+01:00</pacs:CreDtTm><pacs:NbOfTxs>1</pacs:NbOfTxs><pacs:SttlmInf><pacs:SttlmMtd>CLRG</pacs:SttlmMtd><pacs:ClrSys><pacs:Cd>TGT</pacs:Cd></pacs:ClrSys></pacs:SttlmInf></pacs:GrpHdr><pacs:CdtTrfTxInf><pacs:PmtId><pacs:InstrId>-C0</pacs:InstrId><pacs:EndToEndId>InstrIdnumid</pacs:EndToEndId><pacs:UETR>eb6305c9-1f7f-49de-aed0-16487c27b43d</pacs:UETR></pacs:PmtId><pacs:IntrBkSttlmAmt Ccy="EUR">27535371.01</pacs:IntrBkSttlmAmt><pacs:IntrBkSttlmDt>2020-01-03</pacs:IntrBkSttlmDt><pacs:SttlmPrty>HIGH</pacs:SttlmPrty><pacs:ChrgBr>DEBT</pacs:ChrgBr><pacs:InstgAgt><pacs:FinInstnId><pacs:BICFI>BNPAFRPPXXX</pacs:BICFI></pacs:FinInstnId></pacs:InstgAgt><pacs:InstdAgt><pacs:FinInstnId><pacs:BICFI>ZYFAFRP0XXX</pacs:BICFI></pacs:FinInstnId></pacs:InstdAgt><pacs:Dbtr/><pacs:DbtrAgt><pacs:FinInstnId/></pacs:DbtrAgt><pacs:CdtrAgt><pacs:FinInstnId/></pacs:CdtrAgt><pacs:Cdtr/></pacs:CdtTrfTxInf></pacs:FIToFICstmrCdtTrf><!-- HORUS:DetectedAction=ACK_CSM_OK-DetectedMsgType=pacs.008-DetectedCode=2-C0GO --></pacs:Document></saa:Body></saa:DataPDU></file';
+        <file xmlns="urn:test"><saa:DataPDU xmlns:saa="urn:swift:saa:xsd:saa.2.0"><saa:Revision>2.0.9</saa:Revisi' .
+        'on><saa:Header><saa:Message><saa:SenderReference>SR20190780000010</saa:SenderReference><saa:MessageIdent' .
+        'ifier>pacs.008.001.08</saa:MessageIdentifier><saa:Format>AnyXML</saa:Format><saa:Sender><saa:DN>ou=bpce,' .
+        'ou=target2,o=bpcefrpp,o=swift</saa:DN></saa:Sender><saa:Receiver><saa:DN>cn=rtgs,o=trgtxepm,o=swift</saa' .
+        ':DN></saa:Receiver><saa:InterfaceInfo><saa:UserReference>UR20190780000010</saa:UserReference><saa:Valida' .
+        'tionLevel>Minimum</saa:ValidationLevel><saa:MessageNature>Financial</saa:MessageNature><saa:ProductInfo>' .
+        '<saa:Product><saa:VendorName>Diamis</saa:VendorName><saa:ProductName>Cristal</saa:ProductName><saa:Produ' .
+        'ctVersion>5.0</saa:ProductVersion></saa:Product></saa:ProductInfo></saa:InterfaceInfo><saa:NetworkInfo><' .
+        'saa:Service>esmig.t2.iast</saa:Service></saa:NetworkInfo><saa:SecurityInfo><saa:SWIFTNetSecurityInfo><sa' .
+        'a:IsNRRequested>true</saa:IsNRRequested></saa:SWIFTNetSecurityInfo></saa:SecurityInfo></saa:Message></sa' .
+        'a:Header><saa:Body><AppHdr xmlns="urn:iso:std:iso:20022:tech:xsd:head.001.001.01"><Fr><FIId><FinInstnId>' .
+        '<BICFI>BPCEFRPPXXX</BICFI></FinInstnId></FIId></Fr><To><FIId><FinInstnId><BICFI>ZYEXFRP0XXX</BICFI></Fin' .
+        'InstnId></FIId></To><BizMsgIdr>BizMsgIdr7503</BizMsgIdr><MsgDefIdr>pacs.008.001.08</MsgDefIdr><CreDt>202' .
+        '0-03-04T17:28:38Z</CreDt></AppHdr><pacs:Document xmlns:pacs="urn:iso:std:iso:20022:tech:xsd:pacs.008.001' .
+        '.08"><pacs:FIToFICstmrCdtTrf><pacs:GrpHdr><pacs:MsgId>NONREF</pacs:MsgId><pacs:CreDtTm>2020-03-17T15:08:' .
+        '49+01:00</pacs:CreDtTm><pacs:NbOfTxs>1</pacs:NbOfTxs><pacs:SttlmInf><pacs:SttlmMtd>CLRG</pacs:SttlmMtd><' .
+        'pacs:ClrSys><pacs:Cd>TGT</pacs:Cd></pacs:ClrSys></pacs:SttlmInf></pacs:GrpHdr><pacs:CdtTrfTxInf><pacs:Pm' .
+        'tId><pacs:InstrId>-C0</pacs:InstrId><pacs:EndToEndId>InstrIdnumid</pacs:EndToEndId><pacs:UETR>eb6305c9-1' .
+        'f7f-49de-aed0-16487c27b43d</pacs:UETR></pacs:PmtId><pacs:IntrBkSttlmAmt Ccy="EUR">27535371.01</pacs:Intr' .
+        'BkSttlmAmt><pacs:IntrBkSttlmDt>2020-01-03</pacs:IntrBkSttlmDt><pacs:SttlmPrty>HIGH</pacs:SttlmPrty><pacs' .
+        ':ChrgBr>DEBT</pacs:ChrgBr><pacs:InstgAgt><pacs:FinInstnId><pacs:BICFI>BNPAFRPPXXX</pacs:BICFI></pacs:Fin' .
+        'InstnId></pacs:InstgAgt><pacs:InstdAgt><pacs:FinInstnId><pacs:BICFI>ZYFAFRP0XXX</pacs:BICFI></pacs:FinIn' .
+        'stnId></pacs:InstdAgt><pacs:Dbtr/><pacs:DbtrAgt><pacs:FinInstnId/></pacs:DbtrAgt><pacs:CdtrAgt><pacs:Fin' .
+        'InstnId/></pacs:CdtrAgt><pacs:Cdtr/></pacs:CdtTrfTxInf></pacs:FIToFICstmrCdtTrf><!-- HORUS:DetectedActio' .
+        'n=ACK_CSM_OK-DetectedMsgType=pacs.008-DetectedCode=2-C0GO --></pacs:Document></saa:Body></saa:DataPDU></file';
 
-        $result = HorusXml::replaceNameSpace($xml,'/file','urn:test');
-        $this::assertEquals($result,$xmlout);
+        $result = HorusXml::replaceNameSpace($xml, '/file', 'urn:test');
+        $this::assertEquals($result, $xmlout);
     }
 
 }

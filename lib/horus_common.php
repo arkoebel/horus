@@ -91,15 +91,6 @@ class HorusCommon
                     ->setAttribute('OTEL_SERVICE_NAME', 'toto')
                     ->startSpan();
     }
-    /**
-     * Function echoerror
-     * Terminates program, writing an exception message to stdout
-     */
-    public function echoerror($exception)
-    {
-        ob_clean();
-        die('Error ' . $exception->getMessage());
-    }
 
     /**
      * Function myErrorHandler

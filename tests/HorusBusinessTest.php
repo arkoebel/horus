@@ -396,7 +396,7 @@ class HorusBusinessTest extends HorusTestCase
 
         $this::assertEquals(
             'http://proxy/horus/horus.php?bic1=BNPAFRPPXXX&extra=true&param1=single&repeat=5&sourcex=cristal',
-            $mock->effective_urls[0],
+            $mock->effectiveUrls[0],
             'Url params should be mixed'
         );
 

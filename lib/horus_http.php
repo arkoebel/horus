@@ -286,6 +286,7 @@ class HorusHttp
         }
 
         if ($exitafter === true) {
+            //TODO : investigate
             exit;
         }
     }

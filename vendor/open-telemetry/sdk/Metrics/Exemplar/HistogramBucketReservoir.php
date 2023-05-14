@@ -6,7 +6,6 @@ namespace OpenTelemetry\SDK\Metrics\Exemplar;
 
 use function count;
 use OpenTelemetry\Context\ContextInterface;
-use OpenTelemetry\SDK\Common\Attribute\AttributesFactoryInterface;
 use OpenTelemetry\SDK\Common\Attribute\AttributesInterface;
 
 final class HistogramBucketReservoir implements ExemplarReservoirInterface
@@ -20,22 +19,22 @@ final class HistogramBucketReservoir implements ExemplarReservoirInterface
     /**
      * @param list<float|int> $boundaries
      */
-    public function __construct(AttributesFactoryInterface $attributesFactory, array $boundaries)
+    public function __construct(array $boundaries)
     {
-        $this->storage = new BucketStorage($attributesFactory, count($boundaries) + 1);
+        $this->storage = new BucketStorage(count($boundaries) + 1);
         $this->boundaries = $boundaries;
     }
 
-    public function offer($index, $value, AttributesInterface $attributes, ContextInterface $context, int $timestamp, int $revision): void
+    public function offer($index, $value, AttributesInterface $attributes, ContextInterface $context, int $timestamp): void
     {
         $boundariesCount = count($this->boundaries);
         for ($i = 0; $i < $boundariesCount && $this->boundaries[$i] < $value; $i++) {
         }
-        $this->storage->store($i, $index, $value, $attributes, $context, $timestamp, $revision);
+        $this->storage->store($i, $index, $value, $attributes, $context, $timestamp);
     }
 
-    public function collect(array $dataPointAttributes, int $revision, int $limit): array
+    public function collect(array $dataPointAttributes): array
     {
-        return $this->storage->collect($dataPointAttributes, $revision, $limit);
+        return $this->storage->collect($dataPointAttributes);
     }
 }

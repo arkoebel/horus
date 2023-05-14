@@ -88,10 +88,14 @@ class Lexer
 
 	public const VALUE_OFFSET = 0;
 	public const TYPE_OFFSET = 1;
+	public const LINE_OFFSET = 2;
 
 	/** @var string|null */
 	private $regexp;
 
+	/**
+	 * @return list<array{string, int, int}>
+	 */
 	public function tokenize(string $s): array
 	{
 		if ($this->regexp === null) {
@@ -101,11 +105,18 @@ class Lexer
 		preg_match_all($this->regexp, $s, $matches, PREG_SET_ORDER);
 
 		$tokens = [];
+		$line = 1;
 		foreach ($matches as $match) {
-			$tokens[] = [$match[0], (int) $match['MARK']];
+			$type = (int) $match['MARK'];
+			$tokens[] = [$match[0], $type, $line];
+			if ($type !== self::TOKEN_PHPDOC_EOL) {
+				continue;
+			}
+
+			$line++;
 		}
 
-		$tokens[] = ['', self::TOKEN_END];
+		$tokens[] = ['', self::TOKEN_END, $line];
 
 		return $tokens;
 	}
@@ -149,8 +160,8 @@ class Lexer
 			self::TOKEN_PHPDOC_TAG => '@(?:[a-z][a-z0-9-\\\\]+:)?[a-z][a-z0-9-\\\\]*+',
 			self::TOKEN_PHPDOC_EOL => '\\r?+\\n[\\x09\\x20]*+(?:\\*(?!/)\\x20?+)?',
 
-			self::TOKEN_FLOAT => '(?:-?[0-9]++\\.[0-9]*+(?:e-?[0-9]++)?)|(?:-?[0-9]*+\\.[0-9]++(?:e-?[0-9]++)?)|(?:-?[0-9]++e-?[0-9]++)',
-			self::TOKEN_INTEGER => '-?(?:(?:0b[0-1]++)|(?:0o[0-7]++)|(?:0x[0-9a-f]++)|(?:[0-9]++))',
+			self::TOKEN_FLOAT => '(?:-?[0-9]++(_[0-9]++)*\\.[0-9]*(_[0-9]++)*+(?:e-?[0-9]++(_[0-9]++)*)?)|(?:-?[0-9]*+(_[0-9]++)*\\.[0-9]++(_[0-9]++)*(?:e-?[0-9]++(_[0-9]++)*)?)|(?:-?[0-9]++(_[0-9]++)*e-?[0-9]++(_[0-9]++)*)',
+			self::TOKEN_INTEGER => '-?(?:(?:0b[0-1]++(_[0-1]++)*)|(?:0o[0-7]++(_[0-7]++)*)|(?:0x[0-9a-f]++(_[0-9a-f]++)*)|(?:[0-9]++(_[0-9]++)*))',
 			self::TOKEN_SINGLE_QUOTED_STRING => '\'(?:\\\\[^\\r\\n]|[^\'\\r\\n\\\\])*+\'',
 			self::TOKEN_DOUBLE_QUOTED_STRING => '"(?:\\\\[^\\r\\n]|[^"\\r\\n\\\\])*+"',
 

@@ -11,9 +11,9 @@ class ComposerStaticInitde7a39667ced54ac1565a011fa3ba2bf
         '23c18046f52bef3eea034657bafda50f' => __DIR__ . '/..' . '/symfony/polyfill-php81/bootstrap.php',
         '5897ea0ac4cccf14d323035e65887801' => __DIR__ . '/..' . '/symfony/polyfill-php82/bootstrap.php',
         '8e92226780215d0ec758aa7b73e0ede9' => __DIR__ . '/..' . '/open-telemetry/context/fiber/initialize_fiber_handler.php',
+        '0e6d7bf4a5811bfa5cf40c5ccd6fae6a' => __DIR__ . '/..' . '/symfony/polyfill-mbstring/bootstrap.php',
         'c7b4a5d8b94d270f0f9a84f81e1dd63d' => __DIR__ . '/..' . '/open-telemetry/api/Trace/functions.php',
         '6e3fae29631ef280660b3cdad06f25a8' => __DIR__ . '/..' . '/symfony/deprecation-contracts/function.php',
-        '0e6d7bf4a5811bfa5cf40c5ccd6fae6a' => __DIR__ . '/..' . '/symfony/polyfill-mbstring/bootstrap.php',
         '6124b4c8570aa390c21fafd04a26c69f' => __DIR__ . '/..' . '/myclabs/deep-copy/src/DeepCopy/deep_copy.php',
         'c695cb998ba36e4bafc3d028efc7d113' => __DIR__ . '/..' . '/open-telemetry/sdk/Common/Util/functions.php',
         'd991bdbfe253499825156f17c4a721db' => __DIR__ . '/..' . '/open-telemetry/sdk/Logs/Exporter/_register.php',
@@ -46,6 +46,8 @@ class ComposerStaticInitde7a39667ced54ac1565a011fa3ba2bf
             'Symfony\\Contracts\\Service\\' => 26,
             'Symfony\\Contracts\\HttpClient\\' => 29,
             'Symfony\\Component\\HttpClient\\' => 29,
+            'Swaggest\\JsonSchema\\' => 20,
+            'Swaggest\\JsonDiff\\' => 18,
         ),
         'P' => 
         array (
@@ -54,6 +56,8 @@ class ComposerStaticInitde7a39667ced54ac1565a011fa3ba2bf
             'Psr\\Http\\Client\\' => 16,
             'Psr\\Container\\' => 14,
             'Prophecy\\' => 9,
+            'PhpLang\\' => 8,
+            'PackageUrl\\' => 11,
             'PHPStan\\PhpDocParser\\' => 21,
         ),
         'O' => 
@@ -83,6 +87,11 @@ class ComposerStaticInitde7a39667ced54ac1565a011fa3ba2bf
             'Doctrine\\Instantiator\\' => 22,
             'Doctrine\\Deprecations\\' => 22,
             'DeepCopy\\' => 9,
+        ),
+        'C' => 
+        array (
+            'CycloneDX\\Core\\' => 15,
+            'CycloneDX\\Composer\\' => 19,
         ),
     );
 
@@ -129,6 +138,14 @@ class ComposerStaticInitde7a39667ced54ac1565a011fa3ba2bf
         array (
             0 => __DIR__ . '/..' . '/symfony/http-client',
         ),
+        'Swaggest\\JsonSchema\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/swaggest/json-schema/src',
+        ),
+        'Swaggest\\JsonDiff\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/swaggest/json-diff/src',
+        ),
         'Psr\\Log\\' => 
         array (
             0 => __DIR__ . '/..' . '/psr/log/Psr/Log',
@@ -149,6 +166,14 @@ class ComposerStaticInitde7a39667ced54ac1565a011fa3ba2bf
         'Prophecy\\' => 
         array (
             0 => __DIR__ . '/..' . '/phpspec/prophecy/src/Prophecy',
+        ),
+        'PhpLang\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/phplang/scope-exit/src',
+        ),
+        'PackageUrl\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/package-url/packageurl-php/src',
         ),
         'PHPStan\\PhpDocParser\\' => 
         array (
@@ -206,6 +231,14 @@ class ComposerStaticInitde7a39667ced54ac1565a011fa3ba2bf
         array (
             0 => __DIR__ . '/..' . '/myclabs/deep-copy/src/DeepCopy',
         ),
+        'CycloneDX\\Core\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/cyclonedx/cyclonedx-library/src/Core',
+        ),
+        'CycloneDX\\Composer\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/cyclonedx/cyclonedx-php-composer/src',
+        ),
     );
 
     public static $classMap = array (
@@ -227,7 +260,15 @@ class ComposerStaticInitde7a39667ced54ac1565a011fa3ba2bf
         'HorusInjector' => __DIR__ . '/../..' . '/lib/horus_inject.php',
         'HorusRecurse' => __DIR__ . '/../..' . '/lib/horus_recurse.php',
         'HorusSimpleJson' => __DIR__ . '/../..' . '/lib/horus_simplejson.php',
+        'HorusTracing' => __DIR__ . '/../..' . '/lib/horus_tracing.php',
+        'HorusTracingInterface' => __DIR__ . '/../..' . '/lib/horus_tracing.php',
+        'HorusTracingMock' => __DIR__ . '/../..' . '/lib/horus_tracing.php',
         'HorusXml' => __DIR__ . '/../..' . '/lib/horus_xml.php',
+        'Horus_Curl' => __DIR__ . '/../..' . '/lib/horus_curl.php',
+        'Horus_CurlInterface' => __DIR__ . '/../..' . '/lib/horus_curlInterface.php',
+        'Horus_Header' => __DIR__ . '/../..' . '/lib/horus_utils.php',
+        'Horus_HeaderInterface' => __DIR__ . '/../..' . '/lib/horus_utils.php',
+        'Horus_HeaderMock' => __DIR__ . '/../..' . '/lib/horus_utils.php',
         'JsonException' => __DIR__ . '/..' . '/symfony/polyfill-php73/Resources/stubs/JsonException.php',
         'PHPUnit\\Exception' => __DIR__ . '/..' . '/phpunit/phpunit/src/Exception.php',
         'PHPUnit\\Framework\\Assert' => __DIR__ . '/..' . '/phpunit/phpunit/src/Framework/Assert.php',

@@ -40,7 +40,6 @@ interface KnownValues
     public const VALUE_HTTP_NDJSON = 'http/ndjson';
     public const VALUE_OTLP = 'otlp';
     public const VALUE_ZIPKIN = 'zipkin';
-    public const VALUE_NEWRELIC = 'newrelic';
     public const VALUE_PROMETHEUS = 'prometheus';
     public const VALUE_WITH_SAMPLED_TRACE = 'with_sampled_trace';
     public const VALUE_BATCH = 'batch';
@@ -54,6 +53,11 @@ interface KnownValues
     public const VALUE_LOG_NOTICE = LogLevel::NOTICE;
     public const VALUE_LOG_INFO = LogLevel::INFO;
     public const VALUE_LOG_DEBUG = LogLevel::DEBUG;
+    public const VALUE_TEMPORALITY_CUMULATIVE = 'cumulative';
+    public const VALUE_TEMPORALITY_DELTA = 'delta';
+    public const VALUE_TEMPORALITY_LOW_MEMORY = 'lowmemory';
+    public const VALUE_HISTOGRAM_AGGREGATION_EXPLICIT = 'explicit_bucket_histogram';
+    public const VALUE_HISTOGRAM_AGGREGATION_BASE2_EXPONENTIAL = 'base2_exponential_bucket_histogram';
 
     public const VALUES_BOOLEAN = [
         self::VALUE_TRUE,
@@ -69,6 +73,17 @@ interface KnownValues
         self::VALUE_GRPC,
         self::VALUE_HTTP_PROTOBUF,
         self::VALUE_HTTP_JSON,
+    ];
+
+    public const VALUES_TEMPORALITY_PREFERENCE = [
+        self::VALUE_TEMPORALITY_CUMULATIVE,
+        self::VALUE_TEMPORALITY_DELTA,
+        self::VALUE_TEMPORALITY_LOW_MEMORY,
+    ];
+
+    public const VALUES_HISTOGRAM_AGGREGATION = [
+        self::VALUE_HISTOGRAM_AGGREGATION_EXPLICIT,
+        self::VALUE_HISTOGRAM_AGGREGATION_BASE2_EXPONENTIAL,
     ];
 
     /**
@@ -126,7 +141,6 @@ interface KnownValues
     public const OTEL_TRACES_EXPORTER = [
         self::VALUE_OTLP,
         self::VALUE_ZIPKIN,
-        self::VALUE_NEWRELIC,
         self::VALUE_NONE,
     ];
     public const OTEL_METRICS_EXPORTER = [
@@ -166,6 +180,7 @@ interface KnownValues
     public const VALUE_DETECTORS_SDK = 'sdk';
     public const VALUE_DETECTORS_SDK_PROVIDED = 'sdk_provided';
     public const VALUE_DETECTORS_CONTAINER = 'container';
+    public const VALUE_DETECTORS_COMPOSER = 'composer';
     public const OTEL_PHP_DETECTORS = [
         self::VALUE_ALL,
         self::VALUE_DETECTORS_ENVIRONMENT,
@@ -176,6 +191,7 @@ interface KnownValues
         self::VALUE_DETECTORS_SDK,
         self::VALUE_DETECTORS_SDK_PROVIDED,
         self::VALUE_DETECTORS_CONTAINER,
+        self::VALUE_DETECTORS_COMPOSER,
         self::VALUE_NONE,
     ];
 }

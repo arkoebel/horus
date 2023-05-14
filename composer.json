@@ -12,6 +12,7 @@
         "stevegrunwell/runkit7-installer": "^1.1.1"
     },
     "require": {
+        "cyclonedx/cyclonedx-php-composer": "*",
         "open-telemetry/sdk": "*",
         "symfony/http-client": "5.4.x-dev",
         "guzzlehttp/promises": "^1.5@dev",
@@ -27,7 +28,8 @@
             "php": "7.4"
         },
         "allow-plugins": {
-            "php-http/discovery": true
+            "php-http/discovery": true,
+            "cyclonedx/cyclonedx-php-composer": true
         }
     }
 }

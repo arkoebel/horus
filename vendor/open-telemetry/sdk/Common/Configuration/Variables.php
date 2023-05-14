@@ -30,6 +30,14 @@ interface Variables
     public const OTEL_BSP_MAX_QUEUE_SIZE = 'OTEL_BSP_MAX_QUEUE_SIZE';
     public const OTEL_BSP_MAX_EXPORT_BATCH_SIZE = 'OTEL_BSP_MAX_EXPORT_BATCH_SIZE';
     /**
+     * Batch LogRecord Processor
+     * @see https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/configuration/sdk-environment-variables.md#batch-logrecord-processor
+     */
+    public const OTEL_BLRP_SCHEDULE_DELAY = 'OTEL_BLRP_SCHEDULE_DELAY';
+    public const OTEL_BLRP_EXPORT_TIMEOUT = 'OTEL_BLRP_EXPORT_TIMEOUT';
+    public const OTEL_BLRP_MAX_QUEUE_SIZE = 'OTEL_BLRP_MAX_QUEUE_SIZE';
+    public const OTEL_BLRP_MAX_EXPORT_BATCH_SIZE = 'OTEL_BLRP_MAX_EXPORT_BATCH_SIZE';
+    /**
      * Attribute Limits
      * @see https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/sdk-environment-variables.md#attribute-limits
      */
@@ -117,6 +125,8 @@ interface Variables
     public const OTEL_METRICS_EXEMPLAR_FILTER = 'OTEL_METRICS_EXEMPLAR_FILTER';
     public const OTEL_METRIC_EXPORT_INTERVAL = 'OTEL_METRIC_EXPORT_INTERVAL';
     public const OTEL_METRIC_EXPORT_TIMEOUT = 'OTEL_METRIC_EXPORT_TIMEOUT';
+    public const OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE = 'OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE';
+    public const OTEL_EXPORTER_OTLP_METRICS_DEFAULT_HISTOGRAM_AGGREGATION = 'OTEL_EXPORTER_OTLP_METRICS_DEFAULT_HISTOGRAM_AGGREGATION';
     /**
      * Language Specific Environment Variables
      * @see https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/sdk-environment-variables.md#language-specific-environment-variables

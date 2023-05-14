@@ -9,7 +9,6 @@ use OpenTelemetry\API\Behavior\LogsMessagesTrait;
 use OpenTelemetry\SDK\Common\Configuration\Configuration;
 use OpenTelemetry\SDK\Common\Configuration\KnownValues;
 use OpenTelemetry\SDK\Common\Configuration\Variables;
-use OpenTelemetry\SDK\Common\Time\ClockFactory;
 use OpenTelemetry\SDK\Metrics\Exemplar\ExemplarFilter\AllExemplarFilter;
 use OpenTelemetry\SDK\Metrics\Exemplar\ExemplarFilter\NoneExemplarFilter;
 use OpenTelemetry\SDK\Metrics\Exemplar\ExemplarFilter\WithSampledTraceExemplarFilter;
@@ -24,6 +23,11 @@ class MeterProviderFactory
 {
     use LogsMessagesTrait;
 
+    /**
+     * @todo https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/metrics/sdk_exporters/otlp.md#general
+     *       - "The exporter MUST configure the default aggregation on the basis of instrument kind using the
+     *         OTEL_EXPORTER_OTLP_METRICS_DEFAULT_HISTOGRAM_AGGREGATION variable as described below if it is implemented."
+     */
     public function create(): MeterProviderInterface
     {
         if (Sdk::isDisabled()) {
@@ -44,7 +48,8 @@ class MeterProviderFactory
             $exporter = new NoopMetricExporter();
         }
 
-        $reader = new ExportingReader($exporter, ClockFactory::getDefault());
+        // @todo "The exporter MUST be paired with a periodic exporting MetricReader"
+        $reader = new ExportingReader($exporter);
         $resource = ResourceInfoFactory::defaultResource();
         $exemplarFilter = $this->createExemplarFilter(Configuration::getEnum(Variables::OTEL_METRICS_EXEMPLAR_FILTER));
 

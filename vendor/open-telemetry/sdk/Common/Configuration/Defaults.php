@@ -27,6 +27,13 @@ interface Defaults
     public const OTEL_BSP_MAX_QUEUE_SIZE = 2048;
     public const OTEL_BSP_MAX_EXPORT_BATCH_SIZE = 512;
     /**
+     * Batch LogRecord Processor
+     */
+    public const OTEL_BLRP_SCHEDULE_DELAY = 1000;
+    public const OTEL_BLRP_EXPORT_TIMEOUT = 30000;
+    public const OTEL_BLRP_MAX_QUEUE_SIZE = 2048;
+    public const OTEL_BLRP_MAX_EXPORT_BATCH_SIZE = 512;
+    /**
      * Attribute Limits
      * @see https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/sdk-environment-variables.md#attribute-limits
      */
@@ -97,6 +104,8 @@ interface Defaults
     public const OTEL_METRICS_EXEMPLAR_FILTER = 'with_sampled_trace';
     public const OTEL_METRIC_EXPORT_INTERVAL = 60000;
     public const OTEL_METRIC_EXPORT_TIMEOUT = 30000;
+    public const OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE = 'cumulative';
+    public const OTEL_EXPORTER_OTLP_METRICS_DEFAULT_HISTOGRAM_AGGREGATION = 'explicit_bucket_histogram';
     /**
      * Language Specific Environment Variables
      * @see https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/sdk-environment-variables.md#language-specific-environment-variables

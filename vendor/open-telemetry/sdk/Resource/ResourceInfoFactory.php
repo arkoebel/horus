@@ -5,18 +5,24 @@ declare(strict_types=1);
 namespace OpenTelemetry\SDK\Resource;
 
 use function in_array;
+use OpenTelemetry\API\Behavior\LogsMessagesTrait;
 use OpenTelemetry\SDK\Common\Attribute\Attributes;
 use OpenTelemetry\SDK\Common\Configuration\Configuration;
 use OpenTelemetry\SDK\Common\Configuration\KnownValues as Values;
 use OpenTelemetry\SDK\Common\Configuration\Variables as Env;
+use OpenTelemetry\SDK\Registry;
+use RuntimeException;
 
 class ResourceInfoFactory
 {
+    use LogsMessagesTrait;
+
     /**
      * Merges resources into a new one.
      *
-     * @param ResourceInfo ...$resources
-     * @return ResourceInfo
+     * @deprecated Use `ResourceInfo::merge($resource)`
+     * @phan-suppress PhanDeprecatedFunction
+     * @see https://github.com/open-telemetry/opentelemetry-specification/blob/v1.20.0/specification/resource/sdk.md#merge
      */
     public static function merge(ResourceInfo ...$resources): ResourceInfo
     {
@@ -36,15 +42,17 @@ class ResourceInfoFactory
         $detectors = Configuration::getList(Env::OTEL_PHP_DETECTORS);
 
         if (in_array(Values::VALUE_ALL, $detectors)) {
+            // ascending priority: keys from later detectors will overwrite earlier
             return (new Detectors\Composite([
-                new Detectors\Environment(),
                 new Detectors\Host(),
                 new Detectors\OperatingSystem(),
                 new Detectors\Process(),
                 new Detectors\ProcessRuntime(),
                 new Detectors\Sdk(),
                 new Detectors\SdkProvided(),
-                new Detectors\Container(),
+                new Detectors\Composer(),
+                ...Registry::resourceDetectors(),
+                new Detectors\Environment(),
             ]))->getResource();
         }
 
@@ -80,11 +88,20 @@ class ResourceInfoFactory
                     $resourceDetectors[] = new Detectors\SdkProvided();
 
                     break;
-                case Values::VALUE_DETECTORS_CONTAINER:
-                    $resourceDetectors[] = new Detectors\Container();
+
+                case Values::VALUE_DETECTORS_COMPOSER:
+                    $resourceDetectors[] = new Detectors\Composer();
+
+                    break;
+                case Values::VALUE_NONE:
 
                     break;
                 default:
+                    try {
+                        $resourceDetectors[] = Registry::resourceDetector($detector);
+                    } catch (RuntimeException $e) {
+                        self::logWarning($e->getMessage());
+                    }
             }
         }
 
@@ -96,6 +113,9 @@ class ResourceInfoFactory
         return ResourceInfo::create(Attributes::create([]));
     }
 
+    /**
+     * @deprecated
+     */
     private static function mergeSchemaUrl(ResourceInfo ...$resources): ?string
     {
         $schemaUrl = null;

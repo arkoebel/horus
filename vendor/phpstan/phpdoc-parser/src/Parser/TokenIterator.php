@@ -2,6 +2,7 @@
 
 namespace PHPStan\PhpDocParser\Parser;
 
+use LogicException;
 use PHPStan\PhpDocParser\Lexer\Lexer;
 use function array_pop;
 use function assert;
@@ -12,7 +13,7 @@ use function strlen;
 class TokenIterator
 {
 
-	/** @var mixed[][] */
+	/** @var list<array{string, int, int}> */
 	private $tokens;
 
 	/** @var int */
@@ -21,6 +22,9 @@ class TokenIterator
 	/** @var int[] */
 	private $savePoints = [];
 
+	/**
+	 * @param list<array{string, int, int}> $tokens
+	 */
 	public function __construct(array $tokens, int $index = 0)
 	{
 		$this->tokens = $tokens;
@@ -31,6 +35,36 @@ class TokenIterator
 		}
 
 		$this->index++;
+	}
+
+
+	/**
+	 * @return list<array{string, int, int}>
+	 */
+	public function getTokens(): array
+	{
+		return $this->tokens;
+	}
+
+
+	public function getContentBetween(int $startPos, int $endPos): string
+	{
+		if ($startPos < 0 || $endPos > count($this->tokens)) {
+			throw new LogicException();
+		}
+
+		$content = '';
+		for ($i = $startPos; $i < $endPos; $i++) {
+			$content .= $this->tokens[$i][Lexer::VALUE_OFFSET];
+		}
+
+		return $content;
+	}
+
+
+	public function getTokenCount(): int
+	{
+		return count($this->tokens);
 	}
 
 
@@ -54,6 +88,18 @@ class TokenIterator
 		}
 
 		return $offset;
+	}
+
+
+	public function currentTokenLine(): int
+	{
+		return $this->tokens[$this->index][Lexer::LINE_OFFSET];
+	}
+
+
+	public function currentTokenIndex(): int
+	{
+		return $this->index;
 	}
 
 
@@ -217,7 +263,8 @@ class TokenIterator
 			$this->currentTokenType(),
 			$this->currentTokenOffset(),
 			$expectedTokenType,
-			$expectedTokenValue
+			$expectedTokenValue,
+			$this->currentTokenLine()
 		);
 	}
 

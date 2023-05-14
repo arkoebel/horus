@@ -1,6 +1,162 @@
 {
     "packages": [
         {
+            "name": "cyclonedx/cyclonedx-library",
+            "version": "1.x-dev",
+            "version_normalized": "1.9999999.9999999.9999999-dev",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/CycloneDX/cyclonedx-php-library.git",
+                "reference": "f2662d418b5b19360dda9ab082fcdde0b4c840cb"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/CycloneDX/cyclonedx-php-library/zipball/f2662d418b5b19360dda9ab082fcdde0b4c840cb",
+                "reference": "f2662d418b5b19360dda9ab082fcdde0b4c840cb",
+                "shasum": ""
+            },
+            "require": {
+                "ext-dom": "*",
+                "ext-json": "*",
+                "ext-libxml": "*",
+                "package-url/packageurl-php": "^1.0",
+                "php": "^7.3 || ^8.0",
+                "swaggest/json-schema": "^0.12.35"
+            },
+            "require-dev": {
+                "ext-simplexml": "*",
+                "phpunit/phpunit": "9.5.24",
+                "roave/security-advisories": "dev-latest"
+            },
+            "time": "2022-09-15T14:32:23+00:00",
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "1.x-dev"
+                },
+                "composer-normalize": {
+                    "indent-size": 4,
+                    "indent-style": "space"
+                }
+            },
+            "installation-source": "dist",
+            "autoload": {
+                "psr-4": {
+                    "CycloneDX\\Core\\": "src/Core/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "Apache-2.0"
+            ],
+            "authors": [
+                {
+                    "name": "nscuro",
+                    "email": "nscuro@protonmail.com",
+                    "role": "Developer"
+                },
+                {
+                    "name": "Jan Kowalleck",
+                    "email": "jan.kowalleck@gmail.com",
+                    "role": "Developer"
+                }
+            ],
+            "description": "Work with CycloneDX Software Bill-of-Materials (SBOM)",
+            "homepage": "https://github.com/CycloneDX/cyclonedx-php-library/#readme",
+            "keywords": [
+                "CycloneDX",
+                "SBOM",
+                "bill-of-materials",
+                "bom",
+                "package-url",
+                "purl",
+                "software-bill-of-materials"
+            ],
+            "support": {
+                "issues": "https://github.com/CycloneDX/cyclonedx-php-library/issues",
+                "source": "https://github.com/CycloneDX/cyclonedx-php-library/"
+            },
+            "install-path": "../cyclonedx/cyclonedx-library"
+        },
+        {
+            "name": "cyclonedx/cyclonedx-php-composer",
+            "version": "3.x-dev",
+            "version_normalized": "3.9999999.9999999.9999999-dev",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/CycloneDX/cyclonedx-php-composer.git",
+                "reference": "9d223d368aa2d0346266ec90e8bb3d53e5643165"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/CycloneDX/cyclonedx-php-composer/zipball/9d223d368aa2d0346266ec90e8bb3d53e5643165",
+                "reference": "9d223d368aa2d0346266ec90e8bb3d53e5643165",
+                "shasum": ""
+            },
+            "require": {
+                "composer-plugin-api": "^2.0",
+                "cyclonedx/cyclonedx-library": "^1.4.2",
+                "package-url/packageurl-php": "^1.0",
+                "php": "^7.3 || ^8.0"
+            },
+            "require-dev": {
+                "composer/composer": "^2.0.0",
+                "phpunit/phpunit": "9.5.28",
+                "roave/security-advisories": "dev-latest"
+            },
+            "time": "2023-02-11T11:09:27+00:00",
+            "default-branch": true,
+            "type": "composer-plugin",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "3.x-dev"
+                },
+                "class": "CycloneDX\\Composer\\Plugin",
+                "composer-normalize": {
+                    "indent-size": 4,
+                    "indent-style": "space"
+                }
+            },
+            "installation-source": "dist",
+            "autoload": {
+                "psr-4": {
+                    "CycloneDX\\Composer\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "Apache-2.0"
+            ],
+            "authors": [
+                {
+                    "name": "nscuro",
+                    "email": "nscuro@protonmail.com",
+                    "role": "Developer"
+                },
+                {
+                    "name": "Jan Kowalleck",
+                    "email": "jan.kowalleck@gmail.com",
+                    "role": "Developer"
+                }
+            ],
+            "description": "Creates CycloneDX Software Bill-of-Materials (SBOM) from PHP Composer projects",
+            "homepage": "https://github.com/CycloneDX/cyclonedx-php-composer/#readme",
+            "keywords": [
+                "CycloneDX",
+                "SBOM",
+                "bill-of-materials",
+                "bom",
+                "package-url",
+                "purl",
+                "software-bill-of-materials"
+            ],
+            "support": {
+                "issues": "https://github.com/CycloneDX/cyclonedx-php-composer/issues",
+                "source": "https://github.com/CycloneDX/cyclonedx-php-composer/"
+            },
+            "install-path": "../cyclonedx/cyclonedx-php-composer"
+        },
+        {
             "name": "doctrine/deprecations",
             "version": "v1.0.0",
             "version_normalized": "1.0.0.0",
@@ -274,40 +430,42 @@
         },
         {
             "name": "nyholm/psr7",
-            "version": "1.5.1",
-            "version_normalized": "1.5.1.0",
+            "version": "dev-master",
+            "version_normalized": "dev-master",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Nyholm/psr7.git",
-                "reference": "f734364e38a876a23be4d906a2a089e1315be18a"
+                "reference": "3cb4d163b58589e47b35103e8e5e6a6a475b47be"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Nyholm/psr7/zipball/f734364e38a876a23be4d906a2a089e1315be18a",
-                "reference": "f734364e38a876a23be4d906a2a089e1315be18a",
+                "url": "https://api.github.com/repos/Nyholm/psr7/zipball/3cb4d163b58589e47b35103e8e5e6a6a475b47be",
+                "reference": "3cb4d163b58589e47b35103e8e5e6a6a475b47be",
                 "shasum": ""
             },
             "require": {
-                "php": ">=7.1",
-                "php-http/message-factory": "^1.0",
+                "php": ">=7.2",
                 "psr/http-factory": "^1.0",
-                "psr/http-message": "^1.0"
+                "psr/http-message": "^1.1 || ^2.0"
             },
             "provide": {
+                "php-http/message-factory-implementation": "1.0",
                 "psr/http-factory-implementation": "1.0",
                 "psr/http-message-implementation": "1.0"
             },
             "require-dev": {
                 "http-interop/http-factory-tests": "^0.9",
+                "php-http/message-factory": "^1.0",
                 "php-http/psr7-integration-tests": "^1.0",
-                "phpunit/phpunit": "^7.5 || 8.5 || 9.4",
+                "phpunit/phpunit": "^7.5 || ^8.5 || ^9.4",
                 "symfony/error-handler": "^4.4"
             },
-            "time": "2022-06-22T07:13:36+00:00",
+            "time": "2023-05-02T11:26:24+00:00",
+            "default-branch": true,
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "1.4-dev"
+                    "dev-master": "1.8-dev"
                 }
             },
             "installation-source": "dist",
@@ -338,7 +496,7 @@
             ],
             "support": {
                 "issues": "https://github.com/Nyholm/psr7/issues",
-                "source": "https://github.com/Nyholm/psr7/tree/1.5.1"
+                "source": "https://github.com/Nyholm/psr7/tree/1.8.0"
             },
             "funding": [
                 {
@@ -354,30 +512,35 @@
         },
         {
             "name": "open-telemetry/api",
-            "version": "1.0.0beta5",
-            "version_normalized": "1.0.0.0-beta5",
+            "version": "dev-main",
+            "version_normalized": "dev-main",
             "source": {
                 "type": "git",
                 "url": "https://github.com/opentelemetry-php/api.git",
-                "reference": "0554a4f791a2813163992ce8daa4038d09c4b327"
+                "reference": "c100487cc4a1d9a9aecd0c5aac25298d67234e89"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/opentelemetry-php/api/zipball/0554a4f791a2813163992ce8daa4038d09c4b327",
-                "reference": "0554a4f791a2813163992ce8daa4038d09c4b327",
+                "url": "https://api.github.com/repos/opentelemetry-php/api/zipball/c100487cc4a1d9a9aecd0c5aac25298d67234e89",
+                "reference": "c100487cc4a1d9a9aecd0c5aac25298d67234e89",
                 "shasum": ""
             },
             "require": {
                 "open-telemetry/context": "^1.0",
-                "open-telemetry/sem-conv": "^1.0",
                 "php": "^7.4 || ^8.0",
                 "psr/log": "^1.1|^2.0|^3.0",
                 "symfony/polyfill-php80": "^1.26",
                 "symfony/polyfill-php81": "^1.26",
                 "symfony/polyfill-php82": "^1.26"
             },
-            "time": "2023-03-22T12:11:51+00:00",
+            "time": "2023-05-02T22:59:57+00:00",
+            "default-branch": true,
             "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-main": "1.0.x-dev"
+                }
+            },
             "installation-source": "dist",
             "autoload": {
                 "files": [
@@ -408,23 +571,23 @@
                 "tracing"
             ],
             "support": {
-                "source": "https://github.com/opentelemetry-php/api/tree/1.0.0beta5"
+                "source": "https://github.com/opentelemetry-php/api/tree/1.0.0beta9"
             },
             "install-path": "../open-telemetry/api"
         },
         {
             "name": "open-telemetry/context",
-            "version": "1.0.0beta2",
-            "version_normalized": "1.0.0.0-beta2",
+            "version": "dev-main",
+            "version_normalized": "dev-main",
             "source": {
                 "type": "git",
                 "url": "https://github.com/opentelemetry-php/context.git",
-                "reference": "31814464bb54e62e39e79729bbe6b1fd82324897"
+                "reference": "bfb5feb6dfa819594657f588c2998bc48eff3c00"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/opentelemetry-php/context/zipball/31814464bb54e62e39e79729bbe6b1fd82324897",
-                "reference": "31814464bb54e62e39e79729bbe6b1fd82324897",
+                "url": "https://api.github.com/repos/opentelemetry-php/context/zipball/bfb5feb6dfa819594657f588c2998bc48eff3c00",
+                "reference": "bfb5feb6dfa819594657f588c2998bc48eff3c00",
                 "shasum": ""
             },
             "require": {
@@ -436,8 +599,14 @@
             "suggest": {
                 "ext-ffi": "To allow context switching in Fibers"
             },
-            "time": "2022-11-25T20:26:34+00:00",
+            "time": "2023-05-02T22:59:57+00:00",
+            "default-branch": true,
             "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-main": "1.0.x-dev"
+                }
+            },
             "installation-source": "dist",
             "autoload": {
                 "files": [
@@ -464,7 +633,7 @@
                 "otel"
             ],
             "support": {
-                "source": "https://github.com/opentelemetry-php/context/tree/1.0.0beta2"
+                "source": "https://github.com/opentelemetry-php/context/tree/1.0.0beta3"
             },
             "install-path": "../open-telemetry/context"
         },
@@ -475,12 +644,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/opentelemetry-php/exporter-zipkin.git",
-                "reference": "5c22491c9ea0445f8b505ef346c7c135b582e28c"
+                "reference": "9b3f83694390c7a5ce26ca131a38925e531b341b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/opentelemetry-php/exporter-zipkin/zipball/5c22491c9ea0445f8b505ef346c7c135b582e28c",
-                "reference": "5c22491c9ea0445f8b505ef346c7c135b582e28c",
+                "url": "https://api.github.com/repos/opentelemetry-php/exporter-zipkin/zipball/9b3f83694390c7a5ce26ca131a38925e531b341b",
+                "reference": "9b3f83694390c7a5ce26ca131a38925e531b341b",
                 "shasum": ""
             },
             "require": {
@@ -491,9 +660,14 @@
                 "php-http/discovery": "^1.14",
                 "psr/http-factory-implementation": "^1.0"
             },
-            "time": "2023-03-13T16:52:28+00:00",
+            "time": "2023-05-02T22:59:57+00:00",
             "default-branch": true,
             "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-main": "1.0.x-dev"
+                }
+            },
             "installation-source": "dist",
             "autoload": {
                 "files": [
@@ -523,7 +697,7 @@
                 "zipkin"
             ],
             "support": {
-                "source": "https://github.com/opentelemetry-php/exporter-zipkin/tree/main"
+                "source": "https://github.com/opentelemetry-php/exporter-zipkin/tree/1.0.0beta5"
             },
             "install-path": "../open-telemetry/exporter-zipkin"
         },
@@ -534,12 +708,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/opentelemetry-php/extension-propagator-b3.git",
-                "reference": "703e6f3aaabca2ba06bbfbd43677e7e675cb07a1"
+                "reference": "0a96a94d74cc76236fe55682b9c5fd7be6bc1b27"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/opentelemetry-php/extension-propagator-b3/zipball/703e6f3aaabca2ba06bbfbd43677e7e675cb07a1",
-                "reference": "703e6f3aaabca2ba06bbfbd43677e7e675cb07a1",
+                "url": "https://api.github.com/repos/opentelemetry-php/extension-propagator-b3/zipball/0a96a94d74cc76236fe55682b9c5fd7be6bc1b27",
+                "reference": "0a96a94d74cc76236fe55682b9c5fd7be6bc1b27",
                 "shasum": ""
             },
             "require": {
@@ -547,9 +721,14 @@
                 "open-telemetry/context": "^1.0",
                 "php": "^7.4 || ^8.0"
             },
-            "time": "2023-02-15T13:44:20+00:00",
+            "time": "2023-05-02T22:59:57+00:00",
             "default-branch": true,
             "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-main": "1.0.x-dev"
+                }
+            },
             "installation-source": "dist",
             "autoload": {
                 "files": [
@@ -580,23 +759,23 @@
                 "tracing"
             ],
             "support": {
-                "source": "https://github.com/opentelemetry-php/extension-propagator-b3/tree/1.0.0beta3"
+                "source": "https://github.com/opentelemetry-php/extension-propagator-b3/tree/1.0.0beta4"
             },
             "install-path": "../open-telemetry/extension-propagator-b3"
         },
         {
             "name": "open-telemetry/sdk",
-            "version": "1.0.0beta5",
-            "version_normalized": "1.0.0.0-beta5",
+            "version": "dev-main",
+            "version_normalized": "dev-main",
             "source": {
                 "type": "git",
                 "url": "https://github.com/opentelemetry-php/sdk.git",
-                "reference": "d8c0372c9daa8521ed4f6b93a060398ba9aece31"
+                "reference": "1206934af69db1525cda55e776f0b029bde2a91b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/opentelemetry-php/sdk/zipball/d8c0372c9daa8521ed4f6b93a060398ba9aece31",
-                "reference": "d8c0372c9daa8521ed4f6b93a060398ba9aece31",
+                "url": "https://api.github.com/repos/opentelemetry-php/sdk/zipball/1206934af69db1525cda55e776f0b029bde2a91b",
+                "reference": "1206934af69db1525cda55e776f0b029bde2a91b",
                 "shasum": ""
             },
             "require": {
@@ -608,6 +787,7 @@
                 "php-http/async-client-implementation": "^1.0",
                 "php-http/discovery": "^1.14",
                 "psr/http-factory-implementation": "^1.0",
+                "psr/http-message": "^1.0.1",
                 "psr/log": "^1.1|^2.0|^3.0",
                 "symfony/polyfill-mbstring": "^1.23",
                 "symfony/polyfill-php80": "^1.26",
@@ -618,8 +798,14 @@
                 "ext-gmp": "To support unlimited number of synchronous metric readers",
                 "ext-mbstring": "To increase performance of string operations"
             },
-            "time": "2023-03-22T18:31:01+00:00",
+            "time": "2023-05-09T23:16:45+00:00",
+            "default-branch": true,
             "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-main": "1.0.x-dev"
+                }
+            },
             "installation-source": "dist",
             "autoload": {
                 "files": [
@@ -655,30 +841,36 @@
                 "tracing"
             ],
             "support": {
-                "source": "https://github.com/opentelemetry-php/sdk/tree/1.0.0beta5"
+                "source": "https://github.com/opentelemetry-php/sdk/tree/1.0.0beta10"
             },
             "install-path": "../open-telemetry/sdk"
         },
         {
             "name": "open-telemetry/sem-conv",
-            "version": "1.0.0beta2",
-            "version_normalized": "1.0.0.0-beta2",
+            "version": "dev-main",
+            "version_normalized": "dev-main",
             "source": {
                 "type": "git",
                 "url": "https://github.com/opentelemetry-php/sem-conv.git",
-                "reference": "c9c81fe00b1c184961b72808b8a12c7ca0ce375a"
+                "reference": "79bb3d611b7dad487cafe832e674efb2ea435c29"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/opentelemetry-php/sem-conv/zipball/c9c81fe00b1c184961b72808b8a12c7ca0ce375a",
-                "reference": "c9c81fe00b1c184961b72808b8a12c7ca0ce375a",
+                "url": "https://api.github.com/repos/opentelemetry-php/sem-conv/zipball/79bb3d611b7dad487cafe832e674efb2ea435c29",
+                "reference": "79bb3d611b7dad487cafe832e674efb2ea435c29",
                 "shasum": ""
             },
             "require": {
                 "php": "^7.4 || ^8.0"
             },
-            "time": "2022-09-06T12:51:24+00:00",
+            "time": "2023-05-02T22:59:57+00:00",
+            "default-branch": true,
             "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-main": "1.x-dev"
+                }
+            },
             "installation-source": "dist",
             "autoload": {
                 "psr-4": {
@@ -707,9 +899,78 @@
                 "tracing"
             ],
             "support": {
-                "source": "https://github.com/opentelemetry-php/sem-conv/tree/1.0.0beta2"
+                "source": "https://github.com/opentelemetry-php/sem-conv/tree/1.0.0beta3"
             },
             "install-path": "../open-telemetry/sem-conv"
+        },
+        {
+            "name": "package-url/packageurl-php",
+            "version": "1.0.6",
+            "version_normalized": "1.0.6.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/package-url/packageurl-php.git",
+                "reference": "ba6e2761f48a0599b66209ed1296b689b89b32ec"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/package-url/packageurl-php/zipball/ba6e2761f48a0599b66209ed1296b689b89b32ec",
+                "reference": "ba6e2761f48a0599b66209ed1296b689b89b32ec",
+                "shasum": ""
+            },
+            "require": {
+                "php": "^7.3 || ^8.0"
+            },
+            "require-dev": {
+                "ext-json": "*",
+                "phpunit/phpunit": "9.6.5",
+                "roave/security-advisories": "dev-latest"
+            },
+            "time": "2023-03-18T08:35:25+00:00",
+            "type": "library",
+            "extra": {
+                "composer-normalize": {
+                    "indent-size": 4,
+                    "indent-style": "space"
+                }
+            },
+            "installation-source": "dist",
+            "autoload": {
+                "psr-4": {
+                    "PackageUrl\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Jan Kowalleck",
+                    "email": "jan.kowalleck@gmail.com",
+                    "homepage": "https://github.com/jkowalleck"
+                }
+            ],
+            "description": "Builder and parser based on the package URL (purl) specification.",
+            "homepage": "https://github.com/package-url/packageurl-php#readme",
+            "keywords": [
+                "package",
+                "package-url",
+                "packageurl",
+                "purl",
+                "url"
+            ],
+            "support": {
+                "issues": "https://github.com/package-url/packageurl-php/issues",
+                "source": "https://github.com/package-url/packageurl-php/tree/1.0.6"
+            },
+            "funding": [
+                {
+                    "url": "https://github.com/sponsors/jkowalleck",
+                    "type": "github"
+                }
+            ],
+            "install-path": "../package-url/packageurl-php"
         },
         {
             "name": "phar-io/manifest",
@@ -826,12 +1087,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/php-http/discovery.git",
-                "reference": "5cc428320191ac1d0b6520034c2dc0698628ced5"
+                "reference": "29ae6fae35f4116bbfe4c8b96ccc3f687eb07cd9"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/php-http/discovery/zipball/5cc428320191ac1d0b6520034c2dc0698628ced5",
-                "reference": "5cc428320191ac1d0b6520034c2dc0698628ced5",
+                "url": "https://api.github.com/repos/php-http/discovery/zipball/29ae6fae35f4116bbfe4c8b96ccc3f687eb07cd9",
+                "reference": "29ae6fae35f4116bbfe4c8b96ccc3f687eb07cd9",
                 "shasum": ""
             },
             "require": {
@@ -839,7 +1100,8 @@
                 "php": "^7.1 || ^8.0"
             },
             "conflict": {
-                "nyholm/psr7": "<1.0"
+                "nyholm/psr7": "<1.0",
+                "zendframework/zend-diactoros": "*"
             },
             "provide": {
                 "php-http/async-client-implementation": "*",
@@ -856,7 +1118,7 @@
                 "phpspec/phpspec": "^5.1 || ^6.1 || ^7.3",
                 "symfony/phpunit-bridge": "^6.2"
             },
-            "time": "2023-02-11T08:28:41+00:00",
+            "time": "2023-05-03T14:49:12+00:00",
             "default-branch": true,
             "type": "composer-plugin",
             "extra": {
@@ -867,7 +1129,10 @@
             "autoload": {
                 "psr-4": {
                     "Http\\Discovery\\": "src/"
-                }
+                },
+                "exclude-from-classmap": [
+                    "src/Composer/Plugin.php"
+                ]
             },
             "notification-url": "https://packagist.org/downloads/",
             "license": [
@@ -893,7 +1158,7 @@
             ],
             "support": {
                 "issues": "https://github.com/php-http/discovery/issues",
-                "source": "https://github.com/php-http/discovery/tree/1.15.2"
+                "source": "https://github.com/php-http/discovery/tree/1.18.0"
             },
             "install-path": "../php-http/discovery"
         },
@@ -904,24 +1169,24 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/php-http/message-factory.git",
-                "reference": "597f30e6dfd32a85fd7dbe58cb47554b5bad910e"
+                "reference": "4d8778e1c7d405cbb471574821c1ff5b68cc8f57"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/php-http/message-factory/zipball/597f30e6dfd32a85fd7dbe58cb47554b5bad910e",
-                "reference": "597f30e6dfd32a85fd7dbe58cb47554b5bad910e",
+                "url": "https://api.github.com/repos/php-http/message-factory/zipball/4d8778e1c7d405cbb471574821c1ff5b68cc8f57",
+                "reference": "4d8778e1c7d405cbb471574821c1ff5b68cc8f57",
                 "shasum": ""
             },
             "require": {
                 "php": ">=5.4",
-                "psr/http-message": "^1.0"
+                "psr/http-message": "^1.0 || ^2.0"
             },
-            "time": "2018-12-06T18:41:41+00:00",
+            "time": "2023-04-14T14:16:17+00:00",
             "default-branch": true,
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "1.0-dev"
+                    "dev-master": "1.x-dev"
                 }
             },
             "installation-source": "dist",
@@ -951,8 +1216,9 @@
             ],
             "support": {
                 "issues": "https://github.com/php-http/message-factory/issues",
-                "source": "https://github.com/php-http/message-factory/tree/master"
+                "source": "https://github.com/php-http/message-factory/tree/1.1.0"
             },
+            "abandoned": "psr/http-factory",
             "install-path": "../php-http/message-factory"
         },
         {
@@ -1085,12 +1351,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/phpDocumentor/TypeResolver.git",
-                "reference": "1534aea9bde19a5c85c5d1e1f834ab63f4c5dcf5"
+                "reference": "dfc078e8af9c99210337325ff5aa152872c98714"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phpDocumentor/TypeResolver/zipball/1534aea9bde19a5c85c5d1e1f834ab63f4c5dcf5",
-                "reference": "1534aea9bde19a5c85c5d1e1f834ab63f4c5dcf5",
+                "url": "https://api.github.com/repos/phpDocumentor/TypeResolver/zipball/dfc078e8af9c99210337325ff5aa152872c98714",
+                "reference": "dfc078e8af9c99210337325ff5aa152872c98714",
                 "shasum": ""
             },
             "require": {
@@ -1109,7 +1375,7 @@
                 "rector/rector": "^0.13.9",
                 "vimeo/psalm": "^4.25"
             },
-            "time": "2023-03-12T10:13:29+00:00",
+            "time": "2023-03-27T19:02:04+00:00",
             "default-branch": true,
             "type": "library",
             "extra": {
@@ -1136,9 +1402,60 @@
             "description": "A PSR-5 based resolver of Class names, Types and Structural Element Names",
             "support": {
                 "issues": "https://github.com/phpDocumentor/TypeResolver/issues",
-                "source": "https://github.com/phpDocumentor/TypeResolver/tree/1.7.0"
+                "source": "https://github.com/phpDocumentor/TypeResolver/tree/1.7.1"
             },
             "install-path": "../phpdocumentor/type-resolver"
+        },
+        {
+            "name": "phplang/scope-exit",
+            "version": "1.0.0",
+            "version_normalized": "1.0.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/phplang/scope-exit.git",
+                "reference": "239b73abe89f9414aa85a7ca075ec9445629192b"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/phplang/scope-exit/zipball/239b73abe89f9414aa85a7ca075ec9445629192b",
+                "reference": "239b73abe89f9414aa85a7ca075ec9445629192b",
+                "shasum": ""
+            },
+            "require-dev": {
+                "phpunit/phpunit": "*"
+            },
+            "time": "2016-09-17T00:15:18+00:00",
+            "type": "library",
+            "installation-source": "dist",
+            "autoload": {
+                "psr-4": {
+                    "PhpLang\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "BSD"
+            ],
+            "authors": [
+                {
+                    "name": "Sara Golemon",
+                    "email": "pollita@php.net",
+                    "homepage": "https://twitter.com/SaraMG",
+                    "role": "Developer"
+                }
+            ],
+            "description": "Emulation of SCOPE_EXIT construct from C++",
+            "homepage": "https://github.com/phplang/scope-exit",
+            "keywords": [
+                "cleanup",
+                "exit",
+                "scope"
+            ],
+            "support": {
+                "issues": "https://github.com/phplang/scope-exit/issues",
+                "source": "https://github.com/phplang/scope-exit/tree/master"
+            },
+            "install-path": "../phplang/scope-exit"
         },
         {
             "name": "phpspec/prophecy",
@@ -1147,27 +1464,27 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/phpspec/prophecy.git",
-                "reference": "6458bc2e4aeb242506b2100dc94ab546347055f1"
+                "reference": "84c981450d81f03ec8eb64380ab32cac98093bde"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phpspec/prophecy/zipball/6458bc2e4aeb242506b2100dc94ab546347055f1",
-                "reference": "6458bc2e4aeb242506b2100dc94ab546347055f1",
+                "url": "https://api.github.com/repos/phpspec/prophecy/zipball/84c981450d81f03ec8eb64380ab32cac98093bde",
+                "reference": "84c981450d81f03ec8eb64380ab32cac98093bde",
                 "shasum": ""
             },
             "require": {
                 "doctrine/instantiator": "^1.2 || ^2.0",
                 "php": "^7.2 || 8.0.* || 8.1.* || 8.2.*",
                 "phpdocumentor/reflection-docblock": "^5.2",
-                "sebastian/comparator": "^3.0 || ^4.0",
-                "sebastian/recursion-context": "^3.0 || ^4.0"
+                "sebastian/comparator": "^3.0 || ^4.0 || ^5.0",
+                "sebastian/recursion-context": "^3.0 || ^4.0 || ^5.0"
             },
             "require-dev": {
                 "phpspec/phpspec": "^6.0 || ^7.0",
                 "phpstan/phpstan": "^1.9",
-                "phpunit/phpunit": "^8.0 || ^9.0"
+                "phpunit/phpunit": "^8.0 || ^9.0 || ^10.0"
             },
-            "time": "2023-02-20T08:21:35+00:00",
+            "time": "2023-04-12T15:43:51+00:00",
             "default-branch": true,
             "type": "library",
             "extra": {
@@ -1214,23 +1531,24 @@
         },
         {
             "name": "phpstan/phpdoc-parser",
-            "version": "1.16.1",
-            "version_normalized": "1.16.1.0",
+            "version": "1.21.x-dev",
+            "version_normalized": "1.21.9999999.9999999-dev",
             "source": {
                 "type": "git",
                 "url": "https://github.com/phpstan/phpdoc-parser.git",
-                "reference": "e27e92d939e2e3636f0a1f0afaba59692c0bf571"
+                "reference": "cc946352417cef34a2cdb900160caba10e18953d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phpstan/phpdoc-parser/zipball/e27e92d939e2e3636f0a1f0afaba59692c0bf571",
-                "reference": "e27e92d939e2e3636f0a1f0afaba59692c0bf571",
+                "url": "https://api.github.com/repos/phpstan/phpdoc-parser/zipball/cc946352417cef34a2cdb900160caba10e18953d",
+                "reference": "cc946352417cef34a2cdb900160caba10e18953d",
                 "shasum": ""
             },
             "require": {
                 "php": "^7.2 || ^8.0"
             },
             "require-dev": {
+                "nikic/php-parser": "^4.15",
                 "php-parallel-lint/php-parallel-lint": "^1.2",
                 "phpstan/extension-installer": "^1.0",
                 "phpstan/phpstan": "^1.5",
@@ -1239,7 +1557,8 @@
                 "phpunit/phpunit": "^9.5",
                 "symfony/process": "^5.2"
             },
-            "time": "2023-02-07T18:11:17+00:00",
+            "time": "2023-05-02T09:20:36+00:00",
+            "default-branch": true,
             "type": "library",
             "installation-source": "dist",
             "autoload": {
@@ -1256,7 +1575,7 @@
             "description": "PHPDoc parser with support for nullable, intersection and generic types",
             "support": {
                 "issues": "https://github.com/phpstan/phpdoc-parser/issues",
-                "source": "https://github.com/phpstan/phpdoc-parser/tree/1.16.1"
+                "source": "https://github.com/phpstan/phpdoc-parser/tree/1.21.x"
             },
             "install-path": "../phpstan/phpdoc-parser"
         },
@@ -1707,19 +2026,19 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/php-fig/http-client.git",
-                "reference": "22b2ef5687f43679481615605d7a15c557ce85b1"
+                "reference": "0955afe48220520692d2d09f7ab7e0f93ffd6a31"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/php-fig/http-client/zipball/22b2ef5687f43679481615605d7a15c557ce85b1",
-                "reference": "22b2ef5687f43679481615605d7a15c557ce85b1",
+                "url": "https://api.github.com/repos/php-fig/http-client/zipball/0955afe48220520692d2d09f7ab7e0f93ffd6a31",
+                "reference": "0955afe48220520692d2d09f7ab7e0f93ffd6a31",
                 "shasum": ""
             },
             "require": {
                 "php": "^7.0 || ^8.0",
-                "psr/http-message": "^1.0"
+                "psr/http-message": "^1.0 || ^2.0"
             },
-            "time": "2020-09-19T09:12:31+00:00",
+            "time": "2023-04-10T20:12:12+00:00",
             "default-branch": true,
             "type": "library",
             "extra": {
@@ -1752,7 +2071,7 @@
                 "psr-18"
             ],
             "support": {
-                "source": "https://github.com/php-fig/http-client/tree/master"
+                "source": "https://github.com/php-fig/http-client/tree/1.0.2"
             },
             "install-path": "../psr/http-client"
         },
@@ -1763,19 +2082,19 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/php-fig/http-factory.git",
-                "reference": "5a4f141ac2e5bc35e615134f127e1833158d2944"
+                "reference": "e616d01114759c4c489f93b099585439f795fe35"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/php-fig/http-factory/zipball/5a4f141ac2e5bc35e615134f127e1833158d2944",
-                "reference": "5a4f141ac2e5bc35e615134f127e1833158d2944",
+                "url": "https://api.github.com/repos/php-fig/http-factory/zipball/e616d01114759c4c489f93b099585439f795fe35",
+                "reference": "e616d01114759c4c489f93b099585439f795fe35",
                 "shasum": ""
             },
             "require": {
                 "php": ">=7.0.0",
-                "psr/http-message": "^1.0"
+                "psr/http-message": "^1.0 || ^2.0"
             },
-            "time": "2022-07-14T07:21:53+00:00",
+            "time": "2023-04-10T20:10:41+00:00",
             "default-branch": true,
             "type": "library",
             "extra": {
@@ -1811,34 +2130,33 @@
                 "response"
             ],
             "support": {
-                "source": "https://github.com/php-fig/http-factory/tree/master"
+                "source": "https://github.com/php-fig/http-factory/tree/1.0.2"
             },
             "install-path": "../psr/http-factory"
         },
         {
             "name": "psr/http-message",
-            "version": "dev-master",
-            "version_normalized": "dev-master",
+            "version": "1.1",
+            "version_normalized": "1.1.0.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/php-fig/http-message.git",
-                "reference": "efd67d1dc14a7ef4fc4e518e7dee91c271d524e4"
+                "reference": "cb6ce4845ce34a8ad9e68117c10ee90a29919eba"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/php-fig/http-message/zipball/efd67d1dc14a7ef4fc4e518e7dee91c271d524e4",
-                "reference": "efd67d1dc14a7ef4fc4e518e7dee91c271d524e4",
+                "url": "https://api.github.com/repos/php-fig/http-message/zipball/cb6ce4845ce34a8ad9e68117c10ee90a29919eba",
+                "reference": "cb6ce4845ce34a8ad9e68117c10ee90a29919eba",
                 "shasum": ""
             },
             "require": {
-                "php": ">=5.3.0"
+                "php": "^7.2 || ^8.0"
             },
-            "time": "2019-08-29T13:16:46+00:00",
-            "default-branch": true,
+            "time": "2023-04-04T09:50:52+00:00",
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "1.0.x-dev"
+                    "dev-master": "1.1.x-dev"
                 }
             },
             "installation-source": "dist",
@@ -1868,7 +2186,7 @@
                 "response"
             ],
             "support": {
-                "source": "https://github.com/php-fig/http-message/tree/master"
+                "source": "https://github.com/php-fig/http-message/tree/1.1"
             },
             "install-path": "../psr/http-message"
         },
@@ -2067,12 +2385,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/sebastianbergmann/diff.git",
-                "reference": "14f72dd46eaf2f2293cbe79c93cc0bc43161a211"
+                "reference": "6296a0c086dd0117c1b78b059374d7fcbe7545ae"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sebastianbergmann/diff/zipball/14f72dd46eaf2f2293cbe79c93cc0bc43161a211",
-                "reference": "14f72dd46eaf2f2293cbe79c93cc0bc43161a211",
+                "url": "https://api.github.com/repos/sebastianbergmann/diff/zipball/6296a0c086dd0117c1b78b059374d7fcbe7545ae",
+                "reference": "6296a0c086dd0117c1b78b059374d7fcbe7545ae",
                 "shasum": ""
             },
             "require": {
@@ -2082,7 +2400,7 @@
                 "phpunit/phpunit": "^7.5 || ^8.0",
                 "symfony/process": "^2 || ^3.3 || ^4"
             },
-            "time": "2020-11-30T07:59:04+00:00",
+            "time": "2023-05-07T05:30:20+00:00",
             "type": "library",
             "extra": {
                 "branch-alias": {
@@ -2657,6 +2975,106 @@
             "install-path": "../stevegrunwell/runkit7-installer"
         },
         {
+            "name": "swaggest/json-diff",
+            "version": "v3.10.4",
+            "version_normalized": "3.10.4.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/swaggest/json-diff.git",
+                "reference": "f4e511708060ff7511a3743fab4aa484a062bcfb"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/swaggest/json-diff/zipball/f4e511708060ff7511a3743fab4aa484a062bcfb",
+                "reference": "f4e511708060ff7511a3743fab4aa484a062bcfb",
+                "shasum": ""
+            },
+            "require": {
+                "ext-json": "*"
+            },
+            "require-dev": {
+                "phperf/phpunit": "4.8.37"
+            },
+            "time": "2022-11-09T13:21:05+00:00",
+            "type": "library",
+            "installation-source": "dist",
+            "autoload": {
+                "psr-4": {
+                    "Swaggest\\JsonDiff\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Viacheslav Poturaev",
+                    "email": "vearutop@gmail.com"
+                }
+            ],
+            "description": "JSON diff/rearrange/patch/pointer library for PHP",
+            "support": {
+                "issues": "https://github.com/swaggest/json-diff/issues",
+                "source": "https://github.com/swaggest/json-diff/tree/v3.10.4"
+            },
+            "install-path": "../swaggest/json-diff"
+        },
+        {
+            "name": "swaggest/json-schema",
+            "version": "v0.12.41",
+            "version_normalized": "0.12.41.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/swaggest/php-json-schema.git",
+                "reference": "1bb97901314f828774dd8c5b21bff889ce0b34bb"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/swaggest/php-json-schema/zipball/1bb97901314f828774dd8c5b21bff889ce0b34bb",
+                "reference": "1bb97901314f828774dd8c5b21bff889ce0b34bb",
+                "shasum": ""
+            },
+            "require": {
+                "ext-json": "*",
+                "php": ">=5.4",
+                "phplang/scope-exit": "^1.0",
+                "swaggest/json-diff": "^3.8.2",
+                "symfony/polyfill-mbstring": "^1.19"
+            },
+            "require-dev": {
+                "phperf/phpunit": "4.8.37"
+            },
+            "suggest": {
+                "ext-mbstring": "For better performance"
+            },
+            "time": "2022-08-17T11:21:43+00:00",
+            "type": "library",
+            "installation-source": "dist",
+            "autoload": {
+                "psr-4": {
+                    "Swaggest\\JsonSchema\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Viacheslav Poturaev",
+                    "email": "vearutop@gmail.com"
+                }
+            ],
+            "description": "High definition PHP structures with JSON-schema based validation",
+            "support": {
+                "email": "vearutop@gmail.com",
+                "issues": "https://github.com/swaggest/php-json-schema/issues",
+                "source": "https://github.com/swaggest/php-json-schema/tree/v0.12.41"
+            },
+            "install-path": "../swaggest/json-schema"
+        },
+        {
             "name": "symfony/deprecation-contracts",
             "version": "2.5.x-dev",
             "version_normalized": "2.5.9999999.9999999-dev",
@@ -2733,12 +3151,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/http-client.git",
-                "reference": "a2db7efc210a80bba775aaa377ec1c6e7eef853c"
+                "reference": "9e89ac4c9dfe29f4ed2b10a36e62720286632ad6"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/http-client/zipball/a2db7efc210a80bba775aaa377ec1c6e7eef853c",
-                "reference": "a2db7efc210a80bba775aaa377ec1c6e7eef853c",
+                "url": "https://api.github.com/repos/symfony/http-client/zipball/9e89ac4c9dfe29f4ed2b10a36e62720286632ad6",
+                "reference": "9e89ac4c9dfe29f4ed2b10a36e62720286632ad6",
                 "shasum": ""
             },
             "require": {
@@ -2764,13 +3182,14 @@
                 "guzzlehttp/promises": "^1.4",
                 "nyholm/psr7": "^1.0",
                 "php-http/httplug": "^1.0|^2.0",
+                "php-http/message-factory": "^1.0",
                 "psr/http-client": "^1.0",
                 "symfony/dependency-injection": "^4.4|^5.0|^6.0",
                 "symfony/http-kernel": "^4.4.13|^5.1.5|^6.0",
                 "symfony/process": "^4.4|^5.0|^6.0",
                 "symfony/stopwatch": "^4.4|^5.0|^6.0"
             },
-            "time": "2023-03-18T11:48:39+00:00",
+            "time": "2023-05-07T13:11:28+00:00",
             "type": "library",
             "installation-source": "dist",
             "autoload": {
@@ -2826,12 +3245,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/http-client-contracts.git",
-                "reference": "e409355955c35bc64af520f9853f191e6621d013"
+                "reference": "44960121df375520a6fe285e8bef06f7469bbeb2"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/http-client-contracts/zipball/e409355955c35bc64af520f9853f191e6621d013",
-                "reference": "e409355955c35bc64af520f9853f191e6621d013",
+                "url": "https://api.github.com/repos/symfony/http-client-contracts/zipball/44960121df375520a6fe285e8bef06f7469bbeb2",
+                "reference": "44960121df375520a6fe285e8bef06f7469bbeb2",
                 "shasum": ""
             },
             "require": {
@@ -2840,7 +3259,7 @@
             "suggest": {
                 "symfony/http-client-implementation": ""
             },
-            "time": "2023-01-24T14:02:46+00:00",
+            "time": "2023-04-14T10:15:01+00:00",
             "type": "library",
             "extra": {
                 "branch-alias": {
@@ -3330,12 +3749,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/service-contracts.git",
-                "reference": "1a3d2ddc2c06df23e8c13ea99148bae2b8cebd35"
+                "reference": "a2329596ddc8fd568900e3fc76cba42489ecc7f3"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/service-contracts/zipball/1a3d2ddc2c06df23e8c13ea99148bae2b8cebd35",
-                "reference": "1a3d2ddc2c06df23e8c13ea99148bae2b8cebd35",
+                "url": "https://api.github.com/repos/symfony/service-contracts/zipball/a2329596ddc8fd568900e3fc76cba42489ecc7f3",
+                "reference": "a2329596ddc8fd568900e3fc76cba42489ecc7f3",
                 "shasum": ""
             },
             "require": {
@@ -3349,7 +3768,7 @@
             "suggest": {
                 "symfony/service-implementation": ""
             },
-            "time": "2023-02-21T11:06:24+00:00",
+            "time": "2023-04-21T15:04:16+00:00",
             "type": "library",
             "extra": {
                 "branch-alias": {

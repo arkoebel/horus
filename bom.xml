@@ -1,0 +1,2300 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bom xmlns="http://cyclonedx.org/schema/bom/1.3" version="1">
+  <metadata>
+    <tools>
+      <tool>
+        <vendor><![CDATA[cyclonedx]]></vendor>
+        <name><![CDATA[cyclonedx-php-composer]]></name>
+        <version><![CDATA[3.x-dev]]></version>
+      </tool>
+    </tools>
+    <component type="library" bom-ref="pkg:composer/worldline/horus@dev-master">
+      <group><![CDATA[worldline]]></group>
+      <name><![CDATA[horus]]></name>
+      <version><![CDATA[dev-master]]></version>
+      <description><![CDATA[Basic HTTP ESB]]></description>
+      <licenses>
+        <license>
+          <id><![CDATA[Apache-2.0]]></id>
+        </license>
+      </licenses>
+      <purl><![CDATA[pkg:composer/worldline/horus@dev-master]]></purl>
+    </component>
+  </metadata>
+  <components>
+    <component type="library" bom-ref="pkg:composer/cyclonedx/cyclonedx-library@1.x-dev">
+      <group><![CDATA[cyclonedx]]></group>
+      <name><![CDATA[cyclonedx-library]]></name>
+      <version><![CDATA[1.x-dev]]></version>
+      <description><![CDATA[Work with CycloneDX Software Bill-of-Materials (SBOM)]]></description>
+      <licenses>
+        <license>
+          <id><![CDATA[Apache-2.0]]></id>
+        </license>
+      </licenses>
+      <purl><![CDATA[pkg:composer/cyclonedx/cyclonedx-library@1.x-dev]]></purl>
+      <externalReferences>
+        <reference type="distribution">
+          <url><![CDATA[https://github.com/CycloneDX/cyclonedx-php-library.git]]></url>
+          <comment><![CDATA[As detected by composer's `getSourceUrls()` (type=git & reference=f2662d418b5b19360dda9ab082fcdde0b4c840cb)]]></comment>
+        </reference>
+        <reference type="distribution">
+          <url><![CDATA[https://api.github.com/repos/CycloneDX/cyclonedx-php-library/zipball/f2662d418b5b19360dda9ab082fcdde0b4c840cb]]></url>
+          <comment><![CDATA[As detected by composer's `getDistUrls()` (type=zip & reference=f2662d418b5b19360dda9ab082fcdde0b4c840cb & sha1=UNDEFINED)]]></comment>
+        </reference>
+        <reference type="website">
+          <url><![CDATA[https://github.com/CycloneDX/cyclonedx-php-library/#readme]]></url>
+          <comment><![CDATA[As set via `homepage` in composer package definition.]]></comment>
+        </reference>
+        <reference type="issue-tracker">
+          <url><![CDATA[https://github.com/CycloneDX/cyclonedx-php-library/issues]]></url>
+          <comment><![CDATA[As set via `support.issues` in composer package definition.]]></comment>
+        </reference>
+        <reference type="distribution">
+          <url><![CDATA[https://github.com/CycloneDX/cyclonedx-php-library/]]></url>
+          <comment><![CDATA[As set via `support.source` in composer package definition.]]></comment>
+        </reference>
+      </externalReferences>
+    </component>
+    <component type="application" bom-ref="pkg:composer/cyclonedx/cyclonedx-php-composer@3.x-dev">
+      <group><![CDATA[cyclonedx]]></group>
+      <name><![CDATA[cyclonedx-php-composer]]></name>
+      <version><![CDATA[3.x-dev]]></version>
+      <description><![CDATA[Creates CycloneDX Software Bill-of-Materials (SBOM) from PHP Composer projects]]></description>
+      <licenses>
+        <license>
+          <id><![CDATA[Apache-2.0]]></id>
+        </license>
+      </licenses>
+      <purl><![CDATA[pkg:composer/cyclonedx/cyclonedx-php-composer@3.x-dev]]></purl>
+      <externalReferences>
+        <reference type="distribution">
+          <url><![CDATA[https://github.com/CycloneDX/cyclonedx-php-composer.git]]></url>
+          <comment><![CDATA[As detected by composer's `getSourceUrls()` (type=git & reference=9d223d368aa2d0346266ec90e8bb3d53e5643165)]]></comment>
+        </reference>
+        <reference type="distribution">
+          <url><![CDATA[https://api.github.com/repos/CycloneDX/cyclonedx-php-composer/zipball/9d223d368aa2d0346266ec90e8bb3d53e5643165]]></url>
+          <comment><![CDATA[As detected by composer's `getDistUrls()` (type=zip & reference=9d223d368aa2d0346266ec90e8bb3d53e5643165 & sha1=UNDEFINED)]]></comment>
+        </reference>
+        <reference type="website">
+          <url><![CDATA[https://github.com/CycloneDX/cyclonedx-php-composer/#readme]]></url>
+          <comment><![CDATA[As set via `homepage` in composer package definition.]]></comment>
+        </reference>
+        <reference type="issue-tracker">
+          <url><![CDATA[https://github.com/CycloneDX/cyclonedx-php-composer/issues]]></url>
+          <comment><![CDATA[As set via `support.issues` in composer package definition.]]></comment>
+        </reference>
+        <reference type="distribution">
+          <url><![CDATA[https://github.com/CycloneDX/cyclonedx-php-composer/]]></url>
+          <comment><![CDATA[As set via `support.source` in composer package definition.]]></comment>
+        </reference>
+      </externalReferences>
+    </component>
+    <component type="library" bom-ref="pkg:composer/guzzlehttp/promises@dev-master">
+      <group><![CDATA[guzzlehttp]]></group>
+      <name><![CDATA[promises]]></name>
+      <version><![CDATA[dev-master]]></version>
+      <description><![CDATA[Guzzle promises library]]></description>
+      <licenses>
+        <license>
+          <id><![CDATA[MIT]]></id>
+        </license>
+      </licenses>
+      <purl><![CDATA[pkg:composer/guzzlehttp/promises@dev-master]]></purl>
+      <externalReferences>
+        <reference type="distribution">
+          <url><![CDATA[https://github.com/guzzle/promises.git]]></url>
+          <comment><![CDATA[As detected by composer's `getSourceUrls()` (type=git & reference=b94b2807d85443f9719887892882d0329d1e2598)]]></comment>
+        </reference>
+        <reference type="distribution">
+          <url><![CDATA[https://api.github.com/repos/guzzle/promises/zipball/b94b2807d85443f9719887892882d0329d1e2598]]></url>
+          <comment><![CDATA[As detected by composer's `getDistUrls()` (type=zip & reference=b94b2807d85443f9719887892882d0329d1e2598 & sha1=UNDEFINED)]]></comment>
+        </reference>
+        <reference type="issue-tracker">
+          <url><![CDATA[https://github.com/guzzle/promises/issues]]></url>
+          <comment><![CDATA[As set via `support.issues` in composer package definition.]]></comment>
+        </reference>
+        <reference type="distribution">
+          <url><![CDATA[https://github.com/guzzle/promises/tree/1.5.2]]></url>
+          <comment><![CDATA[As set via `support.source` in composer package definition.]]></comment>
+        </reference>
+        <reference type="other">
+          <url><![CDATA[https://github.com/GrahamCampbell]]></url>
+          <comment><![CDATA[As set via `funding` in composer package definition. (type=github)]]></comment>
+        </reference>
+        <reference type="other">
+          <url><![CDATA[https://github.com/Nyholm]]></url>
+          <comment><![CDATA[As set via `funding` in composer package definition. (type=github)]]></comment>
+        </reference>
+        <reference type="other">
+          <url><![CDATA[https://tidelift.com/funding/github/packagist/guzzlehttp/promises]]></url>
+          <comment><![CDATA[As set via `funding` in composer package definition. (type=tidelift)]]></comment>
+        </reference>
+      </externalReferences>
+    </component>
+    <component type="library" bom-ref="pkg:composer/nyholm/psr7@dev-master">
+      <group><![CDATA[nyholm]]></group>
+      <name><![CDATA[psr7]]></name>
+      <version><![CDATA[dev-master]]></version>
+      <description><![CDATA[A fast PHP7 implementation of PSR-7]]></description>
+      <licenses>
+        <license>
+          <id><![CDATA[MIT]]></id>
+        </license>
+      </licenses>
+      <purl><![CDATA[pkg:composer/nyholm/psr7@dev-master]]></purl>
+      <externalReferences>
+        <reference type="distribution">
+          <url><![CDATA[https://github.com/Nyholm/psr7.git]]></url>
+          <comment><![CDATA[As detected by composer's `getSourceUrls()` (type=git & reference=3cb4d163b58589e47b35103e8e5e6a6a475b47be)]]></comment>
+        </reference>
+        <reference type="distribution">
+          <url><![CDATA[https://api.github.com/repos/Nyholm/psr7/zipball/3cb4d163b58589e47b35103e8e5e6a6a475b47be]]></url>
+          <comment><![CDATA[As detected by composer's `getDistUrls()` (type=zip & reference=3cb4d163b58589e47b35103e8e5e6a6a475b47be & sha1=UNDEFINED)]]></comment>
+        </reference>
+        <reference type="website">
+          <url><![CDATA[https://tnyholm.se]]></url>
+          <comment><![CDATA[As set via `homepage` in composer package definition.]]></comment>
+        </reference>
+        <reference type="issue-tracker">
+          <url><![CDATA[https://github.com/Nyholm/psr7/issues]]></url>
+          <comment><![CDATA[As set via `support.issues` in composer package definition.]]></comment>
+        </reference>
+        <reference type="distribution">
+          <url><![CDATA[https://github.com/Nyholm/psr7/tree/1.8.0]]></url>
+          <comment><![CDATA[As set via `support.source` in composer package definition.]]></comment>
+        </reference>
+        <reference type="other">
+          <url><![CDATA[https://github.com/Zegnat]]></url>
+          <comment><![CDATA[As set via `funding` in composer package definition. (type=github)]]></comment>
+        </reference>
+        <reference type="other">
+          <url><![CDATA[https://github.com/nyholm]]></url>
+          <comment><![CDATA[As set via `funding` in composer package definition. (type=github)]]></comment>
+        </reference>
+      </externalReferences>
+    </component>
+    <component type="library" bom-ref="pkg:composer/open-telemetry/api@dev-main">
+      <group><![CDATA[open-telemetry]]></group>
+      <name><![CDATA[api]]></name>
+      <version><![CDATA[dev-main]]></version>
+      <description><![CDATA[API for OpenTelemetry PHP.]]></description>
+      <licenses>
+        <license>
+          <id><![CDATA[Apache-2.0]]></id>
+        </license>
+      </licenses>
+      <purl><![CDATA[pkg:composer/open-telemetry/api@dev-main]]></purl>
+      <externalReferences>
+        <reference type="distribution">
+          <url><![CDATA[https://github.com/opentelemetry-php/api.git]]></url>
+          <comment><![CDATA[As detected by composer's `getSourceUrls()` (type=git & reference=c100487cc4a1d9a9aecd0c5aac25298d67234e89)]]></comment>
+        </reference>
+        <reference type="distribution">
+          <url><![CDATA[https://api.github.com/repos/opentelemetry-php/api/zipball/c100487cc4a1d9a9aecd0c5aac25298d67234e89]]></url>
+          <comment><![CDATA[As detected by composer's `getDistUrls()` (type=zip & reference=c100487cc4a1d9a9aecd0c5aac25298d67234e89 & sha1=UNDEFINED)]]></comment>
+        </reference>
+        <reference type="distribution">
+          <url><![CDATA[https://github.com/opentelemetry-php/api/tree/1.0.0beta9]]></url>
+          <comment><![CDATA[As set via `support.source` in composer package definition.]]></comment>
+        </reference>
+      </externalReferences>
+    </component>
+    <component type="library" bom-ref="pkg:composer/open-telemetry/context@dev-main">
+      <group><![CDATA[open-telemetry]]></group>
+      <name><![CDATA[context]]></name>
+      <version><![CDATA[dev-main]]></version>
+      <description><![CDATA[Context implementation for OpenTelemetry PHP.]]></description>
+      <licenses>
+        <license>
+          <id><![CDATA[Apache-2.0]]></id>
+        </license>
+      </licenses>
+      <purl><![CDATA[pkg:composer/open-telemetry/context@dev-main]]></purl>
+      <externalReferences>
+        <reference type="distribution">
+          <url><![CDATA[https://github.com/opentelemetry-php/context.git]]></url>
+          <comment><![CDATA[As detected by composer's `getSourceUrls()` (type=git & reference=bfb5feb6dfa819594657f588c2998bc48eff3c00)]]></comment>
+        </reference>
+        <reference type="distribution">
+          <url><![CDATA[https://api.github.com/repos/opentelemetry-php/context/zipball/bfb5feb6dfa819594657f588c2998bc48eff3c00]]></url>
+          <comment><![CDATA[As detected by composer's `getDistUrls()` (type=zip & reference=bfb5feb6dfa819594657f588c2998bc48eff3c00 & sha1=UNDEFINED)]]></comment>
+        </reference>
+        <reference type="distribution">
+          <url><![CDATA[https://github.com/opentelemetry-php/context/tree/1.0.0beta3]]></url>
+          <comment><![CDATA[As set via `support.source` in composer package definition.]]></comment>
+        </reference>
+      </externalReferences>
+    </component>
+    <component type="library" bom-ref="pkg:composer/open-telemetry/exporter-zipkin@dev-main">
+      <group><![CDATA[open-telemetry]]></group>
+      <name><![CDATA[exporter-zipkin]]></name>
+      <version><![CDATA[dev-main]]></version>
+      <description><![CDATA[Zipkin exporter for OpenTelemetry PHP.]]></description>
+      <licenses>
+        <license>
+          <id><![CDATA[Apache-2.0]]></id>
+        </license>
+      </licenses>
+      <purl><![CDATA[pkg:composer/open-telemetry/exporter-zipkin@dev-main]]></purl>
+      <externalReferences>
+        <reference type="distribution">
+          <url><![CDATA[https://github.com/opentelemetry-php/exporter-zipkin.git]]></url>
+          <comment><![CDATA[As detected by composer's `getSourceUrls()` (type=git & reference=9b3f83694390c7a5ce26ca131a38925e531b341b)]]></comment>
+        </reference>
+        <reference type="distribution">
+          <url><![CDATA[https://api.github.com/repos/opentelemetry-php/exporter-zipkin/zipball/9b3f83694390c7a5ce26ca131a38925e531b341b]]></url>
+          <comment><![CDATA[As detected by composer's `getDistUrls()` (type=zip & reference=9b3f83694390c7a5ce26ca131a38925e531b341b & sha1=UNDEFINED)]]></comment>
+        </reference>
+        <reference type="distribution">
+          <url><![CDATA[https://github.com/opentelemetry-php/exporter-zipkin/tree/1.0.0beta5]]></url>
+          <comment><![CDATA[As set via `support.source` in composer package definition.]]></comment>
+        </reference>
+      </externalReferences>
+    </component>
+    <component type="library" bom-ref="pkg:composer/open-telemetry/extension-propagator-b3@dev-main">
+      <group><![CDATA[open-telemetry]]></group>
+      <name><![CDATA[extension-propagator-b3]]></name>
+      <version><![CDATA[dev-main]]></version>
+      <description><![CDATA[B3 propagator extension for OpenTelemetry PHP.]]></description>
+      <licenses>
+        <license>
+          <id><![CDATA[Apache-2.0]]></id>
+        </license>
+      </licenses>
+      <purl><![CDATA[pkg:composer/open-telemetry/extension-propagator-b3@dev-main]]></purl>
+      <externalReferences>
+        <reference type="distribution">
+          <url><![CDATA[https://github.com/opentelemetry-php/extension-propagator-b3.git]]></url>
+          <comment><![CDATA[As detected by composer's `getSourceUrls()` (type=git & reference=0a96a94d74cc76236fe55682b9c5fd7be6bc1b27)]]></comment>
+        </reference>
+        <reference type="distribution">
+          <url><![CDATA[https://api.github.com/repos/opentelemetry-php/extension-propagator-b3/zipball/0a96a94d74cc76236fe55682b9c5fd7be6bc1b27]]></url>
+          <comment><![CDATA[As detected by composer's `getDistUrls()` (type=zip & reference=0a96a94d74cc76236fe55682b9c5fd7be6bc1b27 & sha1=UNDEFINED)]]></comment>
+        </reference>
+        <reference type="distribution">
+          <url><![CDATA[https://github.com/opentelemetry-php/extension-propagator-b3/tree/1.0.0beta4]]></url>
+          <comment><![CDATA[As set via `support.source` in composer package definition.]]></comment>
+        </reference>
+      </externalReferences>
+    </component>
+    <component type="library" bom-ref="pkg:composer/open-telemetry/sdk@dev-main">
+      <group><![CDATA[open-telemetry]]></group>
+      <name><![CDATA[sdk]]></name>
+      <version><![CDATA[dev-main]]></version>
+      <description><![CDATA[SDK for OpenTelemetry PHP.]]></description>
+      <licenses>
+        <license>
+          <id><![CDATA[Apache-2.0]]></id>
+        </license>
+      </licenses>
+      <purl><![CDATA[pkg:composer/open-telemetry/sdk@dev-main]]></purl>
+      <externalReferences>
+        <reference type="distribution">
+          <url><![CDATA[https://github.com/opentelemetry-php/sdk.git]]></url>
+          <comment><![CDATA[As detected by composer's `getSourceUrls()` (type=git & reference=1206934af69db1525cda55e776f0b029bde2a91b)]]></comment>
+        </reference>
+        <reference type="distribution">
+          <url><![CDATA[https://api.github.com/repos/opentelemetry-php/sdk/zipball/1206934af69db1525cda55e776f0b029bde2a91b]]></url>
+          <comment><![CDATA[As detected by composer's `getDistUrls()` (type=zip & reference=1206934af69db1525cda55e776f0b029bde2a91b & sha1=UNDEFINED)]]></comment>
+        </reference>
+        <reference type="distribution">
+          <url><![CDATA[https://github.com/opentelemetry-php/sdk/tree/1.0.0beta10]]></url>
+          <comment><![CDATA[As set via `support.source` in composer package definition.]]></comment>
+        </reference>
+      </externalReferences>
+    </component>
+    <component type="library" bom-ref="pkg:composer/open-telemetry/sem-conv@dev-main">
+      <group><![CDATA[open-telemetry]]></group>
+      <name><![CDATA[sem-conv]]></name>
+      <version><![CDATA[dev-main]]></version>
+      <description><![CDATA[Semantic conventions for OpenTelemetry PHP.]]></description>
+      <licenses>
+        <license>
+          <id><![CDATA[Apache-2.0]]></id>
+        </license>
+      </licenses>
+      <purl><![CDATA[pkg:composer/open-telemetry/sem-conv@dev-main]]></purl>
+      <externalReferences>
+        <reference type="distribution">
+          <url><![CDATA[https://github.com/opentelemetry-php/sem-conv.git]]></url>
+          <comment><![CDATA[As detected by composer's `getSourceUrls()` (type=git & reference=79bb3d611b7dad487cafe832e674efb2ea435c29)]]></comment>
+        </reference>
+        <reference type="distribution">
+          <url><![CDATA[https://api.github.com/repos/opentelemetry-php/sem-conv/zipball/79bb3d611b7dad487cafe832e674efb2ea435c29]]></url>
+          <comment><![CDATA[As detected by composer's `getDistUrls()` (type=zip & reference=79bb3d611b7dad487cafe832e674efb2ea435c29 & sha1=UNDEFINED)]]></comment>
+        </reference>
+        <reference type="distribution">
+          <url><![CDATA[https://github.com/opentelemetry-php/sem-conv/tree/1.0.0beta3]]></url>
+          <comment><![CDATA[As set via `support.source` in composer package definition.]]></comment>
+        </reference>
+      </externalReferences>
+    </component>
+    <component type="library" bom-ref="pkg:composer/package-url/packageurl-php@1.0.6">
+      <group><![CDATA[package-url]]></group>
+      <name><![CDATA[packageurl-php]]></name>
+      <version><![CDATA[1.0.6]]></version>
+      <description><![CDATA[Builder and parser based on the package URL (purl) specification.]]></description>
+      <licenses>
+        <license>
+          <id><![CDATA[MIT]]></id>
+        </license>
+      </licenses>
+      <purl><![CDATA[pkg:composer/package-url/packageurl-php@1.0.6]]></purl>
+      <externalReferences>
+        <reference type="distribution">
+          <url><![CDATA[https://github.com/package-url/packageurl-php.git]]></url>
+          <comment><![CDATA[As detected by composer's `getSourceUrls()` (type=git & reference=ba6e2761f48a0599b66209ed1296b689b89b32ec)]]></comment>
+        </reference>
+        <reference type="distribution">
+          <url><![CDATA[https://api.github.com/repos/package-url/packageurl-php/zipball/ba6e2761f48a0599b66209ed1296b689b89b32ec]]></url>
+          <comment><![CDATA[As detected by composer's `getDistUrls()` (type=zip & reference=ba6e2761f48a0599b66209ed1296b689b89b32ec & sha1=UNDEFINED)]]></comment>
+        </reference>
+        <reference type="website">
+          <url><![CDATA[https://github.com/package-url/packageurl-php#readme]]></url>
+          <comment><![CDATA[As set via `homepage` in composer package definition.]]></comment>
+        </reference>
+        <reference type="issue-tracker">
+          <url><![CDATA[https://github.com/package-url/packageurl-php/issues]]></url>
+          <comment><![CDATA[As set via `support.issues` in composer package definition.]]></comment>
+        </reference>
+        <reference type="distribution">
+          <url><![CDATA[https://github.com/package-url/packageurl-php/tree/1.0.6]]></url>
+          <comment><![CDATA[As set via `support.source` in composer package definition.]]></comment>
+        </reference>
+        <reference type="other">
+          <url><![CDATA[https://github.com/sponsors/jkowalleck]]></url>
+          <comment><![CDATA[As set via `funding` in composer package definition. (type=github)]]></comment>
+        </reference>
+      </externalReferences>
+    </component>
+    <component type="application" bom-ref="pkg:composer/php-http/discovery@1.x-dev">
+      <group><![CDATA[php-http]]></group>
+      <name><![CDATA[discovery]]></name>
+      <version><![CDATA[1.x-dev]]></version>
+      <description><![CDATA[Finds and installs PSR-7, PSR-17, PSR-18 and HTTPlug implementations]]></description>
+      <licenses>
+        <license>
+          <id><![CDATA[MIT]]></id>
+        </license>
+      </licenses>
+      <purl><![CDATA[pkg:composer/php-http/discovery@1.x-dev]]></purl>
+      <externalReferences>
+        <reference type="distribution">
+          <url><![CDATA[https://github.com/php-http/discovery.git]]></url>
+          <comment><![CDATA[As detected by composer's `getSourceUrls()` (type=git & reference=29ae6fae35f4116bbfe4c8b96ccc3f687eb07cd9)]]></comment>
+        </reference>
+        <reference type="distribution">
+          <url><![CDATA[https://api.github.com/repos/php-http/discovery/zipball/29ae6fae35f4116bbfe4c8b96ccc3f687eb07cd9]]></url>
+          <comment><![CDATA[As detected by composer's `getDistUrls()` (type=zip & reference=29ae6fae35f4116bbfe4c8b96ccc3f687eb07cd9 & sha1=UNDEFINED)]]></comment>
+        </reference>
+        <reference type="website">
+          <url><![CDATA[http://php-http.org]]></url>
+          <comment><![CDATA[As set via `homepage` in composer package definition.]]></comment>
+        </reference>
+        <reference type="issue-tracker">
+          <url><![CDATA[https://github.com/php-http/discovery/issues]]></url>
+          <comment><![CDATA[As set via `support.issues` in composer package definition.]]></comment>
+        </reference>
+        <reference type="distribution">
+          <url><![CDATA[https://github.com/php-http/discovery/tree/1.18.0]]></url>
+          <comment><![CDATA[As set via `support.source` in composer package definition.]]></comment>
+        </reference>
+      </externalReferences>
+    </component>
+    <component type="library" bom-ref="pkg:composer/php-http/message-factory@dev-master">
+      <group><![CDATA[php-http]]></group>
+      <name><![CDATA[message-factory]]></name>
+      <version><![CDATA[dev-master]]></version>
+      <description><![CDATA[Factory interfaces for PSR-7 HTTP Message]]></description>
+      <licenses>
+        <license>
+          <id><![CDATA[MIT]]></id>
+        </license>
+      </licenses>
+      <purl><![CDATA[pkg:composer/php-http/message-factory@dev-master]]></purl>
+      <externalReferences>
+        <reference type="distribution">
+          <url><![CDATA[https://github.com/php-http/message-factory.git]]></url>
+          <comment><![CDATA[As detected by composer's `getSourceUrls()` (type=git & reference=4d8778e1c7d405cbb471574821c1ff5b68cc8f57)]]></comment>
+        </reference>
+        <reference type="distribution">
+          <url><![CDATA[https://api.github.com/repos/php-http/message-factory/zipball/4d8778e1c7d405cbb471574821c1ff5b68cc8f57]]></url>
+          <comment><![CDATA[As detected by composer's `getDistUrls()` (type=zip & reference=4d8778e1c7d405cbb471574821c1ff5b68cc8f57 & sha1=UNDEFINED)]]></comment>
+        </reference>
+        <reference type="website">
+          <url><![CDATA[http://php-http.org]]></url>
+          <comment><![CDATA[As set via `homepage` in composer package definition.]]></comment>
+        </reference>
+        <reference type="issue-tracker">
+          <url><![CDATA[https://github.com/php-http/message-factory/issues]]></url>
+          <comment><![CDATA[As set via `support.issues` in composer package definition.]]></comment>
+        </reference>
+        <reference type="distribution">
+          <url><![CDATA[https://github.com/php-http/message-factory/tree/1.1.0]]></url>
+          <comment><![CDATA[As set via `support.source` in composer package definition.]]></comment>
+        </reference>
+      </externalReferences>
+    </component>
+    <component type="library" bom-ref="pkg:composer/phplang/scope-exit@1.0.0">
+      <group><![CDATA[phplang]]></group>
+      <name><![CDATA[scope-exit]]></name>
+      <version><![CDATA[1.0.0]]></version>
+      <description><![CDATA[Emulation of SCOPE_EXIT construct from C++]]></description>
+      <licenses>
+        <license>
+          <name><![CDATA[BSD]]></name>
+        </license>
+      </licenses>
+      <purl><![CDATA[pkg:composer/phplang/scope-exit@1.0.0]]></purl>
+      <externalReferences>
+        <reference type="distribution">
+          <url><![CDATA[https://github.com/phplang/scope-exit.git]]></url>
+          <comment><![CDATA[As detected by composer's `getSourceUrls()` (type=git & reference=239b73abe89f9414aa85a7ca075ec9445629192b)]]></comment>
+        </reference>
+        <reference type="distribution">
+          <url><![CDATA[https://api.github.com/repos/phplang/scope-exit/zipball/239b73abe89f9414aa85a7ca075ec9445629192b]]></url>
+          <comment><![CDATA[As detected by composer's `getDistUrls()` (type=zip & reference=239b73abe89f9414aa85a7ca075ec9445629192b & sha1=UNDEFINED)]]></comment>
+        </reference>
+        <reference type="website">
+          <url><![CDATA[https://github.com/phplang/scope-exit]]></url>
+          <comment><![CDATA[As set via `homepage` in composer package definition.]]></comment>
+        </reference>
+        <reference type="issue-tracker">
+          <url><![CDATA[https://github.com/phplang/scope-exit/issues]]></url>
+          <comment><![CDATA[As set via `support.issues` in composer package definition.]]></comment>
+        </reference>
+        <reference type="distribution">
+          <url><![CDATA[https://github.com/phplang/scope-exit/tree/master]]></url>
+          <comment><![CDATA[As set via `support.source` in composer package definition.]]></comment>
+        </reference>
+      </externalReferences>
+    </component>
+    <component type="library" bom-ref="pkg:composer/psr/container@1.x-dev">
+      <group><![CDATA[psr]]></group>
+      <name><![CDATA[container]]></name>
+      <version><![CDATA[1.x-dev]]></version>
+      <description><![CDATA[Common Container Interface (PHP FIG PSR-11)]]></description>
+      <licenses>
+        <license>
+          <id><![CDATA[MIT]]></id>
+        </license>
+      </licenses>
+      <purl><![CDATA[pkg:composer/psr/container@1.x-dev]]></purl>
+      <externalReferences>
+        <reference type="distribution">
+          <url><![CDATA[https://github.com/php-fig/container.git]]></url>
+          <comment><![CDATA[As detected by composer's `getSourceUrls()` (type=git & reference=513e0666f7216c7459170d56df27dfcefe1689ea)]]></comment>
+        </reference>
+        <reference type="distribution">
+          <url><![CDATA[https://api.github.com/repos/php-fig/container/zipball/513e0666f7216c7459170d56df27dfcefe1689ea]]></url>
+          <comment><![CDATA[As detected by composer's `getDistUrls()` (type=zip & reference=513e0666f7216c7459170d56df27dfcefe1689ea & sha1=UNDEFINED)]]></comment>
+        </reference>
+        <reference type="website">
+          <url><![CDATA[https://github.com/php-fig/container]]></url>
+          <comment><![CDATA[As set via `homepage` in composer package definition.]]></comment>
+        </reference>
+        <reference type="issue-tracker">
+          <url><![CDATA[https://github.com/php-fig/container/issues]]></url>
+          <comment><![CDATA[As set via `support.issues` in composer package definition.]]></comment>
+        </reference>
+        <reference type="distribution">
+          <url><![CDATA[https://github.com/php-fig/container/tree/1.1.2]]></url>
+          <comment><![CDATA[As set via `support.source` in composer package definition.]]></comment>
+        </reference>
+      </externalReferences>
+    </component>
+    <component type="library" bom-ref="pkg:composer/psr/http-client@dev-master">
+      <group><![CDATA[psr]]></group>
+      <name><![CDATA[http-client]]></name>
+      <version><![CDATA[dev-master]]></version>
+      <description><![CDATA[Common interface for HTTP clients]]></description>
+      <licenses>
+        <license>
+          <id><![CDATA[MIT]]></id>
+        </license>
+      </licenses>
+      <purl><![CDATA[pkg:composer/psr/http-client@dev-master]]></purl>
+      <externalReferences>
+        <reference type="distribution">
+          <url><![CDATA[https://github.com/php-fig/http-client.git]]></url>
+          <comment><![CDATA[As detected by composer's `getSourceUrls()` (type=git & reference=0955afe48220520692d2d09f7ab7e0f93ffd6a31)]]></comment>
+        </reference>
+        <reference type="distribution">
+          <url><![CDATA[https://api.github.com/repos/php-fig/http-client/zipball/0955afe48220520692d2d09f7ab7e0f93ffd6a31]]></url>
+          <comment><![CDATA[As detected by composer's `getDistUrls()` (type=zip & reference=0955afe48220520692d2d09f7ab7e0f93ffd6a31 & sha1=UNDEFINED)]]></comment>
+        </reference>
+        <reference type="website">
+          <url><![CDATA[https://github.com/php-fig/http-client]]></url>
+          <comment><![CDATA[As set via `homepage` in composer package definition.]]></comment>
+        </reference>
+        <reference type="distribution">
+          <url><![CDATA[https://github.com/php-fig/http-client/tree/1.0.2]]></url>
+          <comment><![CDATA[As set via `support.source` in composer package definition.]]></comment>
+        </reference>
+      </externalReferences>
+    </component>
+    <component type="library" bom-ref="pkg:composer/psr/http-factory@dev-master">
+      <group><![CDATA[psr]]></group>
+      <name><![CDATA[http-factory]]></name>
+      <version><![CDATA[dev-master]]></version>
+      <description><![CDATA[Common interfaces for PSR-7 HTTP message factories]]></description>
+      <licenses>
+        <license>
+          <id><![CDATA[MIT]]></id>
+        </license>
+      </licenses>
+      <purl><![CDATA[pkg:composer/psr/http-factory@dev-master]]></purl>
+      <externalReferences>
+        <reference type="distribution">
+          <url><![CDATA[https://github.com/php-fig/http-factory.git]]></url>
+          <comment><![CDATA[As detected by composer's `getSourceUrls()` (type=git & reference=e616d01114759c4c489f93b099585439f795fe35)]]></comment>
+        </reference>
+        <reference type="distribution">
+          <url><![CDATA[https://api.github.com/repos/php-fig/http-factory/zipball/e616d01114759c4c489f93b099585439f795fe35]]></url>
+          <comment><![CDATA[As detected by composer's `getDistUrls()` (type=zip & reference=e616d01114759c4c489f93b099585439f795fe35 & sha1=UNDEFINED)]]></comment>
+        </reference>
+        <reference type="distribution">
+          <url><![CDATA[https://github.com/php-fig/http-factory/tree/1.0.2]]></url>
+          <comment><![CDATA[As set via `support.source` in composer package definition.]]></comment>
+        </reference>
+      </externalReferences>
+    </component>
+    <component type="library" bom-ref="pkg:composer/psr/http-message@1.1">
+      <group><![CDATA[psr]]></group>
+      <name><![CDATA[http-message]]></name>
+      <version><![CDATA[1.1]]></version>
+      <description><![CDATA[Common interface for HTTP messages]]></description>
+      <licenses>
+        <license>
+          <id><![CDATA[MIT]]></id>
+        </license>
+      </licenses>
+      <purl><![CDATA[pkg:composer/psr/http-message@1.1]]></purl>
+      <externalReferences>
+        <reference type="distribution">
+          <url><![CDATA[https://github.com/php-fig/http-message.git]]></url>
+          <comment><![CDATA[As detected by composer's `getSourceUrls()` (type=git & reference=cb6ce4845ce34a8ad9e68117c10ee90a29919eba)]]></comment>
+        </reference>
+        <reference type="distribution">
+          <url><![CDATA[https://api.github.com/repos/php-fig/http-message/zipball/cb6ce4845ce34a8ad9e68117c10ee90a29919eba]]></url>
+          <comment><![CDATA[As detected by composer's `getDistUrls()` (type=zip & reference=cb6ce4845ce34a8ad9e68117c10ee90a29919eba & sha1=UNDEFINED)]]></comment>
+        </reference>
+        <reference type="website">
+          <url><![CDATA[https://github.com/php-fig/http-message]]></url>
+          <comment><![CDATA[As set via `homepage` in composer package definition.]]></comment>
+        </reference>
+        <reference type="distribution">
+          <url><![CDATA[https://github.com/php-fig/http-message/tree/1.1]]></url>
+          <comment><![CDATA[As set via `support.source` in composer package definition.]]></comment>
+        </reference>
+      </externalReferences>
+    </component>
+    <component type="library" bom-ref="pkg:composer/psr/log@1.1.4">
+      <group><![CDATA[psr]]></group>
+      <name><![CDATA[log]]></name>
+      <version><![CDATA[1.1.4]]></version>
+      <description><![CDATA[Common interface for logging libraries]]></description>
+      <licenses>
+        <license>
+          <id><![CDATA[MIT]]></id>
+        </license>
+      </licenses>
+      <purl><![CDATA[pkg:composer/psr/log@1.1.4]]></purl>
+      <externalReferences>
+        <reference type="distribution">
+          <url><![CDATA[https://github.com/php-fig/log.git]]></url>
+          <comment><![CDATA[As detected by composer's `getSourceUrls()` (type=git & reference=d49695b909c3b7628b6289db5479a1c204601f11)]]></comment>
+        </reference>
+        <reference type="distribution">
+          <url><![CDATA[https://api.github.com/repos/php-fig/log/zipball/d49695b909c3b7628b6289db5479a1c204601f11]]></url>
+          <comment><![CDATA[As detected by composer's `getDistUrls()` (type=zip & reference=d49695b909c3b7628b6289db5479a1c204601f11 & sha1=UNDEFINED)]]></comment>
+        </reference>
+        <reference type="website">
+          <url><![CDATA[https://github.com/php-fig/log]]></url>
+          <comment><![CDATA[As set via `homepage` in composer package definition.]]></comment>
+        </reference>
+        <reference type="distribution">
+          <url><![CDATA[https://github.com/php-fig/log/tree/1.1.4]]></url>
+          <comment><![CDATA[As set via `support.source` in composer package definition.]]></comment>
+        </reference>
+      </externalReferences>
+    </component>
+    <component type="library" bom-ref="pkg:composer/swaggest/json-diff@3.10.4">
+      <group><![CDATA[swaggest]]></group>
+      <name><![CDATA[json-diff]]></name>
+      <version><![CDATA[3.10.4]]></version>
+      <description><![CDATA[JSON diff/rearrange/patch/pointer library for PHP]]></description>
+      <licenses>
+        <license>
+          <id><![CDATA[MIT]]></id>
+        </license>
+      </licenses>
+      <purl><![CDATA[pkg:composer/swaggest/json-diff@3.10.4]]></purl>
+      <externalReferences>
+        <reference type="distribution">
+          <url><![CDATA[https://github.com/swaggest/json-diff.git]]></url>
+          <comment><![CDATA[As detected by composer's `getSourceUrls()` (type=git & reference=f4e511708060ff7511a3743fab4aa484a062bcfb)]]></comment>
+        </reference>
+        <reference type="distribution">
+          <url><![CDATA[https://api.github.com/repos/swaggest/json-diff/zipball/f4e511708060ff7511a3743fab4aa484a062bcfb]]></url>
+          <comment><![CDATA[As detected by composer's `getDistUrls()` (type=zip & reference=f4e511708060ff7511a3743fab4aa484a062bcfb & sha1=UNDEFINED)]]></comment>
+        </reference>
+        <reference type="issue-tracker">
+          <url><![CDATA[https://github.com/swaggest/json-diff/issues]]></url>
+          <comment><![CDATA[As set via `support.issues` in composer package definition.]]></comment>
+        </reference>
+        <reference type="distribution">
+          <url><![CDATA[https://github.com/swaggest/json-diff/tree/v3.10.4]]></url>
+          <comment><![CDATA[As set via `support.source` in composer package definition.]]></comment>
+        </reference>
+      </externalReferences>
+    </component>
+    <component type="library" bom-ref="pkg:composer/swaggest/json-schema@0.12.41">
+      <group><![CDATA[swaggest]]></group>
+      <name><![CDATA[json-schema]]></name>
+      <version><![CDATA[0.12.41]]></version>
+      <description><![CDATA[High definition PHP structures with JSON-schema based validation]]></description>
+      <licenses>
+        <license>
+          <id><![CDATA[MIT]]></id>
+        </license>
+      </licenses>
+      <purl><![CDATA[pkg:composer/swaggest/json-schema@0.12.41]]></purl>
+      <externalReferences>
+        <reference type="distribution">
+          <url><![CDATA[https://github.com/swaggest/php-json-schema.git]]></url>
+          <comment><![CDATA[As detected by composer's `getSourceUrls()` (type=git & reference=1bb97901314f828774dd8c5b21bff889ce0b34bb)]]></comment>
+        </reference>
+        <reference type="distribution">
+          <url><![CDATA[https://api.github.com/repos/swaggest/php-json-schema/zipball/1bb97901314f828774dd8c5b21bff889ce0b34bb]]></url>
+          <comment><![CDATA[As detected by composer's `getDistUrls()` (type=zip & reference=1bb97901314f828774dd8c5b21bff889ce0b34bb & sha1=UNDEFINED)]]></comment>
+        </reference>
+        <reference type="other">
+          <url><![CDATA[mailto:vearutop@gmail.com]]></url>
+          <comment><![CDATA[As set via `support.email` in composer package definition.]]></comment>
+        </reference>
+        <reference type="issue-tracker">
+          <url><![CDATA[https://github.com/swaggest/php-json-schema/issues]]></url>
+          <comment><![CDATA[As set via `support.issues` in composer package definition.]]></comment>
+        </reference>
+        <reference type="distribution">
+          <url><![CDATA[https://github.com/swaggest/php-json-schema/tree/v0.12.41]]></url>
+          <comment><![CDATA[As set via `support.source` in composer package definition.]]></comment>
+        </reference>
+      </externalReferences>
+    </component>
+    <component type="library" bom-ref="pkg:composer/symfony/deprecation-contracts@2.5.x-dev">
+      <group><![CDATA[symfony]]></group>
+      <name><![CDATA[deprecation-contracts]]></name>
+      <version><![CDATA[2.5.x-dev]]></version>
+      <description><![CDATA[A generic function and convention to trigger deprecation notices]]></description>
+      <licenses>
+        <license>
+          <id><![CDATA[MIT]]></id>
+        </license>
+      </licenses>
+      <purl><![CDATA[pkg:composer/symfony/deprecation-contracts@2.5.x-dev]]></purl>
+      <externalReferences>
+        <reference type="distribution">
+          <url><![CDATA[https://github.com/symfony/deprecation-contracts.git]]></url>
+          <comment><![CDATA[As detected by composer's `getSourceUrls()` (type=git & reference=80d075412b557d41002320b96a096ca65aa2c98d)]]></comment>
+        </reference>
+        <reference type="distribution">
+          <url><![CDATA[https://api.github.com/repos/symfony/deprecation-contracts/zipball/80d075412b557d41002320b96a096ca65aa2c98d]]></url>
+          <comment><![CDATA[As detected by composer's `getDistUrls()` (type=zip & reference=80d075412b557d41002320b96a096ca65aa2c98d & sha1=UNDEFINED)]]></comment>
+        </reference>
+        <reference type="website">
+          <url><![CDATA[https://symfony.com]]></url>
+          <comment><![CDATA[As set via `homepage` in composer package definition.]]></comment>
+        </reference>
+        <reference type="distribution">
+          <url><![CDATA[https://github.com/symfony/deprecation-contracts/tree/2.5]]></url>
+          <comment><![CDATA[As set via `support.source` in composer package definition.]]></comment>
+        </reference>
+        <reference type="other">
+          <url><![CDATA[https://symfony.com/sponsor]]></url>
+          <comment><![CDATA[As set via `funding` in composer package definition. (type=custom)]]></comment>
+        </reference>
+        <reference type="other">
+          <url><![CDATA[https://github.com/fabpot]]></url>
+          <comment><![CDATA[As set via `funding` in composer package definition. (type=github)]]></comment>
+        </reference>
+        <reference type="other">
+          <url><![CDATA[https://tidelift.com/funding/github/packagist/symfony/symfony]]></url>
+          <comment><![CDATA[As set via `funding` in composer package definition. (type=tidelift)]]></comment>
+        </reference>
+      </externalReferences>
+    </component>
+    <component type="library" bom-ref="pkg:composer/symfony/http-client@5.4.x-dev">
+      <group><![CDATA[symfony]]></group>
+      <name><![CDATA[http-client]]></name>
+      <version><![CDATA[5.4.x-dev]]></version>
+      <description><![CDATA[Provides powerful methods to fetch HTTP resources synchronously or asynchronously]]></description>
+      <licenses>
+        <license>
+          <id><![CDATA[MIT]]></id>
+        </license>
+      </licenses>
+      <purl><![CDATA[pkg:composer/symfony/http-client@5.4.x-dev]]></purl>
+      <externalReferences>
+        <reference type="distribution">
+          <url><![CDATA[https://github.com/symfony/http-client.git]]></url>
+          <comment><![CDATA[As detected by composer's `getSourceUrls()` (type=git & reference=9e89ac4c9dfe29f4ed2b10a36e62720286632ad6)]]></comment>
+        </reference>
+        <reference type="distribution">
+          <url><![CDATA[https://api.github.com/repos/symfony/http-client/zipball/9e89ac4c9dfe29f4ed2b10a36e62720286632ad6]]></url>
+          <comment><![CDATA[As detected by composer's `getDistUrls()` (type=zip & reference=9e89ac4c9dfe29f4ed2b10a36e62720286632ad6 & sha1=UNDEFINED)]]></comment>
+        </reference>
+        <reference type="website">
+          <url><![CDATA[https://symfony.com]]></url>
+          <comment><![CDATA[As set via `homepage` in composer package definition.]]></comment>
+        </reference>
+        <reference type="distribution">
+          <url><![CDATA[https://github.com/symfony/http-client/tree/5.4]]></url>
+          <comment><![CDATA[As set via `support.source` in composer package definition.]]></comment>
+        </reference>
+        <reference type="other">
+          <url><![CDATA[https://symfony.com/sponsor]]></url>
+          <comment><![CDATA[As set via `funding` in composer package definition. (type=custom)]]></comment>
+        </reference>
+        <reference type="other">
+          <url><![CDATA[https://github.com/fabpot]]></url>
+          <comment><![CDATA[As set via `funding` in composer package definition. (type=github)]]></comment>
+        </reference>
+        <reference type="other">
+          <url><![CDATA[https://tidelift.com/funding/github/packagist/symfony/symfony]]></url>
+          <comment><![CDATA[As set via `funding` in composer package definition. (type=tidelift)]]></comment>
+        </reference>
+      </externalReferences>
+    </component>
+    <component type="library" bom-ref="pkg:composer/symfony/http-client-contracts@2.5.x-dev">
+      <group><![CDATA[symfony]]></group>
+      <name><![CDATA[http-client-contracts]]></name>
+      <version><![CDATA[2.5.x-dev]]></version>
+      <description><![CDATA[Generic abstractions related to HTTP clients]]></description>
+      <licenses>
+        <license>
+          <id><![CDATA[MIT]]></id>
+        </license>
+      </licenses>
+      <purl><![CDATA[pkg:composer/symfony/http-client-contracts@2.5.x-dev]]></purl>
+      <externalReferences>
+        <reference type="distribution">
+          <url><![CDATA[https://github.com/symfony/http-client-contracts.git]]></url>
+          <comment><![CDATA[As detected by composer's `getSourceUrls()` (type=git & reference=44960121df375520a6fe285e8bef06f7469bbeb2)]]></comment>
+        </reference>
+        <reference type="distribution">
+          <url><![CDATA[https://api.github.com/repos/symfony/http-client-contracts/zipball/44960121df375520a6fe285e8bef06f7469bbeb2]]></url>
+          <comment><![CDATA[As detected by composer's `getDistUrls()` (type=zip & reference=44960121df375520a6fe285e8bef06f7469bbeb2 & sha1=UNDEFINED)]]></comment>
+        </reference>
+        <reference type="website">
+          <url><![CDATA[https://symfony.com]]></url>
+          <comment><![CDATA[As set via `homepage` in composer package definition.]]></comment>
+        </reference>
+        <reference type="distribution">
+          <url><![CDATA[https://github.com/symfony/http-client-contracts/tree/2.5]]></url>
+          <comment><![CDATA[As set via `support.source` in composer package definition.]]></comment>
+        </reference>
+        <reference type="other">
+          <url><![CDATA[https://symfony.com/sponsor]]></url>
+          <comment><![CDATA[As set via `funding` in composer package definition. (type=custom)]]></comment>
+        </reference>
+        <reference type="other">
+          <url><![CDATA[https://github.com/fabpot]]></url>
+          <comment><![CDATA[As set via `funding` in composer package definition. (type=github)]]></comment>
+        </reference>
+        <reference type="other">
+          <url><![CDATA[https://tidelift.com/funding/github/packagist/symfony/symfony]]></url>
+          <comment><![CDATA[As set via `funding` in composer package definition. (type=tidelift)]]></comment>
+        </reference>
+      </externalReferences>
+    </component>
+    <component type="library" bom-ref="pkg:composer/symfony/polyfill-mbstring@dev-main">
+      <group><![CDATA[symfony]]></group>
+      <name><![CDATA[polyfill-mbstring]]></name>
+      <version><![CDATA[dev-main]]></version>
+      <description><![CDATA[Symfony polyfill for the Mbstring extension]]></description>
+      <licenses>
+        <license>
+          <id><![CDATA[MIT]]></id>
+        </license>
+      </licenses>
+      <purl><![CDATA[pkg:composer/symfony/polyfill-mbstring@dev-main]]></purl>
+      <externalReferences>
+        <reference type="distribution">
+          <url><![CDATA[https://github.com/symfony/polyfill-mbstring.git]]></url>
+          <comment><![CDATA[As detected by composer's `getSourceUrls()` (type=git & reference=f9c7affe77a00ae32ca127ca6833d034e6d33f25)]]></comment>
+        </reference>
+        <reference type="distribution">
+          <url><![CDATA[https://api.github.com/repos/symfony/polyfill-mbstring/zipball/f9c7affe77a00ae32ca127ca6833d034e6d33f25]]></url>
+          <comment><![CDATA[As detected by composer's `getDistUrls()` (type=zip & reference=f9c7affe77a00ae32ca127ca6833d034e6d33f25 & sha1=UNDEFINED)]]></comment>
+        </reference>
+        <reference type="website">
+          <url><![CDATA[https://symfony.com]]></url>
+          <comment><![CDATA[As set via `homepage` in composer package definition.]]></comment>
+        </reference>
+        <reference type="distribution">
+          <url><![CDATA[https://github.com/symfony/polyfill-mbstring/tree/main]]></url>
+          <comment><![CDATA[As set via `support.source` in composer package definition.]]></comment>
+        </reference>
+        <reference type="other">
+          <url><![CDATA[https://symfony.com/sponsor]]></url>
+          <comment><![CDATA[As set via `funding` in composer package definition. (type=custom)]]></comment>
+        </reference>
+        <reference type="other">
+          <url><![CDATA[https://github.com/fabpot]]></url>
+          <comment><![CDATA[As set via `funding` in composer package definition. (type=github)]]></comment>
+        </reference>
+        <reference type="other">
+          <url><![CDATA[https://tidelift.com/funding/github/packagist/symfony/symfony]]></url>
+          <comment><![CDATA[As set via `funding` in composer package definition. (type=tidelift)]]></comment>
+        </reference>
+      </externalReferences>
+    </component>
+    <component type="library" bom-ref="pkg:composer/symfony/polyfill-php73@dev-main">
+      <group><![CDATA[symfony]]></group>
+      <name><![CDATA[polyfill-php73]]></name>
+      <version><![CDATA[dev-main]]></version>
+      <description><![CDATA[Symfony polyfill backporting some PHP 7.3+ features to lower PHP versions]]></description>
+      <licenses>
+        <license>
+          <id><![CDATA[MIT]]></id>
+        </license>
+      </licenses>
+      <purl><![CDATA[pkg:composer/symfony/polyfill-php73@dev-main]]></purl>
+      <externalReferences>
+        <reference type="distribution">
+          <url><![CDATA[https://github.com/symfony/polyfill-php73.git]]></url>
+          <comment><![CDATA[As detected by composer's `getSourceUrls()` (type=git & reference=fe2f306d1d9d346a7fee353d0d5012e401e984b5)]]></comment>
+        </reference>
+        <reference type="distribution">
+          <url><![CDATA[https://api.github.com/repos/symfony/polyfill-php73/zipball/fe2f306d1d9d346a7fee353d0d5012e401e984b5]]></url>
+          <comment><![CDATA[As detected by composer's `getDistUrls()` (type=zip & reference=fe2f306d1d9d346a7fee353d0d5012e401e984b5 & sha1=UNDEFINED)]]></comment>
+        </reference>
+        <reference type="website">
+          <url><![CDATA[https://symfony.com]]></url>
+          <comment><![CDATA[As set via `homepage` in composer package definition.]]></comment>
+        </reference>
+        <reference type="distribution">
+          <url><![CDATA[https://github.com/symfony/polyfill-php73/tree/main]]></url>
+          <comment><![CDATA[As set via `support.source` in composer package definition.]]></comment>
+        </reference>
+        <reference type="other">
+          <url><![CDATA[https://symfony.com/sponsor]]></url>
+          <comment><![CDATA[As set via `funding` in composer package definition. (type=custom)]]></comment>
+        </reference>
+        <reference type="other">
+          <url><![CDATA[https://github.com/fabpot]]></url>
+          <comment><![CDATA[As set via `funding` in composer package definition. (type=github)]]></comment>
+        </reference>
+        <reference type="other">
+          <url><![CDATA[https://tidelift.com/funding/github/packagist/symfony/symfony]]></url>
+          <comment><![CDATA[As set via `funding` in composer package definition. (type=tidelift)]]></comment>
+        </reference>
+      </externalReferences>
+    </component>
+    <component type="library" bom-ref="pkg:composer/symfony/polyfill-php80@dev-main">
+      <group><![CDATA[symfony]]></group>
+      <name><![CDATA[polyfill-php80]]></name>
+      <version><![CDATA[dev-main]]></version>
+      <description><![CDATA[Symfony polyfill backporting some PHP 8.0+ features to lower PHP versions]]></description>
+      <licenses>
+        <license>
+          <id><![CDATA[MIT]]></id>
+        </license>
+      </licenses>
+      <purl><![CDATA[pkg:composer/symfony/polyfill-php80@dev-main]]></purl>
+      <externalReferences>
+        <reference type="distribution">
+          <url><![CDATA[https://github.com/symfony/polyfill-php80.git]]></url>
+          <comment><![CDATA[As detected by composer's `getSourceUrls()` (type=git & reference=6caa57379c4aec19c0a12a38b59b26487dcfe4b5)]]></comment>
+        </reference>
+        <reference type="distribution">
+          <url><![CDATA[https://api.github.com/repos/symfony/polyfill-php80/zipball/6caa57379c4aec19c0a12a38b59b26487dcfe4b5]]></url>
+          <comment><![CDATA[As detected by composer's `getDistUrls()` (type=zip & reference=6caa57379c4aec19c0a12a38b59b26487dcfe4b5 & sha1=UNDEFINED)]]></comment>
+        </reference>
+        <reference type="website">
+          <url><![CDATA[https://symfony.com]]></url>
+          <comment><![CDATA[As set via `homepage` in composer package definition.]]></comment>
+        </reference>
+        <reference type="distribution">
+          <url><![CDATA[https://github.com/symfony/polyfill-php80/tree/main]]></url>
+          <comment><![CDATA[As set via `support.source` in composer package definition.]]></comment>
+        </reference>
+        <reference type="other">
+          <url><![CDATA[https://symfony.com/sponsor]]></url>
+          <comment><![CDATA[As set via `funding` in composer package definition. (type=custom)]]></comment>
+        </reference>
+        <reference type="other">
+          <url><![CDATA[https://github.com/fabpot]]></url>
+          <comment><![CDATA[As set via `funding` in composer package definition. (type=github)]]></comment>
+        </reference>
+        <reference type="other">
+          <url><![CDATA[https://tidelift.com/funding/github/packagist/symfony/symfony]]></url>
+          <comment><![CDATA[As set via `funding` in composer package definition. (type=tidelift)]]></comment>
+        </reference>
+      </externalReferences>
+    </component>
+    <component type="library" bom-ref="pkg:composer/symfony/polyfill-php81@dev-main">
+      <group><![CDATA[symfony]]></group>
+      <name><![CDATA[polyfill-php81]]></name>
+      <version><![CDATA[dev-main]]></version>
+      <description><![CDATA[Symfony polyfill backporting some PHP 8.1+ features to lower PHP versions]]></description>
+      <licenses>
+        <license>
+          <id><![CDATA[MIT]]></id>
+        </license>
+      </licenses>
+      <purl><![CDATA[pkg:composer/symfony/polyfill-php81@dev-main]]></purl>
+      <externalReferences>
+        <reference type="distribution">
+          <url><![CDATA[https://github.com/symfony/polyfill-php81.git]]></url>
+          <comment><![CDATA[As detected by composer's `getSourceUrls()` (type=git & reference=7581cd600fa9fd681b797d00b02f068e2f13263b)]]></comment>
+        </reference>
+        <reference type="distribution">
+          <url><![CDATA[https://api.github.com/repos/symfony/polyfill-php81/zipball/7581cd600fa9fd681b797d00b02f068e2f13263b]]></url>
+          <comment><![CDATA[As detected by composer's `getDistUrls()` (type=zip & reference=7581cd600fa9fd681b797d00b02f068e2f13263b & sha1=UNDEFINED)]]></comment>
+        </reference>
+        <reference type="website">
+          <url><![CDATA[https://symfony.com]]></url>
+          <comment><![CDATA[As set via `homepage` in composer package definition.]]></comment>
+        </reference>
+        <reference type="distribution">
+          <url><![CDATA[https://github.com/symfony/polyfill-php81/tree/main]]></url>
+          <comment><![CDATA[As set via `support.source` in composer package definition.]]></comment>
+        </reference>
+        <reference type="other">
+          <url><![CDATA[https://symfony.com/sponsor]]></url>
+          <comment><![CDATA[As set via `funding` in composer package definition. (type=custom)]]></comment>
+        </reference>
+        <reference type="other">
+          <url><![CDATA[https://github.com/fabpot]]></url>
+          <comment><![CDATA[As set via `funding` in composer package definition. (type=github)]]></comment>
+        </reference>
+        <reference type="other">
+          <url><![CDATA[https://tidelift.com/funding/github/packagist/symfony/symfony]]></url>
+          <comment><![CDATA[As set via `funding` in composer package definition. (type=tidelift)]]></comment>
+        </reference>
+      </externalReferences>
+    </component>
+    <component type="library" bom-ref="pkg:composer/symfony/polyfill-php82@dev-main">
+      <group><![CDATA[symfony]]></group>
+      <name><![CDATA[polyfill-php82]]></name>
+      <version><![CDATA[dev-main]]></version>
+      <description><![CDATA[Symfony polyfill backporting some PHP 8.2+ features to lower PHP versions]]></description>
+      <licenses>
+        <license>
+          <id><![CDATA[MIT]]></id>
+        </license>
+      </licenses>
+      <purl><![CDATA[pkg:composer/symfony/polyfill-php82@dev-main]]></purl>
+      <externalReferences>
+        <reference type="distribution">
+          <url><![CDATA[https://github.com/symfony/polyfill-php82.git]]></url>
+          <comment><![CDATA[As detected by composer's `getSourceUrls()` (type=git & reference=a2b9e955680ad91faa73b66c34265d013113e524)]]></comment>
+        </reference>
+        <reference type="distribution">
+          <url><![CDATA[https://api.github.com/repos/symfony/polyfill-php82/zipball/a2b9e955680ad91faa73b66c34265d013113e524]]></url>
+          <comment><![CDATA[As detected by composer's `getDistUrls()` (type=zip & reference=a2b9e955680ad91faa73b66c34265d013113e524 & sha1=UNDEFINED)]]></comment>
+        </reference>
+        <reference type="website">
+          <url><![CDATA[https://symfony.com]]></url>
+          <comment><![CDATA[As set via `homepage` in composer package definition.]]></comment>
+        </reference>
+        <reference type="distribution">
+          <url><![CDATA[https://github.com/symfony/polyfill-php82/tree/main]]></url>
+          <comment><![CDATA[As set via `support.source` in composer package definition.]]></comment>
+        </reference>
+        <reference type="other">
+          <url><![CDATA[https://symfony.com/sponsor]]></url>
+          <comment><![CDATA[As set via `funding` in composer package definition. (type=custom)]]></comment>
+        </reference>
+        <reference type="other">
+          <url><![CDATA[https://github.com/fabpot]]></url>
+          <comment><![CDATA[As set via `funding` in composer package definition. (type=github)]]></comment>
+        </reference>
+        <reference type="other">
+          <url><![CDATA[https://tidelift.com/funding/github/packagist/symfony/symfony]]></url>
+          <comment><![CDATA[As set via `funding` in composer package definition. (type=tidelift)]]></comment>
+        </reference>
+      </externalReferences>
+    </component>
+    <component type="library" bom-ref="pkg:composer/symfony/service-contracts@2.5.x-dev">
+      <group><![CDATA[symfony]]></group>
+      <name><![CDATA[service-contracts]]></name>
+      <version><![CDATA[2.5.x-dev]]></version>
+      <description><![CDATA[Generic abstractions related to writing services]]></description>
+      <licenses>
+        <license>
+          <id><![CDATA[MIT]]></id>
+        </license>
+      </licenses>
+      <purl><![CDATA[pkg:composer/symfony/service-contracts@2.5.x-dev]]></purl>
+      <externalReferences>
+        <reference type="distribution">
+          <url><![CDATA[https://github.com/symfony/service-contracts.git]]></url>
+          <comment><![CDATA[As detected by composer's `getSourceUrls()` (type=git & reference=a2329596ddc8fd568900e3fc76cba42489ecc7f3)]]></comment>
+        </reference>
+        <reference type="distribution">
+          <url><![CDATA[https://api.github.com/repos/symfony/service-contracts/zipball/a2329596ddc8fd568900e3fc76cba42489ecc7f3]]></url>
+          <comment><![CDATA[As detected by composer's `getDistUrls()` (type=zip & reference=a2329596ddc8fd568900e3fc76cba42489ecc7f3 & sha1=UNDEFINED)]]></comment>
+        </reference>
+        <reference type="website">
+          <url><![CDATA[https://symfony.com]]></url>
+          <comment><![CDATA[As set via `homepage` in composer package definition.]]></comment>
+        </reference>
+        <reference type="distribution">
+          <url><![CDATA[https://github.com/symfony/service-contracts/tree/2.5]]></url>
+          <comment><![CDATA[As set via `support.source` in composer package definition.]]></comment>
+        </reference>
+        <reference type="other">
+          <url><![CDATA[https://symfony.com/sponsor]]></url>
+          <comment><![CDATA[As set via `funding` in composer package definition. (type=custom)]]></comment>
+        </reference>
+        <reference type="other">
+          <url><![CDATA[https://github.com/fabpot]]></url>
+          <comment><![CDATA[As set via `funding` in composer package definition. (type=github)]]></comment>
+        </reference>
+        <reference type="other">
+          <url><![CDATA[https://tidelift.com/funding/github/packagist/symfony/symfony]]></url>
+          <comment><![CDATA[As set via `funding` in composer package definition. (type=tidelift)]]></comment>
+        </reference>
+      </externalReferences>
+    </component>
+    <component type="library" bom-ref="pkg:composer/doctrine/deprecations@1.0.0">
+      <group><![CDATA[doctrine]]></group>
+      <name><![CDATA[deprecations]]></name>
+      <version><![CDATA[1.0.0]]></version>
+      <description><![CDATA[A small layer on top of trigger_error(E_USER_DEPRECATED) or PSR-3 logging with options to disable all deprecations or selectively for packages.]]></description>
+      <licenses>
+        <license>
+          <id><![CDATA[MIT]]></id>
+        </license>
+      </licenses>
+      <purl><![CDATA[pkg:composer/doctrine/deprecations@1.0.0]]></purl>
+      <externalReferences>
+        <reference type="distribution">
+          <url><![CDATA[https://github.com/doctrine/deprecations.git]]></url>
+          <comment><![CDATA[As detected by composer's `getSourceUrls()` (type=git & reference=0e2a4f1f8cdfc7a92ec3b01c9334898c806b30de)]]></comment>
+        </reference>
+        <reference type="distribution">
+          <url><![CDATA[https://api.github.com/repos/doctrine/deprecations/zipball/0e2a4f1f8cdfc7a92ec3b01c9334898c806b30de]]></url>
+          <comment><![CDATA[As detected by composer's `getDistUrls()` (type=zip & reference=0e2a4f1f8cdfc7a92ec3b01c9334898c806b30de & sha1=UNDEFINED)]]></comment>
+        </reference>
+        <reference type="website">
+          <url><![CDATA[https://www.doctrine-project.org/]]></url>
+          <comment><![CDATA[As set via `homepage` in composer package definition.]]></comment>
+        </reference>
+        <reference type="issue-tracker">
+          <url><![CDATA[https://github.com/doctrine/deprecations/issues]]></url>
+          <comment><![CDATA[As set via `support.issues` in composer package definition.]]></comment>
+        </reference>
+        <reference type="distribution">
+          <url><![CDATA[https://github.com/doctrine/deprecations/tree/v1.0.0]]></url>
+          <comment><![CDATA[As set via `support.source` in composer package definition.]]></comment>
+        </reference>
+      </externalReferences>
+    </component>
+    <component type="library" bom-ref="pkg:composer/doctrine/instantiator@1.5.x-dev">
+      <group><![CDATA[doctrine]]></group>
+      <name><![CDATA[instantiator]]></name>
+      <version><![CDATA[1.5.x-dev]]></version>
+      <description><![CDATA[A small, lightweight utility to instantiate objects in PHP without invoking their constructors]]></description>
+      <licenses>
+        <license>
+          <id><![CDATA[MIT]]></id>
+        </license>
+      </licenses>
+      <purl><![CDATA[pkg:composer/doctrine/instantiator@1.5.x-dev]]></purl>
+      <externalReferences>
+        <reference type="distribution">
+          <url><![CDATA[https://github.com/doctrine/instantiator.git]]></url>
+          <comment><![CDATA[As detected by composer's `getSourceUrls()` (type=git & reference=0a0fa9780f5d4e507415a065172d26a98d02047b)]]></comment>
+        </reference>
+        <reference type="distribution">
+          <url><![CDATA[https://api.github.com/repos/doctrine/instantiator/zipball/0a0fa9780f5d4e507415a065172d26a98d02047b]]></url>
+          <comment><![CDATA[As detected by composer's `getDistUrls()` (type=zip & reference=0a0fa9780f5d4e507415a065172d26a98d02047b & sha1=UNDEFINED)]]></comment>
+        </reference>
+        <reference type="website">
+          <url><![CDATA[https://www.doctrine-project.org/projects/instantiator.html]]></url>
+          <comment><![CDATA[As set via `homepage` in composer package definition.]]></comment>
+        </reference>
+        <reference type="issue-tracker">
+          <url><![CDATA[https://github.com/doctrine/instantiator/issues]]></url>
+          <comment><![CDATA[As set via `support.issues` in composer package definition.]]></comment>
+        </reference>
+        <reference type="distribution">
+          <url><![CDATA[https://github.com/doctrine/instantiator/tree/1.5.0]]></url>
+          <comment><![CDATA[As set via `support.source` in composer package definition.]]></comment>
+        </reference>
+        <reference type="other">
+          <url><![CDATA[https://www.doctrine-project.org/sponsorship.html]]></url>
+          <comment><![CDATA[As set via `funding` in composer package definition. (type=custom)]]></comment>
+        </reference>
+        <reference type="other">
+          <url><![CDATA[https://www.patreon.com/phpdoctrine]]></url>
+          <comment><![CDATA[As set via `funding` in composer package definition. (type=patreon)]]></comment>
+        </reference>
+        <reference type="other">
+          <url><![CDATA[https://tidelift.com/funding/github/packagist/doctrine%2Finstantiator]]></url>
+          <comment><![CDATA[As set via `funding` in composer package definition. (type=tidelift)]]></comment>
+        </reference>
+      </externalReferences>
+    </component>
+    <component type="library" bom-ref="pkg:composer/myclabs/deep-copy@1.x-dev">
+      <group><![CDATA[myclabs]]></group>
+      <name><![CDATA[deep-copy]]></name>
+      <version><![CDATA[1.x-dev]]></version>
+      <description><![CDATA[Create deep copies (clones) of your objects]]></description>
+      <licenses>
+        <license>
+          <id><![CDATA[MIT]]></id>
+        </license>
+      </licenses>
+      <purl><![CDATA[pkg:composer/myclabs/deep-copy@1.x-dev]]></purl>
+      <externalReferences>
+        <reference type="distribution">
+          <url><![CDATA[https://github.com/myclabs/DeepCopy.git]]></url>
+          <comment><![CDATA[As detected by composer's `getSourceUrls()` (type=git & reference=928a96f585b86224ebc78f8f09d0482cf15b04f5)]]></comment>
+        </reference>
+        <reference type="distribution">
+          <url><![CDATA[https://api.github.com/repos/myclabs/DeepCopy/zipball/928a96f585b86224ebc78f8f09d0482cf15b04f5]]></url>
+          <comment><![CDATA[As detected by composer's `getDistUrls()` (type=zip & reference=928a96f585b86224ebc78f8f09d0482cf15b04f5 & sha1=UNDEFINED)]]></comment>
+        </reference>
+        <reference type="issue-tracker">
+          <url><![CDATA[https://github.com/myclabs/DeepCopy/issues]]></url>
+          <comment><![CDATA[As set via `support.issues` in composer package definition.]]></comment>
+        </reference>
+        <reference type="distribution">
+          <url><![CDATA[https://github.com/myclabs/DeepCopy/tree/1.x]]></url>
+          <comment><![CDATA[As set via `support.source` in composer package definition.]]></comment>
+        </reference>
+        <reference type="other">
+          <url><![CDATA[https://tidelift.com/funding/github/packagist/myclabs/deep-copy]]></url>
+          <comment><![CDATA[As set via `funding` in composer package definition. (type=tidelift)]]></comment>
+        </reference>
+      </externalReferences>
+    </component>
+    <component type="library" bom-ref="pkg:composer/phar-io/manifest@1.0.3">
+      <group><![CDATA[phar-io]]></group>
+      <name><![CDATA[manifest]]></name>
+      <version><![CDATA[1.0.3]]></version>
+      <description><![CDATA[Component for reading phar.io manifest information from a PHP Archive (PHAR)]]></description>
+      <licenses>
+        <license>
+          <id><![CDATA[BSD-3-Clause]]></id>
+        </license>
+      </licenses>
+      <purl><![CDATA[pkg:composer/phar-io/manifest@1.0.3]]></purl>
+      <externalReferences>
+        <reference type="distribution">
+          <url><![CDATA[https://github.com/phar-io/manifest.git]]></url>
+          <comment><![CDATA[As detected by composer's `getSourceUrls()` (type=git & reference=7761fcacf03b4d4f16e7ccb606d4879ca431fcf4)]]></comment>
+        </reference>
+        <reference type="distribution">
+          <url><![CDATA[https://api.github.com/repos/phar-io/manifest/zipball/7761fcacf03b4d4f16e7ccb606d4879ca431fcf4]]></url>
+          <comment><![CDATA[As detected by composer's `getDistUrls()` (type=zip & reference=7761fcacf03b4d4f16e7ccb606d4879ca431fcf4 & sha1=UNDEFINED)]]></comment>
+        </reference>
+        <reference type="issue-tracker">
+          <url><![CDATA[https://github.com/phar-io/manifest/issues]]></url>
+          <comment><![CDATA[As set via `support.issues` in composer package definition.]]></comment>
+        </reference>
+        <reference type="distribution">
+          <url><![CDATA[https://github.com/phar-io/manifest/tree/master]]></url>
+          <comment><![CDATA[As set via `support.source` in composer package definition.]]></comment>
+        </reference>
+      </externalReferences>
+    </component>
+    <component type="library" bom-ref="pkg:composer/phar-io/version@2.0.1">
+      <group><![CDATA[phar-io]]></group>
+      <name><![CDATA[version]]></name>
+      <version><![CDATA[2.0.1]]></version>
+      <description><![CDATA[Library for handling version information and constraints]]></description>
+      <licenses>
+        <license>
+          <id><![CDATA[BSD-3-Clause]]></id>
+        </license>
+      </licenses>
+      <purl><![CDATA[pkg:composer/phar-io/version@2.0.1]]></purl>
+      <externalReferences>
+        <reference type="distribution">
+          <url><![CDATA[https://github.com/phar-io/version.git]]></url>
+          <comment><![CDATA[As detected by composer's `getSourceUrls()` (type=git & reference=45a2ec53a73c70ce41d55cedef9063630abaf1b6)]]></comment>
+        </reference>
+        <reference type="distribution">
+          <url><![CDATA[https://api.github.com/repos/phar-io/version/zipball/45a2ec53a73c70ce41d55cedef9063630abaf1b6]]></url>
+          <comment><![CDATA[As detected by composer's `getDistUrls()` (type=zip & reference=45a2ec53a73c70ce41d55cedef9063630abaf1b6 & sha1=UNDEFINED)]]></comment>
+        </reference>
+        <reference type="issue-tracker">
+          <url><![CDATA[https://github.com/phar-io/version/issues]]></url>
+          <comment><![CDATA[As set via `support.issues` in composer package definition.]]></comment>
+        </reference>
+        <reference type="distribution">
+          <url><![CDATA[https://github.com/phar-io/version/tree/master]]></url>
+          <comment><![CDATA[As set via `support.source` in composer package definition.]]></comment>
+        </reference>
+      </externalReferences>
+    </component>
+    <component type="library" bom-ref="pkg:composer/phpdocumentor/reflection-common@dev-master">
+      <group><![CDATA[phpdocumentor]]></group>
+      <name><![CDATA[reflection-common]]></name>
+      <version><![CDATA[dev-master]]></version>
+      <description><![CDATA[Common reflection classes used by phpdocumentor to reflect the code structure]]></description>
+      <licenses>
+        <license>
+          <id><![CDATA[MIT]]></id>
+        </license>
+      </licenses>
+      <purl><![CDATA[pkg:composer/phpdocumentor/reflection-common@dev-master]]></purl>
+      <externalReferences>
+        <reference type="distribution">
+          <url><![CDATA[https://github.com/phpDocumentor/ReflectionCommon.git]]></url>
+          <comment><![CDATA[As detected by composer's `getSourceUrls()` (type=git & reference=a0eeab580cbdf4414fef6978732510a36ed0a9d6)]]></comment>
+        </reference>
+        <reference type="distribution">
+          <url><![CDATA[https://api.github.com/repos/phpDocumentor/ReflectionCommon/zipball/a0eeab580cbdf4414fef6978732510a36ed0a9d6]]></url>
+          <comment><![CDATA[As detected by composer's `getDistUrls()` (type=zip & reference=a0eeab580cbdf4414fef6978732510a36ed0a9d6 & sha1=UNDEFINED)]]></comment>
+        </reference>
+        <reference type="website">
+          <url><![CDATA[http://www.phpdoc.org]]></url>
+          <comment><![CDATA[As set via `homepage` in composer package definition.]]></comment>
+        </reference>
+        <reference type="issue-tracker">
+          <url><![CDATA[https://github.com/phpDocumentor/ReflectionCommon/issues]]></url>
+          <comment><![CDATA[As set via `support.issues` in composer package definition.]]></comment>
+        </reference>
+        <reference type="distribution">
+          <url><![CDATA[https://github.com/phpDocumentor/ReflectionCommon/tree/master]]></url>
+          <comment><![CDATA[As set via `support.source` in composer package definition.]]></comment>
+        </reference>
+      </externalReferences>
+    </component>
+    <component type="library" bom-ref="pkg:composer/phpdocumentor/reflection-docblock@dev-master">
+      <group><![CDATA[phpdocumentor]]></group>
+      <name><![CDATA[reflection-docblock]]></name>
+      <version><![CDATA[dev-master]]></version>
+      <description><![CDATA[With this component, a library can provide support for annotations via DocBlocks or otherwise retrieve information that is embedded in a DocBlock.]]></description>
+      <licenses>
+        <license>
+          <id><![CDATA[MIT]]></id>
+        </license>
+      </licenses>
+      <purl><![CDATA[pkg:composer/phpdocumentor/reflection-docblock@dev-master]]></purl>
+      <externalReferences>
+        <reference type="distribution">
+          <url><![CDATA[https://github.com/phpDocumentor/ReflectionDocBlock.git]]></url>
+          <comment><![CDATA[As detected by composer's `getSourceUrls()` (type=git & reference=7b217217725dc991a0ae7b995041cee1d5019561)]]></comment>
+        </reference>
+        <reference type="distribution">
+          <url><![CDATA[https://api.github.com/repos/phpDocumentor/ReflectionDocBlock/zipball/7b217217725dc991a0ae7b995041cee1d5019561]]></url>
+          <comment><![CDATA[As detected by composer's `getDistUrls()` (type=zip & reference=7b217217725dc991a0ae7b995041cee1d5019561 & sha1=UNDEFINED)]]></comment>
+        </reference>
+        <reference type="issue-tracker">
+          <url><![CDATA[https://github.com/phpDocumentor/ReflectionDocBlock/issues]]></url>
+          <comment><![CDATA[As set via `support.issues` in composer package definition.]]></comment>
+        </reference>
+        <reference type="distribution">
+          <url><![CDATA[https://github.com/phpDocumentor/ReflectionDocBlock/tree/master]]></url>
+          <comment><![CDATA[As set via `support.source` in composer package definition.]]></comment>
+        </reference>
+      </externalReferences>
+    </component>
+    <component type="library" bom-ref="pkg:composer/phpdocumentor/type-resolver@1.x-dev">
+      <group><![CDATA[phpdocumentor]]></group>
+      <name><![CDATA[type-resolver]]></name>
+      <version><![CDATA[1.x-dev]]></version>
+      <description><![CDATA[A PSR-5 based resolver of Class names, Types and Structural Element Names]]></description>
+      <licenses>
+        <license>
+          <id><![CDATA[MIT]]></id>
+        </license>
+      </licenses>
+      <purl><![CDATA[pkg:composer/phpdocumentor/type-resolver@1.x-dev]]></purl>
+      <externalReferences>
+        <reference type="distribution">
+          <url><![CDATA[https://github.com/phpDocumentor/TypeResolver.git]]></url>
+          <comment><![CDATA[As detected by composer's `getSourceUrls()` (type=git & reference=dfc078e8af9c99210337325ff5aa152872c98714)]]></comment>
+        </reference>
+        <reference type="distribution">
+          <url><![CDATA[https://api.github.com/repos/phpDocumentor/TypeResolver/zipball/dfc078e8af9c99210337325ff5aa152872c98714]]></url>
+          <comment><![CDATA[As detected by composer's `getDistUrls()` (type=zip & reference=dfc078e8af9c99210337325ff5aa152872c98714 & sha1=UNDEFINED)]]></comment>
+        </reference>
+        <reference type="issue-tracker">
+          <url><![CDATA[https://github.com/phpDocumentor/TypeResolver/issues]]></url>
+          <comment><![CDATA[As set via `support.issues` in composer package definition.]]></comment>
+        </reference>
+        <reference type="distribution">
+          <url><![CDATA[https://github.com/phpDocumentor/TypeResolver/tree/1.7.1]]></url>
+          <comment><![CDATA[As set via `support.source` in composer package definition.]]></comment>
+        </reference>
+      </externalReferences>
+    </component>
+    <component type="library" bom-ref="pkg:composer/phpspec/prophecy@dev-master">
+      <group><![CDATA[phpspec]]></group>
+      <name><![CDATA[prophecy]]></name>
+      <version><![CDATA[dev-master]]></version>
+      <description><![CDATA[Highly opinionated mocking framework for PHP 5.3+]]></description>
+      <licenses>
+        <license>
+          <id><![CDATA[MIT]]></id>
+        </license>
+      </licenses>
+      <purl><![CDATA[pkg:composer/phpspec/prophecy@dev-master]]></purl>
+      <externalReferences>
+        <reference type="distribution">
+          <url><![CDATA[https://github.com/phpspec/prophecy.git]]></url>
+          <comment><![CDATA[As detected by composer's `getSourceUrls()` (type=git & reference=84c981450d81f03ec8eb64380ab32cac98093bde)]]></comment>
+        </reference>
+        <reference type="distribution">
+          <url><![CDATA[https://api.github.com/repos/phpspec/prophecy/zipball/84c981450d81f03ec8eb64380ab32cac98093bde]]></url>
+          <comment><![CDATA[As detected by composer's `getDistUrls()` (type=zip & reference=84c981450d81f03ec8eb64380ab32cac98093bde & sha1=UNDEFINED)]]></comment>
+        </reference>
+        <reference type="website">
+          <url><![CDATA[https://github.com/phpspec/prophecy]]></url>
+          <comment><![CDATA[As set via `homepage` in composer package definition.]]></comment>
+        </reference>
+        <reference type="issue-tracker">
+          <url><![CDATA[https://github.com/phpspec/prophecy/issues]]></url>
+          <comment><![CDATA[As set via `support.issues` in composer package definition.]]></comment>
+        </reference>
+        <reference type="distribution">
+          <url><![CDATA[https://github.com/phpspec/prophecy/tree/master]]></url>
+          <comment><![CDATA[As set via `support.source` in composer package definition.]]></comment>
+        </reference>
+      </externalReferences>
+    </component>
+    <component type="library" bom-ref="pkg:composer/phpstan/phpdoc-parser@1.21.x-dev">
+      <group><![CDATA[phpstan]]></group>
+      <name><![CDATA[phpdoc-parser]]></name>
+      <version><![CDATA[1.21.x-dev]]></version>
+      <description><![CDATA[PHPDoc parser with support for nullable, intersection and generic types]]></description>
+      <licenses>
+        <license>
+          <id><![CDATA[MIT]]></id>
+        </license>
+      </licenses>
+      <purl><![CDATA[pkg:composer/phpstan/phpdoc-parser@1.21.x-dev]]></purl>
+      <externalReferences>
+        <reference type="distribution">
+          <url><![CDATA[https://github.com/phpstan/phpdoc-parser.git]]></url>
+          <comment><![CDATA[As detected by composer's `getSourceUrls()` (type=git & reference=cc946352417cef34a2cdb900160caba10e18953d)]]></comment>
+        </reference>
+        <reference type="distribution">
+          <url><![CDATA[https://api.github.com/repos/phpstan/phpdoc-parser/zipball/cc946352417cef34a2cdb900160caba10e18953d]]></url>
+          <comment><![CDATA[As detected by composer's `getDistUrls()` (type=zip & reference=cc946352417cef34a2cdb900160caba10e18953d & sha1=UNDEFINED)]]></comment>
+        </reference>
+        <reference type="issue-tracker">
+          <url><![CDATA[https://github.com/phpstan/phpdoc-parser/issues]]></url>
+          <comment><![CDATA[As set via `support.issues` in composer package definition.]]></comment>
+        </reference>
+        <reference type="distribution">
+          <url><![CDATA[https://github.com/phpstan/phpdoc-parser/tree/1.21.x]]></url>
+          <comment><![CDATA[As set via `support.source` in composer package definition.]]></comment>
+        </reference>
+      </externalReferences>
+    </component>
+    <component type="library" bom-ref="pkg:composer/phpunit/php-code-coverage@6.1.4">
+      <group><![CDATA[phpunit]]></group>
+      <name><![CDATA[php-code-coverage]]></name>
+      <version><![CDATA[6.1.4]]></version>
+      <description><![CDATA[Library that provides collection, processing, and rendering functionality for PHP code coverage information.]]></description>
+      <licenses>
+        <license>
+          <id><![CDATA[BSD-3-Clause]]></id>
+        </license>
+      </licenses>
+      <purl><![CDATA[pkg:composer/phpunit/php-code-coverage@6.1.4]]></purl>
+      <externalReferences>
+        <reference type="distribution">
+          <url><![CDATA[https://github.com/sebastianbergmann/php-code-coverage.git]]></url>
+          <comment><![CDATA[As detected by composer's `getSourceUrls()` (type=git & reference=807e6013b00af69b6c5d9ceb4282d0393dbb9d8d)]]></comment>
+        </reference>
+        <reference type="distribution">
+          <url><![CDATA[https://api.github.com/repos/sebastianbergmann/php-code-coverage/zipball/807e6013b00af69b6c5d9ceb4282d0393dbb9d8d]]></url>
+          <comment><![CDATA[As detected by composer's `getDistUrls()` (type=zip & reference=807e6013b00af69b6c5d9ceb4282d0393dbb9d8d & sha1=UNDEFINED)]]></comment>
+        </reference>
+        <reference type="website">
+          <url><![CDATA[https://github.com/sebastianbergmann/php-code-coverage]]></url>
+          <comment><![CDATA[As set via `homepage` in composer package definition.]]></comment>
+        </reference>
+        <reference type="issue-tracker">
+          <url><![CDATA[https://github.com/sebastianbergmann/php-code-coverage/issues]]></url>
+          <comment><![CDATA[As set via `support.issues` in composer package definition.]]></comment>
+        </reference>
+        <reference type="distribution">
+          <url><![CDATA[https://github.com/sebastianbergmann/php-code-coverage/tree/master]]></url>
+          <comment><![CDATA[As set via `support.source` in composer package definition.]]></comment>
+        </reference>
+      </externalReferences>
+    </component>
+    <component type="library" bom-ref="pkg:composer/phpunit/php-file-iterator@2.0.x-dev">
+      <group><![CDATA[phpunit]]></group>
+      <name><![CDATA[php-file-iterator]]></name>
+      <version><![CDATA[2.0.x-dev]]></version>
+      <description><![CDATA[FilterIterator implementation that filters files based on a list of suffixes.]]></description>
+      <licenses>
+        <license>
+          <id><![CDATA[BSD-3-Clause]]></id>
+        </license>
+      </licenses>
+      <purl><![CDATA[pkg:composer/phpunit/php-file-iterator@2.0.x-dev]]></purl>
+      <externalReferences>
+        <reference type="distribution">
+          <url><![CDATA[https://github.com/sebastianbergmann/php-file-iterator.git]]></url>
+          <comment><![CDATA[As detected by composer's `getSourceUrls()` (type=git & reference=42c5ba5220e6904cbfe8b1a1bda7c0cfdc8c12f5)]]></comment>
+        </reference>
+        <reference type="distribution">
+          <url><![CDATA[https://api.github.com/repos/sebastianbergmann/php-file-iterator/zipball/42c5ba5220e6904cbfe8b1a1bda7c0cfdc8c12f5]]></url>
+          <comment><![CDATA[As detected by composer's `getDistUrls()` (type=zip & reference=42c5ba5220e6904cbfe8b1a1bda7c0cfdc8c12f5 & sha1=UNDEFINED)]]></comment>
+        </reference>
+        <reference type="website">
+          <url><![CDATA[https://github.com/sebastianbergmann/php-file-iterator/]]></url>
+          <comment><![CDATA[As set via `homepage` in composer package definition.]]></comment>
+        </reference>
+        <reference type="issue-tracker">
+          <url><![CDATA[https://github.com/sebastianbergmann/php-file-iterator/issues]]></url>
+          <comment><![CDATA[As set via `support.issues` in composer package definition.]]></comment>
+        </reference>
+        <reference type="distribution">
+          <url><![CDATA[https://github.com/sebastianbergmann/php-file-iterator/tree/2.0]]></url>
+          <comment><![CDATA[As set via `support.source` in composer package definition.]]></comment>
+        </reference>
+        <reference type="other">
+          <url><![CDATA[https://github.com/sebastianbergmann]]></url>
+          <comment><![CDATA[As set via `funding` in composer package definition. (type=github)]]></comment>
+        </reference>
+      </externalReferences>
+    </component>
+    <component type="library" bom-ref="pkg:composer/phpunit/php-text-template@1.2.1">
+      <group><![CDATA[phpunit]]></group>
+      <name><![CDATA[php-text-template]]></name>
+      <version><![CDATA[1.2.1]]></version>
+      <description><![CDATA[Simple template engine.]]></description>
+      <licenses>
+        <license>
+          <id><![CDATA[BSD-3-Clause]]></id>
+        </license>
+      </licenses>
+      <purl><![CDATA[pkg:composer/phpunit/php-text-template@1.2.1]]></purl>
+      <externalReferences>
+        <reference type="distribution">
+          <url><![CDATA[https://github.com/sebastianbergmann/php-text-template.git]]></url>
+          <comment><![CDATA[As detected by composer's `getSourceUrls()` (type=git & reference=31f8b717e51d9a2afca6c9f046f5d69fc27c8686)]]></comment>
+        </reference>
+        <reference type="distribution">
+          <url><![CDATA[https://api.github.com/repos/sebastianbergmann/php-text-template/zipball/31f8b717e51d9a2afca6c9f046f5d69fc27c8686]]></url>
+          <comment><![CDATA[As detected by composer's `getDistUrls()` (type=zip & reference=31f8b717e51d9a2afca6c9f046f5d69fc27c8686 & sha1=UNDEFINED)]]></comment>
+        </reference>
+        <reference type="website">
+          <url><![CDATA[https://github.com/sebastianbergmann/php-text-template/]]></url>
+          <comment><![CDATA[As set via `homepage` in composer package definition.]]></comment>
+        </reference>
+        <reference type="issue-tracker">
+          <url><![CDATA[https://github.com/sebastianbergmann/php-text-template/issues]]></url>
+          <comment><![CDATA[As set via `support.issues` in composer package definition.]]></comment>
+        </reference>
+        <reference type="distribution">
+          <url><![CDATA[https://github.com/sebastianbergmann/php-text-template/tree/1.2.1]]></url>
+          <comment><![CDATA[As set via `support.source` in composer package definition.]]></comment>
+        </reference>
+      </externalReferences>
+    </component>
+    <component type="library" bom-ref="pkg:composer/phpunit/php-timer@2.1.x-dev">
+      <group><![CDATA[phpunit]]></group>
+      <name><![CDATA[php-timer]]></name>
+      <version><![CDATA[2.1.x-dev]]></version>
+      <description><![CDATA[Utility class for timing]]></description>
+      <licenses>
+        <license>
+          <id><![CDATA[BSD-3-Clause]]></id>
+        </license>
+      </licenses>
+      <purl><![CDATA[pkg:composer/phpunit/php-timer@2.1.x-dev]]></purl>
+      <externalReferences>
+        <reference type="distribution">
+          <url><![CDATA[https://github.com/sebastianbergmann/php-timer.git]]></url>
+          <comment><![CDATA[As detected by composer's `getSourceUrls()` (type=git & reference=2454ae1765516d20c4ffe103d85a58a9a3bd5662)]]></comment>
+        </reference>
+        <reference type="distribution">
+          <url><![CDATA[https://api.github.com/repos/sebastianbergmann/php-timer/zipball/2454ae1765516d20c4ffe103d85a58a9a3bd5662]]></url>
+          <comment><![CDATA[As detected by composer's `getDistUrls()` (type=zip & reference=2454ae1765516d20c4ffe103d85a58a9a3bd5662 & sha1=UNDEFINED)]]></comment>
+        </reference>
+        <reference type="website">
+          <url><![CDATA[https://github.com/sebastianbergmann/php-timer/]]></url>
+          <comment><![CDATA[As set via `homepage` in composer package definition.]]></comment>
+        </reference>
+        <reference type="issue-tracker">
+          <url><![CDATA[https://github.com/sebastianbergmann/php-timer/issues]]></url>
+          <comment><![CDATA[As set via `support.issues` in composer package definition.]]></comment>
+        </reference>
+        <reference type="distribution">
+          <url><![CDATA[https://github.com/sebastianbergmann/php-timer/tree/2.1]]></url>
+          <comment><![CDATA[As set via `support.source` in composer package definition.]]></comment>
+        </reference>
+        <reference type="other">
+          <url><![CDATA[https://github.com/sebastianbergmann]]></url>
+          <comment><![CDATA[As set via `funding` in composer package definition. (type=github)]]></comment>
+        </reference>
+      </externalReferences>
+    </component>
+    <component type="library" bom-ref="pkg:composer/phpunit/php-token-stream@3.1.x-dev">
+      <group><![CDATA[phpunit]]></group>
+      <name><![CDATA[php-token-stream]]></name>
+      <version><![CDATA[3.1.x-dev]]></version>
+      <description><![CDATA[Wrapper around PHP's tokenizer extension.]]></description>
+      <licenses>
+        <license>
+          <id><![CDATA[BSD-3-Clause]]></id>
+        </license>
+      </licenses>
+      <purl><![CDATA[pkg:composer/phpunit/php-token-stream@3.1.x-dev]]></purl>
+      <externalReferences>
+        <reference type="distribution">
+          <url><![CDATA[https://github.com/sebastianbergmann/php-token-stream.git]]></url>
+          <comment><![CDATA[As detected by composer's `getSourceUrls()` (type=git & reference=9c1da83261628cb24b6a6df371b6e312b3954768)]]></comment>
+        </reference>
+        <reference type="distribution">
+          <url><![CDATA[https://api.github.com/repos/sebastianbergmann/php-token-stream/zipball/9c1da83261628cb24b6a6df371b6e312b3954768]]></url>
+          <comment><![CDATA[As detected by composer's `getDistUrls()` (type=zip & reference=9c1da83261628cb24b6a6df371b6e312b3954768 & sha1=UNDEFINED)]]></comment>
+        </reference>
+        <reference type="website">
+          <url><![CDATA[https://github.com/sebastianbergmann/php-token-stream/]]></url>
+          <comment><![CDATA[As set via `homepage` in composer package definition.]]></comment>
+        </reference>
+        <reference type="issue-tracker">
+          <url><![CDATA[https://github.com/sebastianbergmann/php-token-stream/issues]]></url>
+          <comment><![CDATA[As set via `support.issues` in composer package definition.]]></comment>
+        </reference>
+        <reference type="distribution">
+          <url><![CDATA[https://github.com/sebastianbergmann/php-token-stream/tree/3.1]]></url>
+          <comment><![CDATA[As set via `support.source` in composer package definition.]]></comment>
+        </reference>
+        <reference type="other">
+          <url><![CDATA[https://github.com/sebastianbergmann]]></url>
+          <comment><![CDATA[As set via `funding` in composer package definition. (type=github)]]></comment>
+        </reference>
+      </externalReferences>
+    </component>
+    <component type="library" bom-ref="pkg:composer/phpunit/phpunit@7.5.20">
+      <group><![CDATA[phpunit]]></group>
+      <name><![CDATA[phpunit]]></name>
+      <version><![CDATA[7.5.20]]></version>
+      <description><![CDATA[The PHP Unit Testing framework.]]></description>
+      <licenses>
+        <license>
+          <id><![CDATA[BSD-3-Clause]]></id>
+        </license>
+      </licenses>
+      <purl><![CDATA[pkg:composer/phpunit/phpunit@7.5.20]]></purl>
+      <externalReferences>
+        <reference type="distribution">
+          <url><![CDATA[https://github.com/sebastianbergmann/phpunit.git]]></url>
+          <comment><![CDATA[As detected by composer's `getSourceUrls()` (type=git & reference=9467db479d1b0487c99733bb1e7944d32deded2c)]]></comment>
+        </reference>
+        <reference type="distribution">
+          <url><![CDATA[https://api.github.com/repos/sebastianbergmann/phpunit/zipball/9467db479d1b0487c99733bb1e7944d32deded2c]]></url>
+          <comment><![CDATA[As detected by composer's `getDistUrls()` (type=zip & reference=9467db479d1b0487c99733bb1e7944d32deded2c & sha1=UNDEFINED)]]></comment>
+        </reference>
+        <reference type="website">
+          <url><![CDATA[https://phpunit.de/]]></url>
+          <comment><![CDATA[As set via `homepage` in composer package definition.]]></comment>
+        </reference>
+        <reference type="issue-tracker">
+          <url><![CDATA[https://github.com/sebastianbergmann/phpunit/issues]]></url>
+          <comment><![CDATA[As set via `support.issues` in composer package definition.]]></comment>
+        </reference>
+        <reference type="distribution">
+          <url><![CDATA[https://github.com/sebastianbergmann/phpunit/tree/7.5.20]]></url>
+          <comment><![CDATA[As set via `support.source` in composer package definition.]]></comment>
+        </reference>
+      </externalReferences>
+    </component>
+    <component type="library" bom-ref="pkg:composer/sebastian/code-unit-reverse-lookup@1.0.x-dev">
+      <group><![CDATA[sebastian]]></group>
+      <name><![CDATA[code-unit-reverse-lookup]]></name>
+      <version><![CDATA[1.0.x-dev]]></version>
+      <description><![CDATA[Looks up which function or method a line of code belongs to]]></description>
+      <licenses>
+        <license>
+          <id><![CDATA[BSD-3-Clause]]></id>
+        </license>
+      </licenses>
+      <purl><![CDATA[pkg:composer/sebastian/code-unit-reverse-lookup@1.0.x-dev]]></purl>
+      <externalReferences>
+        <reference type="distribution">
+          <url><![CDATA[https://github.com/sebastianbergmann/code-unit-reverse-lookup.git]]></url>
+          <comment><![CDATA[As detected by composer's `getSourceUrls()` (type=git & reference=1de8cd5c010cb153fcd68b8d0f64606f523f7619)]]></comment>
+        </reference>
+        <reference type="distribution">
+          <url><![CDATA[https://api.github.com/repos/sebastianbergmann/code-unit-reverse-lookup/zipball/1de8cd5c010cb153fcd68b8d0f64606f523f7619]]></url>
+          <comment><![CDATA[As detected by composer's `getDistUrls()` (type=zip & reference=1de8cd5c010cb153fcd68b8d0f64606f523f7619 & sha1=UNDEFINED)]]></comment>
+        </reference>
+        <reference type="website">
+          <url><![CDATA[https://github.com/sebastianbergmann/code-unit-reverse-lookup/]]></url>
+          <comment><![CDATA[As set via `homepage` in composer package definition.]]></comment>
+        </reference>
+        <reference type="issue-tracker">
+          <url><![CDATA[https://github.com/sebastianbergmann/code-unit-reverse-lookup/issues]]></url>
+          <comment><![CDATA[As set via `support.issues` in composer package definition.]]></comment>
+        </reference>
+        <reference type="distribution">
+          <url><![CDATA[https://github.com/sebastianbergmann/code-unit-reverse-lookup/tree/1.0]]></url>
+          <comment><![CDATA[As set via `support.source` in composer package definition.]]></comment>
+        </reference>
+        <reference type="other">
+          <url><![CDATA[https://github.com/sebastianbergmann]]></url>
+          <comment><![CDATA[As set via `funding` in composer package definition. (type=github)]]></comment>
+        </reference>
+      </externalReferences>
+    </component>
+    <component type="library" bom-ref="pkg:composer/sebastian/comparator@3.0.x-dev">
+      <group><![CDATA[sebastian]]></group>
+      <name><![CDATA[comparator]]></name>
+      <version><![CDATA[3.0.x-dev]]></version>
+      <description><![CDATA[Provides the functionality to compare PHP values for equality]]></description>
+      <licenses>
+        <license>
+          <id><![CDATA[BSD-3-Clause]]></id>
+        </license>
+      </licenses>
+      <purl><![CDATA[pkg:composer/sebastian/comparator@3.0.x-dev]]></purl>
+      <externalReferences>
+        <reference type="distribution">
+          <url><![CDATA[https://github.com/sebastianbergmann/comparator.git]]></url>
+          <comment><![CDATA[As detected by composer's `getSourceUrls()` (type=git & reference=1dc7ceb4a24aede938c7af2a9ed1de09609ca770)]]></comment>
+        </reference>
+        <reference type="distribution">
+          <url><![CDATA[https://api.github.com/repos/sebastianbergmann/comparator/zipball/1dc7ceb4a24aede938c7af2a9ed1de09609ca770]]></url>
+          <comment><![CDATA[As detected by composer's `getDistUrls()` (type=zip & reference=1dc7ceb4a24aede938c7af2a9ed1de09609ca770 & sha1=UNDEFINED)]]></comment>
+        </reference>
+        <reference type="website">
+          <url><![CDATA[https://github.com/sebastianbergmann/comparator]]></url>
+          <comment><![CDATA[As set via `homepage` in composer package definition.]]></comment>
+        </reference>
+        <reference type="issue-tracker">
+          <url><![CDATA[https://github.com/sebastianbergmann/comparator/issues]]></url>
+          <comment><![CDATA[As set via `support.issues` in composer package definition.]]></comment>
+        </reference>
+        <reference type="distribution">
+          <url><![CDATA[https://github.com/sebastianbergmann/comparator/tree/3.0.5]]></url>
+          <comment><![CDATA[As set via `support.source` in composer package definition.]]></comment>
+        </reference>
+        <reference type="other">
+          <url><![CDATA[https://github.com/sebastianbergmann]]></url>
+          <comment><![CDATA[As set via `funding` in composer package definition. (type=github)]]></comment>
+        </reference>
+      </externalReferences>
+    </component>
+    <component type="library" bom-ref="pkg:composer/sebastian/diff@3.0.x-dev">
+      <group><![CDATA[sebastian]]></group>
+      <name><![CDATA[diff]]></name>
+      <version><![CDATA[3.0.x-dev]]></version>
+      <description><![CDATA[Diff implementation]]></description>
+      <licenses>
+        <license>
+          <id><![CDATA[BSD-3-Clause]]></id>
+        </license>
+      </licenses>
+      <purl><![CDATA[pkg:composer/sebastian/diff@3.0.x-dev]]></purl>
+      <externalReferences>
+        <reference type="distribution">
+          <url><![CDATA[https://github.com/sebastianbergmann/diff.git]]></url>
+          <comment><![CDATA[As detected by composer's `getSourceUrls()` (type=git & reference=6296a0c086dd0117c1b78b059374d7fcbe7545ae)]]></comment>
+        </reference>
+        <reference type="distribution">
+          <url><![CDATA[https://api.github.com/repos/sebastianbergmann/diff/zipball/6296a0c086dd0117c1b78b059374d7fcbe7545ae]]></url>
+          <comment><![CDATA[As detected by composer's `getDistUrls()` (type=zip & reference=6296a0c086dd0117c1b78b059374d7fcbe7545ae & sha1=UNDEFINED)]]></comment>
+        </reference>
+        <reference type="website">
+          <url><![CDATA[https://github.com/sebastianbergmann/diff]]></url>
+          <comment><![CDATA[As set via `homepage` in composer package definition.]]></comment>
+        </reference>
+        <reference type="issue-tracker">
+          <url><![CDATA[https://github.com/sebastianbergmann/diff/issues]]></url>
+          <comment><![CDATA[As set via `support.issues` in composer package definition.]]></comment>
+        </reference>
+        <reference type="distribution">
+          <url><![CDATA[https://github.com/sebastianbergmann/diff/tree/3.0]]></url>
+          <comment><![CDATA[As set via `support.source` in composer package definition.]]></comment>
+        </reference>
+        <reference type="other">
+          <url><![CDATA[https://github.com/sebastianbergmann]]></url>
+          <comment><![CDATA[As set via `funding` in composer package definition. (type=github)]]></comment>
+        </reference>
+      </externalReferences>
+    </component>
+    <component type="library" bom-ref="pkg:composer/sebastian/environment@4.2.x-dev">
+      <group><![CDATA[sebastian]]></group>
+      <name><![CDATA[environment]]></name>
+      <version><![CDATA[4.2.x-dev]]></version>
+      <description><![CDATA[Provides functionality to handle HHVM/PHP environments]]></description>
+      <licenses>
+        <license>
+          <id><![CDATA[BSD-3-Clause]]></id>
+        </license>
+      </licenses>
+      <purl><![CDATA[pkg:composer/sebastian/environment@4.2.x-dev]]></purl>
+      <externalReferences>
+        <reference type="distribution">
+          <url><![CDATA[https://github.com/sebastianbergmann/environment.git]]></url>
+          <comment><![CDATA[As detected by composer's `getSourceUrls()` (type=git & reference=a8cb2aa3eca438e75a4b7895f04bc8f5f990bc49)]]></comment>
+        </reference>
+        <reference type="distribution">
+          <url><![CDATA[https://api.github.com/repos/sebastianbergmann/environment/zipball/a8cb2aa3eca438e75a4b7895f04bc8f5f990bc49]]></url>
+          <comment><![CDATA[As detected by composer's `getDistUrls()` (type=zip & reference=a8cb2aa3eca438e75a4b7895f04bc8f5f990bc49 & sha1=UNDEFINED)]]></comment>
+        </reference>
+        <reference type="website">
+          <url><![CDATA[http://www.github.com/sebastianbergmann/environment]]></url>
+          <comment><![CDATA[As set via `homepage` in composer package definition.]]></comment>
+        </reference>
+        <reference type="issue-tracker">
+          <url><![CDATA[https://github.com/sebastianbergmann/environment/issues]]></url>
+          <comment><![CDATA[As set via `support.issues` in composer package definition.]]></comment>
+        </reference>
+        <reference type="distribution">
+          <url><![CDATA[https://github.com/sebastianbergmann/environment/tree/4.2]]></url>
+          <comment><![CDATA[As set via `support.source` in composer package definition.]]></comment>
+        </reference>
+        <reference type="other">
+          <url><![CDATA[https://github.com/sebastianbergmann]]></url>
+          <comment><![CDATA[As set via `funding` in composer package definition. (type=github)]]></comment>
+        </reference>
+      </externalReferences>
+    </component>
+    <component type="library" bom-ref="pkg:composer/sebastian/exporter@3.1.x-dev">
+      <group><![CDATA[sebastian]]></group>
+      <name><![CDATA[exporter]]></name>
+      <version><![CDATA[3.1.x-dev]]></version>
+      <description><![CDATA[Provides the functionality to export PHP variables for visualization]]></description>
+      <licenses>
+        <license>
+          <id><![CDATA[BSD-3-Clause]]></id>
+        </license>
+      </licenses>
+      <purl><![CDATA[pkg:composer/sebastian/exporter@3.1.x-dev]]></purl>
+      <externalReferences>
+        <reference type="distribution">
+          <url><![CDATA[https://github.com/sebastianbergmann/exporter.git]]></url>
+          <comment><![CDATA[As detected by composer's `getSourceUrls()` (type=git & reference=73a9676f2833b9a7c36968f9d882589cd75511e6)]]></comment>
+        </reference>
+        <reference type="distribution">
+          <url><![CDATA[https://api.github.com/repos/sebastianbergmann/exporter/zipball/73a9676f2833b9a7c36968f9d882589cd75511e6]]></url>
+          <comment><![CDATA[As detected by composer's `getDistUrls()` (type=zip & reference=73a9676f2833b9a7c36968f9d882589cd75511e6 & sha1=UNDEFINED)]]></comment>
+        </reference>
+        <reference type="website">
+          <url><![CDATA[http://www.github.com/sebastianbergmann/exporter]]></url>
+          <comment><![CDATA[As set via `homepage` in composer package definition.]]></comment>
+        </reference>
+        <reference type="issue-tracker">
+          <url><![CDATA[https://github.com/sebastianbergmann/exporter/issues]]></url>
+          <comment><![CDATA[As set via `support.issues` in composer package definition.]]></comment>
+        </reference>
+        <reference type="distribution">
+          <url><![CDATA[https://github.com/sebastianbergmann/exporter/tree/3.1]]></url>
+          <comment><![CDATA[As set via `support.source` in composer package definition.]]></comment>
+        </reference>
+        <reference type="other">
+          <url><![CDATA[https://github.com/sebastianbergmann]]></url>
+          <comment><![CDATA[As set via `funding` in composer package definition. (type=github)]]></comment>
+        </reference>
+      </externalReferences>
+    </component>
+    <component type="library" bom-ref="pkg:composer/sebastian/global-state@2.0.0">
+      <group><![CDATA[sebastian]]></group>
+      <name><![CDATA[global-state]]></name>
+      <version><![CDATA[2.0.0]]></version>
+      <description><![CDATA[Snapshotting of global state]]></description>
+      <licenses>
+        <license>
+          <id><![CDATA[BSD-3-Clause]]></id>
+        </license>
+      </licenses>
+      <purl><![CDATA[pkg:composer/sebastian/global-state@2.0.0]]></purl>
+      <externalReferences>
+        <reference type="distribution">
+          <url><![CDATA[https://github.com/sebastianbergmann/global-state.git]]></url>
+          <comment><![CDATA[As detected by composer's `getSourceUrls()` (type=git & reference=e8ba02eed7bbbb9e59e43dedd3dddeff4a56b0c4)]]></comment>
+        </reference>
+        <reference type="distribution">
+          <url><![CDATA[https://api.github.com/repos/sebastianbergmann/global-state/zipball/e8ba02eed7bbbb9e59e43dedd3dddeff4a56b0c4]]></url>
+          <comment><![CDATA[As detected by composer's `getDistUrls()` (type=zip & reference=e8ba02eed7bbbb9e59e43dedd3dddeff4a56b0c4 & sha1=UNDEFINED)]]></comment>
+        </reference>
+        <reference type="website">
+          <url><![CDATA[http://www.github.com/sebastianbergmann/global-state]]></url>
+          <comment><![CDATA[As set via `homepage` in composer package definition.]]></comment>
+        </reference>
+        <reference type="issue-tracker">
+          <url><![CDATA[https://github.com/sebastianbergmann/global-state/issues]]></url>
+          <comment><![CDATA[As set via `support.issues` in composer package definition.]]></comment>
+        </reference>
+        <reference type="distribution">
+          <url><![CDATA[https://github.com/sebastianbergmann/global-state/tree/2.0.0]]></url>
+          <comment><![CDATA[As set via `support.source` in composer package definition.]]></comment>
+        </reference>
+      </externalReferences>
+    </component>
+    <component type="library" bom-ref="pkg:composer/sebastian/object-enumerator@3.0.x-dev">
+      <group><![CDATA[sebastian]]></group>
+      <name><![CDATA[object-enumerator]]></name>
+      <version><![CDATA[3.0.x-dev]]></version>
+      <description><![CDATA[Traverses array structures and object graphs to enumerate all referenced objects]]></description>
+      <licenses>
+        <license>
+          <id><![CDATA[BSD-3-Clause]]></id>
+        </license>
+      </licenses>
+      <purl><![CDATA[pkg:composer/sebastian/object-enumerator@3.0.x-dev]]></purl>
+      <externalReferences>
+        <reference type="distribution">
+          <url><![CDATA[https://github.com/sebastianbergmann/object-enumerator.git]]></url>
+          <comment><![CDATA[As detected by composer's `getSourceUrls()` (type=git & reference=e67f6d32ebd0c749cf9d1dbd9f226c727043cdf2)]]></comment>
+        </reference>
+        <reference type="distribution">
+          <url><![CDATA[https://api.github.com/repos/sebastianbergmann/object-enumerator/zipball/e67f6d32ebd0c749cf9d1dbd9f226c727043cdf2]]></url>
+          <comment><![CDATA[As detected by composer's `getDistUrls()` (type=zip & reference=e67f6d32ebd0c749cf9d1dbd9f226c727043cdf2 & sha1=UNDEFINED)]]></comment>
+        </reference>
+        <reference type="website">
+          <url><![CDATA[https://github.com/sebastianbergmann/object-enumerator/]]></url>
+          <comment><![CDATA[As set via `homepage` in composer package definition.]]></comment>
+        </reference>
+        <reference type="issue-tracker">
+          <url><![CDATA[https://github.com/sebastianbergmann/object-enumerator/issues]]></url>
+          <comment><![CDATA[As set via `support.issues` in composer package definition.]]></comment>
+        </reference>
+        <reference type="distribution">
+          <url><![CDATA[https://github.com/sebastianbergmann/object-enumerator/tree/3.0]]></url>
+          <comment><![CDATA[As set via `support.source` in composer package definition.]]></comment>
+        </reference>
+        <reference type="other">
+          <url><![CDATA[https://github.com/sebastianbergmann]]></url>
+          <comment><![CDATA[As set via `funding` in composer package definition. (type=github)]]></comment>
+        </reference>
+      </externalReferences>
+    </component>
+    <component type="library" bom-ref="pkg:composer/sebastian/object-reflector@1.1.x-dev">
+      <group><![CDATA[sebastian]]></group>
+      <name><![CDATA[object-reflector]]></name>
+      <version><![CDATA[1.1.x-dev]]></version>
+      <description><![CDATA[Allows reflection of object attributes, including inherited and non-public ones]]></description>
+      <licenses>
+        <license>
+          <id><![CDATA[BSD-3-Clause]]></id>
+        </license>
+      </licenses>
+      <purl><![CDATA[pkg:composer/sebastian/object-reflector@1.1.x-dev]]></purl>
+      <externalReferences>
+        <reference type="distribution">
+          <url><![CDATA[https://github.com/sebastianbergmann/object-reflector.git]]></url>
+          <comment><![CDATA[As detected by composer's `getSourceUrls()` (type=git & reference=9b8772b9cbd456ab45d4a598d2dd1a1bced6363d)]]></comment>
+        </reference>
+        <reference type="distribution">
+          <url><![CDATA[https://api.github.com/repos/sebastianbergmann/object-reflector/zipball/9b8772b9cbd456ab45d4a598d2dd1a1bced6363d]]></url>
+          <comment><![CDATA[As detected by composer's `getDistUrls()` (type=zip & reference=9b8772b9cbd456ab45d4a598d2dd1a1bced6363d & sha1=UNDEFINED)]]></comment>
+        </reference>
+        <reference type="website">
+          <url><![CDATA[https://github.com/sebastianbergmann/object-reflector/]]></url>
+          <comment><![CDATA[As set via `homepage` in composer package definition.]]></comment>
+        </reference>
+        <reference type="issue-tracker">
+          <url><![CDATA[https://github.com/sebastianbergmann/object-reflector/issues]]></url>
+          <comment><![CDATA[As set via `support.issues` in composer package definition.]]></comment>
+        </reference>
+        <reference type="distribution">
+          <url><![CDATA[https://github.com/sebastianbergmann/object-reflector/tree/1.1]]></url>
+          <comment><![CDATA[As set via `support.source` in composer package definition.]]></comment>
+        </reference>
+        <reference type="other">
+          <url><![CDATA[https://github.com/sebastianbergmann]]></url>
+          <comment><![CDATA[As set via `funding` in composer package definition. (type=github)]]></comment>
+        </reference>
+      </externalReferences>
+    </component>
+    <component type="library" bom-ref="pkg:composer/sebastian/recursion-context@3.0.x-dev">
+      <group><![CDATA[sebastian]]></group>
+      <name><![CDATA[recursion-context]]></name>
+      <version><![CDATA[3.0.x-dev]]></version>
+      <description><![CDATA[Provides functionality to recursively process PHP variables]]></description>
+      <licenses>
+        <license>
+          <id><![CDATA[BSD-3-Clause]]></id>
+        </license>
+      </licenses>
+      <purl><![CDATA[pkg:composer/sebastian/recursion-context@3.0.x-dev]]></purl>
+      <externalReferences>
+        <reference type="distribution">
+          <url><![CDATA[https://github.com/sebastianbergmann/recursion-context.git]]></url>
+          <comment><![CDATA[As detected by composer's `getSourceUrls()` (type=git & reference=367dcba38d6e1977be014dc4b22f47a484dac7fb)]]></comment>
+        </reference>
+        <reference type="distribution">
+          <url><![CDATA[https://api.github.com/repos/sebastianbergmann/recursion-context/zipball/367dcba38d6e1977be014dc4b22f47a484dac7fb]]></url>
+          <comment><![CDATA[As detected by composer's `getDistUrls()` (type=zip & reference=367dcba38d6e1977be014dc4b22f47a484dac7fb & sha1=UNDEFINED)]]></comment>
+        </reference>
+        <reference type="website">
+          <url><![CDATA[http://www.github.com/sebastianbergmann/recursion-context]]></url>
+          <comment><![CDATA[As set via `homepage` in composer package definition.]]></comment>
+        </reference>
+        <reference type="issue-tracker">
+          <url><![CDATA[https://github.com/sebastianbergmann/recursion-context/issues]]></url>
+          <comment><![CDATA[As set via `support.issues` in composer package definition.]]></comment>
+        </reference>
+        <reference type="distribution">
+          <url><![CDATA[https://github.com/sebastianbergmann/recursion-context/tree/3.0]]></url>
+          <comment><![CDATA[As set via `support.source` in composer package definition.]]></comment>
+        </reference>
+        <reference type="other">
+          <url><![CDATA[https://github.com/sebastianbergmann]]></url>
+          <comment><![CDATA[As set via `funding` in composer package definition. (type=github)]]></comment>
+        </reference>
+      </externalReferences>
+    </component>
+    <component type="library" bom-ref="pkg:composer/sebastian/resource-operations@2.0.x-dev">
+      <group><![CDATA[sebastian]]></group>
+      <name><![CDATA[resource-operations]]></name>
+      <version><![CDATA[2.0.x-dev]]></version>
+      <description><![CDATA[Provides a list of PHP built-in functions that operate on resources]]></description>
+      <licenses>
+        <license>
+          <id><![CDATA[BSD-3-Clause]]></id>
+        </license>
+      </licenses>
+      <purl><![CDATA[pkg:composer/sebastian/resource-operations@2.0.x-dev]]></purl>
+      <externalReferences>
+        <reference type="distribution">
+          <url><![CDATA[https://github.com/sebastianbergmann/resource-operations.git]]></url>
+          <comment><![CDATA[As detected by composer's `getSourceUrls()` (type=git & reference=31d35ca87926450c44eae7e2611d45a7a65ea8b3)]]></comment>
+        </reference>
+        <reference type="distribution">
+          <url><![CDATA[https://api.github.com/repos/sebastianbergmann/resource-operations/zipball/31d35ca87926450c44eae7e2611d45a7a65ea8b3]]></url>
+          <comment><![CDATA[As detected by composer's `getDistUrls()` (type=zip & reference=31d35ca87926450c44eae7e2611d45a7a65ea8b3 & sha1=UNDEFINED)]]></comment>
+        </reference>
+        <reference type="website">
+          <url><![CDATA[https://www.github.com/sebastianbergmann/resource-operations]]></url>
+          <comment><![CDATA[As set via `homepage` in composer package definition.]]></comment>
+        </reference>
+        <reference type="issue-tracker">
+          <url><![CDATA[https://github.com/sebastianbergmann/resource-operations/issues]]></url>
+          <comment><![CDATA[As set via `support.issues` in composer package definition.]]></comment>
+        </reference>
+        <reference type="distribution">
+          <url><![CDATA[https://github.com/sebastianbergmann/resource-operations/tree/2.0]]></url>
+          <comment><![CDATA[As set via `support.source` in composer package definition.]]></comment>
+        </reference>
+        <reference type="other">
+          <url><![CDATA[https://github.com/sebastianbergmann]]></url>
+          <comment><![CDATA[As set via `funding` in composer package definition. (type=github)]]></comment>
+        </reference>
+      </externalReferences>
+    </component>
+    <component type="library" bom-ref="pkg:composer/sebastian/version@2.0.1">
+      <group><![CDATA[sebastian]]></group>
+      <name><![CDATA[version]]></name>
+      <version><![CDATA[2.0.1]]></version>
+      <description><![CDATA[Library that helps with managing the version number of Git-hosted PHP projects]]></description>
+      <licenses>
+        <license>
+          <id><![CDATA[BSD-3-Clause]]></id>
+        </license>
+      </licenses>
+      <purl><![CDATA[pkg:composer/sebastian/version@2.0.1]]></purl>
+      <externalReferences>
+        <reference type="distribution">
+          <url><![CDATA[https://github.com/sebastianbergmann/version.git]]></url>
+          <comment><![CDATA[As detected by composer's `getSourceUrls()` (type=git & reference=99732be0ddb3361e16ad77b68ba41efc8e979019)]]></comment>
+        </reference>
+        <reference type="distribution">
+          <url><![CDATA[https://api.github.com/repos/sebastianbergmann/version/zipball/99732be0ddb3361e16ad77b68ba41efc8e979019]]></url>
+          <comment><![CDATA[As detected by composer's `getDistUrls()` (type=zip & reference=99732be0ddb3361e16ad77b68ba41efc8e979019 & sha1=UNDEFINED)]]></comment>
+        </reference>
+        <reference type="website">
+          <url><![CDATA[https://github.com/sebastianbergmann/version]]></url>
+          <comment><![CDATA[As set via `homepage` in composer package definition.]]></comment>
+        </reference>
+        <reference type="issue-tracker">
+          <url><![CDATA[https://github.com/sebastianbergmann/version/issues]]></url>
+          <comment><![CDATA[As set via `support.issues` in composer package definition.]]></comment>
+        </reference>
+        <reference type="distribution">
+          <url><![CDATA[https://github.com/sebastianbergmann/version/tree/master]]></url>
+          <comment><![CDATA[As set via `support.source` in composer package definition.]]></comment>
+        </reference>
+      </externalReferences>
+    </component>
+    <component type="library" bom-ref="pkg:composer/stevegrunwell/runkit7-installer@1.2.0">
+      <group><![CDATA[stevegrunwell]]></group>
+      <name><![CDATA[runkit7-installer]]></name>
+      <version><![CDATA[1.2.0]]></version>
+      <description><![CDATA[Installer for PHP's runkit and runkit7 extensions]]></description>
+      <licenses>
+        <license>
+          <id><![CDATA[MIT]]></id>
+        </license>
+      </licenses>
+      <purl><![CDATA[pkg:composer/stevegrunwell/runkit7-installer@1.2.0]]></purl>
+      <externalReferences>
+        <reference type="distribution">
+          <url><![CDATA[https://github.com/stevegrunwell/runkit7-installer.git]]></url>
+          <comment><![CDATA[As detected by composer's `getSourceUrls()` (type=git & reference=7a2ed7adc0a0e1e904b94e40c2224101aaf28a16)]]></comment>
+        </reference>
+        <reference type="distribution">
+          <url><![CDATA[https://api.github.com/repos/stevegrunwell/runkit7-installer/zipball/7a2ed7adc0a0e1e904b94e40c2224101aaf28a16]]></url>
+          <comment><![CDATA[As detected by composer's `getDistUrls()` (type=zip & reference=7a2ed7adc0a0e1e904b94e40c2224101aaf28a16 & sha1=UNDEFINED)]]></comment>
+        </reference>
+        <reference type="issue-tracker">
+          <url><![CDATA[https://github.com/stevegrunwell/runkit7-installer/issues]]></url>
+          <comment><![CDATA[As set via `support.issues` in composer package definition.]]></comment>
+        </reference>
+        <reference type="distribution">
+          <url><![CDATA[https://github.com/stevegrunwell/runkit7-installer]]></url>
+          <comment><![CDATA[As set via `support.source` in composer package definition.]]></comment>
+        </reference>
+      </externalReferences>
+    </component>
+    <component type="library" bom-ref="pkg:composer/theseer/tokenizer@1.2.1">
+      <group><![CDATA[theseer]]></group>
+      <name><![CDATA[tokenizer]]></name>
+      <version><![CDATA[1.2.1]]></version>
+      <description><![CDATA[A small library for converting tokenized PHP source code into XML and potentially other formats]]></description>
+      <licenses>
+        <license>
+          <id><![CDATA[BSD-3-Clause]]></id>
+        </license>
+      </licenses>
+      <purl><![CDATA[pkg:composer/theseer/tokenizer@1.2.1]]></purl>
+      <externalReferences>
+        <reference type="distribution">
+          <url><![CDATA[https://github.com/theseer/tokenizer.git]]></url>
+          <comment><![CDATA[As detected by composer's `getSourceUrls()` (type=git & reference=34a41e998c2183e22995f158c581e7b5e755ab9e)]]></comment>
+        </reference>
+        <reference type="distribution">
+          <url><![CDATA[https://api.github.com/repos/theseer/tokenizer/zipball/34a41e998c2183e22995f158c581e7b5e755ab9e]]></url>
+          <comment><![CDATA[As detected by composer's `getDistUrls()` (type=zip & reference=34a41e998c2183e22995f158c581e7b5e755ab9e & sha1=UNDEFINED)]]></comment>
+        </reference>
+        <reference type="issue-tracker">
+          <url><![CDATA[https://github.com/theseer/tokenizer/issues]]></url>
+          <comment><![CDATA[As set via `support.issues` in composer package definition.]]></comment>
+        </reference>
+        <reference type="distribution">
+          <url><![CDATA[https://github.com/theseer/tokenizer/tree/1.2.1]]></url>
+          <comment><![CDATA[As set via `support.source` in composer package definition.]]></comment>
+        </reference>
+        <reference type="other">
+          <url><![CDATA[https://github.com/theseer]]></url>
+          <comment><![CDATA[As set via `funding` in composer package definition. (type=github)]]></comment>
+        </reference>
+      </externalReferences>
+    </component>
+    <component type="library" bom-ref="pkg:composer/webmozart/assert@1.11.0">
+      <group><![CDATA[webmozart]]></group>
+      <name><![CDATA[assert]]></name>
+      <version><![CDATA[1.11.0]]></version>
+      <description><![CDATA[Assertions to validate method input/output with nice error messages.]]></description>
+      <licenses>
+        <license>
+          <id><![CDATA[MIT]]></id>
+        </license>
+      </licenses>
+      <purl><![CDATA[pkg:composer/webmozart/assert@1.11.0]]></purl>
+      <externalReferences>
+        <reference type="distribution">
+          <url><![CDATA[https://github.com/webmozarts/assert.git]]></url>
+          <comment><![CDATA[As detected by composer's `getSourceUrls()` (type=git & reference=11cb2199493b2f8a3b53e7f19068fc6aac760991)]]></comment>
+        </reference>
+        <reference type="distribution">
+          <url><![CDATA[https://api.github.com/repos/webmozarts/assert/zipball/11cb2199493b2f8a3b53e7f19068fc6aac760991]]></url>
+          <comment><![CDATA[As detected by composer's `getDistUrls()` (type=zip & reference=11cb2199493b2f8a3b53e7f19068fc6aac760991 & sha1=UNDEFINED)]]></comment>
+        </reference>
+        <reference type="issue-tracker">
+          <url><![CDATA[https://github.com/webmozarts/assert/issues]]></url>
+          <comment><![CDATA[As set via `support.issues` in composer package definition.]]></comment>
+        </reference>
+        <reference type="distribution">
+          <url><![CDATA[https://github.com/webmozarts/assert/tree/1.11.0]]></url>
+          <comment><![CDATA[As set via `support.source` in composer package definition.]]></comment>
+        </reference>
+      </externalReferences>
+    </component>
+  </components>
+  <dependencies>
+    <dependency ref="pkg:composer/cyclonedx/cyclonedx-library@1.x-dev">
+      <dependency ref="pkg:composer/package-url/packageurl-php@1.0.6"/>
+      <dependency ref="pkg:composer/swaggest/json-schema@0.12.41"/>
+    </dependency>
+    <dependency ref="pkg:composer/cyclonedx/cyclonedx-php-composer@3.x-dev">
+      <dependency ref="pkg:composer/cyclonedx/cyclonedx-library@1.x-dev"/>
+      <dependency ref="pkg:composer/package-url/packageurl-php@1.0.6"/>
+    </dependency>
+    <dependency ref="pkg:composer/guzzlehttp/promises@dev-master"/>
+    <dependency ref="pkg:composer/nyholm/psr7@dev-master">
+      <dependency ref="pkg:composer/psr/http-factory@dev-master"/>
+      <dependency ref="pkg:composer/psr/http-message@1.1"/>
+    </dependency>
+    <dependency ref="pkg:composer/open-telemetry/api@dev-main">
+      <dependency ref="pkg:composer/open-telemetry/context@dev-main"/>
+      <dependency ref="pkg:composer/psr/log@1.1.4"/>
+      <dependency ref="pkg:composer/symfony/polyfill-php80@dev-main"/>
+      <dependency ref="pkg:composer/symfony/polyfill-php81@dev-main"/>
+      <dependency ref="pkg:composer/symfony/polyfill-php82@dev-main"/>
+    </dependency>
+    <dependency ref="pkg:composer/open-telemetry/context@dev-main">
+      <dependency ref="pkg:composer/symfony/polyfill-php80@dev-main"/>
+      <dependency ref="pkg:composer/symfony/polyfill-php81@dev-main"/>
+      <dependency ref="pkg:composer/symfony/polyfill-php82@dev-main"/>
+    </dependency>
+    <dependency ref="pkg:composer/open-telemetry/exporter-zipkin@dev-main">
+      <dependency ref="pkg:composer/open-telemetry/api@dev-main"/>
+      <dependency ref="pkg:composer/open-telemetry/sdk@dev-main"/>
+      <dependency ref="pkg:composer/php-http/discovery@1.x-dev"/>
+    </dependency>
+    <dependency ref="pkg:composer/open-telemetry/extension-propagator-b3@dev-main">
+      <dependency ref="pkg:composer/open-telemetry/api@dev-main"/>
+      <dependency ref="pkg:composer/open-telemetry/context@dev-main"/>
+    </dependency>
+    <dependency ref="pkg:composer/open-telemetry/sdk@dev-main">
+      <dependency ref="pkg:composer/open-telemetry/api@dev-main"/>
+      <dependency ref="pkg:composer/open-telemetry/context@dev-main"/>
+      <dependency ref="pkg:composer/open-telemetry/sem-conv@dev-main"/>
+      <dependency ref="pkg:composer/php-http/discovery@1.x-dev"/>
+      <dependency ref="pkg:composer/psr/http-message@1.1"/>
+      <dependency ref="pkg:composer/psr/log@1.1.4"/>
+      <dependency ref="pkg:composer/symfony/polyfill-mbstring@dev-main"/>
+      <dependency ref="pkg:composer/symfony/polyfill-php80@dev-main"/>
+      <dependency ref="pkg:composer/symfony/polyfill-php81@dev-main"/>
+      <dependency ref="pkg:composer/symfony/polyfill-php82@dev-main"/>
+    </dependency>
+    <dependency ref="pkg:composer/open-telemetry/sem-conv@dev-main"/>
+    <dependency ref="pkg:composer/package-url/packageurl-php@1.0.6"/>
+    <dependency ref="pkg:composer/php-http/discovery@1.x-dev"/>
+    <dependency ref="pkg:composer/php-http/message-factory@dev-master">
+      <dependency ref="pkg:composer/psr/http-message@1.1"/>
+    </dependency>
+    <dependency ref="pkg:composer/phplang/scope-exit@1.0.0"/>
+    <dependency ref="pkg:composer/psr/container@1.x-dev"/>
+    <dependency ref="pkg:composer/psr/http-client@dev-master">
+      <dependency ref="pkg:composer/psr/http-message@1.1"/>
+    </dependency>
+    <dependency ref="pkg:composer/psr/http-factory@dev-master">
+      <dependency ref="pkg:composer/psr/http-message@1.1"/>
+    </dependency>
+    <dependency ref="pkg:composer/psr/http-message@1.1"/>
+    <dependency ref="pkg:composer/psr/log@1.1.4"/>
+    <dependency ref="pkg:composer/swaggest/json-diff@3.10.4"/>
+    <dependency ref="pkg:composer/swaggest/json-schema@0.12.41">
+      <dependency ref="pkg:composer/phplang/scope-exit@1.0.0"/>
+      <dependency ref="pkg:composer/swaggest/json-diff@3.10.4"/>
+      <dependency ref="pkg:composer/symfony/polyfill-mbstring@dev-main"/>
+    </dependency>
+    <dependency ref="pkg:composer/symfony/deprecation-contracts@2.5.x-dev"/>
+    <dependency ref="pkg:composer/symfony/http-client@5.4.x-dev">
+      <dependency ref="pkg:composer/psr/log@1.1.4"/>
+      <dependency ref="pkg:composer/symfony/deprecation-contracts@2.5.x-dev"/>
+      <dependency ref="pkg:composer/symfony/http-client-contracts@2.5.x-dev"/>
+      <dependency ref="pkg:composer/symfony/polyfill-php73@dev-main"/>
+      <dependency ref="pkg:composer/symfony/polyfill-php80@dev-main"/>
+      <dependency ref="pkg:composer/symfony/service-contracts@2.5.x-dev"/>
+    </dependency>
+    <dependency ref="pkg:composer/symfony/http-client-contracts@2.5.x-dev"/>
+    <dependency ref="pkg:composer/symfony/polyfill-mbstring@dev-main"/>
+    <dependency ref="pkg:composer/symfony/polyfill-php73@dev-main"/>
+    <dependency ref="pkg:composer/symfony/polyfill-php80@dev-main"/>
+    <dependency ref="pkg:composer/symfony/polyfill-php81@dev-main"/>
+    <dependency ref="pkg:composer/symfony/polyfill-php82@dev-main"/>
+    <dependency ref="pkg:composer/symfony/service-contracts@2.5.x-dev">
+      <dependency ref="pkg:composer/psr/container@1.x-dev"/>
+      <dependency ref="pkg:composer/symfony/deprecation-contracts@2.5.x-dev"/>
+    </dependency>
+    <dependency ref="pkg:composer/doctrine/deprecations@1.0.0"/>
+    <dependency ref="pkg:composer/doctrine/instantiator@1.5.x-dev"/>
+    <dependency ref="pkg:composer/myclabs/deep-copy@1.x-dev"/>
+    <dependency ref="pkg:composer/phar-io/manifest@1.0.3">
+      <dependency ref="pkg:composer/phar-io/version@2.0.1"/>
+    </dependency>
+    <dependency ref="pkg:composer/phar-io/version@2.0.1"/>
+    <dependency ref="pkg:composer/phpdocumentor/reflection-common@dev-master"/>
+    <dependency ref="pkg:composer/phpdocumentor/reflection-docblock@dev-master">
+      <dependency ref="pkg:composer/phpdocumentor/reflection-common@dev-master"/>
+      <dependency ref="pkg:composer/phpdocumentor/type-resolver@1.x-dev"/>
+      <dependency ref="pkg:composer/phpstan/phpdoc-parser@1.21.x-dev"/>
+      <dependency ref="pkg:composer/webmozart/assert@1.11.0"/>
+    </dependency>
+    <dependency ref="pkg:composer/phpdocumentor/type-resolver@1.x-dev">
+      <dependency ref="pkg:composer/doctrine/deprecations@1.0.0"/>
+      <dependency ref="pkg:composer/phpdocumentor/reflection-common@dev-master"/>
+      <dependency ref="pkg:composer/phpstan/phpdoc-parser@1.21.x-dev"/>
+    </dependency>
+    <dependency ref="pkg:composer/phpspec/prophecy@dev-master">
+      <dependency ref="pkg:composer/doctrine/instantiator@1.5.x-dev"/>
+      <dependency ref="pkg:composer/phpdocumentor/reflection-docblock@dev-master"/>
+      <dependency ref="pkg:composer/sebastian/comparator@3.0.x-dev"/>
+      <dependency ref="pkg:composer/sebastian/recursion-context@3.0.x-dev"/>
+    </dependency>
+    <dependency ref="pkg:composer/phpstan/phpdoc-parser@1.21.x-dev"/>
+    <dependency ref="pkg:composer/phpunit/php-code-coverage@6.1.4">
+      <dependency ref="pkg:composer/phpunit/php-file-iterator@2.0.x-dev"/>
+      <dependency ref="pkg:composer/phpunit/php-text-template@1.2.1"/>
+      <dependency ref="pkg:composer/phpunit/php-token-stream@3.1.x-dev"/>
+      <dependency ref="pkg:composer/sebastian/code-unit-reverse-lookup@1.0.x-dev"/>
+      <dependency ref="pkg:composer/sebastian/environment@4.2.x-dev"/>
+      <dependency ref="pkg:composer/sebastian/version@2.0.1"/>
+      <dependency ref="pkg:composer/theseer/tokenizer@1.2.1"/>
+    </dependency>
+    <dependency ref="pkg:composer/phpunit/php-file-iterator@2.0.x-dev"/>
+    <dependency ref="pkg:composer/phpunit/php-text-template@1.2.1"/>
+    <dependency ref="pkg:composer/phpunit/php-timer@2.1.x-dev"/>
+    <dependency ref="pkg:composer/phpunit/php-token-stream@3.1.x-dev"/>
+    <dependency ref="pkg:composer/phpunit/phpunit@7.5.20">
+      <dependency ref="pkg:composer/doctrine/instantiator@1.5.x-dev"/>
+      <dependency ref="pkg:composer/myclabs/deep-copy@1.x-dev"/>
+      <dependency ref="pkg:composer/phar-io/manifest@1.0.3"/>
+      <dependency ref="pkg:composer/phar-io/version@2.0.1"/>
+      <dependency ref="pkg:composer/phpspec/prophecy@dev-master"/>
+      <dependency ref="pkg:composer/phpunit/php-code-coverage@6.1.4"/>
+      <dependency ref="pkg:composer/phpunit/php-file-iterator@2.0.x-dev"/>
+      <dependency ref="pkg:composer/phpunit/php-text-template@1.2.1"/>
+      <dependency ref="pkg:composer/phpunit/php-timer@2.1.x-dev"/>
+      <dependency ref="pkg:composer/sebastian/comparator@3.0.x-dev"/>
+      <dependency ref="pkg:composer/sebastian/diff@3.0.x-dev"/>
+      <dependency ref="pkg:composer/sebastian/environment@4.2.x-dev"/>
+      <dependency ref="pkg:composer/sebastian/exporter@3.1.x-dev"/>
+      <dependency ref="pkg:composer/sebastian/global-state@2.0.0"/>
+      <dependency ref="pkg:composer/sebastian/object-enumerator@3.0.x-dev"/>
+      <dependency ref="pkg:composer/sebastian/resource-operations@2.0.x-dev"/>
+      <dependency ref="pkg:composer/sebastian/version@2.0.1"/>
+    </dependency>
+    <dependency ref="pkg:composer/sebastian/code-unit-reverse-lookup@1.0.x-dev"/>
+    <dependency ref="pkg:composer/sebastian/comparator@3.0.x-dev">
+      <dependency ref="pkg:composer/sebastian/diff@3.0.x-dev"/>
+      <dependency ref="pkg:composer/sebastian/exporter@3.1.x-dev"/>
+    </dependency>
+    <dependency ref="pkg:composer/sebastian/diff@3.0.x-dev"/>
+    <dependency ref="pkg:composer/sebastian/environment@4.2.x-dev"/>
+    <dependency ref="pkg:composer/sebastian/exporter@3.1.x-dev">
+      <dependency ref="pkg:composer/sebastian/recursion-context@3.0.x-dev"/>
+    </dependency>
+    <dependency ref="pkg:composer/sebastian/global-state@2.0.0"/>
+    <dependency ref="pkg:composer/sebastian/object-enumerator@3.0.x-dev">
+      <dependency ref="pkg:composer/sebastian/object-reflector@1.1.x-dev"/>
+      <dependency ref="pkg:composer/sebastian/recursion-context@3.0.x-dev"/>
+    </dependency>
+    <dependency ref="pkg:composer/sebastian/object-reflector@1.1.x-dev"/>
+    <dependency ref="pkg:composer/sebastian/recursion-context@3.0.x-dev"/>
+    <dependency ref="pkg:composer/sebastian/resource-operations@2.0.x-dev"/>
+    <dependency ref="pkg:composer/sebastian/version@2.0.1"/>
+    <dependency ref="pkg:composer/stevegrunwell/runkit7-installer@1.2.0"/>
+    <dependency ref="pkg:composer/theseer/tokenizer@1.2.1"/>
+    <dependency ref="pkg:composer/webmozart/assert@1.11.0"/>
+    <dependency ref="pkg:composer/worldline/horus@dev-master">
+      <dependency ref="pkg:composer/cyclonedx/cyclonedx-php-composer@3.x-dev"/>
+      <dependency ref="pkg:composer/open-telemetry/sdk@dev-main"/>
+      <dependency ref="pkg:composer/symfony/http-client@5.4.x-dev"/>
+      <dependency ref="pkg:composer/guzzlehttp/promises@dev-master"/>
+      <dependency ref="pkg:composer/php-http/message-factory@dev-master"/>
+      <dependency ref="pkg:composer/nyholm/psr7@dev-master"/>
+      <dependency ref="pkg:composer/psr/http-client@dev-master"/>
+      <dependency ref="pkg:composer/open-telemetry/exporter-zipkin@dev-main"/>
+      <dependency ref="pkg:composer/open-telemetry/extension-propagator-b3@dev-main"/>
+      <dependency ref="pkg:composer/phpunit/phpunit@7.5.20"/>
+      <dependency ref="pkg:composer/stevegrunwell/runkit7-installer@1.2.0"/>
+    </dependency>
+  </dependencies>
+</bom>

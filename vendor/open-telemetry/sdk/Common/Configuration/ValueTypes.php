@@ -29,6 +29,13 @@ interface ValueTypes
     public const OTEL_BSP_MAX_QUEUE_SIZE = VariableTypes::INTEGER;
     public const OTEL_BSP_MAX_EXPORT_BATCH_SIZE = VariableTypes::INTEGER;
     /**
+     * Batch LogRecord Processor
+     */
+    public const OTEL_BLRP_SCHEDULE_DELAY = VariableTypes::INTEGER;
+    public const OTEL_BLRP_EXPORT_TIMEOUT = VariableTypes::INTEGER;
+    public const OTEL_BLRP_MAX_QUEUE_SIZE = VariableTypes::INTEGER;
+    public const OTEL_BLRP_MAX_EXPORT_BATCH_SIZE = VariableTypes::INTEGER;
+    /**
      * Attribute Limits
      * @see https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/sdk-environment-variables.md#attribute-limits
      */
@@ -103,6 +110,8 @@ interface ValueTypes
     public const OTEL_METRICS_EXEMPLAR_FILTER = VariableTypes::ENUM;
     public const OTEL_METRIC_EXPORT_INTERVAL = VariableTypes::INTEGER;
     public const OTEL_METRIC_EXPORT_TIMEOUT = VariableTypes::INTEGER;
+    public const OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE = VariableTypes::ENUM;
+    public const OTEL_EXPORTER_OTLP_METRICS_DEFAULT_HISTOGRAM_AGGREGATION = VariableTypes::ENUM;
     /**
      * Language Specific Environment Variables
      * @see https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/sdk-environment-variables.md#language-specific-environment-variables

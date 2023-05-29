@@ -21,7 +21,7 @@ class HorusBusinessTest extends HorusTestCase
 
     public function testFindMatch(): void
     {
-        $horus = new HorusBusiness('testFindMatch', null, 'XXXX', self::$tracer, new Horus_CurlMock());
+        $horus = new HorusBusiness('testFindMatch', null, 'XXXX', self::$tracing, new Horus_CurlMock());
         $params = json_decode('[{"level1":"value1",
                                  "level2":"value2",
                                  "level3":{
@@ -32,16 +32,16 @@ class HorusBusinessTest extends HorusTestCase
                                 {"key3":"value3"}]',
                                 true
                             );
-        $this::assertEquals($horus->findMatch($params, 0, 'level1'), 'value1');
-        $this::assertEquals($horus->findMatch($params, 1, 'level2'), 'value20');
-        $this::assertEquals($horus->findMatch($params, 0, 'level3'), array('key1' => 'value1', 'key2' => 'value2'));
-        $this::assertEquals($horus->findMatch($params, 0, 'levelX'), '');
-        $this::assertEquals($horus->findMatch($params, 5, 'level1'), '');
+        $this::assertEquals('value1', $horus->findMatch($params, 0, 'level1'));
+        $this::assertEquals('value20', $horus->findMatch($params, 1, 'level2'));
+        $this::assertEquals(array('key1' => 'value1', 'key2' => 'value2'), $horus->findMatch($params, 0, 'level3'));
+        $this::assertEquals('', $horus->findMatch($params, 0, 'levelX'));
+        $this::assertEquals('', $horus->findMatch($params, 5, 'level1'));
     }
 
     public function testLocate(): void
     {
-        $horus = new HorusBusiness('testLocate', null, 'XXXX', self::$tracer, new Horus_CurlMock());
+        $horus = new HorusBusiness('testLocate', null, 'XXXX', self::$tracing, new Horus_CurlMock());
         $params = json_decode('[{"query":"value1","queryMatch":"value2","comment":"line1"},
                                 {"query":"value10","queryMatch":"value20","comment":"line2"},
                                 {"query":"value10","queryMatch":"value21","comment":"line3"},
@@ -64,13 +64,16 @@ class HorusBusinessTest extends HorusTestCase
     public function testLocateJson(): void
     {
 
-        $horus = new HorusBusiness('testLocateJson', null, 'XXXX', self::$tracer, new Horus_CurlMock());
+        $horus = new HorusBusiness('testLocateJson', null, 'XXXX', self::$tracing, new Horus_CurlMock());
         $params = json_decode('[
             {"query": {"key": "key1", "value": "value1"}},
             {"query": {"key": "key1", "value": "value1"}, "queryMatch": "match"},
-            {"query": {"key": "key1", "value": "value1", "queryKey": "qkey1", "queryValue": "qvalue1"}},
-            {"query": {"key": "key1", "value": "value1", "queryKey": "qkey1", "queryValue": "qvalue1"},"queryMatch": "match"},
-            {"query": {"key": "key1", "value": "value1", "queryKey": "qkey1", "queryValue": "qvalue1"},"queryMatch": "match"},
+            {"query": {"key": "key1", "value": "value1", "queryKey": "qkey1",
+                "queryValue": "qvalue1"}},
+            {"query": {"key": "key1", "value": "value1", "queryKey": "qkey1",
+                "queryValue": "qvalue1"},"queryMatch": "match"},
+            {"query": {"key": "key1", "value": "value1", "queryKey": "qkey1",
+                "queryValue": "qvalue1"},"queryMatch": "match"},
             {"query": {"key": "zip"},"queryMatch": "match3"},
             {"query": {"key": "zip"}}
         ]',
@@ -94,16 +97,15 @@ class HorusBusinessTest extends HorusTestCase
 
     public function testPerformRoutingError(): void
     {
-        $horus = new HorusBusiness('testPerformRoutingError', null, 'OOOO', self::$tracer, new Horus_CurlMock());
+        $horus = new HorusBusiness('testPerformRoutingError', null, 'OOOO', self::$tracing, new Horus_CurlMock());
         $this->expectException(HorusException::class);
         $horus->performRouting(null, HorusCommon::JS_CT, HorusCommon::JS_CT, TEST_OK, array(), self::$rootSpan);
     }
 
     public function testPerformRoutingStandard(): void
     {
-        $rootSpan = self::$tracer->spanBuilder('Test Business')->setAttribute('OTEL_SERVICE_NAME', 'toto')->startSpan();
-        $scope = $rootSpan->activate();
-        $horus = new HorusBusiness('testPerformRouting', null, 'PPPP', self::$tracer, new Horus_CurlMock());
+        $rootSpan = self::$tracing->newSpan('Test Business');
+        $horus = new HorusBusiness('testPerformRouting', null, 'PPPP', self::$tracing, new Horus_CurlMock());
         $route = json_decode('{
 			"source": "singlesource",
 			"parameters": [{
@@ -210,8 +212,7 @@ class HorusBusinessTest extends HorusTestCase
             array(),
             $rootSpan
         );
-        $rootSpan->end();
-        $scope->detach();
+        self::$tracing->closeSpan($rootSpan);
         $this::assertEquals(2, sizeof($res), '2 queries should have responded');
     }
 
@@ -308,7 +309,7 @@ class HorusBusinessTest extends HorusTestCase
         $headerImpl = new Horus_HeaderMock();
         $this->http->setCurlImpl($mock);
         $this->http->setHeaderImpl($headerImpl);
-        $horus = new HorusBusiness('testPerformRouting', null, 'QQQQ', self::$tracer, $mock);
+        $horus = new HorusBusiness('testPerformRouting', null, 'QQQQ', self::$tracing, $mock);
 
         $res = $horus->performRouting(
             $route,
@@ -384,7 +385,7 @@ class HorusBusinessTest extends HorusTestCase
             CURLINFO_HEADER_OUT => true,
         ), $options);
 
-        $horus = new HorusBusiness('testPerformRouting', null, 'QQQQ', self::$tracer, $mock);
+        $horus = new HorusBusiness('testPerformRouting', null, 'QQQQ', self::$tracing, $mock);
         $horus->performRouting(
             $route,
             HorusCommon::JS_CT,

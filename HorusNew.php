@@ -27,9 +27,14 @@ $requestType = array_key_exists('type', $_GET) ? $_GET["type"] : '';
 
 $colour = ("inject" === $requestType) ? 'YELLOW' : 'GREEN';
  
-$tracerProvider = HorusCommon::getTracerProvider($colour, HorusCommon::getPath($_SERVER));
-$tracer = HorusCommon::getTracer($tracerProvider, $colour, HorusCommon::getPath($_SERVER));
-$rootSpan = HorusCommon::getStartSpan($tracer, apache_request_headers(), 'Start Green/Yellow');
+
+$tracer = new HorusTracing(
+    $colour,
+    HorusCommon::getPath($_SERVER),
+    'Start Green/Yellow',
+    HorusCommon::getHttpHeaders()
+    );
+$rootSpan = $tracer->getCurrentSpan();
 
 $mmatches = json_decode(file_get_contents('conf/horusParams.json'), true);
 
@@ -60,7 +65,7 @@ $proxyMode = HorusHttp::extractHeader('x_destination_url');
 $accept = HorusHttp::extractHeader('Accept');
 
 if ("inject" === $requestType) {
-    $rootSpan->addEvent('message', array('Starting Injector mode', 'path' => $path, 'BOX' => $colour));
+    $tracer->logSpan($rootSpan, 'message', array('Starting Injector mode', 'path' => $path, 'BOX' => $colour));
     $common->mlog('+++++ BEGIN INJECTOR MODE +++++', 'INFO');
     $injector = new HorusInjector($businessId, $loglocation, $tracer);
     $common->mlog("Request : " . print_r($_SERVER, true) . "\n", 'DEBUG');
@@ -78,7 +83,7 @@ if ("inject" === $requestType) {
     }
     $common->mlog('+++++ END INJECTOR MODE +++++', 'INFO');
 } elseif (("simplejson" === $requestType) && ("application/json" === substr($contentType, 0, 16))) {
-    $rootSpan->addEvent('Starting Json mode', array('path' => $path, 'BOX' => $colour));
+    $tracer->logSpan($rootSpan, 'Starting Json mode', array('path' => $path, 'BOX' => $colour));
     $common->mlog('+++++ BEGIN SIMPLEJSON MODE +++++', 'INFO');
     $injector = new HorusSimpleJson($businessId, $loglocation, $simpleJsonMatches, $tracer);
 
@@ -104,7 +109,7 @@ if ("inject" === $requestType) {
     $common->mlog('+++++ END SIMPLEJSON MODE +++++', 'INFO');
 } else {
     $common->mlog('+++++ BEGIN XML MODE +++++', 'INFO');
-    $rootSpan->addEvent('Starting XML mode', array('path' => HorusCommon::getPath($_SERVER), 'BOX' => $colour));
+    $tracer->logSpan($rootSpan, 'Starting XML mode', array('path' => HorusCommon::getPath($_SERVER), 'BOX' => $colour));
     $injector = new HorusXml($businessId, $loglocation, 'GREEN', $tracer);
 
     $common->mlog("Request : " . print_r($_SERVER, true) . "\n", 'DEBUG');
@@ -144,7 +149,7 @@ if ("inject" === $requestType) {
     }
     $common->mlog('+++++ END XML MODE +++++', 'INFO');
 }
-$rootSpan->end();
-$tracerProvider->shutdown();
+$tracer->closeSpan($rootSpan);
+$tracer->finishAll();
 
 $common->mlog("===== END HORUS CALL =====", "INFO");

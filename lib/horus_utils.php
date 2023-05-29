@@ -10,7 +10,7 @@ class Horus_Header implements Horus_HeaderInterface
 
     public function sendHeader($header, $replace = true, $error = 0)
     {
-        header($header, $replace, $error);
+        @header($header, $replace, $error);
     }
 }
 

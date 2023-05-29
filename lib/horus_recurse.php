@@ -1,8 +1,5 @@
 <?php
 
-use OpenTelemetry\API\Trace\SpanKind;
-use OpenTelemetry\Context\Context;
-
 class HorusRecurse
 {
     public $common = null;
@@ -10,9 +7,14 @@ class HorusRecurse
     public $business = null;
     public $xml = null;
     public $businessId = '';
-    public $tracer = null;
+    public ?HorusTracingInterface $tracer = null;
 
-    public function __construct($businessId, $logLocation, $tracer, Horus_CurlInterface $curl = null)
+    public function __construct(
+        $businessId,
+        $logLocation,
+        HorusTracingInterface $tracer,
+        Horus_CurlInterface $curl = null
+        )
     {
         $this->common = new HorusCommon($businessId, $logLocation, 'INDIGO');
         $this->http = new HorusHttp($businessId, $logLocation, 'INDIGO', $tracer, $curl);
@@ -61,9 +63,8 @@ class HorusRecurse
         return null;
     }
 
-    public function doRecurse($reqBody, $contentType, $proxyMode, $matches, $params, $span)
+    public function doRecurse($reqBody, $contentType, $proxyMode, $matches, $params, $currentSpan)
     {
-        $currentSpan = $span;
 
         if (!array_key_exists('section', $params)) {
             throw new HorusException('Section URL parameter is unknown');
@@ -131,7 +132,7 @@ class HorusRecurse
         if (array_key_exists('validator', $section)) {
             foreach ($section['validator'] as $validator) {
                 try {
-                    $span->addEvent('Validating signature ' . $validator['name']);
+                    $this->tracer->logSpan($span, 'Validating signature ' . $validator['name']);
 
                     HorusXML::validateSignature($body, $queryParams, $validator, $this->common->cnf);
                     $this->common->mlog('Validated ' . $validator['name'] . ' Signature', 'INFO');
@@ -143,20 +144,20 @@ class HorusRecurse
 
         $headers = array();
 
-        $ctx = $span->storeInContext(Context::getCurrent());
         foreach ($section['parts'] as $part) {
-            $currentSpan = $this->tracer->spanBuilder(
+            $currentSpan = $this->tracer->newSpan(
                 'Part '
                 . $part['order']
                 . ' '
-                . $part['comment']
-                )->setParent($ctx)->setSpanKind(SpanKind::KIND_SERVER)->startSpan();
+                . $part['comment'],
+                $span
+                );
             $this->common->mlog('Dealing with part #' . $part['order'] . ' : ' . $part['comment'], 'INFO');
             $inputXmlPart = null;
             $vars = $queryParams;
             if (array_key_exists('variables', $part)) {
                 $this->common->mlog('Extracting variables for part #' . $part['order'], 'DEBUG');
-                $currentSpan->addEvent('Get variables');
+                $this->tracer->logSpan($currentSpan, 'Get variables');
                 foreach ($part['variables'] as $name => $xpath) {
                     $elt = array('key' => $name, 'value' => $this->xml->getXpathVariable($xmlBody, $xpath));
                     $this->common->mlog('  Variable ' . $elt['key'] . ' = ' . $elt['value'], 'DEBUG');
@@ -164,7 +165,7 @@ class HorusRecurse
                 }
             }
             if (array_key_exists('path', $part)) {
-                $currentSpan->addEvent('Get document part');
+                $this->tracer->logSpan($currentSpan, 'Get document part');
                 $this->common->mlog('Extracting document from XPath=' . $part['path'], 'DEBUG');
                 $inputXmlPart = $xmlBody->xpath($part['path']);
                 if (false !== $inputXmlPart && is_array($inputXmlPart) && (!empty($inputXmlPart))) {
@@ -177,9 +178,9 @@ class HorusRecurse
 
                     $correctedxmlpart =  $newdom->saveXml($newdom->documentElement);
                     $this->common->mlog('Part Contents : ' . $correctedxmlpart, 'DEBUG');
-                    $finalUrl = $this->common->formatQueryString($part['transformUrl'], $vars, false);
+                    $finalUrl = $this->common->formatQueryString($part['transformUrl'], $vars, true);
                     $this->common->mlog('Transformation URL is : ' . $finalUrl, 'DEBUG');
-                    $currentSpan->addEvent('Forward to ' . $finalUrl);
+                    $this->tracer->logSpan($currentSpan, 'Forward to ' . $finalUrl);
                     $resp = $this->http->forwardSingleHttpQuery(
                         $finalUrl,
                         array(
@@ -192,13 +193,14 @@ class HorusRecurse
                         'POST',
                         $currentSpan
                     );
-                    $currentSpan->addEvent('Got response');
+                    $this->tracer->logSpan($currentSpan, 'Got response');
+                    $this->common->mlog('Return : ' . print_r($resp, true), 'DEBUG');
                     $headers[$part['order']] = $resp['headers'];
                     $rr = simplexml_load_string($resp['body']);
                     $this->common->mlog('Part Transformed : ' . $rr->saveXML(), 'DEBUG');
                     $elements[$part['order']] = $rr;
                 } else {
-                    $currentSpan->end();
+                    $this->tracer->closeSpan($currentSpan);
                     throw new HorusException(
                         'Could not extract location ' . $part['path'] . ' for part #' . $part['order']);
                 }
@@ -212,11 +214,11 @@ class HorusRecurse
                     $rr = simplexml_load_string('<' . $tag . ' xmlns="' . $nsp . '">' . $value . '</' . $tag . '>');
                     $elements[$part['order']] = $rr;
                 } else {
-                    $currentSpan->end();
+                    $this->tracer->closeSpan($currentSpan);
                     throw new HorusException('No XPath to search for in configuration');
                 }
             }
-            $currentSpan->end();
+            $this->tracer->closeSpan($currentSpan);
         }
 
         $dom = new DomDocument();

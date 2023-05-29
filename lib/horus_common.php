@@ -1,16 +1,5 @@
 <?php
 
-use OpenTelemetry\API\Trace\SpanKind;
-use OpenTelemetry\Contrib\Zipkin\Exporter as ZipkinExporter;
-use OpenTelemetry\Extension\Propagator\B3\B3MultiPropagator;
-use OpenTelemetry\SDK\Common\Export\Http\PsrTransportFactory;
-use OpenTelemetry\SDK\Common\Time\ClockFactory;
-use OpenTelemetry\SDK\Logs\SimplePsrFileLogger;
-use OpenTelemetry\SDK\Trace\Sampler\AlwaysOnSampler;
-use OpenTelemetry\SDK\Trace\SpanExporter\LoggerDecorator;
-use OpenTelemetry\SDK\Trace\SpanProcessor\BatchSpanProcessor;
-use OpenTelemetry\SDK\Trace\TracerProvider;
-
 //should use require_once 'vendor/autoload.php';
 
 class HorusCommon
@@ -40,56 +29,20 @@ class HorusCommon
         $this->cnf = json_decode(file_get_contents('conf/horusConfig.json'), true);
     }
 
+    public static function getHttpHeaders()
+    {
+        if (function_exists('apache_request_headers')) {
+            return apache_request_headers();
+        } else {
+            return array();
+        }
+    }
+
     public static function getPath($vars)
     {
         $patharray = explode('/', $vars['SCRIPT_FILENAME']);
         array_pop($patharray);
         return array_pop($patharray);
-    }
-
-    public static function getTracerProvider($prefix, $path)
-    {
-        $cnf = json_decode(file_get_contents('conf/horusConfig.json'), true);
-
-        $transport = PsrTransportFactory::discover()->create($cnf['zipkinUrl'], 'application/json');
-        $zipkinExporter = new ZipkinExporter(
-            $transport
-        );
-        $decorator = new LoggerDecorator(
-            $zipkinExporter,
-            new SimplePsrFileLogger(__DIR__ . '/../otel.log')
-        );
-
-        putenv('OTEL_SERVICE_NAME=' . $prefix . '_' . $path);
-        return new TracerProvider(
-            new BatchSpanProcessor($decorator, ClockFactory::getDefault()),
-            new AlwaysOnSampler()
-        );
-    }
-
-    public static function getTracer($tracerProvider, $prefix, $path)
-    {
-
-        return $tracerProvider->getTracer($prefix . '_' . $path);
-    }
-
-    public static function getStartSpan($tracer, $headers, $title)
-    {
-        $h = array();
-        foreach ($headers as $key => $value) {
-            $h[strtolower($key)] = $value;
-        }
-
-        $propagator = B3MultiPropagator::getInstance();
-
-        $rootContext = $propagator->extract($h);
-
-        //start a root span
-        return  $tracer
-                    ->spanBuilder($title)->setParent($rootContext)
-                    ->setSpanKind(SpanKind::KIND_SERVER)
-                    ->setAttribute('OTEL_SERVICE_NAME', 'toto')
-                    ->startSpan();
     }
 
     /**

@@ -8,9 +8,9 @@ class HorusSimpleJson
     public $business = null;
     private $businessId = '';
     private $simpleJsonMatches = null;
-    private $tracer = null;
+    private ?HorusTracingInterface $tracer = null;
 
-    public function __construct($businessId, $logLocation, $matches, $tracer)
+    public function __construct($businessId, $logLocation, $matches, HorusTracingInterface $tracer)
     {
         $this->common = new HorusCommon($businessId, $logLocation, 'GREEN');
         $this->http = new HorusHttp($businessId, $logLocation, 'GREEN', $tracer);
@@ -91,15 +91,14 @@ class HorusSimpleJson
         return array('templates' => $templates, 'formats' => $formats, 'variables' => $vars, 'multiple' => $multiple);
     }
 
-    public function doInject($reqbody, $proxyMode, $preferredType, $queryParams, $rootSpan)
+    public function doInject($reqbody, $proxyMode, $preferredType, $queryParams, $injectSpan)
     {
-        $injectSpan = $rootSpan;
-        $injectSpan->addEvent('Inject JSON Lib');
+        $this->tracer->logSpan($injectSpan, 'Inject JSON Lib');
         $input = $this->business->extractSimpleJsonPayload($reqbody);
 
         try {
-            $injectSpan->addEvent('Find section');
-            $res = $this->selection($input, $proxyMode, $preferredType, $rootSpan);
+            $this->tracer->logSpan($injectSpan, 'Find section');
+            $res = $this->selection($input, $proxyMode, $preferredType, $injectSpan);
         } catch (HorusException $e) {
             throw new HorusException($e->getMessage());
         }
@@ -116,13 +115,13 @@ class HorusSimpleJson
         foreach ($res['templates'] as $template) {
             $respxml = 'templates/' . HorusBusiness::getTemplateName($template, $vars);
             $this->common->mlog("Using template " . $respxml, 'INFO');
-            $injectSpan->addEvent('Generate template ' . $respxml);
+            $this->tracer->logSpan($injectSpan, 'Generate template ' . $respxml);
 
             ob_start();
             include_once $respxml;
             $output = ob_get_contents();
             ob_end_clean();
-            $injectSpan->addEvent('Generate Output');
+            $this->tracer->logSpan($injectSpan, 'Generate Output');
             if ($res['multiple']) {
                 $response .= $this->http->formMultiPart(
                     $template,
@@ -137,7 +136,7 @@ class HorusSimpleJson
             $nrep++;
         }
         $outres = null;
-        $injectSpan->addEvent('Generate Out Queries');
+        $this->tracer->logSpan($injectSpan, 'Generate Out Queries');
         if ($res['multiple']) {
             $outres = $this->http->returnWithContentType(
                 $response . "--" . $mimeBoundary . "--" . $eol . $eol,
@@ -164,6 +163,6 @@ class HorusSimpleJson
         if ('' === $proxyMode) {
             return $outres;
         }
-        $injectSpan->end();
+        $this->tracer->closeSpan($injectSpan);
     }
 }

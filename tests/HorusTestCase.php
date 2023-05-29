@@ -20,23 +20,20 @@ class HorusTestCase extends TestCase
     public static $curlCounter;
     protected $http;
     public static $tracerProvider;
-    public static $tracer;
     public static $rootSpan;
+    public static HorusTracingInterface $tracing;
 
-    /**
-     * Use runkit to create a new header function.
-     */
-    public static function setUpBeforeClass()
+    public static function setUpBeforeClass(): void
     {
-        self::$tracerProvider = HorusCommon::getTracerProvider('Test', 'mytest');
-        self::$tracer = HorusCommon::getTracer(self::$tracerProvider, 'Test', 'mytest');
-        self::$rootSpan = HorusCommon::getStartSpan(self::$tracer, array(), 'Start Test');
+
+        self::$tracing = new HorusTracingMock('test', 'mytest', 'operation', array());
+        self::$rootSpan = self::$tracing->getCurrentSpan();
     }
 
     /**
      * After we're done testing, restore the header function.
      */
-    public static function tearDownAfterClass()
+    public static function tearDownAfterClass(): void
     {
 
 
@@ -45,9 +42,9 @@ class HorusTestCase extends TestCase
     /**
      * Set up our subject under test and global header state.
      */
-    protected function setUp()
+    protected function setUp(): void
     {
-        $this->http = new HorusHttp('testHorusHttp', 'php://stdout', 'GREEN', self::$tracer);
+        $this->http = new HorusHttp('testHorusHttp', 'php://stdout', 'GREEN', self::$tracing);
         self::$mockheaders = array();
         self::$curls = array();
         self::$curlCounter = 0;

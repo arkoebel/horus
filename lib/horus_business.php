@@ -1,16 +1,20 @@
 <?php
 
-use OpenTelemetry\API\Trace\SpanKind;
-
 class HorusBusiness
 {
 
     public $common = '';
     public $http = '';
     private $businessId = '';
-    public $tracer = null;
+    public ?HorusTracingInterface $tracer = null;
 
-    public function __construct($businessId, $logLocation, $colour, $tracer, Horus_CurlInterface $httpImpl = null)
+    public function __construct(
+        $businessId,
+        $logLocation,
+        $colour,
+        HorusTracingInterface $tracer,
+        Horus_CurlInterface $httpImpl = null
+        )
     {
         $this->businessId = $businessId;
         $this->common = new HorusCommon($businessId, $logLocation, $colour);
@@ -78,7 +82,7 @@ class HorusBusiness
         return $selected;
     }
 
-    function locateJson($matches, $input, $queryParams = array())
+    public function locateJson($matches, $input, $queryParams = array())
     {
         $selected = -1;
         if (is_null($input) ||
@@ -235,12 +239,7 @@ class HorusBusiness
         foreach ($route['destinations'] as $destination) {
             $ii++;
 
-            $routeSpan = $this
-                ->tracer
-                ->spanBuilder('Destination ' . $destination['comment'])
-                ->setSpanKind(SpanKind::KIND_SERVER)
-                ->startSpan();
-
+            $routeSpan = $this->tracer->newSpan('Destination ' . $destination['comment']);
             $this->common->mlog("Destination : $ii " . $destination['comment'] . "\n", "INFO");
 
 
@@ -263,10 +262,10 @@ class HorusBusiness
             $this->common->mlog("Final destination : " . $destinationUrl . "\n", 'DEBUG');
             $this->common->mlog("Content-type: " . $contentType . ", Accept: " . $accept, 'DEBUG');
 
-            $routeSpan->setAttribute('destination', $destinationUrl);
-            $routeSpan->setAttribute('proxy', $proxyUrl);
-            $routeSpan->setAttribute('content-type', $contentType);
-            $routeSpan->setAttribute('accept', $accept);
+            $this->tracer->addAttribute($routeSpan, 'destination', $destinationUrl);
+            $this->tracer->addAttribute($routeSpan, 'proxy', $proxyUrl);
+            $this->tracer->addAttribute($routeSpan, 'content-type', $contentType);
+            $this->tracer->addAttribute($routeSpan, 'accept', $accept);
 
             $headers = array(
                 'Content-type: ' . $contentType,
@@ -287,7 +286,7 @@ class HorusBusiness
             } catch (HorusException $e) {
                 $response = json_encode(array("error" => $e->getMessage()));
                 if (!$followOnError) {
-                    $routeSpan->end();
+                    $this->tracer->closeSpan($routeSpan);
                     throw new HorusException('Flow interrupted after error ' . $e->getMessage(), 503);
                 }
             }
@@ -295,12 +294,12 @@ class HorusBusiness
             $responses[] = $response;
 
             if (array_key_exists('delayafter', $destination)) {
-                $routeSpan->addEvent('Start delay ' . $destination['delayafter'] . 's');
+                $this->tracer->logSpan($routeSpan, 'Start delay ' . $destination['delayafter'] . 's');
                 $this->common->mlog('Waiting ' . $destination['delayafter'] . 'sec for next destination', 'INFO');
                 sleep($destination['delayafter']);
-                $routeSpan->addEvent('End delay');
+                $this->tracer->logSpan($routeSpan, 'End delay');
             }
-            $routeSpan->end();
+            $this->tracer->closeSpan($routeSpan);
         }
         return $responses;
     }

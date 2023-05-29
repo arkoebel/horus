@@ -1,5 +1,6 @@
 {
-    "tracerCollectorHost":"172.17.0.3:5775",
+    "tracerCollectorHost":"192.168.68.114:5775",
+    "zipkinUrl": "http://192.168.68.114:9411/api/v2/spans",
     "rfh2Prefix":"rfh-",
     "mqmdPrefix":"mqmd-"
 }

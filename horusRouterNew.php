@@ -12,10 +12,11 @@ require_once 'lib/horus_curl.php';
 
 require_once 'vendor/autoload.php';
 
-$tracer = HorusCommon::getTracer(null, 'ORANGE', HorusCommon::getPath($_SERVER));
-$rootSpan = HorusCommon::getStartSpan($tracer, apache_request_headers(), 'Start Orange');
+$tracer = new HorusTracing('ORANGE', HorusCommon::getPath($_SERVER), 'Start Orange', HorusCommon::getHttpHeaders());
+$rootSpan = $tracer->getCurrentSpan();
 
-$rootSpan->addEvent('Start Router', array('path' => HorusCommon::getPath($_SERVER), 'BOX' => 'ORANGE'));
+
+$tracer->logSpan($rootSpan, 'Start Router', array('path' => HorusCommon::getPath($_SERVER), 'BOX' => 'ORANGE'));
 
 $headerInt = new Horus_Header();
 
@@ -29,9 +30,7 @@ if ($businessId === '') {
 
 $common = new HorusCommon($businessId, $loglocation, 'ORANGE');
 
-if (function_exists('apache_request_headers')) {
-    $common->mlog('Headers : ' . print_r(apache_request_headers(), true), 'DEBUG');
-}
+$common->mlog('Headers : ' . print_r(HorusCommon::getHttpHeaders(), true), 'DEBUG');
 
 $common->mlog('Destination is : ' . HorusHttp::extractHeader(HorusCommon::DEST_HEADER), 'DEBUG');
 
@@ -81,6 +80,6 @@ try {
     }
     echo json_encode(array('result' => 'KO', 'message' => $e->getMessage()));
 } finally {
-    $rootSpan->end();
-    $tracer->flush();
+    $tracer->closeSpan($rootSpan);
+    $tracer->finishAll();
 }

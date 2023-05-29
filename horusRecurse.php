@@ -13,11 +13,10 @@ require_once('lib/horus_curl.php');
 require_once('lib/horus_utils.php');
 require_once('vendor/autoload.php');
 
-$tracerProvider = HorusCommon::getTracerProvider('INDIGO', HorusCommon::getPath($_SERVER));
-$tracer = HorusCommon::getTracer($tracerProvider, 'INDIGO', HorusCommon::getPath($_SERVER));
-$rootSpan = HorusCommon::getStartSpan($tracer, apache_request_headers(), 'Start Indigo');
+$tracer = new HorusTracing('INDIGO', HorusCommon::getPath($_SERVER), 'Start Indigo', HorusCommon::getHttpHeaders());
+$rootSpan = $tracer->getCurrentSpan();
 
-$rootSpan->addEvent('Start Indigo', array('path'=>HorusCommon::getPath($_SERVER), 'BOX'=>'INDIGO'));
+$tracer->logSpan($rootSpan, 'Start Indigo', array('path'=>HorusCommon::getPath($_SERVER), 'BOX'=>'INDIGO'));
 
 $headerInt = new Horus_Header();
 
@@ -63,8 +62,9 @@ try {
     echo $e->getMessage();
 }
 
-$rootSpan->end();
-$tracerProvider->shutdown();
+$tracer->closeSpan($rootSpan);
+$tracer->finishAll();
+
 $common->mlog('+++++ END HORUS RECURSE +++++', 'INFO');
 
 

@@ -13,9 +13,8 @@ require_once('lib/horus_utils.php');
 
 require_once('vendor/autoload.php');
 
-$tracerProvider = HorusCommon::getTracerProvider('BLACK', HorusCommon::getPath($_SERVER));
-$tracer = HorusCommon::getTracer($tracerProvider, 'BLACK', HorusCommon::getPath($_SERVER));
-$rootSpan = HorusCommon::getStartSpan($tracer, apache_request_headers(), 'Start Black');
+$tracer = new HorusTracing('BLACK', HorusCommon::getPath($_SERVER), 'Start Black', HorusCommon::getHttpHeaders());
+$rootSpan = $tracer->getCurrentSpan();
 
 $headerInt = new Horus_Header();
 
@@ -51,14 +50,11 @@ if ($businessId === '') {
 $common = new HorusCommon($businessId, $loglocation, 'BLACK');
 $http = new HorusHttp($businessId, $loglocation, 'BLACK', $tracer);
 
-
-if (function_exists('apache_request_headers')) {
-    $common->mlog('Headers : ' . print_r(apache_request_headers(), true), 'DEBUG');
-}
+$common->mlog('Headers : ' . print_r(HorusCommon::getHttpHeaders(), true), 'DEBUG');
 
 $destination = HorusHttp::extractHeader(HorusCommon::DEST_HEADER);
 $common->mlog('Destination is : ' . $destination, 'DEBUG');
-$rootSpan->setAttribute('destination', $destination);
+$tracer->addAttribute($rootSpan,'destination', $destination);
 
 $params = json_decode(file_get_contents('conf/horusFormating.json'), true);
 
@@ -76,12 +72,12 @@ if ((''=== $format) || (getParams($params, $format) === null)) {
     $headerInt->sendHeader('X-Business-Id: ' . $businessId);
     $common->mlog("Missing or unknown format : " . $format . "\n", "ERROR");
     echo "Missing or unknown format : " . $format . "\n";
-    $rootSpan->end();
-    $tracer->flush();
+    $tracer->closeSpan($rootSpan);
+    $tracer->finishAll();
     exit;
 }
 
-$rootSpan->setAttribute('format', $format);
+$tracer->addAttribute($rootSpan, 'format', $format);
 $content_type = array_key_exists('CONTENT_TYPE', $_SERVER) ? $_SERVER['CONTENT_TYPE'] : 'application/json';
 $accept = HorusCommon::JS_CT;
 $data = file_get_contents('php://input');
@@ -144,8 +140,8 @@ if (''===$destination) {
     $http->setHttpReturnCode(200);
     $headerInt->sendHeader('Content-type: ' . $returnContent);
     echo $returnData;
-    $rootSpan->end();
-    $tracer->flush();
+    $tracer->closeSpan($rootSpan);
+    $tracer->finishAll();
     exit;
 } else {
     $common->mlog('Forwarding content to ' . $destination . "\n", "INFO");
@@ -176,7 +172,7 @@ if (''===$destination) {
     }
     echo $rr['body'];
 
-    $rootSpan->end();
-    $tracer->flush();
+    $tracer->closeSpan($rootSpan);
+    $tracer->finishAll();
     exit;
 }

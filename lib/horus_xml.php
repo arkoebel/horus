@@ -6,7 +6,7 @@ class HorusXml
     public $http = null;
     public $business = null;
     public $businessId = '';
-    public $tracer = null;
+    public ?HorusTracingInterface $tracer = null;
 
     public const XMLENVSIG = "http://www.w3.org/2000/09/xmldsig#enveloped-signature";
     public const XMLC14N = "http://www.w3.org/2001/10/xml-exc-c14n#";
@@ -18,7 +18,7 @@ class HorusXml
     public const DSIGSIELT = '/ds:SignedInfo';
     public const DSIGSVELT = '/ds:SignatureValue';
 
-    public function __construct($businessId, $logLocation, $colour = 'GREEN', $tracer = null)
+    public function __construct($businessId, $logLocation, $colour = 'GREEN', HorusTracingInterface $tracer = null)
     {
         $this->common = new HorusCommon($businessId, $logLocation, $colour);
         $this->http = new HorusHttp($businessId, $logLocation, $colour, $tracer);
@@ -63,7 +63,7 @@ class HorusXml
         foreach (scandir('xsd') as $schema) {
             if (strpos($schema, $namespace) !== false) {
                 libxml_use_internal_errors(true);
-                if ($domdoc->schemaValidate('xsd/' . $schema)) {
+                if (@$domdoc->schemaValidate('xsd/' . $schema)) {
                     $selectedXsd = $schema;
                 } else {
                     $this->common->mlog(
@@ -372,7 +372,7 @@ class HorusXml
     {
         $input = $this->business->extractPayload($contentType, $reqbody, $genericError, $preferredType, $rootSpan);
         libxml_use_internal_errors(true);
-        $rootSpan->addEvent('Validating XML Input');
+        $this->tracer->logSpan($rootSpan, 'Validating XML Input');
         $query = simplexml_load_string($input);
         if ($query === false) {
             $errorMessage = "Input XML not properly formatted.\n";
@@ -386,7 +386,7 @@ class HorusXml
         $namespaces = $this->getRootNamespace($query, $defaultNamespace);
         $query->registerXPathNamespace('u', $namespaces);
 
-        $rootSpan->addEvent('Finding XSD');
+        $this->tracer->logSpan($rootSpan, 'Finding XSD');
         $selectedXsd = $this->findSchema($query, $defaultNamespace);
 
         if ('' !== $selectedXsd) {
@@ -416,15 +416,23 @@ class HorusXml
                 . "\n",
                 'INFO'
             );
-            $rootSpan->setAttribute('section', $this->business->findMatch($matches, $selected, "comment"));
-            $vars = array_merge($queryParams, $vars, $this->http->filterMQHeaders(apache_request_headers(), 'UNPACK'));
+            $this->tracer->addAttribute(
+                $rootSpan,
+                'section',
+                $this->business->findMatch($matches, $selected, "comment")
+            );
+            $vars = array_merge(
+                $queryParams,
+                $vars,
+                $this->http->filterMQHeaders(HorusCommon::getHttpHeaders(), 'UNPACK')
+            );
             $this->common->mlog("Variables: " . print_r($vars, true) . "\n", 'INFO');
 
             $validator = $this->business->findMatch($matches, $selected, "validator");
 
             if ('' !== $validator) {
                 $this->common->mlog('Attempting to validate Signature/Digest', 'INFO');
-                $rootSpan->addEvent('Attempt to validate Signature/Digest');
+                $this->tracer->logSpan($rootSpan, 'Attempt to validate Signature/Digest');
                 try {
                     HorusXml::validateSignature($reqbody, $vars, $validator, $this->common->cnf);
                     $this->common->mlog('Signature/Digest checked OK', 'INFO');
@@ -471,7 +479,7 @@ class HorusXml
             $mimeBoundary = md5(time());
 
             try {
-                $rootSpan->addEvent('Generate XML Response');
+                $this->tracer->logSpan($rootSpan, 'Generate XML Response');
                 $resp = $this->getResponses(
                     $templates,
                     $vars,
@@ -553,7 +561,7 @@ class HorusXml
             $errorMessage = "Unable to find appropriate response.\n";
             $errorMessage .= $this->common->libxml_display_errors();
             $this->common->mlog($errorMessage . "\n", 'ERROR');
-            $rootSpan->addEvent('Generate Error');
+            $this->tracer->logSpan($rootSpan, 'Generate Error');
             $res = $this->business->returnGenericError($preferredType, $genericError, $errorMessage, '', $rootSpan);
 
             throw new HorusException($res);

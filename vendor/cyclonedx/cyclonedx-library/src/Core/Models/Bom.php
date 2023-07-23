@@ -23,8 +23,9 @@ declare(strict_types=1);
 
 namespace CycloneDX\Core\Models;
 
-use CycloneDX\Core\Repositories\ComponentRepository;
-use CycloneDX\Core\Repositories\ExternalReferenceRepository;
+use CycloneDX\Core\Collections\ComponentRepository;
+use CycloneDX\Core\Collections\ExternalReferenceRepository;
+use CycloneDX\Core\Collections\PropertyRepository;
 use DomainException;
 
 /**
@@ -33,12 +34,26 @@ use DomainException;
  */
 class Bom
 {
+    // Property `bomFormat` is not part of model, it is runtime information.
+
+    // Property `specVersion` is not part of model, it is runtime information.
+
     /**
-     * @var ComponentRepository
+     * Every BOM generated SHOULD have a unique serial number, even if the contents of the BOM have not changed over time.
+     * If specified, the serial number MUST conform to RFC-4122.
+     * Use of serial numbers are RECOMMENDED.
      *
+     * - pattern for XSD: urn:uuid:([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})|(\{[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\})
+     * - pattern for JSON: ^urn:uuid:[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$
+     *
+     * @psalm-var non-empty-string|null
+     */
+    private ?string $serialNumber = null;
+
+    /**
      * @psalm-suppress PropertyNotSetInConstructor
      */
-    private $componentRepository;
+    private ComponentRepository $components;
 
     /**
      * The version allows component publishers/authors to make changes to existing BOMs to update various aspects of the document such as description or licenses.
@@ -46,43 +61,73 @@ class Bom
      * The default version is '1' and should be incremented for each version of the BOM that is published.
      * Each version of a component should have a unique BOM and if no changes are made to the BOMs, then each BOM will have a version of '1'.
      *
-     * @var int
-     *
      * @psalm-var positive-int
      */
-    private $version = 1;
+    private int $version = 1;
 
-    /**
-     * @var MetaData|null
-     *
-     * @TODO deprecated rename it in v4 to `$metadata` and also rename the getter/setter
-     */
-    private $metaData;
+    private Metadata $metadata;
 
     /**
      * Provides the ability to document external references related to the BOM or
      * to the project the BOM describes.
-     *
-     * @var ExternalReferenceRepository|null
      */
-    private $externalReferenceRepository;
+    private ExternalReferenceRepository $externalReferences;
 
-    public function __construct(?ComponentRepository $componentRepository = null)
+    /**
+     * Provides the ability to document properties in a key/value store.
+     * This provides flexibility to include data not officially supported in the standard without having to use
+     * additional namespaces or create extensions.
+     *
+     * Property names of interest to the general public are encouraged to be registered in the
+     * {@link https://github.com/CycloneDX/cyclonedx-property-taxonomy CycloneDX Property Taxonomy}.
+     * Formal registration is OPTIONAL.
+     */
+    private PropertyRepository $properties;
+
+    // Property `dependencies` is not part of this model, but part of `Component` and other models.
+    // The dependency graph can be normalized on render-time, no need to store it in the bom model.
+
+    public function __construct()
     {
-        $this->setComponentRepository($componentRepository ?? new ComponentRepository());
+        $this->components = new ComponentRepository();
+        $this->externalReferences = new ExternalReferenceRepository();
+        $this->metadata = new Metadata();
+        $this->properties = new PropertyRepository();
     }
 
-    public function getComponentRepository(): ComponentRepository
+    /**
+     * @psalm-return non-empty-string|null
+     */
+    public function getSerialNumber(): ?string
     {
-        return $this->componentRepository;
+        return $this->serialNumber;
+    }
+
+    /**
+     * Create valid values with {@see \CycloneDX\Core\Utils\BomUtility::randomSerialNumber()}.
+     *
+     * @return $this
+     */
+    public function setSerialNumber(?string $serialNumber): static
+    {
+        $this->serialNumber = '' === $serialNumber
+            ? null
+            : $serialNumber;
+
+        return $this;
+    }
+
+    public function getComponents(): ComponentRepository
+    {
+        return $this->components;
     }
 
     /**
      * @return $this
      */
-    public function setComponentRepository(ComponentRepository $componentRepository): self
+    public function setComponents(ComponentRepository $components): static
     {
-        $this->componentRepository = $componentRepository;
+        $this->components = $components;
 
         return $this;
     }
@@ -104,50 +149,66 @@ class Bom
      *
      * @return $this
      */
-    public function setVersion(int $version): self
+    public function setVersion(int $version): static
     {
-        if (false === $this->isValidVersion($version)) {
-            throw new DomainException("Invalid value: $version");
-        }
-        $this->version = $version;
+        $this->version = self::isValidVersion($version)
+            ? $version
+            : throw new DomainException("Invalid value: $version");
 
         return $this;
     }
 
     /**
+     * @psalm-pure
+     *
      * @psalm-assert-if-true positive-int $version
      */
-    private function isValidVersion(int $version): bool
+    private static function isValidVersion(int $version): bool
     {
         return $version > 0;
     }
 
-    public function getMetaData(): ?MetaData
+    public function getMetadata(): Metadata
     {
-        return $this->metaData;
+        return $this->metadata;
     }
 
     /**
      * @return $this
      */
-    public function setMetaData(?MetaData $metaData): self
+    public function setMetadata(Metadata $metadata): static
     {
-        $this->metaData = $metaData;
+        $this->metadata = $metadata;
 
         return $this;
     }
 
-    public function getExternalReferenceRepository(): ?ExternalReferenceRepository
+    public function getExternalReferences(): ExternalReferenceRepository
     {
-        return $this->externalReferenceRepository;
+        return $this->externalReferences;
     }
 
     /**
      * @return $this
      */
-    public function setExternalReferenceRepository(?ExternalReferenceRepository $externalReferenceRepository): self
+    public function setExternalReferences(ExternalReferenceRepository $externalReferences): static
     {
-        $this->externalReferenceRepository = $externalReferenceRepository;
+        $this->externalReferences = $externalReferences;
+
+        return $this;
+    }
+
+    public function getProperties(): PropertyRepository
+    {
+        return $this->properties;
+    }
+
+    /**
+     * @return $this
+     */
+    public function setProperties(PropertyRepository $properties): static
+    {
+        $this->properties = $properties;
 
         return $this;
     }

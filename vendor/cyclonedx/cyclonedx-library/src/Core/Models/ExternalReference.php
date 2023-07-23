@@ -23,9 +23,8 @@ declare(strict_types=1);
 
 namespace CycloneDX\Core\Models;
 
+use CycloneDX\Core\Collections\HashDictionary;
 use CycloneDX\Core\Enums\ExternalReferenceType;
-use CycloneDX\Core\Repositories\HashRepository;
-use DomainException;
 
 /**
  * External references provide a way to document systems, sites, and information that may be relevant
@@ -39,57 +38,34 @@ class ExternalReference
      * Specifies the type of external reference. There are built-in types to describe common
      * references. If a type does not exist for the reference being referred to, use the "other" type.
      *
-     * @var string
-     *
-     * @psalm-var ExternalReferenceType::*
-     *
      * @psalm-suppress PropertyNotSetInConstructor
      */
-    private $type;
+    private ExternalReferenceType $type;
 
     /**
      * The URL to the external reference.
      *
-     * @var string
-     *
      * @psalm-suppress PropertyNotSetInConstructor
      */
-    private $url;
+    private string $url;
 
     /**
      * An optional comment describing the external reference.
-     *
-     * @var string|null
      */
-    private $comment;
+    private ?string $comment = null;
 
-    /**
-     * @var HashRepository|null
-     */
-    private $hashRepository;
+    private HashDictionary $hashes;
 
-    /**
-     * @psalm-return  ExternalReferenceType::*
-     */
-    public function getType(): string
+    public function getType(): ExternalReferenceType
     {
         return $this->type;
     }
 
     /**
-     * @param string $type A valid {@see \CycloneDX\Core\Enums\ExternalReferenceType}
-     *
-     * @psalm-assert ExternalReferenceType::* $type
-     *
-     * @throws DomainException if value is unknown
-     *
      * @return $this
      */
-    public function setType(string $type): self
+    public function setType(ExternalReferenceType $type): static
     {
-        if (false === ExternalReferenceType::isValidValue($type)) {
-            throw new DomainException("Invalid type: $type");
-        }
         $this->type = $type;
 
         return $this;
@@ -103,7 +79,7 @@ class ExternalReference
     /**
      * @return $this
      */
-    public function setUrl(string $url): self
+    public function setUrl(string $url): static
     {
         $this->url = $url;
 
@@ -118,36 +94,32 @@ class ExternalReference
     /**
      * @return $this
      */
-    public function setComment(?string $comment): self
+    public function setComment(?string $comment): static
     {
         $this->comment = $comment;
 
         return $this;
     }
 
-    public function getHashRepository(): ?HashRepository
+    public function getHashes(): HashDictionary
     {
-        return $this->hashRepository;
+        return $this->hashes;
     }
 
     /**
      * @return $this
      */
-    public function setHashRepository(?HashRepository $hashRepository): self
+    public function setHashes(HashDictionary $hashes): static
     {
-        $this->hashRepository = $hashRepository;
+        $this->hashes = $hashes;
 
         return $this;
     }
 
-    /**
-     * @psalm-assert ExternalReferenceType::* $type
-     *
-     * @throws DomainException if type is unknown
-     */
-    public function __construct(string $type, string $url)
+    public function __construct(ExternalReferenceType $type, string $url)
     {
         $this->setType($type);
         $this->setUrl($url);
+        $this->hashes = new HashDictionary();
     }
 }

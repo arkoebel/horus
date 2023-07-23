@@ -20,7 +20,7 @@ $tracer->logSpan($rootSpan, 'Start Router', array('path' => HorusCommon::getPath
 
 $headerInt = new Horus_Header();
 
-$loglocation = '/var/log/horus/horus_http.log';
+$loglocation = HorusCommon::getConfValue('logLocation', HorusCommon::DEFAULT_LOG_LOCATION);
 
 $businessId = HorusHttp::extractHeader('X-Business-Id', 'X_BUSINESS_ID');
 

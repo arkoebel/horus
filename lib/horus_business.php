@@ -137,7 +137,7 @@ class HorusBusiness
         return $selected;
     }
 
-    function extractPayload($contentType, $body, $errorTemplate, $errorFormat, $span)
+    public function extractPayload($contentType, $body, $errorTemplate, $errorFormat, $span)
     {
         if (substr($contentType, 0, 16) == "application/json") {
             $json = json_decode($body, true);

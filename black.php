@@ -39,7 +39,7 @@ function getQParams($parms, $prefix)
     return $ret;
 }
 
-$loglocation = '/var/log/horus/horus_http.log';
+$loglocation = HorusCommon::getConfValue('logLocation', HorusCommon::DEFAULT_LOG_LOCATION);
 
 $businessId = HorusHttp::extractHeader(HorusCommon::TID_HEADER, 'X_BUSINESS_ID');
 

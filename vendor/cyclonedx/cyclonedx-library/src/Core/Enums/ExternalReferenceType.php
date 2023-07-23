@@ -27,49 +27,61 @@ namespace CycloneDX\Core\Enums;
  * See {@link https://cyclonedx.org/schema/bom/1.1 Schema 1.1} for `externalReferenceType`.
  * See {@link https://cyclonedx.org/schema/bom/1.2 Schema 1.2} for `externalReferenceType`.
  * See {@link https://cyclonedx.org/schema/bom/1.3 Schema 1.3} for `externalReferenceType`.
+ * See {@link https://cyclonedx.org/schema/bom/1.4 Schema 1.4} for `externalReferenceType`.
  *
  * @author jkowalleck
  */
-abstract class ExternalReferenceType
+enum ExternalReferenceType: string
 {
-    /** Version Control System */
-    public const VCS = 'vcs';
-    /** Issue or defect tracking system, or an Application Lifecycle Management (ALM) system */
-    public const ISSUE_TRACKER = 'issue-tracker';
-    /** Website */
-    public const WEBSITE = 'website';
-    /** Security advisories */
-    public const ADVISORIES = 'advisories';
-    /** Bill-of-material document (CycloneDX, SPDX, SWID, etc) */
-    public const BOM = 'bom';
-    /** Mailing list or discussion group */
-    public const MAILING_LIST = 'mailing-list';
-    /** Social media account */
-    public const SOCIAL = 'social';
-    /** Real-time chat platform */
-    public const CHAT = 'chat';
-    /** Documentation, guides, or how-to instructions */
-    public const DOCUMENTATION = 'documentation';
-    /** Community or commercial support */
-    public const SUPPORT = 'support';
-    /*** Direct or repository download location.*/
-    public const DISTRIBUTION = 'distribution';
-    /** The URL to the license file. If a license URL has been defined in the licensenode, it should also be defined as an external reference for completeness. */
-    public const LICENSE = 'license';
-    /** Build-system specific meta file (i.e. pom.xml, package.json, .nuspec, etc). */
-    public const BUILD_META = 'build-meta';
-    /** URL to an automated build system. */
-    public const BUILD_SYSTEM = 'build-system';
-    /** Use this if no other types accurately describe the purpose of the external reference. */
-    public const OTHER = 'other';
+    /* Security advisories */
+    case Advisories = 'advisories';
 
-    /**
-     * @psalm-assert-if-true self::* $value
+    /* Bill-of-material document (CycloneDX, SPDX, SWID, etc) */
+    case BOM = 'bom';
+
+    /* Build-system specific meta file (i.e. pom.xml, package.json, .nuspec, etc). */
+    case BuildMeta = 'build-meta';
+
+    /* URL to an automated build system. */
+    case BuildSystem = 'build-system';
+
+    /* Real-time chat platform */
+    case Chat = 'chat';
+
+    /* Direct or repository download location. */
+    case Distribution = 'distribution';
+
+    /* Documentation, guides, or how-to instructions */
+    case Documentation = 'documentation';
+
+    /* Issue or defect tracking system, or an Application Lifecycle Management (ALM) system */
+    case IssueTracker = 'issue-tracker';
+
+    /* The URL to the license file. If a license URL has been defined in the license node,
+     * it should also be defined as an external reference for completeness.
      */
-    public static function isValidValue(string $value): bool
-    {
-        $values = (new \ReflectionClass(self::class))->getConstants();
+    case License = 'license';
 
-        return \in_array($value, $values, true);
-    }
+    /* Mailing list or discussion group */
+    case MailingList = 'mailing-list';
+
+    /* URL to release notes. */
+    case ReleaseNotes = 'release-notes';
+
+    /* Social media account */
+    case Social = 'social';
+
+    /* Community or commercial support */
+    case Support = 'support';
+
+    /* Version Control System */
+    case VCS = 'vcs';
+
+    /* Website */
+    case Website = 'website';
+
+    // ----
+
+    /* Use this if no other types accurately describe the purpose of the external reference. */
+    case Other = 'other';
 }

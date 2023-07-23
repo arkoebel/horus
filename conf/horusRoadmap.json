@@ -1,0 +1,92 @@
+{
+    "roadmaps": [
+        {
+            "source": "A",
+            "comment": "Regular round trip",
+            "filter": [
+                {
+                    "regexp": {
+                        "pattern": "ZZZ",
+                        "xpath": "//input"
+                    }
+                },
+                {
+                    "namespace": "camt050"
+                },{
+                    "customFilter": "filter1.php"
+                }
+            ],
+            "map": [
+                {
+                    "destination": "B",
+                    "comment": "Primary destination",
+                    "transform": "transform1.php"
+                },
+                {
+                    "destination": "A",
+                    "comment": "Return ACK"
+                },
+                {
+                    "destination": "A",
+                    "comment": "Return OK",
+                    "transformUrl": "http://localhost/horus.php"
+                }
+            ]
+        },
+        {
+            "source": "A",
+            "comment": "Failed",
+            "filter": [
+                {
+                    "namespace": "camt001"
+                }
+            ],
+            "map": [
+                {
+                    "destination": "B",
+                    "comment": "Primary destination",
+                    "transform": "transform1.php"
+                },
+                {
+                    "destination": "A",
+                    "comment": "Return KO",
+                    "transformUrl": "http://localhost/horus.php"
+                }
+            ]
+        },
+        {
+            "comment": "Catch all",
+            "map": [
+                {
+                    "destination": "C",
+                    "comment": "Return OK",
+                    "transformUrl": "http://localhost/horus.php"
+                }
+            ]
+        }
+    ],
+    "sources": [
+        {
+            "name": "A",
+            "comment": "Default Source"
+        }
+    ],
+    "destinations": [
+        {
+            "name": "A",
+            "comment": "Default Source",
+            "url": "http://localhost/horus.php"
+        },
+
+        {
+            "name": "B",
+            "comment": "Default Destination",
+            "url": "http://localhost/horus.php"
+        },
+        {
+            "name": "C",
+            "comment": "Garbage",
+            "url": "http://localhost/dump"
+        }
+    ]
+}

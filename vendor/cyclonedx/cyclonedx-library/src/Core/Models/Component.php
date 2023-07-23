@@ -23,15 +23,14 @@ declare(strict_types=1);
 
 namespace CycloneDX\Core\Models;
 
-use CycloneDX\Core\Enums\Classification;
-use CycloneDX\Core\Models\License\LicenseExpression;
-use CycloneDX\Core\Repositories\BomRefRepository;
-use CycloneDX\Core\Repositories\DisjunctiveLicenseRepository;
-use CycloneDX\Core\Repositories\ExternalReferenceRepository;
-use CycloneDX\Core\Repositories\HashRepository;
+use CycloneDX\Core\Collections\BomRefRepository;
+use CycloneDX\Core\Collections\ExternalReferenceRepository;
+use CycloneDX\Core\Collections\HashDictionary;
+use CycloneDX\Core\Collections\LicenseRepository;
+use CycloneDX\Core\Collections\PropertyRepository;
+use CycloneDX\Core\Enums\ComponentType;
 use DomainException;
 use PackageUrl\PackageUrl;
-use UnexpectedValueException;
 
 /**
  * @author nscuro
@@ -43,11 +42,11 @@ class Component
      * An optional identifier which can be used to reference the component elsewhere in the BOM. Every bom-ref should be unique.
      *
      * Implementation is intended to prevent memory leaks.
-     * See ../../../docs/dev/decisions/BomDependencyDataModel.md
+     * See {@link file://../../../docs/dev/decisions/BomDependencyDataModel.md BomDependencyDataModel docs}
      *
-     * @var BomRef
+     * @readonly
      */
-    private $bomRef;
+    private BomRef $bomRef;
 
     /**
      * The name of the component. This will often be a shortened, single name
@@ -55,11 +54,9 @@ class Component
      *
      * Examples: commons-lang3 and jquery
      *
-     * @var string
-     *
      * @psalm-suppress PropertyNotSetInConstructor
      */
-    private $name;
+    private string $name;
 
     /**
      * The grouping name or identifier. This will often be a shortened, single
@@ -69,11 +66,9 @@ class Component
      *
      * Examples include: apache, org.apache.commons, and apache.org.
      *
-     * @var string|null
-     *
      * @psalm-var non-empty-string|null
      */
-    private $group;
+    private ?string $group = null;
 
     /**
      * Specifies the type of component. For software components, classify as application if no more
@@ -83,74 +78,82 @@ class Component
      * Refer to the {@link https://cyclonedx.org/schema/bom/1.1 bom:classification documentation}
      * for information describing each one.
      *
-     * @var string
-     *
-     * @psalm-var Classification::*
-     *
      * @psalm-suppress PropertyNotSetInConstructor
      */
-    private $type;
+    private ComponentType $type;
 
     /**
      * Specifies a description for the component.
      *
-     * @var string|null
+     * @psalm-var non-empty-string|null
+     */
+    private ?string $description = null;
+
+    /**
+     * The person(s) or organization(s) that authored the component.
      *
      * @psalm-var non-empty-string|null
      */
-    private $description;
+    private ?string $author = null;
 
     /**
      * Package-URL (PURL).
      *
      * The purl, if specified, must be valid and conform to the specification
      * defined at: {@linnk https://github.com/package-url/purl-spec/blob/master/README.rst#purl}.
-     *
-     * @var PackageUrl|null
      */
-    private $packageUrl;
+    private ?PackageUrl $packageUrl = null;
 
     /**
      * licence(s).
-     *
-     * @var LicenseExpression|DisjunctiveLicenseRepository|null
      */
-    private $license;
+    private LicenseRepository $licenses;
+
+    /**
+     * A copyright notice informing users of the underlying claims to copyright ownership in a published work.
+     */
+    private ?string $copyright = null;
 
     /**
      * Specifies the file hashes of the component.
-     *
-     * @var HashRepository|null
      */
-    private $hashRepository;
+    private HashDictionary $hashes;
 
     /**
      * References to dependencies.
      *
      * Implementation is intended to prevent memory leaks.
-     * See ../../../docs/dev/decisions/BomDependencyDataModel.md
-     *
-     * @var BomRefRepository|null
+     * See {@link file://../../../docs/dev/decisions/BomDependencyDataModel.md BomDependencyDataModel docs}
      */
-    private $dependenciesBomRefRepository;
+    private BomRefRepository $dependencies;
 
     /**
      * The component version. The version should ideally comply with semantic versioning
      * but is not enforced.
-     *
-     * @var string
-     *
-     * @psalm-suppress PropertyNotSetInConstructor
      */
-    private $version;
+    private ?string $version = null;
 
     /**
      * Provides the ability to document external references related to the
      * component or to the project the component describes.
-     *
-     * @var ExternalReferenceRepository|null
      */
-    private $externalReferenceRepository;
+    private ExternalReferenceRepository $externalReferences;
+
+    /**
+     * Provides the ability to document properties in a name-value store. This provides flexibility to include data not
+     * officially supported in the standard without having to use additional namespaces or create extensions.
+     * Unlike key-value stores, properties support duplicate names, each potentially having different values.
+     *
+     * Property names of interest to the general public are encouraged to be registered in the
+     * {@link https://github.com/CycloneDX/cyclonedx-property-taxonomy CycloneDX Property Taxonomy}.
+     * Formal registration is OPTIONAL.
+     */
+    private PropertyRepository $properties;
+
+    /**
+     * Provides the ability to document evidence collected through various forms of extraction or analysis.
+     */
+    private ?ComponentEvidence $evidence = null;
 
     public function getBomRef(): BomRef
     {
@@ -158,11 +161,11 @@ class Component
     }
 
     /**
-     * shorthand for `{@see getBomRef()}->{@see BomRef::setValue() setValue()}`.
+     * shorthand for `->getBomRef()->setValue()`.
      *
      * @return $this
      */
-    public function setBomRefValue(?string $value): self
+    public function setBomRefValue(?string $value): static
     {
         $this->bomRef->setValue($value);
 
@@ -177,7 +180,7 @@ class Component
     /**
      * @return $this
      */
-    public function setName(string $name): self
+    public function setName(string $name): static
     {
         $this->name = $name;
 
@@ -195,7 +198,7 @@ class Component
     /**
      * @return $this
      */
-    public function setGroup(?string $group): self
+    public function setGroup(?string $group): static
     {
         $this->group = '' === $group
             ? null
@@ -204,28 +207,16 @@ class Component
         return $this;
     }
 
-    /**
-     * @psalm-return Classification::*
-     */
-    public function getType(): string
+    public function getType(): ComponentType
     {
         return $this->type;
     }
 
     /**
-     * @param string $type A valid {@see \CycloneDX\Core\Enums\Classification}
-     *
-     * @psalm-assert Classification::* $type
-     *
-     * @throws DomainException if value is unknown
-     *
      * @return $this
      */
-    public function setType(string $type): self
+    public function setType(ComponentType $type): static
     {
-        if (false === Classification::isValidValue($type)) {
-            throw new DomainException("Invalid type: $type");
-        }
         $this->type = $type;
 
         return $this;
@@ -239,7 +230,7 @@ class Component
     /**
      * @return $this
      */
-    public function setDescription(?string $description): self
+    public function setDescription(?string $description): static
     {
         $this->description = '' === $description
             ? null
@@ -248,62 +239,68 @@ class Component
         return $this;
     }
 
-    /**
-     * @return LicenseExpression|DisjunctiveLicenseRepository|null
-     */
-    public function getLicense()
+    public function getAuthor(): ?string
     {
-        return $this->license;
-    }
-
-    /**
-     * @param mixed $license
-     *
-     * @psalm-assert LicenseExpression|DisjunctiveLicenseRepository|null $license
-     *
-     * @throws UnexpectedValueException
-     *
-     * @return $this
-     */
-    public function setLicense($license): self
-    {
-        if (false === $this->isValidLicense($license)) {
-            throw new UnexpectedValueException('Invalid license type');
-        }
-
-        $this->license = $license;
-
-        return $this;
-    }
-
-    /**
-     * @param mixed $license
-     *
-     * @psalm-assert-if-true  null|LicenseExpression|DisjunctiveLicenseRepository $license
-     */
-    private function isValidLicense($license): bool
-    {
-        return null === $license
-            || $license instanceof LicenseExpression
-            || $license instanceof DisjunctiveLicenseRepository;
-    }
-
-    public function getHashRepository(): ?HashRepository
-    {
-        return $this->hashRepository;
+        return $this->author;
     }
 
     /**
      * @return $this
      */
-    public function setHashRepository(?HashRepository $hashRepository): self
+    public function setAuthor(?string $author): static
     {
-        $this->hashRepository = $hashRepository;
+        $this->author = '' === $author
+            ? null
+            : $author;
 
         return $this;
     }
 
-    public function getVersion(): string
+    public function getLicenses(): LicenseRepository
+    {
+        return $this->licenses;
+    }
+
+    /**
+     * @return $this
+     */
+    public function setLicenses(LicenseRepository $licenses): static
+    {
+        $this->licenses = $licenses;
+
+        return $this;
+    }
+
+    public function getCopyright(): ?string
+    {
+        return $this->copyright;
+    }
+
+    public function setCopyright(?string $copyright): static
+    {
+        $this->copyright = '' === $copyright
+            ? null
+            : $copyright;
+
+        return $this;
+    }
+
+    public function getHashes(): HashDictionary
+    {
+        return $this->hashes;
+    }
+
+    /**
+     * @return $this
+     */
+    public function setHashes(HashDictionary $hashes): static
+    {
+        $this->hashes = $hashes;
+
+        return $this;
+    }
+
+    public function getVersion(): ?string
     {
         return $this->version;
     }
@@ -311,7 +308,7 @@ class Component
     /**
      * @return $this
      */
-    public function setVersion(string $version): self
+    public function setVersion(?string $version): static
     {
         $this->version = $version;
 
@@ -326,54 +323,84 @@ class Component
     /**
      * @return $this
      */
-    public function setPackageUrl(?PackageUrl $purl): self
+    public function setPackageUrl(?PackageUrl $purl): static
     {
         $this->packageUrl = $purl;
 
         return $this;
     }
 
-    public function getDependenciesBomRefRepository(): ?BomRefRepository
+    public function getDependencies(): BomRefRepository
     {
-        return $this->dependenciesBomRefRepository;
+        return $this->dependencies;
     }
 
     /**
      * @return $this
      */
-    public function setDependenciesBomRefRepository(?BomRefRepository $dependenciesBomRefRepository): self
+    public function setDependencies(BomRefRepository $dependencies): static
     {
-        $this->dependenciesBomRefRepository = $dependenciesBomRefRepository;
+        $this->dependencies = $dependencies;
 
         return $this;
     }
 
-    public function getExternalReferenceRepository(): ?ExternalReferenceRepository
+    public function getExternalReferences(): ExternalReferenceRepository
     {
-        return $this->externalReferenceRepository;
+        return $this->externalReferences;
     }
 
     /**
      * @return $this
      */
-    public function setExternalReferenceRepository(?ExternalReferenceRepository $externalReferenceRepository): self
+    public function setExternalReferences(ExternalReferenceRepository $externalReferences): static
     {
-        $this->externalReferenceRepository = $externalReferenceRepository;
+        $this->externalReferences = $externalReferences;
+
+        return $this;
+    }
+
+    public function getProperties(): PropertyRepository
+    {
+        return $this->properties;
+    }
+
+    /**
+     * @return $this
+     */
+    public function setProperties(PropertyRepository $properties): static
+    {
+        $this->properties = $properties;
+
+        return $this;
+    }
+
+    public function getEvidence(): ?ComponentEvidence
+    {
+        return $this->evidence;
+    }
+
+    /** @return $this */
+    public function setEvidence(?ComponentEvidence $evidence): static
+    {
+        $this->evidence = $evidence;
 
         return $this;
     }
 
     /**
-     * @psalm-assert Classification::* $type
-     *
      * @throws DomainException if type is unknown
      */
-    public function __construct(string $type, string $name, string $version)
+    public function __construct(ComponentType $type, string $name)
     {
         $this->setType($type);
         $this->setName($name);
-        $this->setVersion($version);
         $this->bomRef = new BomRef();
+        $this->dependencies = new BomRefRepository();
+        $this->licenses = new LicenseRepository();
+        $this->hashes = new HashDictionary();
+        $this->externalReferences = new ExternalReferenceRepository();
+        $this->properties = new PropertyRepository();
     }
 
     public function __clone()

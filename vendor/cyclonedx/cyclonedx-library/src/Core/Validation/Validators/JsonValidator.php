@@ -28,11 +28,11 @@ use CycloneDX\Core\Spec\Version;
 use CycloneDX\Core\Validation\BaseValidator;
 use CycloneDX\Core\Validation\Errors\JsonValidationError;
 use CycloneDX\Core\Validation\Exceptions\FailedLoadingSchemaException;
-use CycloneDX\Core\Validation\Helpers\JsonSchemaRemoteRefProviderForSnapshotResources;
-use CycloneDX\Core\Validation\ValidationError;
 use Exception;
 use JsonException;
-use Swaggest\JsonSchema;
+use Opis\JsonSchema;
+use stdClass;
+use Throwable;
 
 /**
  * @author jkowalleck
@@ -40,28 +40,23 @@ use Swaggest\JsonSchema;
 class JsonValidator extends BaseValidator
 {
     /**
-     * {@inheritdoc}
-     *
-     * @internal
+     * @internal as this function may be affected by breaking changes without notice
      */
     protected static function listSchemaFiles(): array
     {
         return [
-            Version::V_1_1 => null, // unsupported version
-            Version::V_1_2 => Resources::FILE_CDX_JSON_SCHEMA_1_2,
-            Version::V_1_3 => Resources::FILE_CDX_JSON_SCHEMA_1_3,
+            Version::v1dot1->value => null, // unsupported version
+            Version::v1dot2->value => Resources::FILE_CDX_JSON_SCHEMA_1_2,
+            Version::v1dot3->value => Resources::FILE_CDX_JSON_SCHEMA_1_3,
+            Version::v1dot4->value => Resources::FILE_CDX_JSON_SCHEMA_1_4,
         ];
     }
 
     /**
-     * @psalm-param non-empty-string $string
-     *
      * @throws FailedLoadingSchemaException if schema file unknown or not readable
      * @throws JsonException                if loading the JSON failed
-     *
-     * @return JsonValidationError|null
      */
-    public function validateString(string $string): ?ValidationError
+    public function validateString(string $string): ?JsonValidationError
     {
         return $this->validateData(
             $this->loadDataFromJson($string)
@@ -70,48 +65,41 @@ class JsonValidator extends BaseValidator
 
     /**
      * @throws FailedLoadingSchemaException
+     *
+     * @SuppressWarnings(PHPMD.StaticAccess)
      */
-    public function validateData(\stdClass $data): ?JsonValidationError
+    public function validateData(stdClass $data): ?JsonValidationError
     {
-        $contract = $this->getSchemaContract();
+        $schemaId = uniqid('validate:cdx-php-lib?r=', true);
+        $resolver = new JsonSchema\Resolvers\SchemaResolver();
+        $resolver->registerFile($schemaId, $this->getSchemaFile());
+        $resolver->registerPrefix('http://cyclonedx.org/schema/', Resources::DIR_SCHEMA);
+        $validator = new JsonSchema\Validator();
+        $validator->setResolver($resolver);
         try {
-            $contract->in($data);
-        } catch (JsonSchema\InvalidValue $error) {
-            return JsonValidationError::fromJsonSchemaInvalidValue($error);
-        }
-
-        return null;
-    }
-
-    /**
-     * @throws FailedLoadingSchemaException
-     */
-    private function getSchemaContract(): JsonSchema\SchemaContract
-    {
-        $schemaFile = $this->getSchemaFile();
-        try {
-            return JsonSchema\Schema::import(
-                $schemaFile,
-                new JsonSchema\Context(new JsonSchemaRemoteRefProviderForSnapshotResources())
-            );
+            $validationError = $validator->validate($data, $schemaId)->error();
             // @codeCoverageIgnoreStart
-        } catch (Exception $exception) {
-            throw new FailedLoadingSchemaException('import schema data failed', 0, $exception);
+        } catch (Throwable $error) {
+            return JsonValidationError::fromThrowable($error);
         }
         // @codeCoverageIgnoreEnd
+
+        return null === $validationError
+            ? null
+            : JsonValidationError::fromSchemaValidationError($validationError);
     }
 
     /**
      * @throws JsonException if loading the JSON failed
      */
-    private function loadDataFromJson(string $json): \stdClass
+    private function loadDataFromJson(string $json): stdClass
     {
         try {
-            $data = json_decode($json, false, 512, \JSON_THROW_ON_ERROR);
+            $data = json_decode($json, false, 1024, \JSON_THROW_ON_ERROR);
         } catch (Exception $exception) {
-            throw new JsonException('loading failed', 0, $exception);
+            throw new JsonException('loading failed', previous: $exception);
         }
-        \assert($data instanceof \stdClass);
+        \assert($data instanceof stdClass);
 
         return $data;
     }

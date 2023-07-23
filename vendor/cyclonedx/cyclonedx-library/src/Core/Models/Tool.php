@@ -23,7 +23,8 @@ declare(strict_types=1);
 
 namespace CycloneDX\Core\Models;
 
-use CycloneDX\Core\Repositories\HashRepository;
+use CycloneDX\Core\Collections\ExternalReferenceRepository;
+use CycloneDX\Core\Collections\HashDictionary;
 
 /**
  * @author jkowalleck
@@ -32,31 +33,28 @@ class Tool
 {
     /**
      * The vendor of the tool used to create the BOM.
-     *
-     * @var string|null
      */
-    private $vendor;
+    private ?string $vendor = null;
 
     /**
      * The name of the tool used to create the BOM.
-     *
-     * @var string|null
      */
-    private $name;
+    private ?string $name = null;
 
     /**
      * The version of the tool used to create the BOM.
-     *
-     * @var string|null
      */
-    private $version;
+    private ?string $version = null;
 
     /**
      * The hashes of the tool (if applicable).
-     *
-     * @var HashRepository|null
      */
-    private $hashRepository;
+    private HashDictionary $hashes;
+
+    /**
+     * Provides the ability to document external references related to the tool.
+     */
+    private ExternalReferenceRepository $externalReferences;
 
     public function getVendor(): ?string
     {
@@ -66,7 +64,7 @@ class Tool
     /**
      * @return $this
      */
-    public function setVendor(?string $vendor): self
+    public function setVendor(?string $vendor): static
     {
         $this->vendor = $vendor;
 
@@ -81,7 +79,7 @@ class Tool
     /**
      * @return $this
      */
-    public function setName(?string $name): self
+    public function setName(?string $name): static
     {
         $this->name = $name;
 
@@ -96,25 +94,46 @@ class Tool
     /**
      * @return $this
      */
-    public function setVersion(?string $version): self
+    public function setVersion(?string $version): static
     {
         $this->version = $version;
 
         return $this;
     }
 
-    public function getHashRepository(): ?HashRepository
+    public function getHashes(): HashDictionary
     {
-        return $this->hashRepository;
+        return $this->hashes;
     }
 
     /**
      * @return $this
      */
-    public function setHashRepository(?HashRepository $hashRepository): self
+    public function setHashes(HashDictionary $hashes): static
     {
-        $this->hashRepository = $hashRepository;
+        $this->hashes = $hashes;
 
         return $this;
+    }
+
+    public function getExternalReferences(): ExternalReferenceRepository
+    {
+        return $this->externalReferences;
+    }
+
+    /**
+     * @return $this
+     */
+    public function setExternalReferences(ExternalReferenceRepository $externalReferences): static
+    {
+        $this->externalReferences = $externalReferences;
+
+        return $this;
+    }
+
+    public function __construct()
+    {
+        $this->hashes = new HashDictionary();
+        $this->externalReferences = new ExternalReferenceRepository();
     }
 }

@@ -23,28 +23,57 @@ declare(strict_types=1);
 
 namespace CycloneDX\Core\Models;
 
-use CycloneDX\Core\Repositories\ToolRepository;
+use CycloneDX\Core\Collections\PropertyRepository;
+use CycloneDX\Core\Collections\ToolRepository;
+use DateTimeInterface;
 
 /**
  * @author jkowalleck
  */
-class MetaData
+class Metadata
 {
     /**
-     * The tool(s) used in the creation of the BOM.
-     *
-     * @var ToolRepository|null
+     * The date and time (timestamp) when the BOM was created.
      */
-    private $tools;
+    private ?DateTimeInterface $timestamp = null;
+
+    /**
+     * The tool(s) used in the creation of the BOM.
+     */
+    private ToolRepository $tools;
 
     /**
      * The component that the BOM describes.
-     *
-     * @var Component|null
      */
-    private $component;
+    private ?Component $component = null;
 
-    public function getTools(): ?ToolRepository
+    /**
+     * Provides the ability to document properties in a name-value store. This provides flexibility to include data not
+     * officially supported in the standard without having to use additional namespaces or create extensions.
+     * Unlike key-value stores, properties support duplicate names, each potentially having different values.
+     *
+     * Property names of interest to the general public are encouraged to be registered in the
+     * {@link https://github.com/CycloneDX/cyclonedx-property-taxonomy CycloneDX Property Taxonomy}.
+     * Formal registration is OPTIONAL.
+     */
+    private PropertyRepository $properties;
+
+    public function getTimestamp(): ?DateTimeInterface
+    {
+        return $this->timestamp;
+    }
+
+    /**
+     * @return $this
+     */
+    public function setTimestamp(?DateTimeInterface $timestamp): static
+    {
+        $this->timestamp = $timestamp;
+
+        return $this;
+    }
+
+    public function getTools(): ToolRepository
     {
         return $this->tools;
     }
@@ -52,7 +81,7 @@ class MetaData
     /**
      * @return $this
      */
-    public function setTools(?ToolRepository $tools): self
+    public function setTools(ToolRepository $tools): static
     {
         $this->tools = $tools;
 
@@ -67,10 +96,31 @@ class MetaData
     /**
      * @return $this
      */
-    public function setComponent(?Component $component): self
+    public function setComponent(?Component $component): static
     {
         $this->component = $component;
 
         return $this;
+    }
+
+    public function getProperties(): PropertyRepository
+    {
+        return $this->properties;
+    }
+
+    /**
+     * @return $this
+     */
+    public function setProperties(PropertyRepository $properties): static
+    {
+        $this->properties = $properties;
+
+        return $this;
+    }
+
+    public function __construct()
+    {
+        $this->tools = new ToolRepository();
+        $this->properties = new PropertyRepository();
     }
 }

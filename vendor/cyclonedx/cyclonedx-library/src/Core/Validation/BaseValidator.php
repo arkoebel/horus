@@ -23,39 +23,24 @@ declare(strict_types=1);
 
 namespace CycloneDX\Core\Validation;
 
-use CycloneDX\Core\Spec\SpecInterface;
-use CycloneDX\Core\Spec\Version;
+use CycloneDX\Core\Spec\Spec;
 
 /**
  * @author jkowalleck
  */
-abstract class BaseValidator implements ValidatorInterface
+abstract class BaseValidator implements Validator
 {
-    /**
-     * @var SpecInterface
-     */
-    private $spec;
+    /** @TODO in next major version: use `\CycloneDX\Core\Enums\Version` */
+    private readonly Spec $spec;
 
-    public function __construct(SpecInterface $spec)
+    public function __construct(Spec $spec)
     {
         $this->spec = $spec;
     }
 
-    public function getSpec(): SpecInterface
+    public function getSpec(): Spec
     {
         return $this->spec;
-    }
-
-    /**
-     * @deprecated
-     *
-     * @return $this
-     */
-    public function setSpec(SpecInterface $spec): self
-    {
-        $this->spec = $spec;
-
-        return $this;
     }
 
     /**
@@ -64,9 +49,9 @@ abstract class BaseValidator implements ValidatorInterface
     protected function getSchemaFile(): string
     {
         $specVersion = $this->spec->getVersion();
-        $schemaFile = static::listSchemaFiles()[$specVersion] ?? null;
+        $schemaFile = static::listSchemaFiles()[$specVersion->value] ?? null;
         if (false === \is_string($schemaFile)) {
-            throw new Exceptions\FailedLoadingSchemaException("Schema file unknown for specVersion: $specVersion");
+            throw new Exceptions\FailedLoadingSchemaException("Schema file unknown for specVersion: $specVersion->name");
         }
         if (is_file($schemaFile) && is_readable($schemaFile)) {
             return realpath($schemaFile);
@@ -77,9 +62,9 @@ abstract class BaseValidator implements ValidatorInterface
     }
 
     /**
-     * @return string[]|null[]
+     * @return string[]|null[] dictionary ala `[ CycloneDX\Core\Spec\Version::value() => string ]`
      *
-     * @psalm-return array<Version::V_*, ?string>
+     * @psalm-return array<string, ?string>
      */
     abstract protected static function listSchemaFiles(): array;
 }

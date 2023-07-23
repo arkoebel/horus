@@ -1,17 +1,17 @@
 <?php
 
-require_once('lib/horus_http.php');
-require_once('lib/horus_common.php');
-require_once('lib/horus_business.php');
-require_once('lib/horus_inject.php');
-require_once('lib/horus_simplejson.php');
-require_once('lib/horus_xml.php');
-require_once('lib/horus_exception.php');
-require_once('lib/horus_recurse.php');
-require_once('lib/horus_curlInterface.php');
-require_once('lib/horus_curl.php');
-require_once('lib/horus_utils.php');
-require_once('vendor/autoload.php');
+require_once 'lib/horus_http.php';
+require_once 'lib/horus_common.php';
+require_once 'lib/horus_business.php';
+require_once 'lib/horus_inject.php';
+require_once 'lib/horus_simplejson.php';
+require_once 'lib/horus_xml.php';
+require_once 'lib/horus_exception.php';
+require_once 'lib/horus_recurse.php';
+require_once 'lib/horus_curlInterface.php';
+require_once 'lib/horus_curl.php';
+require_once 'lib/horus_utils.php';
+require_once 'vendor/autoload.php';
 
 $tracer = new HorusTracing('INDIGO', HorusCommon::getPath($_SERVER), 'Start Indigo', HorusCommon::getHttpHeaders());
 $rootSpan = $tracer->getCurrentSpan();
@@ -20,7 +20,7 @@ $tracer->logSpan($rootSpan, 'Start Indigo', array('path'=>HorusCommon::getPath($
 
 $headerInt = new Horus_Header();
 
-$loglocation = '/var/log/horus/horus_http.log';
+$loglocation = HorusCommon::getConfValue('logLocation', HorusCommon::DEFAULT_LOG_LOCATION);
 
 $businessId = HorusHttp::extractHeader('X-Business-Id', 'X_BUSINESS_ID');
 

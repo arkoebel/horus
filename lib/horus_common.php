@@ -13,6 +13,7 @@ class HorusCommon
     public const ENC_PREFIX = 'B64PRF-';
     public const ENC_SEP = '#!#';
     public const DEFAULT_LOG_LOCATION = '/var/log/horus/horus_http.log';
+    public const HORUS_CONFIG = 'conf/horusConfig.json';
     public const QUERY_PARAM_CUTOFF = 80;
     public const XML_CT = 'application/xml';
     public const JS_CT = 'application/json';
@@ -26,7 +27,16 @@ class HorusCommon
         $this->logLocation = $logLocation;
         $this->businessId = $businessId;
         $this->colour = $colour;
-        $this->cnf = json_decode(file_get_contents('conf/horusConfig.json'), true);
+        $this->cnf = json_decode(file_get_contents(HorusCommon::HORUS_CONFIG), true);
+    }
+
+    public static function getConfValue($key, $default = null){
+        $cnf = json_decode(file_get_contents(HorusCommon::HORUS_CONFIG), true);
+        if (array_key_exists($key, $cnf)) {
+            return $cnf[$key];
+        } else {
+            return $default;
+        }
     }
 
     public static function getHttpHeaders()

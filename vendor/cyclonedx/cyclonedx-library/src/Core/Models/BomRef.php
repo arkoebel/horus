@@ -24,27 +24,26 @@ declare(strict_types=1);
 namespace CycloneDX\Core\Models;
 
 /**
- * An identifier which can be used to reference objects elsewhere in the BOM.
- *
- * Implementation is intended to prevent memory leaks.
- * See ../../../docs/dev/decisions/BomDependencyDataModel.md
+ * Identifier-DataType for interlinked elements.
  *
  * Class is currently final, to enforce proper usage.
+ *
+ * Implementation is intended to prevent memory leaks.
+ * See {@link file://../../../docs/dev/decisions/BomDependencyDataModel.md BomDependencyDataModel docs}
  *
  * @author jkowalleck
  */
 final class BomRef
 {
-    /**
-     * @var string|null
-     */
-    private $value;
+    /** @psalm-var non-empty-string|null  */
+    private ?string $value;
 
-    public function __construct(?string $value = null)
+    public function __construct(string $value = null)
     {
-        $this->value = $value;
+        $this->setValue($value);
     }
 
+    /** @psalm-return non-empty-string|null */
     public function getValue(): ?string
     {
         return $this->value;
@@ -53,9 +52,11 @@ final class BomRef
     /**
      * @return $this
      */
-    public function setValue(?string $value): self
+    public function setValue(?string $value): static
     {
-        $this->value = $value;
+        $this->value = '' === $value
+            ? null
+            : $value;
 
         return $this;
     }

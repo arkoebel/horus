@@ -12,7 +12,7 @@ require_once('lib/horus_curlInterface.php');
 require_once('lib/horus_curl.php');
 require_once('vendor/autoload.php');
 
-$loglocation = '/var/log/horus/horus_http.log';
+$loglocation = HorusCommon::getConfValue('logLocation', HorusCommon::DEFAULT_LOG_LOCATION);
 
 $businessId = HorusHttp::extractHeader(HorusCommon::TID_HEADER, 'X_BUSINESS_ID');
 

@@ -25,10 +25,13 @@ namespace CycloneDX\Core\Spec;
 
 /**
  * Spec version enum.
+ *
+ * @SuppressWarnings(PHPMD.ConstantNamingConventions)
  */
-abstract class Version
+enum Version: string
 {
-    public const V_1_1 = '1.1';
-    public const V_1_2 = '1.2';
-    public const V_1_3 = '1.3';
+    case v1dot1 = '1.1';
+    case v1dot2 = '1.2';
+    case v1dot3 = '1.3';
+    case v1dot4 = '1.4';
 }

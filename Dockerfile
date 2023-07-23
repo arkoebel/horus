@@ -1,4 +1,4 @@
-FROM php:7.4-apache
+FROM php:8-apache
 RUN apt-get update && apt-get install -y \
     && apt install -y libxml2-dev \
     && docker-php-ext-configure soap \

@@ -28,9 +28,9 @@ use CycloneDX\Core\Spec\Version;
 use CycloneDX\Core\Validation\BaseValidator;
 use CycloneDX\Core\Validation\Errors\XmlValidationError;
 use CycloneDX\Core\Validation\Exceptions\FailedLoadingSchemaException;
-use CycloneDX\Core\Validation\ValidationError;
 use DOMDocument;
 use DOMException;
+use LibXMLError;
 
 /**
  * @author jkowalleck
@@ -38,28 +38,23 @@ use DOMException;
 class XmlValidator extends BaseValidator
 {
     /**
-     * {@inheritdoc}
-     *
-     * @internal
+     * @internal as this function may be affected by breaking changes without notice
      */
     protected static function listSchemaFiles(): array
     {
         return [
-            Version::V_1_1 => Resources::FILE_CDX_XML_SCHEMA_1_1,
-            Version::V_1_2 => Resources::FILE_CDX_XML_SCHEMA_1_2,
-            Version::V_1_3 => Resources::FILE_CDX_XML_SCHEMA_1_3,
+            Version::v1dot1->value => Resources::FILE_CDX_XML_SCHEMA_1_1,
+            Version::v1dot2->value => Resources::FILE_CDX_XML_SCHEMA_1_2,
+            Version::v1dot3->value => Resources::FILE_CDX_XML_SCHEMA_1_3,
+            Version::v1dot4->value => Resources::FILE_CDX_XML_SCHEMA_1_4,
         ];
     }
 
     /**
-     * @psalm-param non-empty-string $string
-     *
      * @throws FailedLoadingSchemaException if schema file unknown or not readable
      * @throws DOMException                 if loading the DOM failed
-     *
-     * @return XmlValidationError|null
      */
-    public function validateString(string $string): ?ValidationError
+    public function validateString(string $string): ?XmlValidationError
     {
         return $this->validateDom(
             $this->loadDomFromXml($string)
@@ -68,21 +63,22 @@ class XmlValidator extends BaseValidator
 
     /**
      * @throws FailedLoadingSchemaException
+     *
+     * @SuppressWarnings(PHPMD.StaticAccess)
      */
     public function validateDom(DOMDocument $doc): ?XmlValidationError
     {
         $error = $this->validateDomWithSchema($doc);
-        if ($error) {
-            return XmlValidationError::fromLibXMLError($error);
-        }
 
-        return null;
+        return $error
+            ? XmlValidationError::fromLibXMLError($error)
+            : null;
     }
 
     /**
      * @throws FailedLoadingSchemaException
      */
-    private function validateDomWithSchema(DOMDocument $doc): ?\LibXMLError
+    private function validateDomWithSchema(DOMDocument $doc): ?LibXMLError
     {
         $schema = $this->getSchemaFile();
 
@@ -99,8 +95,6 @@ class XmlValidator extends BaseValidator
     }
 
     /**
-     * @psalm-param non-empty-string $xml
-     *
      * @throws DOMException if loading the DOM failed
      */
     private function loadDomFromXml(string $xml): DOMDocument

@@ -24,12 +24,13 @@ declare(strict_types=1);
 namespace CycloneDX\Core\Spec;
 
 /**
- * @internal
+ * Spec format enum.
  *
  * @author jkowalleck
  */
-abstract class Format
+enum Format
 {
-    public const XML = 'XML';
-    public const JSON = 'JSON';
+    case XML;
+    case JSON;
+    case ProtoBuff;
 }

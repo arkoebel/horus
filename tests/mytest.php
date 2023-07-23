@@ -1,10 +1,10 @@
 <?php
 
-require_once('../lib/horus_curlInterface.php');
-require_once('HorusCurlMock.php');
-require_once('../lib/horus_tracing.php');
+require_once('lib/horus_curlInterface.php');
+require_once('tests/HorusCurlMock.php');
+require_once('lib/horus_tracing.php');
 
-$mockTracing = new HorusTracingMock('BOX','SERIAL','START',array());
+$mockTracing = new HorusTracingMock('BOX', 'SERIAL', 'START', array());
 
 $mock = new Horus_CurlMock();
 
@@ -46,7 +46,14 @@ $mock->setInfo(
         CURLINFO_HEADER_OUT=>true
     )
 );
+
+
 $mockTracing->newSpan('newurl');
+$mockTracing->newSpan('node1');
+$mockTracing->newSpan('node2');
+$mockTracing->finishSpan();
+$mockTracing->newSpan('node3');
+
 $id = $mock->curl_init('newurl');
 $mock->curl_setopt($id, CURLOPT_PROXY, 'toto');
 var_dump($mock->curl_exec($id));

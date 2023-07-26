@@ -366,8 +366,10 @@ class HorusXml
         $preferredType,
         $queryParams,
         $genericError,
+        &$mimeBoundary,
         $defaultNamespace = '',
-        $rootSpan = null
+        $rootSpan = null,
+        $start = 0
         )
     {
         $input = $this->business->extractPayload($contentType, $reqbody, $genericError, $preferredType, $rootSpan);
@@ -475,9 +477,11 @@ class HorusXml
                 $multiple = true;
             }
 
-            $eol = "\r\n";
-            $mimeBoundary = md5(time());
+            if ($multiple && ($mimeBoundary === 'single')) {
+                $mimeBoundary = md5(time());
+            }
 
+            $eol = "\r\n";
             try {
                 $this->tracer->logSpan($rootSpan, 'Generate XML Response');
                 $resp = $this->getResponses(
@@ -495,11 +499,13 @@ class HorusXml
             $forwardData = $this->formOutQuery($forwardparams, $proxyMode, $vars);
 
 
-            if ($multiple) {
+            if ($multiple || ($mimeBoundary !== 'single')) {
+                error_log('multiple');
                 $response = '';
+                if(is_array($resp) && (count($resp)>1)){
                 foreach ($resp as $i => $r) {
                     $response .= $this->http->formMultiPart(
-                        "response_$i",
+                        'response_' .  $start . '_' . $i,
                         $r['data'],
                         $mimeBoundary,
                         $eol,
@@ -507,10 +513,20 @@ class HorusXml
                         $r['headers']
                     );
                 }
+            } else {
+                $response .= $this->http->formMultipart(
+                    'response_' . $start,
+                    $resp[0],
+                    $mimeBoundary,
+                    $eol,
+                    $preferredType,
+                    $vars
+                );
+            }
                 $ret = null;
                 if ('' === $proxyMode) {
                     $ret = $this->http->returnWithContentType(
-                        $response . "--" . $mimeBoundary . "--" . $eol . $eol,
+                        $response,
                         "multipart/form-data; boundary=$mimeBoundary",
                         200,
                         $proxyMode,
@@ -521,7 +537,7 @@ class HorusXml
                     );
                 } else {
                     $ret = $this->http->returnWithContentType(
-                        $response . "--" . $mimeBoundary . "--" . $eol . $eol,
+                        $response,
                         "multipart/form-data; boundary=$mimeBoundary",
                         200,
                         $forwardData,

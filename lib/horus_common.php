@@ -12,6 +12,12 @@ class HorusCommon
     public const ENC_SEP = '#!#';
     public const DEFAULT_LOG_LOCATION='/var/log/horus/horus_http.log';
     public const QUERY_PARAM_CUTOFF = 80;
+    public const XML_CT = 'application/xml';
+    public const JS_CT = 'application/json';
+    public const TID_HEADER = 'X-Business-Id';
+    public const DEST_HEADER = 'X_destination_url';
+    public const HTTP_200_RETURN = 'HTTP/1.1 200 OK';
+    public const HTTP_500_RETURN = 'HTTP/1.1 500 SERVER ERROR';
 
     function __construct($business_id, $log_location, $colour = 'GREEN')
     {

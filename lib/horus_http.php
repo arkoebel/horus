@@ -189,7 +189,17 @@ class HorusHttp
      * function returnArrayWithContentType
      * Send a set of http queries to the same destination
      */
-    function returnArrayWithContentType($data, $content_type, $status, $forward = '', $exitafter = true, $no_conversion = false, $method = 'POST', $rootSpan = null, $rfhprefix = 'rfh-', $mqmdprefix = 'mqmd-')
+    function returnArrayWithContentType(
+        $data,
+        $content_type,
+        $status, $forward = '',
+        $exitafter = true,
+        $no_conversion = false,
+        $method = 'POST',
+        $rootSpan = null,
+        $rfhprefix = 'rfh-',
+        $mqmdprefix = 'mqmd-'
+        )
     {
 
         //$injectSpan = $this->tracer->startSpan('Http Call Lib for Arrays', ['child_of' => $rootSpan]);

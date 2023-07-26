@@ -315,13 +315,25 @@ class HorusXml
         return str_replace('<' . $pattern . '>','<' . $pattern . ' xmlns="' . $destinationNameSpace . '">',$input);
     }
 
-    function doInject($reqbody, $content_type, $proxy_mode, $matches, $preferredType, $queryParams, $genericError, $defaultNamespace = '', $rootSpan = null)
+    function doInject(
+        $reqbody,
+        $content_type,
+        $proxy_mode,
+        $matches,
+        $preferredType,
+        $queryParams,
+        $genericError,
+        &$mime_boundary,
+        $defaultNamespace = '',
+        $rootSpan = null,
+        $start = 0
+        )
     {
         $input = $this->business->extractPayload($content_type, $reqbody, $genericError, $preferredType, $rootSpan);
         libxml_use_internal_errors(true);
         $rootSpan->log(['message' => 'Validating XML Input']);
         $query = simplexml_load_string($input);
-        if ($query === FALSE) {
+        if ($query === false) {
             $errorMessage = "Input XML not properly formatted.\n";
             $errorMessage .= $this->common->libxml_display_errors();
             $ret = $this->business->returnGenericError($preferredType, $genericError, $errorMessage, '', $rootSpan);
@@ -378,7 +390,13 @@ class HorusXml
             $errorTemplate = (($errorTemplate == null) ? $genericError : $errorTemplate);
             $errorTemplate = 'templates/' . $errorTemplate;
             if ($this->business->findMatch($matches, $selected, "displayError") === "On") {
-                throw new HorusException($this->business->returnGenericError($preferredType, $errorTemplate, "Requested error", '', $rootSpan));
+                throw new HorusException($this->business->returnGenericError(
+                    $preferredType,
+                    $errorTemplate,
+                    "Requested error",
+                    '',
+                    $rootSpan
+                ));
             }
             $response = '';
             $multiple = false;
@@ -393,28 +411,58 @@ class HorusXml
                 $multiple = true;
             }
 
+            if ($multiple && ($mime_boundary === 'single')) {
+                $mime_boundary = md5(time());
+            }
+
             $eol = "\r\n";
-            $mime_boundary = md5(time());
 
             try {
                 $rootSpan->log(['message' => 'Generate XML Response']);
-                $resp = $this->getResponses($templates, $vars, $formats, $preferredType, $errorTemplate, $rootSpan, $multiple);
+                $resp = $this->getResponses(
+                    $templates,
+                    $vars,
+                    $formats,
+                    $preferredType,
+                    $errorTemplate,
+                    $rootSpan,
+                    $multiple
+                );
             } catch (HorusException $e) {
                 throw new HorusException($e->getMessage());
             }
             $forwardData = $this->formOutQuery($forwardparams, $proxy_mode, $vars);
 
 
-            if ($multiple) {
+            if ($multiple || ($mime_boundary !== 'single')) {
+                error_log('multiple');
                 $response = '';
+                if(is_array($resp) && (count($resp)>1)){
                 foreach ($resp as $i => $r) {
-                    $response .= $this->http->formMultiPart("response_$i", $r['data'], $mime_boundary, $eol, $preferredType, $r['headers']);
+                    $response .= $this->http->formMultiPart(
+                        'response_' .  $start . '_' . $i,
+                        $r['data'],
+                        $mime_boundary,
+                        $eol,
+                        $preferredType,
+                        $r['headers']
+                    );
                 }
+            } else {
+                $response .= $this->http->formMultipart(
+                    'response_' . $start,
+                    $resp[0],
+                    $mime_boundary,
+                    $eol,
+                    $preferredType,
+                    $vars
+                );
+            }
                 $ret = null;
                 if ('' === $proxy_mode)
-                    $ret = $this->http->returnWithContentType($response . "--" . $mime_boundary . "--" . $eol . $eol, "multipart/form-data; boundary=$mime_boundary", 200, $proxy_mode, false, 'POST', $forwardData, $rootSpan);
+                    $ret = $this->http->returnWithContentType($response, "multipart/form-data; boundary=$mime_boundary", 200, $proxy_mode, false, 'POST', $forwardData, $rootSpan);
                 else
-                    $ret = $this->http->returnWithContentType($response . "--" . $mime_boundary . "--" . $eol . $eol, "multipart/form-data; boundary=$mime_boundary", 200, $forwardData, false, 'POST', $vars, $rootSpan);
+                    $ret = $this->http->returnWithContentType($response, "multipart/form-data; boundary=$mime_boundary", 200, $forwardData, false, 'POST', $vars, $rootSpan);
             } else {
                 if ('' === $proxy_mode)
                     $ret = $this->http->returnWithContentType($resp, $preferredType, 200, $proxy_mode, false, 'POST', $forwardData, $rootSpan);

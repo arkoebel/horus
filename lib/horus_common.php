@@ -172,7 +172,17 @@ class HorusCommon
         foreach ($params as $id=>$param){
                 if((is_array($param))&&(array_key_exists('key',$param))&&(array_key_exists('value',$param))){
                     $converted[$param['key']] = $param['value'];
-                }else if(!is_array($param)){
+                }elseif((is_array($param))&&(array_key_exists('key',$param))&&(array_key_exists('phpvalue',$param))){
+                    try {
+                        ob_start();
+                        eval($param['phpvalue']);
+                        $converted[$param['key']] = urlencode(ob_get_contents());
+                        ob_end_clean();
+                    } catch (\Throwable $th) {
+                        // Do nothing
+                    }
+
+                }elseif(!is_array($param)){
                     $converted[$id] = $param;
                 }
         }

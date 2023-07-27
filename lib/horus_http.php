@@ -304,17 +304,13 @@ class HorusHttp
             $this->common->mlog('Forced conversion to JSON', 'DEBUG');
         }
 
-        if (is_null($forward)) {
-            $forward = '';
-        }
+        $forward = (is_null($forward)) ? '' : $forward;
 
         $data = $this->convertOutData($data, $contentType, $noConversion);
         $this->common->mlog('Sending back data', 'DEBUG', 'TXT');
         $this->common->mlog($data, 'DEBUG', 'TXT');
 
         if ($forward !== '') {
-
-
             $headers = array(
                 'Content-Type' => $contentType,
                 'Accept' =>HorusCommon::JS_CT,
@@ -322,11 +318,9 @@ class HorusHttp
                 'X-Business-Id' => $this->businessId);
             $mqheaders = $this->filterMQHeaders($returnHeaders, 'EXPAND');
 
-            if (preg_match('/multipart/', $contentType) !== false) {
-                $headersoff = array_merge($mqheaders, $headers);
-            } else {
-                $headersoff = $headers;
-            }
+            $headersoff = (preg_match('/multipart/', $contentType) !== false)
+                ? array_merge($mqheaders, $headers)
+                : $headers;
 
             $query = array(
                 'url' => $forward,
@@ -408,6 +402,7 @@ class HorusHttp
     public static function extractHeader($header, $alternate=null)
     {
         $requestHeaders = HorusCommon::getHttpHeaders();
+        
         if (array_key_exists($header, $requestHeaders)) {
             return $requestHeaders[$header];
         } elseif (($alternate!==null) && array_key_exists($alternate, $requestHeaders)) {

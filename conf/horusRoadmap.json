@@ -38,7 +38,7 @@
             "comment": "Failed",
             "filter": [
                 {
-                    "namespace": "camt001"
+                    "namespace": "setr.016"
                 }
             ],
             "map": [

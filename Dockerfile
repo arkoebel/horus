@@ -1,9 +1,12 @@
 FROM php:8-apache
 RUN apt-get update && apt-get install -y \
     && apt install -y libxml2-dev \
+    && apt install -y librdkafka-dev \
     && docker-php-ext-configure soap \
     && docker-php-ext-configure bcmath \
     && docker-php-ext-configure sockets \
+    && pecl install rdkafka \
+    && docker-php-ext-enable rdkafka \
     && docker-php-ext-install bcmath \
     && docker-php-ext-install sockets \
     && docker-php-ext-install soap \

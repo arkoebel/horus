@@ -1,6 +1,7 @@
 {
-    "tracerCollectorHost":"192.168.68.114:5775",
-    "zipkinUrl": "http://192.168.68.114:9411/api/v2/spans",
+    "tracerCollectorHost":"jaeger:5775",
+    "zipkinUrl": "http://jaeger:9411/api/v2/spans",
+    "broker.list": "kafka-server:9092",
     "rfh2Prefix":"rfh-",
     "mqmdPrefix":"mqmd-",
     "logLocation": "php://stdout"

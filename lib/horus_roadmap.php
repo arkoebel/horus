@@ -35,13 +35,37 @@ class HorusRoadmap
 
     }
 
+    function getAllNamespaces(SimpleXMLElement $xml) {
+        $dom = dom_import_simplexml($xml)->ownerDocument;
+        $namespaces = array();
+    
+        // Extract namespaces from the root element
+        $rootNamespace = $dom->documentElement->lookupNamespaceUri(null);
+        if ($rootNamespace && $rootNamespace !== "http://www.w3.org/XML/1998/namespace") {
+            $namespaces[] = $rootNamespace;
+        }
+    
+        // Extract namespaces from all elements and attributes
+        $xpath = new DOMXPath($dom);
+        foreach ($xpath->query('//@* | //namespace::*', $dom) as $node) {
+            $namespace = $node->nodeValue;
+            if ($namespace !== "http://www.w3.org/XML/1998/namespace" && !in_array($namespace, $namespaces)) {
+                $namespaces[] = $namespace;
+            }
+        }
+    
+        return $namespaces;
+    }    
+    
+
     private function getNamespaces($input)
     {
         $xml = simplexml_load_string($input);
         if ($xml === false) {
             throw new HorusException('Supplied input isn\'t XML');
         }
-        return $xml->getDocNamespaces(true, true);
+        
+        return $this->getAllNamespaces($xml);
     }
 
     private function getXpathPattern($input, $xpath, $pattern)
@@ -61,7 +85,6 @@ class HorusRoadmap
 
     public function findRoadmap($source, $input, $span)
     {
-
         $this->tracer->logSpan($span, 'Find Roadmap');
 
         foreach ($this->conf['roadmaps'] as $id => $roadmap) {
@@ -74,10 +97,14 @@ class HorusRoadmap
                 foreach ($roadmap['filter'] as $filter) {
                     if (array_key_exists('namespace', $filter)) {
                         $namespace = $filter['namespace'];
+                        $this->common->mlog("Searching input for " . $namespace, 'DEBUG');
                         $namespaceList = $this->getNamespaces($input);
+                        error_log(print_r($namespaceList, true));
                         $found = false;
                         foreach ($namespaceList as $ns) {
+                            error_log(' ' . $ns );
                             if (str_contains($ns, $namespace)) {
+                                $this->common->mlog("Input contains " . $namespace, 'DEBUG');
                                 $found = true;
                             }
                         }
@@ -114,15 +141,37 @@ class HorusRoadmap
 
     private function putMessage($dest, $data, $businessId, $span ){
 
+        $producer = new RdKafka\Producer($this->conf);
+        $topic = $producer->newTopic($dest['name']);
+        $headers = $this->tracer->getB3Headers($span);
+        $headers['businessId'] = $businessId;
+        $headers['destinationUrl'] = $dest['url'];
+        $topic->producev(RD_KAFKA_PARTITION_UA, 0, $data, $businessId, $headers);
+        $producer->poll(0);
 
+
+        for ($flushRetries = 0; $flushRetries < 10; $flushRetries++) {
+            $result = $producer->flush(10000);
+            if (RD_KAFKA_RESP_ERR_NO_ERROR === $result) {
+                break;
+            }
+        }
+
+        if (RD_KAFKA_RESP_ERR_NO_ERROR !== $result) {
+            throw new \RuntimeException('Was unable to flush, messages might be lost!');
+        }
     }
     
     public function generateParts($input, $mapId, $businessId, $span){
         $roadmap = $this->conf['roadmaps'][$mapId];
+        error_log('roadmap : ' . print_r($roadmap,true));
         $destinations = $this->conf['destinations'];
-        foreach($roadmap as $id => $dest){
+        foreach($roadmap['map'] as $id => $dest){
+
+            error_log('id=' . $id . "\n");
+            error_log('dest=' . print_r($dest,true) . "\n");
             $this->common->mlog(
-                'Sending message ' . ($id + 1) . ' to ' . $dest['destination'] . ' : ' . $dest['comment'], 'INFO');
+                'Sending message ' . $id  . ' to ' . $dest['destination'] . ' : ' . $dest['comment'], 'INFO');
             $transformed = '';
             $dd = $this->findDest($dest['destination'], $destinations);
             if(array_key_exists('transformUrl',$dest)) {
@@ -133,7 +182,7 @@ class HorusRoadmap
                     'POST',
                     $span);
             } elseif (array_key_exists('transform', $dest)) {
-                $to_evaluate = $input;
+                $toEvaluate = $input;
                 include_once 'transforms/' . $dest['transform'];
                 $transformed = $evaluated;
             } else {

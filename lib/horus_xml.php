@@ -3,6 +3,7 @@
 use OpenTracing\Formats;
 use OpenTracing\GlobalTracer;
 use Jaeger\Config;
+use phpseclib3\Crypt\RSA;
 
 class HorusXml
 {
@@ -754,6 +755,15 @@ class HorusXml
             }
             $signatureValue = $signature->item(0)->nodeValue;
 
+            // Save key for later
+            if (preg_match('/^RSA/', $definition['signatureAlgorithm'])) {
+                $key = $sig->item(0)->getElementsByTagNameNS(HorusXML::XMLDSIGNS, 'X509Data');
+                error_log('Key = ' . print_r($key, true));
+                //if (is_array($key)) {
+                    $rsakey = (string) $key->item(0)->nodeValue;
+                //}
+            }
+
             // Remove the Signature element from the original XML (http://www.w3.org/2000/09/xmldsig#enveloped-signature)
             // LAU-Specific : also remove ds:Signature's parent because of reasons...
             $sig->item(0)->parentNode->parentNode->removeChild($sig->item(0)->parentNode);
@@ -776,17 +786,16 @@ class HorusXml
                     openssl_sign($canonical2, $computedSignature, $private, $definition['signatureAlgorithm']);
                     $computedSignature = base64_encode($computedSignature);
                 } else {
-                    $key = $sig->item(0)->getElementsByTagNameNS(HorusXML::XMLDSIGNS, 'X509Data');
-                    if ($key->length !== 0) {
-                        $cert = "-----BEGIN CERTIFICATE-----\n" . $key->item(0)->nodeValue . "\n-----END CERTIFICATE-----\n";
+                        $cert = "-----BEGIN CERTIFICATE-----\n" . $rsakey . "\n-----END CERTIFICATE-----\n";
                         $pubkey = openssl_pkey_get_public($cert);
                         if ($pubkey === false) {
                             throw new HorusException('Incorrect Cert Found' . openssl_error_string());
                         }
-                        if (1 !== openssl_verify($canonical2, $signatureValue, $pubkey, $definition['signatureAlgorithm'])) {
-                            throw new HorusException('Mismatched signature ' . openssl_error_string());
+                        if (1 !== openssl_verify($canonical2, base64_decode($signatureValue), $pubkey, $definition['signatureAlgorithm'])) {
+                          throw new HorusException('Mismatched signature ' . openssl_error_string());
                         }
-                    }
+
+                        $computedSignature = $signatureValue;
                 }
             } else {
                 $computedSignature = base64_encode(hash_hmac($definition['signatureAlgorithm'], $canonical2, $definition['key'], true));
@@ -795,7 +804,7 @@ class HorusXml
                 throw new HorusException('Wrong LAU Signature (Found: ' . $signatureValue . ', Computed: ' . $computedSignature);
             }
             HorusCommon::logger('LAU Signature validated with bogus algorithm','DEBUG','TXT','GREEN',$conf['business_id']);
-        } else if ('DATAPDUSIG' === $definition['method']) {
+        } elseif ('DATAPDUSIG' === $definition['method']) {
             HorusCommon::logger('Enter DataPDU Sign','INFO','TXT','INDIGO',$conf['business_id'],$logLocation);
             // Load original document, preserving its format.
             $xml = new DOMDocument();
@@ -843,7 +852,7 @@ class HorusXml
                 $refdata = $xpath->query($reference['xpath']);
                 if ($refdata->length === 0)
                     throw new HorusException('Reference not found at xpath ' . $reference['xpath']);
-//error_log($xml->saveXML($refdata->item(0)));
+
                 // Remove signature if needed
                 if (array_key_exists('removeSignature', $reference) && $reference['removeSignature']) {
                     $sig = $xml->getElementsByTagNameNS(HorusXML::XMLDSIGNS, 'Signature');

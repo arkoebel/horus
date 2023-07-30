@@ -88,7 +88,7 @@ class HorusSignatureTest extends HorusTestCase{
     '   </Saa:LAU>' . "\n" .
     '</Saa:DataPDU>';
 
-    function stestSample(): void {
+    function testSample(): void {
 
         $input = '<?xml version="1.0" encoding="UTF-8"?>' . "\n" .
             '<Saa:DataPDU xmlns:Saa="urn:swift:saa:xsd:saa.2.0" xmlns:Sw="urn:swift:snl:ns.Sw" xmlns:SwInt="urn:swift:snl:ns.SwInt" xmlns:SwGbl="urn:swift:snl:ns.SwGbl" xmlns:SwSec="urn:swift:snl:ns.SwSec">' . "\n" .
@@ -280,7 +280,7 @@ file_put_contents('sample.xml',$input);
             array('business_id'=>'122345'));
     }
 
-    function stest3():void {
+    function sxtest3():void {
 
         $input = '<?xml version="1.0" encoding="UTF-8"?><Envelope xmlns="http://example.org/envelope"><Body>Olá mundo</Body><Signature xmlns="http://www.w3.org/2000/09/xmldsig#"><SignedInfo><CanonicalizationMethod Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315" /><SignatureMethod Algorithm="http://www.w3.org/2000/09/xmldsig#rsa-sha1" /><Reference URI=""><Transforms><Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature" /></Transforms><DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1" /><DigestValue>AzgXlUQAvdSKPKnHlP4O8S0kvro=</DigestValue></Reference></SignedInfo><SignatureValue>E8GWQYMa9spOyrLxQR/tXLdRcHbteI1RgwgO6owGJkyYh+zAqD93Ndiw7g7pu0DHWXsgSyYY6+UBcgBe6YQAJKp+Xx1/WQK409HnRk8d/0SlBlaxiBBxjjXxrT9IJJge95cUJH/e1RR4DC4S62GvloRK9xzHUlSfEfXUvzKnlfY=</SignatureValue><KeyInfo><KeyValue><RSAKeyValue><Modulus>4IlzOY3Y9fXoh3Y5f06wBbtTg94Pt6vcfcd1KQ0FLm0S36aGJtTSb6pYKfyX7PqCUQ8wgL6xUJ5GRPEsu9gyz8ZobwfZsGCsvu40CWoT9fcFBZPfXro1Vtlh/xl/yYHm+Gzqh0Bw76xtLHSfLfpVOrmZdwKmSFKMTvNXOFd0V18=</Modulus><Exponent>AQAB</Exponent></RSAKeyValue></KeyValue></KeyInfo></Signature></Envelope>';
         $xml = new DOMDocument();
@@ -342,7 +342,7 @@ B9Je
         $this::assertEquals('AzgXlUQAvdSKPKnHlP4O8S0kvro=',$digest);
     }
 
-    function stest4(): void {
+    function sxtest4(): void {
         $input = '<?xml version="1.0" encoding="UTF-8"?><Envelope xmlns="http://example.org/envelope"><Body>Olá mundo</Body><Signature xmlns="http://www.w3.org/2000/09/xmldsig#"><SignedInfo><CanonicalizationMethod Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315" /><SignatureMethod Algorithm="http://www.w3.org/2000/09/xmldsig#rsa-sha1" /><Reference URI=""><Transforms><Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature" /></Transforms><DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1" /><DigestValue>AzgXlUQAvdSKPKnHlP4O8S0kvro=</DigestValue></Reference></SignedInfo><SignatureValue>E8GWQYMa9spOyrLxQR/tXLdRcHbteI1RgwgO6owGJkyYh+zAqD93Ndiw7g7pu0DHWXsgSyYY6+UBcgBe6YQAJKp+Xx1/WQK409HnRk8d/0SlBlaxiBBxjjXxrT9IJJge95cUJH/e1RR4DC4S62GvloRK9xzHUlSfEfXUvzKnlfY=</SignatureValue><KeyInfo><KeyValue><RSAKeyValue><Modulus>4IlzOY3Y9fXoh3Y5f06wBbtTg94Pt6vcfcd1KQ0FLm0S36aGJtTSb6pYKfyX7PqCUQ8wgL6xUJ5GRPEsu9gyz8ZobwfZsGCsvu40CWoT9fcFBZPfXro1Vtlh/xl/yYHm+Gzqh0Bw76xtLHSfLfpVOrmZdwKmSFKMTvNXOFd0V18=</Modulus><Exponent>AQAB</Exponent></RSAKeyValue></KeyValue></KeyInfo></Signature></Envelope>';
         $params = array('method'=>'XMLDSIG', 'key'=> '-----BEGIN ENCRYPTED PRIVATE KEY-----
 MIICojAcBgoqhkiG9w0BDAEDMA4ECFleZ90vhGrRAgIEAASCAoA9rti16XVH
@@ -522,13 +522,26 @@ function test9():void {
         null,
         array(
             'signatureAlgorithm'=>'SHA256',
-            'digestAlgorithm'=>'SHA256', 
+            'digestAlgorithm'=>'SHA256',
             'method'=>'SWIFTLAU',
             'documentNSPrefix'=>'Saa',
             'documentNSURI'=>'urn:swift:saa:xsd:saa.2.0',
             'destinationXPath'=>'/Saa:DataPDU/Saa:LAU',
-            'key'=>'secret'), 
+            'key'=>'secret'),
         array('business_id'=>'122345'));
         $this::assertTrue(true,'Passed LAU Test 2');
+    }
+
+    function testLAUSwift(): void {
+      $input = '<?xml version="1.0" encoding="UTF-8"?><DataPDU xmlns="urn:swift:saa:xsd:saa.2.0"><Revision>2.0.13</Revision><Header><Message><SenderReference>AV20232090007010</SenderReference><MessageIdentifier>camt.050.001.05</MessageIdentifier><Format>AnyXML</Format><Sender><DN>cn=BNPAFRPP,ou=payment,o=bank,o=swift</DN></Sender><Receiver><DN>cn=rtgs,o=trgtxepm,o=swift</DN></Receiver><InterfaceInfo><UserReference>AV20232090007010</UserReference><MessageNature>Financial</MessageNature></InterfaceInfo><NetworkInfo><Service>esmig.t2.iast!pu</Service><SWIFTNetNetworkInfo><RequestType>camt.050.001.05</RequestType></SWIFTNetNetworkInfo></NetworkInfo></Message></Header><Body><AppHdr xmlns="urn:iso:std:iso:20022:tech:xsd:head.001.001.01"><Fr><FIId><FinInstnId><BICFI>BNPAFRPPXXX</BICFI><ClrSysMmbId><MmbId>SystemUserBNPAFRPPXXX</MmbId></ClrSysMmbId></FinInstnId></FIId></Fr><To><FIId><FinInstnId><BICFI>TRGTXEPMRTG</BICFI></FinInstnId></FIId></To><BizMsgIdr>HC20230728000401</BizMsgIdr><MsgDefIdr>camt.050.001.05</MsgDefIdr><CreDt>2023-07-29T08:37:08Z</CreDt></AppHdr><Document xmlns="urn:iso:std:iso:20022:tech:xsd:camt.050.001.05"><LqdtyCdtTrf><MsgHdr><MsgId>NONREF</MsgId></MsgHdr><LqdtyCdtTrf><LqdtyTrfId><InstrId>elo01</InstrId><EndToEndId>elo01</EndToEndId></LqdtyTrfId><CdtrAcct><Id><Othr><Id>BNPAFRPPXXXDCARTGS2</Id></Othr></Id><Tp><Cd>SACC</Cd></Tp></CdtrAcct><TrfdAmt><AmtWthCcy Ccy="EUR">70012</AmtWthCcy></TrfdAmt><DbtrAcct><Id><Othr><Id>BNPAFRPPXXXDCARTGS1</Id></Othr></Id><Tp><Cd>SACC</Cd></Tp></DbtrAcct><SttlmDt>2023-07-28</SttlmDt></LqdtyCdtTrf></LqdtyCdtTrf></Document></Body><LAU><ds:Signature xmlns:ds="http://www.w3.org/2000/09/xmldsig#"><ds:SignedInfo><ds:CanonicalizationMethod Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/><ds:SignatureMethod Algorithm="http://www.w3.org/2001/04/xmldsig-more#rsa-sha256"/><ds:Reference URI=""><ds:Transforms><ds:Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature"/><ds:Transform Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/></ds:Transforms><ds:DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/><ds:DigestValue>wFC+fxejiZvMwCAt+w3VTmDRoxddt1eHjRR6BehGowA=</ds:DigestValue></ds:Reference></ds:SignedInfo><ds:SignatureValue>gtvQZDxA+PIXnqPP+0A4B3Omjr9HLsEOzBcgMWZVp56c7m/5FfApSycieSqWy/nbZnhERcicM/njqRKxGMtZmY/dxBoLFKbf6wpKnQ7ThMmtD6sCLtuWFOYAEE0/jTMhy6o79aCoDOwsyq9ADBLe96wR7KrJoIChErivwUuv6gSaK4RVnCIhRcZh1LJilOrC+qOt9vGSe6sMdKJgkvtoEA5fqoEmjKFPvJWR4pU3/DXdPxd/gZJPqVJuMzuf3CKJFV7iDZAeC7fr9pbkQQDrjF23tONGW0AdHeP+e5QGFAeuofJd4vQPEhy3/jt7PkEhYtZ1xROTWC2vr5yLKMM76ZlCGoQrDS6tajtlwgUo+iu+k6MiFyeRp2AcNRHDPtvf3Vgvh3QV5azYgJ8w73uMtS8Ky9o1l66wYi1nl8weNGVjswf7TDTVxI/W2xEpjZXgGAATzNBVLqZxkcYastfOFUflwaXUMpPz9y9vjvPzNUTP+SaAUui2YgB7DRigMH+KihlBBPvxdklfWhFCwkraLe4fobqBZVGK1goLgp36Wt6YNRJH/oDGN52okee/Lk7x3P4gTs116alOe8fAbcEiEe9rhZpcUNwUs1D59MUvuqK8IkPcBFcXKq8DmbbWxtUhKWRByvACHV7PTTaKCH4MBGTVW4Uu57RngW7Wu5NHWFg=</ds:SignatureValue><ds:KeyInfo><ds:X509Data><ds:X509Certificate>MIIFeDCCA2ACCQCVW2Ee3y2VJTANBgkqhkiG9w0BAQsFADB+MQswCQYDVQQGEwJGUjEWMBQGA1UECAwNSWxlIGRlIGZyYW5jZTEOMAwGA1UEBwwFcGFyaXMxDDAKBgNVBAoMA1BMUzEMMAoGA1UECwwDUExTMQ4wDAYDVQQDDAVTRUJBSTEbMBkGCSqGSIb3DQEJARYMbXNlQHlhaG9vLmZyMB4XDTIzMDYyODExMzM0N1oXDTI0MDYyNzExMzM0N1owfjELMAkGA1UEBhMCRlIxFjAUBgNVBAgMDUlsZSBkZSBmcmFuY2UxDjAMBgNVBAcMBXBhcmlzMQwwCgYDVQQKDANQTFMxDDAKBgNVBAsMA1BMUzEOMAwGA1UEAwwFU0VCQUkxGzAZBgkqhkiG9w0BCQEWDG1zZUB5YWhvby5mcjCCAiIwDQYJKoZIhvcNAQEBBQADggIPADCCAgoCggIBAON6aEW0+SiX1WKN9Q9nAtiSfmoUqpZBPk6sOVb2Tlh9LCF6daH7SIXW7V6cvpTIXMDKy8CT0KvwmW/+77NonA0sCbkzHJ4oz4i+wjc8U1WX9IIcDcEhS9TmZs7CZsvem6S8jd7zS1mSkjoefple3OORsObSDGUVB4vcPIqLfijrLcf0l17cN4TOXpllQH2d50Ah65aX3JgixldcwQeiJp20aK2r2q7WDvnhOZqqi6lE5+pDupkic/+O37X7+qQSJiD9s/8pXwy6lYPrKuthCGTntVL+IDo208MBglBNRzCHHtiYuU8MBpXBAb7pDzeJK4NruAo0nVP8kBh2uGtPg7fi2u8jep0diQdQwsD4uMg9LLvMbwCVerYWpLjlS7YMiy3KI+X96L8jE9oCNmf9s0qwWzhJ3HGj3bwARUHVXvH6GLqx6xGXFL4nZSusE8CK0SE5TACu2GQvkHMa9XD5jBjSxhdZYJ8/TZ7V+6n/aEyVep32K8r6agKTU9fj3JUIXddSEhylezmXnAeZ3zcDhvI7l6b6cLG1AUE6TW2PuN/DgAK7PjbQN7a7y2ZCD+O4coNs4GIzU7rdGlBdlmAmcmtHHlCrjw7esi/+n8LEoUB/nZ4zKraX2W7aZVBuoodIz5CkcLOtQlXWkxrEYvFSUamfUWCESBgeFlU3k6kWtnqRAgMBAAEwDQYJKoZIhvcNAQELBQADggIBAH2wzawvKY4nuy83oMi4XKj/+Q0hhBggIp4Djz0x9oxwl1jd1OGH3tNWmou/dI71PhQzN5/b5cvdGplR5oKmJoTusZVMhhAMv4Sjru9WDJ7FgNTUbUYOfnJ2OKP3fhXIQXR8Ggb+krWJFANuzj2fIQhZfpnvNgrWMHtriCtOamWANJUJegx/hJHDZv9IL+Q1OaT10ccDTZDVmH/psD8/WfV3n91a6ykrllID++KPvcPaHu25SJFOsutmHAAqzuE6yT1Cw+L9O4aW8zq+qGr2n3HPUg/1mzF8FR/DM8WVnsIj+VRrb6QUT3XinvdMVWJv9FH/0IMRnN8ypzyeAVwDHtt2fc1Ch7wXGQ8iK9qDDTqrYdbu+FviK/lEF8sAsrQ+1hH3CCoMU/4JWb+A4CkKLkaZFyBKdf3NIZSHAfLoSEaJI9mDCPVeTnKly2Ps4VsAmQNxivJwGhtexQVj2P7CbhmKL4Mf8/MThcwylJAHzkZe6p+RLJG7zZvUFwN5kPE+PspsFY/OoQR8cyNx1g/Wtsmh2GdgBQQiWeFmQPxY+fHewmHqwE3+ey0jn9yW0jx62LrFq8P1uHEp5ll/60ysCvKRWlCwDmDiU71jTtUHMcoUmHi5EOYls0FbC+waG/veGbALKBFbFliIpQoq0KWBKvDFz6orWzsTcA/wXG8HFRQF</ds:X509Certificate></ds:X509Data></ds:KeyInfo></ds:Signature></LAU></DataPDU>';
+    HorusXML::validateSignature($input, null, array(
+      'signatureAlgorithm' => 'RSA-SHA256',
+      'digestAlgorithm' => 'SHA256',
+      'method' => 'SWIFTLAU',
+      'documentNSPrefix'=>'Saa',
+      'documentNSURI' => 'urn:swift:saa:xsd:saa.2.0',
+      'destinationXPath' => '/Saa:DataPDU/Saa:LAU'
+    ), array('business_id' => '11221122'));
+
     }
 }

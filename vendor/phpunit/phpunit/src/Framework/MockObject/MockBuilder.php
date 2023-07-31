@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 /*
  * This file is part of PHPUnit.
  *
@@ -9,92 +9,48 @@
  */
 namespace PHPUnit\Framework\MockObject;
 
+use function array_merge;
+use PHPUnit\Framework\MockObject\Generator\ClassAlreadyExistsException;
+use PHPUnit\Framework\MockObject\Generator\ClassIsEnumerationException;
+use PHPUnit\Framework\MockObject\Generator\ClassIsFinalException;
+use PHPUnit\Framework\MockObject\Generator\ClassIsReadonlyException;
+use PHPUnit\Framework\MockObject\Generator\DuplicateMethodException;
+use PHPUnit\Framework\MockObject\Generator\Generator;
+use PHPUnit\Framework\MockObject\Generator\InvalidMethodNameException;
+use PHPUnit\Framework\MockObject\Generator\OriginalConstructorInvocationRequiredException;
+use PHPUnit\Framework\MockObject\Generator\ReflectionException;
+use PHPUnit\Framework\MockObject\Generator\RuntimeException;
+use PHPUnit\Framework\MockObject\Generator\UnknownTypeException;
 use PHPUnit\Framework\TestCase;
+use ReflectionClass;
 
 /**
- * Implementation of the Builder pattern for Mock objects.
+ * @psalm-template MockedType
+ *
+ * @no-named-arguments Parameter names are not covered by the backward compatibility promise for PHPUnit
  */
-class MockBuilder
+final class MockBuilder
 {
-    /**
-     * @var TestCase
-     */
-    private $testCase;
+    private readonly TestCase $testCase;
+    private readonly string $type;
+    private ?array $methods                = [];
+    private bool $emptyMethodsArray        = false;
+    private string $mockClassName          = '';
+    private array $constructorArgs         = [];
+    private bool $originalConstructor      = true;
+    private bool $originalClone            = true;
+    private bool $autoload                 = true;
+    private bool $cloneArguments           = false;
+    private bool $callOriginalMethods      = false;
+    private ?object $proxyTarget           = null;
+    private bool $allowMockingUnknownTypes = true;
+    private bool $returnValueGeneration    = true;
+    private readonly Generator $generator;
 
     /**
-     * @var string
+     * @psalm-param class-string $type
      */
-    private $type;
-
-    /**
-     * @var array
-     */
-    private $methods = [];
-
-    /**
-     * @var array
-     */
-    private $methodsExcept = [];
-
-    /**
-     * @var string
-     */
-    private $mockClassName = '';
-
-    /**
-     * @var array
-     */
-    private $constructorArgs = [];
-
-    /**
-     * @var bool
-     */
-    private $originalConstructor = true;
-
-    /**
-     * @var bool
-     */
-    private $originalClone = true;
-
-    /**
-     * @var bool
-     */
-    private $autoload = true;
-
-    /**
-     * @var bool
-     */
-    private $cloneArguments = false;
-
-    /**
-     * @var bool
-     */
-    private $callOriginalMethods = false;
-
-    /**
-     * @var object
-     */
-    private $proxyTarget;
-
-    /**
-     * @var bool
-     */
-    private $allowMockingUnknownTypes = true;
-
-    /**
-     * @var bool
-     */
-    private $returnValueGeneration = true;
-
-    /**
-     * @var Generator
-     */
-    private $generator;
-
-    /**
-     * @param array|string $type
-     */
-    public function __construct(TestCase $testCase, $type)
+    public function __construct(TestCase $testCase, string $type)
     {
         $this->testCase  = $testCase;
         $this->type      = $type;
@@ -104,13 +60,25 @@ class MockBuilder
     /**
      * Creates a mock object using a fluent interface.
      *
-     * @return MockObject
+     * @throws \PHPUnit\Framework\InvalidArgumentException
+     * @throws ClassAlreadyExistsException
+     * @throws ClassIsEnumerationException
+     * @throws ClassIsFinalException
+     * @throws ClassIsReadonlyException
+     * @throws DuplicateMethodException
+     * @throws InvalidMethodNameException
+     * @throws OriginalConstructorInvocationRequiredException
+     * @throws ReflectionException
+     * @throws RuntimeException
+     * @throws UnknownTypeException
+     *
+     * @psalm-return MockObject&MockedType
      */
-    public function getMock()
+    public function getMock(bool $register = true): MockObject
     {
         $object = $this->generator->getMock(
             $this->type,
-            $this->methods,
+            !$this->emptyMethodsArray ? $this->methods : null,
             $this->constructorArgs,
             $this->mockClassName,
             $this->originalConstructor,
@@ -120,10 +88,12 @@ class MockBuilder
             $this->callOriginalMethods,
             $this->proxyTarget,
             $this->allowMockingUnknownTypes,
-            $this->returnValueGeneration
+            $this->returnValueGeneration,
         );
 
-        $this->testCase->registerMockObject($object);
+        if ($register) {
+            $this->testCase->registerMockObject($object);
+        }
 
         return $object;
     }
@@ -131,9 +101,15 @@ class MockBuilder
     /**
      * Creates a mock object for an abstract class using a fluent interface.
      *
-     * @return MockObject
+     * @psalm-return MockObject&MockedType
+     *
+     * @throws \PHPUnit\Framework\Exception
+     * @throws ReflectionException
+     * @throws RuntimeException
+     *
+     * @deprecated https://github.com/sebastianbergmann/phpunit/issues/5305
      */
-    public function getMockForAbstractClass()
+    public function getMockForAbstractClass(): MockObject
     {
         $object = $this->generator->getMockForAbstractClass(
             $this->type,
@@ -143,7 +119,7 @@ class MockBuilder
             $this->originalClone,
             $this->autoload,
             $this->methods,
-            $this->cloneArguments
+            $this->cloneArguments,
         );
 
         $this->testCase->registerMockObject($object);
@@ -154,9 +130,15 @@ class MockBuilder
     /**
      * Creates a mock object for a trait using a fluent interface.
      *
-     * @return MockObject
+     * @psalm-return MockObject&MockedType
+     *
+     * @throws \PHPUnit\Framework\Exception
+     * @throws ReflectionException
+     * @throws RuntimeException
+     *
+     * @deprecated https://github.com/sebastianbergmann/phpunit/issues/5306
      */
-    public function getMockForTrait()
+    public function getMockForTrait(): MockObject
     {
         $object = $this->generator->getMockForTrait(
             $this->type,
@@ -166,7 +148,7 @@ class MockBuilder
             $this->originalClone,
             $this->autoload,
             $this->methods,
-            $this->cloneArguments
+            $this->cloneArguments,
         );
 
         $this->testCase->registerMockObject($object);
@@ -175,32 +157,82 @@ class MockBuilder
     }
 
     /**
-     * Specifies the subset of methods to mock. Default is to mock none of them.
+     * Specifies the subset of methods to mock, requiring each to exist in the class.
      *
-     * @return MockBuilder
+     * @psalm-param list<string> $methods
+     *
+     * @throws CannotUseOnlyMethodsException
+     * @throws ReflectionException
+     *
+     * @return $this
      */
-    public function setMethods(array $methods = null)
+    public function onlyMethods(array $methods): self
     {
-        $this->methods = $methods;
+        if (empty($methods)) {
+            $this->emptyMethodsArray = true;
+
+            return $this;
+        }
+
+        try {
+            $reflector = new ReflectionClass($this->type);
+        } catch (\ReflectionException $e) {
+            throw new ReflectionException(
+                $e->getMessage(),
+                $e->getCode(),
+                $e,
+            );
+        }
+
+        foreach ($methods as $method) {
+            if (!$reflector->hasMethod($method)) {
+                throw new CannotUseOnlyMethodsException($this->type, $method);
+            }
+        }
+
+        $this->methods = array_merge($this->methods ?? [], $methods);
 
         return $this;
     }
 
     /**
-     * Specifies the subset of methods to not mock. Default is to mock all of them.
+     * Specifies methods that don't exist in the class which you want to mock.
      *
-     * @return MockBuilder
+     * @psalm-param list<string> $methods
+     *
+     * @throws CannotUseAddMethodsException
+     * @throws ReflectionException
+     * @throws RuntimeException
+     *
+     * @return $this
+     *
+     * @deprecated https://github.com/sebastianbergmann/phpunit/issues/5320
      */
-    public function setMethodsExcept(array $methods = [])
+    public function addMethods(array $methods): self
     {
-        $this->methodsExcept = $methods;
+        if (empty($methods)) {
+            $this->emptyMethodsArray = true;
 
-        $this->setMethods(
-            \array_diff(
-                $this->generator->getClassMethods($this->type),
-                $this->methodsExcept
-            )
-        );
+            return $this;
+        }
+
+        try {
+            $reflector = new ReflectionClass($this->type);
+        } catch (\ReflectionException $e) {
+            throw new ReflectionException(
+                $e->getMessage(),
+                $e->getCode(),
+                $e,
+            );
+        }
+
+        foreach ($methods as $method) {
+            if ($reflector->hasMethod($method)) {
+                throw new CannotUseAddMethodsException($this->type, $method);
+            }
+        }
+
+        $this->methods = array_merge($this->methods ?? [], $methods);
 
         return $this;
     }
@@ -208,11 +240,11 @@ class MockBuilder
     /**
      * Specifies the arguments for the constructor.
      *
-     * @return MockBuilder
+     * @return $this
      */
-    public function setConstructorArgs(array $args)
+    public function setConstructorArgs(array $arguments): self
     {
-        $this->constructorArgs = $args;
+        $this->constructorArgs = $arguments;
 
         return $this;
     }
@@ -220,11 +252,11 @@ class MockBuilder
     /**
      * Specifies the name for the mock class.
      *
-     * @param string $name
+     * @return $this
      *
-     * @return MockBuilder
+     * @deprecated https://github.com/sebastianbergmann/phpunit/issues/5444
      */
-    public function setMockClassName($name)
+    public function setMockClassName(string $name): self
     {
         $this->mockClassName = $name;
 
@@ -234,9 +266,9 @@ class MockBuilder
     /**
      * Disables the invocation of the original constructor.
      *
-     * @return MockBuilder
+     * @return $this
      */
-    public function disableOriginalConstructor()
+    public function disableOriginalConstructor(): self
     {
         $this->originalConstructor = false;
 
@@ -246,9 +278,9 @@ class MockBuilder
     /**
      * Enables the invocation of the original constructor.
      *
-     * @return MockBuilder
+     * @return $this
      */
-    public function enableOriginalConstructor()
+    public function enableOriginalConstructor(): self
     {
         $this->originalConstructor = true;
 
@@ -258,9 +290,9 @@ class MockBuilder
     /**
      * Disables the invocation of the original clone constructor.
      *
-     * @return MockBuilder
+     * @return $this
      */
-    public function disableOriginalClone()
+    public function disableOriginalClone(): self
     {
         $this->originalClone = false;
 
@@ -270,9 +302,9 @@ class MockBuilder
     /**
      * Enables the invocation of the original clone constructor.
      *
-     * @return MockBuilder
+     * @return $this
      */
-    public function enableOriginalClone()
+    public function enableOriginalClone(): self
     {
         $this->originalClone = true;
 
@@ -282,9 +314,11 @@ class MockBuilder
     /**
      * Disables the use of class autoloading while creating the mock object.
      *
-     * @return MockBuilder
+     * @return $this
+     *
+     * @deprecated https://github.com/sebastianbergmann/phpunit/issues/5309
      */
-    public function disableAutoload()
+    public function disableAutoload(): self
     {
         $this->autoload = false;
 
@@ -294,9 +328,11 @@ class MockBuilder
     /**
      * Enables the use of class autoloading while creating the mock object.
      *
-     * @return MockBuilder
+     * @return $this
+     *
+     * @deprecated https://github.com/sebastianbergmann/phpunit/issues/5309
      */
-    public function enableAutoload()
+    public function enableAutoload(): self
     {
         $this->autoload = true;
 
@@ -306,9 +342,11 @@ class MockBuilder
     /**
      * Disables the cloning of arguments passed to mocked methods.
      *
-     * @return MockBuilder
+     * @return $this
+     *
+     * @deprecated https://github.com/sebastianbergmann/phpunit/issues/5315
      */
-    public function disableArgumentCloning()
+    public function disableArgumentCloning(): self
     {
         $this->cloneArguments = false;
 
@@ -318,9 +356,11 @@ class MockBuilder
     /**
      * Enables the cloning of arguments passed to mocked methods.
      *
-     * @return MockBuilder
+     * @return $this
+     *
+     * @deprecated https://github.com/sebastianbergmann/phpunit/issues/5315
      */
-    public function enableArgumentCloning()
+    public function enableArgumentCloning(): self
     {
         $this->cloneArguments = true;
 
@@ -330,9 +370,11 @@ class MockBuilder
     /**
      * Enables the invocation of the original methods.
      *
-     * @return MockBuilder
+     * @return $this
+     *
+     * @deprecated https://github.com/sebastianbergmann/phpunit/issues/5307
      */
-    public function enableProxyingToOriginalMethods()
+    public function enableProxyingToOriginalMethods(): self
     {
         $this->callOriginalMethods = true;
 
@@ -342,9 +384,11 @@ class MockBuilder
     /**
      * Disables the invocation of the original methods.
      *
-     * @return MockBuilder
+     * @return $this
+     *
+     * @deprecated https://github.com/sebastianbergmann/phpunit/issues/5307
      */
-    public function disableProxyingToOriginalMethods()
+    public function disableProxyingToOriginalMethods(): self
     {
         $this->callOriginalMethods = false;
         $this->proxyTarget         = null;
@@ -355,11 +399,11 @@ class MockBuilder
     /**
      * Sets the proxy target.
      *
-     * @param object $object
+     * @return $this
      *
-     * @return MockBuilder
+     * @deprecated https://github.com/sebastianbergmann/phpunit/issues/5307
      */
-    public function setProxyTarget($object)
+    public function setProxyTarget(object $object): self
     {
         $this->proxyTarget = $object;
 
@@ -367,9 +411,11 @@ class MockBuilder
     }
 
     /**
-     * @return MockBuilder
+     * @return $this
+     *
+     * @deprecated https://github.com/sebastianbergmann/phpunit/issues/5308
      */
-    public function allowMockingUnknownTypes()
+    public function allowMockingUnknownTypes(): self
     {
         $this->allowMockingUnknownTypes = true;
 
@@ -377,9 +423,11 @@ class MockBuilder
     }
 
     /**
-     * @return MockBuilder
+     * @return $this
+     *
+     * @deprecated https://github.com/sebastianbergmann/phpunit/issues/5308
      */
-    public function disallowMockingUnknownTypes()
+    public function disallowMockingUnknownTypes(): self
     {
         $this->allowMockingUnknownTypes = false;
 
@@ -387,9 +435,11 @@ class MockBuilder
     }
 
     /**
-     * @return MockBuilder
+     * @return $this
+     *
+     * @deprecated https://github.com/sebastianbergmann/phpunit/issues/5421
      */
-    public function enableAutoReturnValueGeneration()
+    public function enableAutoReturnValueGeneration(): self
     {
         $this->returnValueGeneration = true;
 
@@ -397,9 +447,11 @@ class MockBuilder
     }
 
     /**
-     * @return MockBuilder
+     * @return $this
+     *
+     * @deprecated https://github.com/sebastianbergmann/phpunit/issues/5421
      */
-    public function disableAutoReturnValueGeneration()
+    public function disableAutoReturnValueGeneration(): self
     {
         $this->returnValueGeneration = false;
 

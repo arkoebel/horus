@@ -1,10 +1,10 @@
 # OpenTracing API for PHP
 
-[![Build Status](https://travis-ci.org/opentracing/opentracing-php.svg?branch=master)](https://travis-ci.org/opentracing/opentracing-php)
+[![Build](https://github.com/opentracing/opentracing-php/actions/workflows/ci.yml/badge.svg)](https://github.com/opentracing/opentracing-php/actions/workflows/ci.yml)
 [![OpenTracing Badge](https://img.shields.io/badge/OpenTracing-enabled-blue.svg)](http://opentracing.io)
 [![Total Downloads](https://poser.pugx.org/opentracing/opentracing/downloads)](https://packagist.org/packages/opentracing/opentracing)
 [![Minimum PHP Version](https://img.shields.io/badge/php-%3E%3D%205.6-8892BF.svg)](https://php.net/)
-[![License](https://img.shields.io/packagist/l/opentracing/opentracing.svg)](https://github.com/opentracing/opentracing-php/blob/master/LICENSE)
+[![License](https://img.shields.io/github/license/opentracing/opentracing-php.svg)](https://github.com/opentracing/opentracing-php/blob/master/LICENSE)
 [![Join the chat at https://gitter.im/opentracing/opentracing-php](https://badges.gitter.im/opentracing/opentracing-php.svg)](https://gitter.im/opentracing/opentracing-php?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 PHP library for the OpenTracing's API.
@@ -42,7 +42,7 @@ GlobalTracer::set(new MyTracerImplementation());
 
 ### Creating a Span given an existing Request
 
-To start a new `Span`, you can use the `startActiveSpan` method.
+To start a new `Span`, you can use the `startSpan` method.
 
 ```php
 use OpenTracing\Formats;
@@ -50,6 +50,7 @@ use OpenTracing\GlobalTracer;
 
 ...
 
+// extract the span context
 $spanContext = GlobalTracer::get()->extract(
     Formats\HTTP_HEADERS,
     getallheaders()
@@ -58,21 +59,24 @@ $spanContext = GlobalTracer::get()->extract(
 function doSomething() {
     ...
 
+    // start a new span called 'my_span' and make it a child of the $spanContext
     $span = GlobalTracer::get()->startSpan('my_span', ['child_of' => $spanContext]);
 
     ...
-
+    
+    // add some logs to the span
     $span->log([
         'event' => 'soft error',
         'type' => 'cache timeout',
         'waiter.millis' => 1500,
     ])
 
+    // finish the the span
     $span->finish();
 }
 ```
 
-### Starting an empty trace by creating a "root span"
+### Starting a new trace by creating a "root span"
 
 It's always possible to create a "root" `Span` with no parent or other causal reference.
 
@@ -84,27 +88,11 @@ $span->finish();
 
 ### Active Spans and Scope Manager
 
-When using the `Tracer::startActiveSpan` function the underlying tracer uses an
-abstraction called scope manager to keep track of the currently active span.
-
-Starting an active span will always use the currently active span as a parent.
-If no parent is available, then the newly created span is considered to be the
-root span of the trace.
-
-Unless you are using asynchronous code that tracks multiple spans at the same
-time, such as when using cURL Multi Exec or MySQLi Polling you are better
-of just using `Tracer::startActiveSpan` everywhere in your application.
-
-The currently active span gets automatically finished when you call `$scope->close()`
-as you can see in the previous example.
-
-If you don't want a span to automatically close when `Span::finish()` is called
-then you must pass the option `'finish_span_on_close'=> false,` to the `$options`
-argument of `startActiveSpan`.
+For most use cases, it is recommended that you use the `Tracer::startActiveSpan` function for
+creating new spans.
 
 An example of a linear, two level deep span tree using active spans looks like
 this in PHP code:
-
 ```php
 // At dispatcher level
 $scope = $tracer->startActiveSpan('request');
@@ -124,6 +112,24 @@ $scope = $tracer->startActiveSpan('http');
 file_get_contents('http://php.net');
 $scope->close();
 ```
+ 
+When using the `Tracer::startActiveSpan` function the underlying tracer uses an
+abstraction called scope manager to keep track of the currently active span.
+
+Starting an active span will always use the currently active span as a parent.
+If no parent is available, then the newly created span is considered to be the
+root span of the trace.
+
+Unless you are using asynchronous code that tracks multiple spans at the same
+time, such as when using cURL Multi Exec or MySQLi Polling it is recommended that you 
+use `Tracer::startActiveSpan` everywhere in your application.
+
+The currently active span gets automatically finished when you call `$scope->close()`
+as you can see in the previous examples.
+
+If you don't want a span to automatically close when `$scope->close()` is called
+then you must specify `'finish_span_on_close'=> false,` in the `$options`
+argument of `startActiveSpan`.
 
 #### Creating a child span assigning parent manually
 
@@ -270,7 +276,7 @@ The propagation formats should be implemented consistently across all tracers.
 If you want to implement your own format, then don't reuse the existing constants.
 Tracers will throw an exception if the requested format is not handled by them.
 
-- `Tracer::FORMAT_TEXT_MAP` should represents the span context as a key value map. There is no
+- `Tracer::FORMAT_TEXT_MAP` should represent the span context as a key value map. There is no
   assumption about the semantics where the context is coming from and sent to.
 
 - `Tracer::FORMAT_HTTP_HEADERS` should represent the span context as HTTP header lines
@@ -297,4 +303,4 @@ coding standard and the [PSR-4](https://github.com/php-fig/fig-standards/blob/ma
 
 ## License
 
-All the open source contributions are under the terms of the [MIT License](http://opensource.org/licenses/MIT).
+All the open source contributions are under the terms of the [Apache-2.0 License](https://opensource.org/licenses/Apache-2.0).

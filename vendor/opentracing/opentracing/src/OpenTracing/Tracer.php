@@ -1,10 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace OpenTracing;
 
-use OpenTracing\Exceptions\InvalidReferencesSet;
-use OpenTracing\Exceptions\InvalidSpanOption;
-use OpenTracing\Exceptions\UnsupportedFormat;
+use OpenTracing\UnsupportedFormatException;
+use OpenTracing\InvalidSpanOptionException;
+use OpenTracing\InvalidReferencesSetException;
 
 interface Tracer
 {
@@ -13,7 +15,7 @@ interface Tracer
      *
      * @return ScopeManager
      */
-    public function getScopeManager();
+    public function getScopeManager(): ScopeManager;
 
     /**
      * Returns the active {@link Span}. This is a shorthand for
@@ -22,78 +24,85 @@ interface Tracer
      *
      * @return Span|null
      */
-    public function getActiveSpan();
+    public function getActiveSpan(): ?Span;
 
     /**
-     * Starts and returns a new `Span` representing a unit of work.
+     * Starts a new span that is activated on a scope manager.
      *
-     * This method differs from `startSpan` because it uses in-process
-     * context propagation to keep track of the current active `Span` (if
-     * available).
+     * It's also possible to not finish the {@see \OpenTracing\Span} when
+     * {@see \OpenTracing\Scope} context expires:
      *
-     * Starting a root `Span` with no casual references and a child `Span`
-     * in a different function, is possible without passing the parent
-     * reference around:
-     *
-     *  function handleRequest(Request $request, $userId)
-     *  {
-     *      $rootSpan = $this->tracer->startActiveSpan('request.handler');
-     *      $user = $this->repository->getUser($userId);
-     *  }
-     *
-     *  function getUser($userId)
-     *  {
-     *      // `$childSpan` has `$rootSpan` as parent.
-     *      $childSpan = $this->tracer->startActiveSpan('db.query');
-     *  }
+     *     $scope = $tracer->startActiveSpan('...', [
+     *         'finish_span_on_close' => false,
+     *     ]);
+     *     $span = $scope->getSpan();
+     *     try {
+     *         $span->setTag(Tags\HTTP_METHOD, 'GET');
+     *         // ...
+     *     } finally {
+     *         $scope->close();
+     *     }
+     *     // $span->finish() is not called as part of Scope deactivation as
+     *     // finish_span_on_close is false
      *
      * @param string $operationName
-     * @param array|StartSpanOptions $options A set of optional parameters:
-     *   - Zero or more references to related SpanContexts, including a shorthand for ChildOf and
-     *     FollowsFrom reference types if possible.
-     *   - An optional explicit start timestamp; if omitted, the current walltime is used by default
-     *     The default value should be set by the vendor.
-     *   - Zero or more tags
-     *   - FinishSpanOnClose option which defaults to true.
+     * @param array|StartSpanOptions $options Same as for startSpan() with
+     *     additional option of `finish_span_on_close` that enables finishing
+     *     of span whenever a scope is closed. It is true by default.
      *
-     * @return Scope
+     * @return Scope A Scope that holds newly created Span and is activated on
+     *               a ScopeManager.
      */
-    public function startActiveSpan($operationName, $options = []);
+    public function startActiveSpan(string $operationName, $options = []): Scope;
 
     /**
-     * Starts and returns a new `Span` representing a unit of work.
+     * Starts and returns a new span representing a unit of work.
+     *
+     * Whenever `child_of` reference is not passed then
+     * {@see \OpenTracing\ScopeManager::getActive()} span is used as `child_of`
+     * reference. In order to ignore implicit parent span pass in
+     * `ignore_active_span` option set to true.
+     *
+     * Starting a span with explicit parent:
+     *
+     *     $tracer->startSpan('...', [
+     *         'child_of' => $parentSpan,
+     *     ]);
      *
      * @param string $operationName
-     * @param array|StartSpanOptions $options
+     * @param array|StartSpanOptions $options See StartSpanOptions for
+     *                                        available options.
+     *
      * @return Span
-     * @throws InvalidSpanOption for invalid option
-     * @throws InvalidReferencesSet for invalid references set
+     *
+     * @throws InvalidSpanOptionException for invalid option
+     * @throws InvalidReferencesSetException for invalid references set
+     * @see \OpenTracing\StartSpanOptions
      */
-    public function startSpan($operationName, $options = []);
+    public function startSpan(string $operationName, $options = []): Span;
 
     /**
      * @param SpanContext $spanContext
      * @param string $format
      * @param mixed $carrier
+     * @return void
      *
-     * @see Formats
-     *
-     * @throws UnsupportedFormat when the format is not recognized by the tracer
+     * @throws UnsupportedFormatException when the format is not recognized by the tracer
      * implementation
+     * @see Formats
      */
-    public function inject(SpanContext $spanContext, $format, &$carrier);
+    public function inject(SpanContext $spanContext, string $format, &$carrier): void;
 
     /**
      * @param string $format
      * @param mixed $carrier
      * @return SpanContext|null
      *
-     * @see Formats
-     *
-     * @throws UnsupportedFormat when the format is not recognized by the tracer
+     * @throws UnsupportedFormatException when the format is not recognized by the tracer
      * implementation
+     * @see Formats
      */
-    public function extract($format, $carrier);
+    public function extract(string $format, $carrier): ?SpanContext;
 
     /**
      * Allow tracer to send span data to be instrumented.
@@ -106,5 +115,5 @@ interface Tracer
      * or {@see fastcgi_finish_request} in order to not to delay the end of the request
      * to the client.
      */
-    public function flush();
+    public function flush(): void;
 }

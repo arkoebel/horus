@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace OpenTracing;
 
 final class GlobalTracer
@@ -10,6 +12,11 @@ final class GlobalTracer
     private static $instance;
 
     /**
+     * @var bool
+     */
+    private static $isRegistered = false;
+
+    /**
      * GlobalTracer::set sets the [singleton] Tracer returned by get().
      * Those who use GlobalTracer (rather than directly manage a Tracer instance)
      * should call GlobalTracer::set as early as possible in bootstrap, prior to
@@ -17,10 +24,12 @@ final class GlobalTracer
      * via the `Tracer::startActiveSpan` (etc) globals are noops.
      *
      * @param Tracer $tracer
+     * @return void
      */
-    public static function set(Tracer $tracer)
+    public static function set(Tracer $tracer): void
     {
         self::$instance = $tracer;
+        self::$isRegistered = true;
     }
 
     /**
@@ -30,12 +39,22 @@ final class GlobalTracer
      *
      * @return Tracer
      */
-    public static function get()
+    public static function get(): Tracer
     {
         if (self::$instance === null) {
-            self::$instance = NoopTracer::create();
+            self::$instance = new NoopTracer();
         }
 
         return self::$instance;
+    }
+
+    /**
+     * Returns true if a global tracer has been registered, otherwise returns false.
+     *
+     * @return bool
+     */
+    public static function isRegistered(): bool
+    {
+        return self::$isRegistered;
     }
 }

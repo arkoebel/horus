@@ -1,26 +1,23 @@
 <?php
 
+declare(strict_types=1);
+
 namespace OpenTracing;
 
 final class NoopScope implements Scope
 {
-    public static function create()
+    /**
+     * {@inheritdoc}
+     */
+    public function close(): void
     {
-        return new self();
     }
 
     /**
      * {@inheritdoc}
      */
-    public function close()
+    public function getSpan(): Span
     {
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function getSpan()
-    {
-        return NoopSpan::create();
+        return new NoopSpan();
     }
 }

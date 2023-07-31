@@ -1,8 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace OpenTracing;
 
-use OpenTracing\Exceptions\InvalidReferenceArgument;
+use OpenTracing\InvalidReferenceArgumentException;
 
 final class Reference
 {
@@ -10,14 +12,14 @@ final class Reference
      * A Span may be the ChildOf a parent Span. In a ChildOf reference,
      * the parent Span depends on the child Span in some capacity.
      */
-    const CHILD_OF = 'child_of';
+    public const CHILD_OF = 'child_of';
 
     /**
      * Some parent Spans do not depend in any way on the result of their
      * child Spans. In these cases, we say merely that the child Span
      * FollowsFrom the parent Span in a causal sense.
      */
-    const FOLLOWS_FROM = 'follows_from';
+    public const FOLLOWS_FROM = 'follows_from';
 
     /**
      * @var string
@@ -27,39 +29,39 @@ final class Reference
     /**
      * @var SpanContext
      */
-    private $context;
+    private $spanContext;
 
     /**
      * @param string $type
-     * @param SpanContext $context
+     * @param SpanContext $spanContext
      */
-    private function __construct($type, SpanContext $context)
+    public function __construct(string $type, SpanContext $spanContext)
     {
+        if (empty($type)) {
+            throw InvalidReferenceArgumentException::forEmptyType();
+        }
+
         $this->type = $type;
-        $this->context = $context;
+        $this->spanContext = $spanContext;
     }
 
     /**
-     * @param SpanContext|Span $context
      * @param string $type
-     * @throws InvalidReferenceArgument on empty type
+     * @param Span $span
      * @return Reference when context is invalid
+     * @throws InvalidReferenceArgumentException on empty type
      */
-    public static function create($type, $context)
+    public static function createForSpan(string $type, Span $span): Reference
     {
-        if (empty($type)) {
-            throw InvalidReferenceArgument::forEmptyType();
-        }
-
-        return new self($type, self::extractContext($context));
+        return new self($type, $span->getContext());
     }
 
     /**
      * @return SpanContext
      */
-    public function getContext()
+    public function getSpanContext(): SpanContext
     {
-        return $this->context;
+        return $this->spanContext;
     }
 
     /**
@@ -68,21 +70,8 @@ final class Reference
      * @param string $type the type for the reference
      * @return bool
      */
-    public function isType($type)
+    public function isType(string $type): bool
     {
         return $this->type === $type;
-    }
-
-    private static function extractContext($context)
-    {
-        if ($context instanceof SpanContext) {
-            return $context;
-        }
-
-        if ($context instanceof Span) {
-            return $context->getContext();
-        }
-
-        throw InvalidReferenceArgument::forInvalidContext($context);
     }
 }

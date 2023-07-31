@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 /*
  * This file is part of sebastian/comparator.
  *
@@ -9,35 +9,29 @@
  */
 namespace SebastianBergmann\Comparator;
 
+use function assert;
+use PHPUnit\Framework\MockObject\MockObject;
+
 /**
- * Compares PHPUnit_Framework_MockObject_MockObject instances for equality.
+ * Compares PHPUnit\Framework\MockObject\MockObject instances for equality.
  */
-class MockObjectComparator extends ObjectComparator
+final class MockObjectComparator extends ObjectComparator
 {
     /**
      * Returns whether the comparator can compare two values.
      *
      * @param mixed $expected The first value to compare
      * @param mixed $actual   The second value to compare
-     *
-     * @return bool
      */
-    public function accepts($expected, $actual)
+    public function accepts(mixed $expected, mixed $actual): bool
     {
-        return ($expected instanceof \PHPUnit_Framework_MockObject_MockObject || $expected instanceof \PHPUnit\Framework\MockObject\MockObject) &&
-               ($actual instanceof \PHPUnit_Framework_MockObject_MockObject || $actual instanceof \PHPUnit\Framework\MockObject\MockObject);
+        return $expected instanceof MockObject && $actual instanceof MockObject;
     }
 
-    /**
-     * Converts an object to an array containing all of its private, protected
-     * and public properties.
-     *
-     * @param object $object
-     *
-     * @return array
-     */
-    protected function toArray($object)
+    protected function toArray(object $object): array
     {
+        assert($object instanceof MockObject);
+
         $array = parent::toArray($object);
 
         unset($array['__phpunit_invocationMocker']);

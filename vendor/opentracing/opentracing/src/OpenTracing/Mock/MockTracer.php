@@ -1,12 +1,17 @@
 <?php
 
+declare(strict_types=1);
+
 namespace OpenTracing\Mock;
 
-use OpenTracing\Exceptions\UnsupportedFormat;
+use OpenTracing\InvalidReferenceArgumentException;
+use OpenTracing\UnsupportedFormatException;
+use OpenTracing\Scope;
 use OpenTracing\ScopeManager;
+use OpenTracing\Span;
+use OpenTracing\SpanContext;
 use OpenTracing\StartSpanOptions;
 use OpenTracing\Tracer;
-use OpenTracing\SpanContext;
 
 final class MockTracer implements Tracer
 {
@@ -40,7 +45,7 @@ final class MockTracer implements Tracer
     /**
      * {@inheritdoc}
      */
-    public function startActiveSpan($operationName, $options = [])
+    public function startActiveSpan(string $operationName, $options = []): Scope
     {
         if (!($options instanceof StartSpanOptions)) {
             $options = StartSpanOptions::create($options);
@@ -58,7 +63,7 @@ final class MockTracer implements Tracer
     /**
      * {@inheritdoc}
      */
-    public function startSpan($operationName, $options = [])
+    public function startSpan(string $operationName, $options = []): Span
     {
         if (!($options instanceof StartSpanOptions)) {
             $options = StartSpanOptions::create($options);
@@ -67,14 +72,14 @@ final class MockTracer implements Tracer
         if (empty($options->getReferences())) {
             $spanContext = MockSpanContext::createAsRoot();
         } else {
-            $spanContext = MockSpanContext::createAsChildOf($options->getReferences()[0]);
+            $referenceContext = $options->getReferences()[0]->getSpanContext();
+            if (!$referenceContext instanceof MockSpanContext) {
+                throw InvalidReferenceArgumentException::forInvalidContext($referenceContext);
+            }
+            $spanContext = MockSpanContext::createAsChildOf($referenceContext);
         }
 
-        $span = new MockSpan(
-            $operationName,
-            $spanContext,
-            $options->getStartTime()
-        );
+        $span = new MockSpan($operationName, $spanContext, $options->getStartTime());
 
         foreach ($options->getTags() as $key => $value) {
             $span->setTag($key, $value);
@@ -88,31 +93,31 @@ final class MockTracer implements Tracer
     /**
      * {@inheritdoc}
      */
-    public function inject(SpanContext $spanContext, $format, &$carrier)
+    public function inject(SpanContext $spanContext, string $format, &$carrier): void
     {
         if (!array_key_exists($format, $this->injectors)) {
-            throw UnsupportedFormat::forFormat($format);
+            throw UnsupportedFormatException::forFormat($format);
         }
 
-        call_user_func($this->injectors[$format], $spanContext, $carrier);
+        $this->injectors[$format]($spanContext, $carrier);
     }
 
     /**
      * {@inheritdoc}
      */
-    public function extract($format, $carrier)
+    public function extract(string $format, $carrier): ?SpanContext
     {
         if (!array_key_exists($format, $this->extractors)) {
-            throw UnsupportedFormat::forFormat($format);
+            throw UnsupportedFormatException::forFormat($format);
         }
 
-        return call_user_func($this->extractors[$format], $carrier);
+        return $this->extractors[$format]($carrier);
     }
 
     /**
      * {@inheritdoc}
      */
-    public function flush()
+    public function flush(): void
     {
         $this->spans = [];
     }
@@ -120,7 +125,7 @@ final class MockTracer implements Tracer
     /**
      * @return array|MockSpan[]
      */
-    public function getSpans()
+    public function getSpans(): array
     {
         return $this->spans;
     }
@@ -128,7 +133,7 @@ final class MockTracer implements Tracer
     /**
      * {@inheritdoc}
      */
-    public function getScopeManager()
+    public function getScopeManager(): ScopeManager
     {
         return $this->scopeManager;
     }
@@ -136,7 +141,7 @@ final class MockTracer implements Tracer
     /**
      * {@inheritdoc}
      */
-    public function getActiveSpan()
+    public function getActiveSpan(): ?Span
     {
         if (null !== ($activeScope = $this->scopeManager->getActive())) {
             return $activeScope->getSpan();

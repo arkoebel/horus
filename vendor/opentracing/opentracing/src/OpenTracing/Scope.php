@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace OpenTracing;
 
 /**
@@ -18,11 +20,13 @@ interface Scope
      *
      * NOTE: Calling {@link #close} more than once on a single {@link Scope} instance leads to undefined
      * behavior.
+     *
+     * @return void
      */
-    public function close();
+    public function close(): void;
 
     /**
      * @return Span the {@link Span} that's been scoped by this {@link Scope}
      */
-    public function getSpan();
+    public function getSpan(): Span;
 }

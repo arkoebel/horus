@@ -802,7 +802,7 @@ class HorusXml
                         }
                         if (1 !== openssl_verify(
                             $canonical2,
-                            $signatureValue,
+                            base64_decode($signatureValue),
                             $pubkey,
                             $definition['signatureAlgorithm']
                             )
@@ -887,6 +887,15 @@ class HorusXml
                         throw new HorusException('Malformed LAU Signature (missing SignatureValue)');
                     }
                     $signatureValue = $signature->item(0)->nodeValue;
+
+                    if (preg_match('/^RSA/', $definition['signatureAlgorithm'])) {
+                        /** @var DOMDocument $dd **/
+                        $dd = $sig->item(0);
+                        $key = $dd->getElementsByTagNameNS(HorusXML::XMLDSIGNS, 'X509Data');
+                        if ($key->length !== 0) {
+                            $rsakey = $key->item(0)->nodeValue;
+                        }
+                    }
         
                     // Remove the Signature element from the original XML
                     // (http://www.w3.org/2000/09/xmldsig#enveloped-signature)
@@ -910,24 +919,20 @@ class HorusXml
                             openssl_sign($canonical2, $computedSignature, $private, $definition['signatureAlgorithm']);
                             $computedSignature = base64_encode($computedSignature);
                         } else {
-                            /** @var DOMDocument $dd **/
-                            $dd = $sig->item(0);
-                            $key = $dd->getElementsByTagNameNS(HorusXML::XMLDSIGNS, 'X509Data');
-                            if ($key->length !== 0) {
-                                $cert = HorusXml::generatePEMFromString($key->item(0)->nodeValue);
-                                $pubkey = openssl_pkey_get_public($cert);
-                                if ($pubkey === false) {
-                                    throw new HorusException('Incorrect Cert Found' . openssl_error_string());
-                                }
-                                if (1 !== openssl_verify(
+                            $cert = HorusXml::generatePEMFromString($rsakey);
+                            $pubkey = openssl_pkey_get_public($cert);
+                            if ($pubkey === false) {
+                                throw new HorusException('Incorrect Cert Found' . openssl_error_string());
+                            }
+                            if (1 !== openssl_verify(
                                     $canonical2,
-                                    $signatureValue,
+                                    base64_decode($signatureValue),
                                     $pubkey,
                                     $definition['signatureAlgorithm']
-                                    )) {
-                                    throw new HorusException('Mismatched signature ' . openssl_error_string());
-                                }
+                                )) {
+                                throw new HorusException('Mismatched signature ' . openssl_error_string());
                             }
+                            $computedSignature = $signatureValue;
                         }
                     } else {
                         $computedSignature = base64_encode(hash_hmac(

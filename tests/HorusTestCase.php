@@ -26,7 +26,7 @@ class HorusTestCase extends TestCase
     /**
      * Use runkit to create a new header function.
      */
-    public static function setUpBeforeClass()
+    public static function setUpBeforeClass(): void
     {
         $config = Config::getInstance();
         $config::$propagator = \Jaeger\Constants\PROPAGATOR_ZIPKIN;
@@ -143,7 +143,7 @@ class HorusTestCase extends TestCase
     /**
      * After we're done testing, restore the header function.
      */
-    public static function tearDownAfterClass()
+    public static function tearDownAfterClass(): void
     {
         if (!extension_loaded('runkit7')) {
             return;
@@ -185,7 +185,7 @@ class HorusTestCase extends TestCase
     /**
      * Set up our subject under test and global header state.
      */
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->http = new HorusHttp('testHorusHttp', 'php://stdout', 'GREEN',self::$tracer);
         self::$mockheaders = array();

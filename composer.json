@@ -12,7 +12,8 @@
         "stevegrunwell/runkit7-installer": "^1.1.1"
     },
     "require": {
-        "jukylin/jaeger-php": "dev-master"
+        "jukylin/jaeger-php": "dev-master",
+        "RobRichards/XMLSecLibs": "*"
     },
     "minimum-stability": "dev"
 }

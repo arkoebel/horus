@@ -337,6 +337,7 @@ class HorusXml
         if ($query === false) {
             $errorMessage = "Input XML not properly formatted.\n";
             $errorMessage .= $this->common->libxml_display_errors();
+            $errorMessage .= ' input was : ' . $input;
             $ret = $this->business->returnGenericError($preferredType, $genericError, $errorMessage, '', $rootSpan);
 
             throw new HorusException($ret);
@@ -434,12 +435,15 @@ class HorusXml
             }
             $forwardData = $this->formOutQuery($forwardparams, $proxy_mode, $vars);
 
+            error_log($_SERVER['PHP_SELF'] . ' multiple = ' . ($multiple ? 'TRUE' : 'FALSE') . ' / boundary = ' . $mime_boundary);
+            error_log($_SERVER['PHP_SELF'] . ' xxxxx ' . print_r($resp, true));
 
             if ($multiple || ($mime_boundary !== 'single')) {
                 error_log('multiple');
                 $response = '';
                 if(is_array($resp) && (count($resp)>1)){
-                foreach ($resp as $i => $r) {
+                  error_log('multiple array = ' . print_r($resp,true));
+                  foreach ($resp as $i => $r) {
                     $response .= $this->http->formMultiPart(
                         'response_' .  $start . '_' . $i,
                         $r['data'],
@@ -448,7 +452,10 @@ class HorusXml
                         $preferredType,
                         $r['headers']
                     );
-                }
+                  }
+                  $response .= '--' . $mime_boundary . "--\r\n\r\n";
+                  error_log('Multipart response : ' . $response . "\n",3,'/var/log/horus/multiple.log');
+                  error_log('Multipart response : ' . $response . "\n");
             } else {
                 $response .= $this->http->formMultipart(
                     'response_' . $start,
@@ -458,6 +465,7 @@ class HorusXml
                     $preferredType,
                     $vars
                 );
+                $response .= '--' . $mime_boundary . "--\r\n\r\n";
             }
                 $ret = null;
                 if ('' === $proxy_mode)

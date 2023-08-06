@@ -55,7 +55,7 @@ if(substr($content_type,0,9)==='multipart'){
     preg_match('/boundary=(.*)/',$content_type,$mm);
     $boundary = $mm[1];
     foreach ($_FILES as $file){
-        $reqbody[] = file_get_contents($file['tmp_name']);
+        $reqbody[] = base64_decode(file_get_contents($file['tmp_name']));
     }
     error_log(print_r($reqbody, true));
 }else{

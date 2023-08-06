@@ -44,4 +44,4 @@ $common->mlog('Destination is : ' . HorusHttp::extractHeader(HorusCommon::DEST_H
 $roadmaps = new HorusRoadmap($businessId, $loglocation, $colour, $tracer, null);
 $roadmapId = $roadmaps->findRoadmap('A', $input, $rootSpan);
 $common->mlog("Applying roadmap " . $roadmapId, 'DEBUG');
-$roadmaps->generateParts($input, $roadmapId, $businessId, $rootSpan);
+$roadmaps->generateParts('A', $input, $roadmapId, $businessId, $rootSpan);

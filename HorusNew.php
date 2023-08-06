@@ -143,7 +143,7 @@ if ("inject" === $requestType) {
         foreach ($reqbody as $ii => $singlebody) {
    
             $zz = $injector->doInject(
-                $reqbody,
+                $singlebody,
                 $contentType,
                 $proxyMode,
                 $matches,

@@ -29,7 +29,7 @@
                 {
                     "destination": "A",
                     "comment": "Return OK",
-                    "transformUrl": "http://localhost/horus.php"
+                    "transformUrl": "http://horus/HorusNew.php"
                 }
             ]
         },
@@ -50,19 +50,13 @@
                 {
                     "destination": "A",
                     "comment": "Return KO",
-                    "transformUrl": "http://localhost/horus.php"
+                    "transformUrl": "http://horus/HorusNew.php"
                 }
             ]
         },
         {
             "comment": "Catch all",
-            "map": [
-                {
-                    "destination": "C",
-                    "comment": "Return OK",
-                    "transformUrl": "http://localhost/horus.php"
-                }
-            ]
+            "customRoadmap": "mapperSample1.php"
         }
     ],
     "sources": [
@@ -75,18 +69,18 @@
         {
             "name": "A",
             "comment": "Default Source",
-            "url": "http://localhost/horus.php"
+            "url": "http://horus/HorusNew.php"
         },
 
         {
             "name": "B",
             "comment": "Default Destination",
-            "url": "http://localhost/horus.php"
+            "url": "http://horus/HorusNew.php"
         },
         {
-            "name": "C",
+            "name": "destination_c",
             "comment": "Garbage",
-            "url": "http://localhost/dump"
+            "url": "http://horus/dump"
         }
     ]
 }

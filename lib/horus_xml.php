@@ -316,6 +316,48 @@ class HorusXml
         return str_replace('<' . $pattern . '>','<' . $pattern . ' xmlns="' . $destinationNameSpace . '">',$input);
     }
 
+    static function insertXmlElement(
+        $input,
+        $destinationNameSpace,
+        $elementName,
+        $elementLocation
+    ){
+
+        // Simple implementation for now
+        if('/' === $elementLocation){
+            $decl = strpos($input,'?>');
+            if ($decl>0) {
+                $input = substr($input,$decl+2);
+            }
+
+            $header = '<' . $elementName;
+            if ($destinationNameSpace !== null) {
+                $header .= ' xmlns="' . $destinationNameSpace . '">';
+            }else{
+                $header .= '>';
+            }
+            return $header . $input . '</' . $elementName . '>';
+        }
+    }
+
+    static function removeXmlElement(
+        $input,
+        $sourceNameSpace,
+        $sourceNSPrefix,
+        $elementLocation,
+        $destination
+    ){
+        // Simple implementation for now
+        if('/' === $destination){
+            $xml = simplexml_load_string($input);
+            $xml->registerXPathNamespace($sourceNSPrefix, $sourceNameSpace);
+            $xpath = $xml->xpath($elementLocation . '/*');
+            if (is_array($xpath) && count($xpath)==1){
+                $ret = $xpath[0];
+                return $ret->asXML();
+            }
+        }
+    }
     function doInject(
         $reqbody,
         $content_type,

@@ -92,7 +92,7 @@ class HorusRoadmap
         }
         $xp = $xml->xpath($xpath);
         if (($xp !== false) && (is_array($xp) && (sizeof($xp) == 1))) {
-            return preg_match($pattern, (string) $xp[0]);
+            return preg_match('/' . $pattern . '/', (string) $xp[0]);
         }
 
         return false;
@@ -104,49 +104,79 @@ class HorusRoadmap
         $this->tracer->logSpan($span, 'Find Roadmap');
 
         foreach ($this->conf['roadmaps'] as $id => $roadmap) {
+            $this->common->mlog('Trying roadmap ' . $roadmap['comment'], 'DEBUG');
             if ((array_key_exists('source', $roadmap)) && ($source !== $roadmap['source'])) {
-                break;
-            }
-
-            if (array_key_exists('filter', $roadmap)) {
+                $this->common->mlog('Rejected roadmap: wrong source', 'DEBUG');
+            } elseif (array_key_exists('filter', $roadmap)) {
                 $matchFilter = true;
                 foreach ($roadmap['filter'] as $filter) {
+
                     if (array_key_exists('namespace', $filter)) {
                         $namespace = $filter['namespace'];
-                        $this->common->mlog("Searching input for " . $namespace, 'DEBUG');
+                        $this->common->mlog("Searching input for namespace " . $namespace, 'DEBUG');
                         $namespaceList = $this->getNamespaces($input);
-                        error_log(print_r($namespaceList, true));
+                        //error_log(print_r($namespaceList, true));
                         $found = false;
                         foreach ($namespaceList as $ns) {
-                            error_log(' ' . $ns);
+                            //error_log(' ' . $ns);
                             if (str_contains($ns, $namespace)) {
-                                $this->common->mlog("Input contains " . $namespace, 'DEBUG');
+                                $this->common->mlog("Input contains namespace " . $namespace, 'DEBUG');
                                 $found = true;
+                            } else {
+                                // Nothing to say
                             }
                         }
                         if (!$found) {
+                            $this->common->mlog('Failed namespace filter', 'DEBUG');
                             $matchFilter = false;
                             break;
                         }
-                    } elseif (array_key_exists('regex', $filter)) {
+                    } elseif (array_key_exists('xpathregexp', $filter)) {
+                        $this->common->mlog(
+                            'Searching input for Xpath regex ' .
+                            $filter['xpathregexp']['pattern'],
+                            'DEBUG');
                         if (
-                            array_key_exists('xpath', $filter['regex']) &&
-                            !$this->getXpathPattern($input, $filter['regex']['xpath'], $filter['regex']['pattern'])) {
+                            array_key_exists('xpath', $filter['xpathregexp']) &&
+                            !$this->getXpathPattern(
+                                $input,
+                                $filter['xpathregexp']['xpath'],
+                                $filter['xpathregexp']['pattern']
+                            )) {
                             $matchFilter = false;
+                            $this->common->mlog('Failed regex filter', 'DEBUG');
                             break;
+                        } else {
+                            $this->common->mlog('Regex filter matched', 'DEBUG');
                         }
-                    } elseif (array_key_exists('customFilter', $filter)){
+                    } elseif (array_key_exists('customFilter', $filter)) {
+                        $this->common->mlog(
+                            "Searching input for custom filter " .
+                            $filter['customFilter'],
+                            'DEBUG');
                         require_once 'filters/' . $filter['customFilter'];
                         $object = HorusRoadmap::getObjectInstance('HorusFilterInterface');
                         if (!$object->doFilter($input, $source)) {
+                            $this->common->mlog('Failed custom filter ' . $filter['customFilter'], 'DEBUG');
                             $matchFilter = false;
                             break;
+                        } else {
+                            $this->common->mlog('Matched custom filter ' . $filter['customFilter'], 'DEBUG');
                         }
                     }
                 }
                 if ($matchFilter) {
+                    $this->common->mlog('Roadmap ' . $roadmap['comment'] . ' matched', 'DEBUG');
                     return $id;
                 }
+
+            } else {
+                $this->common->mlog(
+                    'No source, no filter : Roadmap ' .
+                    $roadmap['comment'] .
+                    ' always matches',
+                    'DEBUG');
+                return $id;
             }
         }
         return null;
@@ -165,13 +195,20 @@ class HorusRoadmap
 
     private function putMessage($source, $dest, $data, $businessId, $span)
     {
-
+        $nspan = $this->tracer->newSpan($dest['name'] . ' publish', $span);
+        $this->tracer->addAttribute($nspan,'span.kind','PUBLISHER');
+        $this->tracer->addAttribute($nspan,'messaging.system','kafka');
+        $this->tracer->addAttribute($nspan,'messaging.operation','publish');
+        $this->tracer->addAttribute($nspan,'messaging.destination.name',$dest['name']);
+        //$this->tracer->addAttribute($nspan,'messaging.kafka.partition',$message->partition);
+        //$this->tracer->addAttribute($nspan,'messaging.kafka.message.offset',$message->offset);
+        
         $topic = $this->producer->newTopic($dest['name']);
         $headers = $this->tracer->getB3Headers($span);
         $headers['businessId'] = $businessId;
         $headers['destinationUrl'] = $dest['url'];
         $headers['source'] = $source;
-        $topic->producev(RD_KAFKA_PARTITION_UA, 0, $data, $businessId, $headers);
+        $topic->producev(RD_KAFKA_MSG_PARTITIONER_CONSISTENT_RANDOM, 0, $data, $businessId, $headers);
         $this->producer->poll(0);
 
         for ($flushRetries = 0; $flushRetries < 10; $flushRetries++) {
@@ -189,9 +226,11 @@ class HorusRoadmap
     public function generateParts($source, $input, $mapId, $businessId, $span)
     {
         $roadmap = $this->conf['roadmaps'][$mapId];
-        error_log('roadmap : ' . print_r($roadmap, true));
+
+        $nMess = 0;
+
         $destinations = $this->conf['destinations'];
-        if (array_key_exists('customRoadmap', $roadmap)){
+        if (array_key_exists('customRoadmap', $roadmap)) {
             require_once 'mappers/' . $roadmap['customRoadmap'];
             $object = HorusRoadmap::getObjectInstance('HorusMapperInterface');
             $steps = $object->doMap($input, $source, $destinations);
@@ -200,8 +239,6 @@ class HorusRoadmap
         }
         foreach ($steps as $id => $dest) {
 
-            error_log('id=' . $id . "\n");
-            error_log('dest=' . print_r($dest, true) . "\n");
             $this->common->mlog(
                 'Sending message ' . $id . ' to ' . $dest['destination'] . ' : ' . $dest['comment'], 'INFO');
             $transformed = '';
@@ -219,13 +256,15 @@ class HorusRoadmap
                 require_once 'transforms/' . $dest['transform'];
                 $object = HorusRoadmap::getObjectInstance('HorusTransformer');
                 $transformed = $object->doTransform($input);
- 
+
             } else {
                 $transformed = $input;
             }
 
             $this->putMessage($source, $dd, $transformed, $businessId, $span);
+            $nMess++;
         }
+        return $nMess;
     }
 
 }

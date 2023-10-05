@@ -63,9 +63,11 @@ $contentType = $_SERVER['CONTENT_TYPE'];
 if(substr($contentType,0,9)==='multipart'){
     preg_match('/boundary=(.*)/',$contentType,$mm);
     $boundary = $mm[1];
+
     foreach ($_FILES as $file){
-        $reqbody[] = file_get_contents($file['tmp_name']);
+        $reqbody[] = base64_decode(file_get_contents($file['tmp_name']));
     }
+
     error_log(print_r($reqbody, true));
 }else{
     $reqbody[] = file_get_contents('php://input');

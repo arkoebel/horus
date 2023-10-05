@@ -513,6 +513,7 @@ class HorusXml
                         $r['headers']
                     );
                 }
+                $response .= '--' . $mimeBoundary . "--\r\n\r\n";
             } else {
                 $response .= $this->http->formMultipart(
                     'response_' . $start,
@@ -522,6 +523,7 @@ class HorusXml
                     $preferredType,
                     $vars
                 );
+                $response .= '--' . $mimeBoundary . "--\r\n\r\n";
             }
                 $ret = null;
                 if ('' === $proxyMode) {

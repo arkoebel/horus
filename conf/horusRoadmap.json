@@ -1,41 +1,41 @@
 {
     "roadmaps": [
         {
-            "source": "A",
+            "source": "destination_a",
             "comment": "Regular round trip",
             "filter": [
                 {
-                    "regexp": {
-                        "pattern": "ZZZ",
-                        "xpath": "//input"
+                    "xpathregexp": {
+                        "pattern": "SAADBEBBXXX",
+                        "xpath": "//*[local-name()='Sender']/*[local-name() = 'X1']"
                     }
                 },
                 {
-                    "namespace": "camt050"
+                    "namespace": "setr.016"
                 },{
                     "customFilter": "filter1.php"
                 }
             ],
             "map": [
                 {
-                    "destination": "B",
+                    "destination": "destination_b",
                     "comment": "Primary destination",
                     "transform": "transform1.php"
                 },
                 {
-                    "destination": "A",
+                    "destination": "destination_a",
                     "comment": "Return ACK"
                 },
                 {
-                    "destination": "A",
+                    "destination": "destination_a",
                     "comment": "Return OK",
                     "transformUrl": "http://horus/HorusNew.php"
                 }
             ]
         },
         {
-            "source": "A",
-            "comment": "Failed",
+            "source": "destination_a",
+            "comment": "Default Case",
             "filter": [
                 {
                     "namespace": "setr.016"
@@ -43,12 +43,12 @@
             ],
             "map": [
                 {
-                    "destination": "B",
+                    "destination": "destination_b",
                     "comment": "Primary destination",
                     "transform": "transform1.php"
                 },
                 {
-                    "destination": "A",
+                    "destination": "destination_a",
                     "comment": "Return KO",
                     "transformUrl": "http://horus/HorusNew.php"
                 }
@@ -61,19 +61,19 @@
     ],
     "sources": [
         {
-            "name": "A",
+            "name": "destination_a",
             "comment": "Default Source"
         }
     ],
     "destinations": [
         {
-            "name": "A",
+            "name": "destination_a",
             "comment": "Default Source",
             "url": "http://horus/HorusNew.php"
         },
 
         {
-            "name": "B",
+            "name": "destination_b",
             "comment": "Default Destination",
             "url": "http://horus/HorusNew.php"
         },

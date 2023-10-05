@@ -14,13 +14,15 @@ require_once 'lib/horus_tracing.php';
 require_once 'lib/horus_roadmap.php';
 require_once 'vendor/autoload.php';
 
+const CONSUMER_GROUP='horus';
+
 $headerInt = new Horus_Header();
 
 $loglocation = HorusCommon::getConfValue('logLocation', HorusCommon::DEFAULT_LOG_LOCATION);
 
 $conf = new RdKafka\Conf();
 
-$conf->set('group.id', 'horus');
+$conf->set('group.id', CONSUMER_GROUP);
 
 // Initial list of Kafka brokers
 $conf->set('metadata.broker.list', HorusCommon::getConfValue('broker.list', ''));
@@ -56,7 +58,19 @@ while (true) {
                 $headers
             );
             $rootSpan = $tracer->getCurrentSpan();
-            $span = $tracer->newSpan('Treating message', $rootSpan);
+            $span = $tracer->newSpan($message->topic_name . ' process', $rootSpan);
+            $tracer->addAttribute($span,'span.kind','CONSUMER');
+            $tracer->addAttribute($span,'messaging.system','kafka');
+            $tracer->addAttribute($span,'messaging.operation','process');
+            $tracer->addAttribute($span,'messaging.destination.name',$message->topic_name);
+            $tracer->addAttribute($span,'messaging.kafka.consumer.group',CONSUMER_GROUP);
+            $tracer->addAttribute($span,'messaging.kafka.partition',$message->partition);
+            $tracer->addAttribute($span,'messaging.kafka.message.offset',$message->offset);
+            $tracer->addAttribute($span,'destination',$headers['destinationUrl']);
+            $tracer->addAttribute($span,'businessId',$headers['businessId']);
+            $tracer->addAttribute($span,'source',$headers['source']);
+            
+            
             $common = new HorusCommon($headers['businessId'], $loglocation, 'WHITE');
             $common->mlog(
                 'Got new message for destination '
@@ -73,6 +87,8 @@ while (true) {
                     $message->payload,
                     'POST',
                     $span);
+                    $tracer->addAttribute($span,'destination',$headers['destinationUrl']);
+            
             } catch (Exception $e){
                 $common->mlog(
                     'Exception while calling destination '

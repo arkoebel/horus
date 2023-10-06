@@ -135,6 +135,36 @@ if (array_key_exists('destinationNameSpace', $section)) {
     );
 }
 
+if(array_key_exists('InsertXmlElement', $section)){
+    $common->mlog(
+        'Inserting element '
+        . $section['destinationNameSpace'] . ':' . $section['elementName']
+        . ' to '
+        . $section['elementLocation'],'INFO'
+    );
+
+    $returnContent = 'application/xml';
+    $returnData = HorusXml::insertXmlElement(
+        $returnData,
+        $section['destinationNameSpace'],
+        $section['elementName'],
+        $section['elementLocation']
+    );
+}
+
+if(array_key_exists('RemoveXmlElement', $section)){
+    $common->mlog('Removing element ' . $section['elementLocation'], 'INFO');
+
+    $returnContent = 'application/xml';
+    $returnData = HorusXml::removeXmlElement(
+        $returnData,
+        $section['sourceNameSpace'],
+        $section['sourceNSPrefix'],
+        $section['elementLocation'],
+        $section['destination']
+    );
+}
+
 if (''===$destination) {
     $common->mlog('Return content is : ' . $returnData . "\n", "INFO");
     $http->setHttpReturnCode(200);

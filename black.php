@@ -119,7 +119,7 @@ if (array_key_exists('addSection', $section)) {
     $returnContent = 'text/plain';
 }
 
-if (array_key_exists('destinationNameSpace', $section)) {
+if (('EnrichXml' === $section['formatName']) && array_key_exists('destinationNameSpace', $section)){
     $common->mlog(
         'Replacing namespace for element '
         . $section['sourceXpath']
@@ -135,7 +135,7 @@ if (array_key_exists('destinationNameSpace', $section)) {
     );
 }
 
-if(array_key_exists('InsertXmlElement', $section)){
+if('InsertXmlElement' === $section['formatName']){
     $common->mlog(
         'Inserting element '
         . $section['destinationNameSpace'] . ':' . $section['elementName']
@@ -152,7 +152,7 @@ if(array_key_exists('InsertXmlElement', $section)){
     );
 }
 
-if(array_key_exists('RemoveXmlElement', $section)){
+if('RemoveXmlElement' === $section['formatName']){
     $common->mlog('Removing element ' . $section['elementLocation'], 'INFO');
 
     $returnContent = 'application/xml';

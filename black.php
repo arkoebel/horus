@@ -102,7 +102,7 @@ if(array_key_exists('stripSection', $section)){
     $common->mlog('Found Header parameters ' . print_r($queryParams, true), 'DEBUG');
 }
 
-if (array_key_exists('addSection', $section)){
+if (array_key_exists('addSection', $section){
     $common->mlog('Adding section ' . $section['addSection'], 'INFO');
     $xml = simplexml_load_string('<' . $section['addSection'] . '/>');
     $qparams = getQParams($_GET,$section['httpQueryPrefix']);
@@ -116,7 +116,7 @@ if (array_key_exists('addSection', $section)){
     $returnContent = 'text/plain';
 }
 
-if (array_key_exists('destinationNameSpace', $section)){
+if (('EnrichXml' === $section['formatName']) && array_key_exists('destinationNameSpace', $section)){
     $common->mlog(
         'Replacing namespace for element '
         . $section['sourceXpath']
@@ -127,7 +127,7 @@ if (array_key_exists('destinationNameSpace', $section)){
     $returnData = HorusXml::replaceNameSpace($returnData, $section['sourceXPath'], $section['destinationNameSpace']);
 }
 
-if(array_key_exists('InsertXmlElement', $section)){
+if('InsertXmlElement' === $section['formatName']){
     $common->mlog(
         'Inserting element '
         . $section['destinationNameSpace'] . ':' . $section['elementName']
@@ -144,7 +144,7 @@ if(array_key_exists('InsertXmlElement', $section)){
     );
 }
 
-if(array_key_exists('RemoveXmlElement', $section)){
+if('RemoveXmlElement' === $section['formatName']){
     $common->mlog('Removing element ' . $section['elementLocation'], 'INFO');
 
     $returnContent = 'application/xml';

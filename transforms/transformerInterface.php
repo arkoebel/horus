@@ -1,6 +1,6 @@
 <?php
 
-interface HorusTransformer {
+interface HorusTransformerInterface {
 
     public static function doTransform(string $toTransform): string;
 

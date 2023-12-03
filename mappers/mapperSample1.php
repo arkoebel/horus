@@ -1,12 +1,18 @@
 <?php
 
+/* Sample mapper class. The class MUST implement HorusMapperInterface.
+Do try to have different names for all mapper classes.
+If two different files use the same class names and are used within the same request, bad things will happen!
+*/
 class MapperSample1 implements HorusMapperInterface {
 
     /* Mapping should return an array of destinations. Each destination is an associative array with the following keys:
-       "destination": name of the destination for this step. Must be one of the values defined in the destinations defined in the global roadmap configuration file
+       "destination": name of the destination for this step.
+                    Must be one of the values defined in the destinations
+                    defined in the global roadmap configuration file
        "comment": a comment describing that destination
        "transform" (optional) : name of a php file in the ./transforms folder used to transform a given input
-       "transformUrl" (optional) : URL the input can be POSTed to to transform the given input
+       "transformUrl" (optional) : URL the input can be POSTed to, to transform the given input
    */
     static function doMap(string $input, string $source, array $destinations): array {
 

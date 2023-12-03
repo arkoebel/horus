@@ -3,15 +3,18 @@
         {
             "source": "destination_a",
             "comment": "Regular round trip",
+            "preTransform": "http://horus/horusNews.php",
             "filter": [
                 {
                     "xpathregexp": {
                         "pattern": "SAADBEBBXXX",
                         "xpath": "//*[local-name()='Sender']/*[local-name() = 'X1']"
-                    }
+                    },
+                    "filterAgainst": "transformed"
                 },
                 {
-                    "namespace": "setr.016"
+                    "namespace": "setr.016",
+                    "filterAgainst": "input"
                 },{
                     "customFilter": "filter1.php"
                 }
@@ -20,7 +23,8 @@
                 {
                     "destination": "destination_b",
                     "comment": "Primary destination",
-                    "transform": "transform1.php"
+                    "transform": "transform1.php",
+                    "delay": "1"
                 },
                 {
                     "destination": "destination_a",

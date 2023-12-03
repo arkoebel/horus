@@ -1,6 +1,7 @@
 <?php
 
 use OpenTelemetry\API\Trace\SpanKind;
+use OpenTelemetry\API\Trace\SpanInterface;
 use OpenTelemetry\Contrib\Zipkin\Exporter as ZipkinExporter;
 use OpenTelemetry\Extension\Propagator\B3\B3MultiPropagator;
 use OpenTelemetry\SDK\Common\Export\Http\PsrTransportFactory;
@@ -9,13 +10,15 @@ use OpenTelemetry\SDK\Trace\Sampler\AlwaysOnSampler;
 use OpenTelemetry\SDK\Trace\SpanExporter\LoggerDecorator;
 use OpenTelemetry\SDK\Trace\SpanProcessor\BatchSpanProcessor;
 use OpenTelemetry\SDK\Trace\TracerProvider;
+use OpenTelemetry\SDK\Logs\SimplePsrFileLogger;
+use OpenTelemetry\SDK\Trace\SpanProcessor\SimpleSpanProcessor;
 
 use OpenTelemetry\Context\Context;
 
 interface HorusTracingInterface
 {
-    public function __construct($prefix, $path, $title, $headers);
-    public function newSpan($title, $parent=null);
+    public function __construct($prefix, $path, $title, $headers, $spanKind=SpanKind::KIND_SERVER);
+    public function newSpan($title, $parent=null, $spanKind=SpanKind::KIND_SERVER);
     public function finishSpan();
     public function finishAll();
     public function setAttribute($key, $value);
@@ -28,6 +31,7 @@ interface HorusTracingInterface
     public function closeSpan(&$span);
     public function flush(&$tracer, &$span);
     public function getB3Headers($span);
+    public function forceFlush();
 }
 
 class HorusTracingMock implements HorusTracingInterface
@@ -36,26 +40,26 @@ class HorusTracingMock implements HorusTracingInterface
     private $lastSpan;
     private  ?HorusNodeList $tree;
 
-    public function __construct($prefix, $path, $title, $headers)
+    public function __construct($prefix, $path, $title, $headers, $spanKind=SpanKind::KIND_SERVER)
     {
 
         $this->tree = new HorusNodeList('root');
         $this->tracer = $this->getTracer($prefix, $path);
 
-        $new = $this->getStartSpan($this->tracer, $title, $headers);
+        $new = $this->getStartSpan($this->tracer, $title, $headers, $spanKind);
         $this->tree->addChild(new HorusNodeList($new));
         $this->lastSpan = $new;
     }
 
-    public function newSpan($title, $parent = null)
+    public function newSpan($title, $parent = null, $spanKind=SpanKind::KIND_SERVER)
     {
 
         if (is_null($parent)) {
             $current = $this->tree->searchValueInTree($this->lastSpan, $this->tree->root());
-            $span = $this->startSpan($this->tracer, $title, $this->lastSpan);
+            $span = $this->startSpan($this->tracer, $title, $this->lastSpan, $spanKind);
         } else {
             $current = $this->tree->searchValueInTree($parent, $this->tree->root());
-            $span = $this->startSpan($this->tracer, $title, $parent);
+            $span = $this->startSpan($this->tracer, $title, $parent, $spanKind);
         }
        
         if (!is_null($current)) {
@@ -172,6 +176,11 @@ class HorusTracingMock implements HorusTracingInterface
     {
         return array();
     }
+
+    public function forceFlush()
+    {
+        return null;
+    }
 }
 
 class HorusTracing implements HorusTracingInterface
@@ -181,22 +190,29 @@ class HorusTracing implements HorusTracingInterface
     private $tracerProvider;
     private $lastSpan;
     private ?HorusNodeList $tree;
-    public function __construct($prefix, $path, $title, $headers)
+    public function __construct($prefix, $path, $title, $headers, $spanKind=SpanKind::KIND_SERVER)
     {
 
         $this->tracer = $this->getTracer($prefix, $path);
 
-        $new = $this->getStartSpan($this->tracer, $title, $headers);
+        $new = $this->getStartSpan($this->tracer, $title, $headers, $spanKind);
         $this->tree = new HorusNodeList($new);
         $this->lastSpan = $new;
     }
 
-    public function newSpan($title, $parent = null)
+    public function printSpan(SpanInterface $span)
+    {
+        return $span->getContext()->getTraceId() . '_' . $span->getContext()->getSpanId();
+    }
+    public function newSpan($title, $parent = null, $spanKind=SpanKind::KIND_SERVER)
     {
         if (is_null($parent)) {
-            $this->lastSpan = $this->startSpan($this->tracer, $title, $this->lastSpan);
+            $zz = $this->printSpan($this->lastSpan);
+            $this->lastSpan = $this->startSpan($this->tracer, $title, $this->lastSpan, $spanKind);
+            error_log("New Span (no parent) " . $this->printSpan($this->lastSpan) . ' / ' . $zz );
         } else {
-            $this->lastSpan = $this->startSpan($this->tracer, $title, $parent);
+            $this->lastSpan = $this->startSpan($this->tracer, $title, $parent, $spanKind);
+            error_log("New Span " . $this->printSpan($this->lastSpan) . ' / ' . $this->printSpan($parent));
         }
         return $this->lastSpan;
     }
@@ -204,6 +220,7 @@ class HorusTracing implements HorusTracingInterface
     public function finishSpan()
     {
         $this->finishSpan($this->lastSpan);
+        error_log("End Span " . $this->printSpan($this->lastSpan) );
         $this->lastSpan = '';
     }
 
@@ -242,20 +259,22 @@ class HorusTracing implements HorusTracingInterface
         $zipkinExporter = new ZipkinExporter(
             $transport
         );
+        /*
         $decorator = new LoggerDecorator(
             $zipkinExporter,
-            //new SimplePsrFileLogger(__DIR__ . '/../otel.log')
+            new SimplePsrFileLogger(__DIR__ . '/../otel.log')
         );
-
+        */
         putenv('OTEL_SERVICE_NAME=' . $prefix . '_' . $path);
         $this->tracerProvider = new TracerProvider(
-            new BatchSpanProcessor($decorator, ClockFactory::getDefault()),
+          //  new BatchSpanProcessor($decorator, ClockFactory::getDefault()),
+            new SimpleSpanProcessor($zipkinExporter),
             new AlwaysOnSampler()
         );
         return $this->tracerProvider->getTracer($prefix . '_' . $path);
     }
 
-    private function getStartSpan($tracer, $title, $headers)
+    private function getStartSpan($tracer, $title, $headers, $spanKind = SpanKind::KIND_SERVER)
     {
         $h = array();
         foreach ($headers as $key => $value) {
@@ -269,24 +288,24 @@ class HorusTracing implements HorusTracingInterface
         //start a root span
         return $tracer
             ->spanBuilder($title)->setParent($rootContext)
-            ->setSpanKind(SpanKind::KIND_SERVER)
+            ->setSpanKind($spanKind)
             ->setAttribute('OTEL_SERVICE_NAME', 'toto')
             ->startSpan();
     }
 
-    private function startSpan($tracer, $spanName, $parentSpan = null)
+    private function startSpan($tracer, $spanName, $parentSpan = null, $spanKind = SpanKind::KIND_SERVER)
     {
         if (is_null($parentSpan)) {
             return $tracer
                 ->spanBuilder($spanName)
-                ->setSpanKind(SpanKind::KIND_SERVER)
+                ->setSpanKind($spanKind)
                 ->startSpan();
         } else {
             $ctx = $parentSpan->storeInContext(Context::getCurrent());
             return $tracer
                 ->spanBuilder($spanName)
                 ->setParent($ctx)
-                ->setSpanKind(SpanKind::KIND_SERVER)
+                ->setSpanKind($spanKind)
                 ->startSpan();
         }
     }
@@ -318,8 +337,14 @@ class HorusTracing implements HorusTracingInterface
         $carrier=array();
         $ctx = $span->storeInContext(Context::getCurrent());
         $propagator->inject($carrier, null, $ctx);
+        error_log(' Get Headers : ' . print_r($carrier, true));
         return $carrier;
 
+    }
+
+    public function forceFlush()
+    {
+        $this->tracerProvider->forceFlush();
     }
 }
 

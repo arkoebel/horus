@@ -39,7 +39,7 @@ class HorusRoadmap
 
     }
 
-    public static function getObjectInstance($interface)
+    public static function getObjectInstance($interface, $plugin)
     {
         $loadedClasses = get_declared_classes();
 
@@ -49,6 +49,7 @@ class HorusRoadmap
                 return $reflectionClass->newInstance();
             }
         }
+        throw new HorusException("Plugin $plugin doesn't implement interface $interface");
     }
 
     public function getAllNamespaces(SimpleXMLElement $xml)
@@ -86,87 +87,136 @@ class HorusRoadmap
 
     private function getXpathPattern($input, $xpath, $pattern)
     {
-        $xml = simplexml_load_string($input);
-        if ($xml === false) {
-            throw new HorusException('Supplied input isn\'t XML');
+        try{
+            $xml = simplexml_load_string($input);
+            if ($xml === false) {
+                throw new HorusException('Supplied input isn\'t XML');
+            }
+            $xp = $xml->xpath($xpath);
+            if (($xp !== false) && (is_array($xp) && (sizeof($xp) == 1))) {
+                return preg_match('/' . $pattern . '/', (string) $xp[0]);
+            }
+        }catch(Exception $e){
+            $this->common->mlog('Error : ' . $e->getMessage(), 'DEBUG');
         }
-        $xp = $xml->xpath($xpath);
-        if (($xp !== false) && (is_array($xp) && (sizeof($xp) == 1))) {
-            return preg_match('/' . $pattern . '/', (string) $xp[0]);
-        }
-
         return false;
 
     }
 
-    public function findRoadmap($source, $input, $span)
+    private function getFilterSource($selector, $input, $transformed){
+        if (array_key_exists('filterAgainst', $selector)){
+            return $selector['filterAgainst'] == 'transformed' ? $transformed : $input;
+        } else {
+            return $input;
+        }
+    }
+
+    public function findRoadmap($source, $input, $span, $businessId)
     {
         $this->tracer->logSpan($span, 'Find Roadmap');
 
         foreach ($this->conf['roadmaps'] as $id => $roadmap) {
-            $this->common->mlog('Trying roadmap ' . $roadmap['comment'], 'DEBUG');
+            $transformed = '';
+            $this->common->mlog('Trying roadmap ' . $roadmap['comment'], 'INFO');
             if ((array_key_exists('source', $roadmap)) && ($source !== $roadmap['source'])) {
-                $this->common->mlog('Rejected roadmap: wrong source', 'DEBUG');
+                $this->common->mlog('Rejected roadmap: wrong source', 'INFO');
             } elseif (array_key_exists('filter', $roadmap)) {
                 $matchFilter = true;
-                foreach ($roadmap['filter'] as $filter) {
+                if(array_key_exists('preTransform', $roadmap)){
+                    $this->tracer->logSpan($span, 'Transform input for filtering ' . $roadmap['preTransform']);
+                    try{
+                        $res = $this->http->forwardSingleHttpQuery(
+                            $roadmap['preTransform'],
+                            array($this->common::TID_HEADER => $businessId),
+                            $input,
+                            'POST',
+                            $span);
+                        $transformed = $res['body'];
+                    }catch(Exception $e){
+                        $this->common->mlog('HTTP Call failed. Error = ' . $e->getMessage(), 'ERROR');
+                        $matchFilter = false;
+                    }
+                }
+                if ($matchFilter) {
+                    foreach ($roadmap['filter'] as $filter) {
 
-                    if (array_key_exists('namespace', $filter)) {
-                        $namespace = $filter['namespace'];
-                        $this->common->mlog("Searching input for namespace " . $namespace, 'DEBUG');
-                        $namespaceList = $this->getNamespaces($input);
-                        //error_log(print_r($namespaceList, true));
-                        $found = false;
-                        foreach ($namespaceList as $ns) {
-                            //error_log(' ' . $ns);
-                            if (str_contains($ns, $namespace)) {
-                                $this->common->mlog("Input contains namespace " . $namespace, 'DEBUG');
-                                $found = true;
-                            } else {
-                                // Nothing to say
+                        if (array_key_exists('namespace', $filter)) {
+                            $namespace = $filter['namespace'];
+                            $this->common->mlog("Searching input for namespace " . $namespace, 'DEBUG');
+                            $namespaceList = $this->getNamespaces(
+                                $this->getFilterSource($filter, $input, $transformed)
+                            );
+                            
+                            $found = false;
+                            foreach ($namespaceList as $ns) {
+                                
+                                if (str_contains($ns, $namespace)) {
+                                    $this->common->mlog("Input contains namespace " . $namespace, 'DEBUG');
+                                    $found = true;
+                                } else {
+                                    // Nothing to say
+                                }
                             }
-                        }
-                        if (!$found) {
-                            $this->common->mlog('Failed namespace filter', 'DEBUG');
-                            $matchFilter = false;
-                            break;
-                        }
-                    } elseif (array_key_exists('xpathregexp', $filter)) {
-                        $this->common->mlog(
-                            'Searching input for Xpath regex ' .
-                            $filter['xpathregexp']['pattern'],
-                            'DEBUG');
-                        if (
-                            array_key_exists('xpath', $filter['xpathregexp']) &&
-                            !$this->getXpathPattern(
-                                $input,
-                                $filter['xpathregexp']['xpath'],
-                                $filter['xpathregexp']['pattern']
-                            )) {
-                            $matchFilter = false;
-                            $this->common->mlog('Failed regex filter', 'DEBUG');
-                            break;
-                        } else {
-                            $this->common->mlog('Regex filter matched', 'DEBUG');
-                        }
-                    } elseif (array_key_exists('customFilter', $filter)) {
-                        $this->common->mlog(
-                            "Searching input for custom filter " .
-                            $filter['customFilter'],
-                            'DEBUG');
-                        require_once 'filters/' . $filter['customFilter'];
-                        $object = HorusRoadmap::getObjectInstance('HorusFilterInterface');
-                        if (!$object->doFilter($input, $source)) {
-                            $this->common->mlog('Failed custom filter ' . $filter['customFilter'], 'DEBUG');
-                            $matchFilter = false;
-                            break;
-                        } else {
-                            $this->common->mlog('Matched custom filter ' . $filter['customFilter'], 'DEBUG');
+                            if (!$found) {
+                                $this->common->mlog('Failed namespace filter', 'DEBUG');
+                                $matchFilter = false;
+                                break;
+                            }
+                        } elseif (array_key_exists('xpathregexp', $filter)) {
+                            $this->common->mlog(
+                                'Searching input for Xpath regex ' .
+                                $filter['xpathregexp']['pattern'],
+                                'DEBUG');
+                            if (
+                                array_key_exists('xpath', $filter['xpathregexp']) &&
+                                !$this->getXpathPattern(
+                                    $this->getFilterSource($filter, $input, $transformed),
+                                    $filter['xpathregexp']['xpath'],
+                                    $filter['xpathregexp']['pattern']
+                                )) {
+                                $matchFilter = false;
+                                $this->common->mlog('Failed regex filter', 'DEBUG');
+                                break;
+                            } else {
+                                $this->common->mlog('Regex filter matched', 'DEBUG');
+                            }
+                        } elseif (array_key_exists('customFilter', $filter)) {
+                            $this->common->mlog(
+                                "Searching input for custom filter " .
+                                $filter['customFilter'],
+                                'DEBUG');
+                            require_once 'filters/' . $filter['customFilter'];
+                            try{
+                                $object = HorusRoadmap::getObjectInstance(
+                                    'HorusFilterInterface',
+                                    $filter['customFilter']
+                                );
+                                if (!$object->doFilter(
+                                        $this->getFilterSource($filter, $input, $transformed),
+                                        $source)
+                                    ) {
+                                    $this->common->mlog('Failed custom filter ' . $filter['customFilter'], 'DEBUG');
+                                    $matchFilter = false;
+                                    break;
+                                } else {
+                                    $this->common->mlog('Matched custom filter ' . $filter['customFilter'], 'DEBUG');
+                                }
+                                unset($object);
+                            }catch(Exception $e){
+                                $matchFilter = false;
+                                break;
+                            }
+                        } elseif (array_key_exists('regexp', $filter)){
+                            $this->common->mlog("Searching input for regexp " . $filter['regexp'], 'DEBUG');
+                            if(!preg_match($filter['regexp'], $this->getFilterSource($filter, $input, $transformed))){
+                                $matchFilter = false;
+                                break;
+                            }
                         }
                     }
                 }
                 if ($matchFilter) {
-                    $this->common->mlog('Roadmap ' . $roadmap['comment'] . ' matched', 'DEBUG');
+                    $this->common->mlog('Roadmap ' . $roadmap['comment'] . ' matched', 'INFO');
                     return $id;
                 }
 
@@ -175,7 +225,7 @@ class HorusRoadmap
                     'No source, no filter : Roadmap ' .
                     $roadmap['comment'] .
                     ' always matches',
-                    'DEBUG');
+                    'INFO');
                 return $id;
             }
         }
@@ -185,7 +235,7 @@ class HorusRoadmap
 
     private function findDest($dest, $destinations)
     {
-        foreach ($destinations as $id => $dd) {
+        foreach ($destinations as $dd) {
             if ($dd['name'] === $dest) {
                 return $dd;
             }
@@ -200,11 +250,9 @@ class HorusRoadmap
         $this->tracer->addAttribute($nspan,'messaging.system','kafka');
         $this->tracer->addAttribute($nspan,'messaging.operation','publish');
         $this->tracer->addAttribute($nspan,'messaging.destination.name',$dest['name']);
-        //$this->tracer->addAttribute($nspan,'messaging.kafka.partition',$message->partition);
-        //$this->tracer->addAttribute($nspan,'messaging.kafka.message.offset',$message->offset);
         
         $topic = $this->producer->newTopic($dest['name']);
-        $headers = $this->tracer->getB3Headers($span);
+        $headers = $this->tracer->getB3Headers($nspan);
         $headers['businessId'] = $businessId;
         $headers['destinationUrl'] = $dest['url'];
         $headers['source'] = $source;
@@ -219,21 +267,32 @@ class HorusRoadmap
         }
 
         if (RD_KAFKA_RESP_ERR_NO_ERROR !== $result) {
+            $this->tracer->closeSpan($nspan);
             throw new \RuntimeException('Was unable to flush, messages might be lost!');
         }
+        $this->tracer->closeSpan($nspan);
     }
 
     public function generateParts($source, $input, $mapId, $businessId, $span)
     {
+        $this->common->mlog('Generating parts', 'DEBUG');
         $roadmap = $this->conf['roadmaps'][$mapId];
 
         $nMess = 0;
 
         $destinations = $this->conf['destinations'];
         if (array_key_exists('customRoadmap', $roadmap)) {
+            $this->common->mlog('Applying custom roadmap', 'DEBUG');
+            $this->tracer->logSpan($span, 'Applying custom roadmap ' . $roadmap['customRoadmap']);
             require_once 'mappers/' . $roadmap['customRoadmap'];
-            $object = HorusRoadmap::getObjectInstance('HorusMapperInterface');
-            $steps = $object->doMap($input, $source, $destinations);
+            try{
+                $object = HorusRoadmap::getObjectInstance('HorusMapperInterface', $roadmap['customRoadmap']);
+                $steps = $object->doMap($input, $source, $destinations);
+                unset($object);
+            }catch(Exception $e){
+                $this->common->mlog('Error while generating roadmap : ' . $e->getMessage(), 'ERROR');
+                throw new HorusException('Unable to generate roadmap : ' . $e->getMessage());
+            }
         } else {
             $steps = $roadmap['map'];
         }
@@ -244,25 +303,47 @@ class HorusRoadmap
             $transformed = '';
             $dd = $this->findDest($dest['destination'], $destinations);
             if (array_key_exists('transformUrl', $dest)) {
-                $res = $this->http->forwardSingleHttpQuery(
-                    $dd['url'],
-                    array($this->common::TID_HEADER => $businessId),
-                    $input,
-                    'POST',
-                    $span);
-                $transformed = $res['body'];
+                $this->common->mlog('Custom transformation ' . $id . ' URL = ' . $dd['url'], 'DEBUG');
+                $this->tracer->logSpan($span, 'Transform body ' . $id . ' http call ' . $dd['url']);
+                
+                try{
+                    $res = $this->http->forwardSingleHttpQuery(
+                        $dd['url'],
+                        array($this->common::TID_HEADER => $businessId),
+                        $input,
+                        'POST',
+                        $span);
+                    $transformed = $res['body'];
+                }catch(Exception $e){
+                    $this->common->mlog('Unable to transform input (URL) : ' . $e->getMessage(), 'ERROR');
+                    $transformed = '';
+                }
 
             } elseif (array_key_exists('transform', $dest)) {
+                $this->tracer->logSpan($span, 'Transform body ' . $id . ' local call ' . $dest['transform']);
                 require_once 'transforms/' . $dest['transform'];
-                $object = HorusRoadmap::getObjectInstance('HorusTransformer');
-                $transformed = $object->doTransform($input);
-
+                $object = HorusRoadmap::getObjectInstance('HorusTransformerInterface',  $dest['transform']);
+                try{
+                    $transformed = $object->doTransform($input);
+                    unset($object);
+                }catch(Exception $e){
+                    $this->common->mlog('Unable to transform input (custom) : ' . $e->getMessage(), 'ERROR');
+                    $transformed = '';
+                }
             } else {
                 $transformed = $input;
             }
 
-            $this->putMessage($source, $dd, $transformed, $businessId, $span);
-            $nMess++;
+            $this->tracer->logSpan($span, 'Put body ' . $id . ' in queue ' . $dd['name']);
+            if ($transformed !== '') {
+                $this->common->mlog('Sending message to destination ' . $dd['name'], 'INFO');
+                    
+                $this->putMessage($source, $dd, $transformed, $businessId, $span);
+                $nMess++;
+            }
+            if (array_key_exists('delay', $dest)){
+                sleep($dest['delay']);
+            }
         }
         return $nMess;
     }

@@ -48,7 +48,7 @@ $source = array_key_exists('source', $_GET) ? $_GET['source'] : '';
 
 $roadmaps = new HorusRoadmap($businessId, $loglocation, $colour, $tracer, null);
 $tracer->logSpan($whiteSpan, "Looking for Roadmap");
-$roadmapId = $roadmaps->findRoadmap($source, $input, $whiteSpan);
+$roadmapId = $roadmaps->findRoadmap($source, $input, $whiteSpan, $businessId);
 $tracer->logSpan($whiteSpan, "Roadmap Id is " . $roadmapId);
 if(is_null($roadmapId)){
     echo json_encode(array('result' => 'KO', 'message' => 'Unable to find appropriate roadmap'));
@@ -58,11 +58,12 @@ $common->mlog("Applying roadmap " . $roadmapId, 'DEBUG');
 $tracer->logSpan($whiteSpan, "Applying roadmap " . $roadmapId);
 try{
     $nMess = $roadmaps->generateParts($source, $input, $roadmapId, $businessId, $whiteSpan);
-    $tracer->logSpan($whiteSpan, "Generated " . $nMess . ' messages');
+    $tracer->logSpan($whiteSpan, 'Generated ' . $nMess . ' messages');
 }catch(Exception $e){
     echo json_encode(array('result' => 'KO', 'message' => $e->getMessage()));
     exit;
 }finally{
+    $tracer->logSpan($whiteSpan, 'End roadmap');
     $tracer->closeSpan($whiteSpan);
     $tracer->finishAll();
 

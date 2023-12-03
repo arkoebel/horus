@@ -1,5 +1,9 @@
 <?php
 
+/* Sample filter class. The class MUST implement HorusFilterInterface.
+Do try to have different names for all filter classes.
+If two different files use the same class names and are used within the same request, bad things will happen!
+*/
 class SampleFilter implements HorusFilterInterface
 {
     public function doFilter($input, $source): bool

@@ -621,13 +621,13 @@ class HorusHttp
             );
             $this->common->mlog('Call stack was : ' . print_r($this->curl->curl_getinfo($handle), true), 'DEBUG');
             $this->common->mlog('Error response : ' . $response, 'DEBUG');
-            $this->tracer->closeSpan($currentSpan);
+            //$this->tracer->closeSpan($currentSpan);
             
             throw new HorusException('HTTP Error ' . $responseCode . ' for ' . $destUrl);
         } else {
             $this->common->mlog("Query result was $responseCode \n", 'DEBUG');
             $this->common->mlog('Return Headers : ' . implode("\n", $headersout) . "\n", 'DEBUG');
-            $this->tracer->closeSpan($currentSpan);
+            //$this->tracer->closeSpan($currentSpan);
         }
 
         return array('body' => $response, 'headers' => $headersout);

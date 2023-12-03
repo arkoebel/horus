@@ -43,7 +43,6 @@ $roadmaps = json_decode(file_get_contents('conf/horusRoadmap.json'), true);
 foreach ($roadmaps['destinations'] as $destination ) {
     $topics[] = $destination['name'];
 }
-
 // Subscribe to topics
 $consumer->subscribe($topics);
 while (true) {
@@ -51,10 +50,11 @@ while (true) {
     switch ($message->err) {
         case RD_KAFKA_RESP_ERR_NO_ERROR:
             $headers = $message->headers;
+            error_log('incoming message headers : ' . print_r($headers, true));
             $tracer = new HorusTracing(
-                'WHITE',
-                HorusCommon::getPath($_SERVER),
-                'Start White Consumer',
+                'WHITE_CONSUMER',
+                array_pop(explode('/',$_SERVER['PWD'])),
+                $message->topic_name . ' consume',
                 $headers
             );
             $rootSpan = $tracer->getCurrentSpan();
@@ -98,6 +98,7 @@ while (true) {
                     'ERROR');
             }
             $tracer->closeSpan($span);
+            $tracer->forceFlush();
             $tracer->finishAll();
             $http = null;
             $common = null;
@@ -113,5 +114,3 @@ while (true) {
             break;
     }
 }
-
-?>

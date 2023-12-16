@@ -6,7 +6,7 @@ If two different files use the same class names and are used within the same req
 */
 class SampleFilter implements HorusFilterInterface
 {
-    public function doFilter($input, $source): bool
+    public function doFilter($input, $source, $headers, $queryparams): bool
     {
         if($source == 'A'){
             //perform some complex operation here

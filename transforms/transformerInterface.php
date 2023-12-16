@@ -2,6 +2,6 @@
 
 interface HorusTransformerInterface {
 
-    public static function doTransform(string $toTransform): string;
+    public static function doTransform(string $toTransform, array $headers, array $queryparams): string;
 
 }

@@ -1,0 +1,22 @@
+<Document xmlns="urn:iso:std:iso:20022:tech:xsd:pacs.002.001.10">
+    <FIToFIPmtStsRpt>
+        <GrpHdr>
+            <MsgId>NONREF</MsgId>
+            <CreDtTm><?= gmdate(DateTimeInterface::ATOM) ?></CreDtTm>
+        </GrpHdr>
+        <TxInfAndSts>
+            <OrgnlGrpInf>
+                <OrgnlMsgId><?= $vars['msgid'] ?></OrgnlMsgId>
+                <OrgnlMsgNmId><?= $vars['msgtype'] ?></OrgnlMsgNmId>
+            </OrgnlGrpInf>
+            <OrgnlInstrId><?= $vars['instrid'] ?></OrgnlInstrId>
+            <OrgnlEndToEndId><?= $vars['endtoendid'] ?></OrgnlEndToEndId>
+            <OrgnlUETR><?= $vars['UETR'] ?></OrgnlUETR>
+            <TxSts>ACSC</TxSts>
+            <FctvIntrBkSttlmDt>
+                <DtTm><?= gmdate(DateTimeInterface::ATOM) ?></DtTm>
+            </FctvIntrBkSttlmDt>
+            <ClrSysRef>RTGS-70638129</ClrSysRef>
+        </TxInfAndSts>
+    </FIToFIPmtStsRpt>
+</Document>

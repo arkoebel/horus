@@ -30,6 +30,27 @@ class HorusCommon
         $this->cnf = json_decode(file_get_contents(HorusCommon::HORUS_CONFIG), true);
     }
 
+
+    public static function implodeAssArray(array $input, string $fieldSep, string $lineSep): string
+    {
+        $temp = array();
+        foreach($input as $key=>$val){
+            $temp[] = $key . $fieldSep . $val;
+        }
+        return implode($lineSep, $temp);
+    }
+
+    public static function explodeAssArray(string $input, string $fieldSep, string $lineSep): array
+    {
+        $temp = explode($lineSep, $input);
+        $output = array();
+        foreach($temp as $line){
+            $vv = explode($fieldSep, $line);
+            $output[$vv[0]] = $vv[1];
+        }
+        return $output;
+    }
+
     public static function getConfValue($key, $default = null){
         $cnf = json_decode(file_get_contents(HorusCommon::HORUS_CONFIG), true);
         if (array_key_exists($key, $cnf)) {

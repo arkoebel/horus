@@ -1,0 +1,19 @@
+<AppHdr xmlns="urn:iso:std:iso:20022:tech:xsd:head.001.001.01">
+    <Fr>
+        <FIId>
+            <FinInstnId>
+                <BICFI><?= $vars['tobic'] ?></BICFI>
+            </FinInstnId>
+        </FIId>
+    </Fr>
+    <To>
+        <FIId>
+            <FinInstnId>
+                <BICFI><?= $vars['frombic'] ?></BICFI>
+            </FinInstnId>
+        </FIId>
+    </To>
+    <BizMsgIdr><?= $vars['ref'] ?></BizMsgIdr>
+    <MsgDefIdr><?= $vars['msgtype'] ?></MsgDefIdr>
+    <CreDt><?= $vars['crdate'] ?></CreDt>
+</AppHdr>

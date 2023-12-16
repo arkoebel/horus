@@ -1,0 +1,33 @@
+<saa:Header xmlns:saa="urn:swift:saa:xsd:saa.2.0">
+    <saa:Message>
+        <saa:SenderReference><?= $vars['ref'] ?></saa:SenderReference>
+        <saa:MessageIdentifier><?= $vars['msgtype'] ?></saa:MessageIdentifier>
+        <saa:Format>AnyXML</saa:Format>
+        <saa:Sender>
+            <saa:DN><?= $vars['receiver'] ?></saa:DN>
+        </saa:Sender>
+        <saa:Receiver>
+            <saa:DN><?= $vars['sender'] ?></saa:DN>
+        </saa:Receiver>
+        <saa:InterfaceInfo>
+            <saa:UserReference><?= $vars['ref'] ?></saa:UserReference>
+            <saa:ValidationLevel>Minimum</saa:ValidationLevel>
+            <saa:MessageNature>Financial</saa:MessageNature>
+            <saa:ProductInfo>
+                <saa:Product>
+                    <saa:VendorName>Diamis</saa:VendorName>
+                    <saa:ProductName>cristal</saa:ProductName>
+                    <saa:ProductVersion>5.0</saa:ProductVersion>
+                </saa:Product>
+            </saa:ProductInfo>
+        </saa:InterfaceInfo>
+        <saa:NetworkInfo>
+            <saa:Service>esmig.t2.iast!pu</saa:Service>
+        </saa:NetworkInfo>
+        <saa:SecurityInfo>
+            <saa:SWIFTNetSecurityInfo>
+                <saa:IsNRRequested>true</saa:IsNRRequested>
+            </saa:SWIFTNetSecurityInfo>
+        </saa:SecurityInfo>
+    </saa:Message>
+</saa:Header>

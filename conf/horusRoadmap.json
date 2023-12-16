@@ -1,16 +1,78 @@
 {
     "roadmaps": [
         {
+            "source": "xml_emis_a",
+            "comment": "pacs8 roadmap",
+            "preTransformUrl":  "http://horus/horusRecurse.php?section=datapdu",
+            "filter": [
+            {
+                "namespace": "camt.998.001.02",
+                "negate": "true",
+                "filterAgainst": "transformed",
+                "comment": "Making sure transformed input has no errors"
+            },{
+                "namespace": "pacs.008.001.08",
+                "comment": "Looking for a pacs8"
+            },{
+                "namespace": "saa.2.0",
+                "comment": "Should be enclosed in a DataPDU"
+            }, {
+                "comment": "Check Sender/DN = AGRIFRPP",
+                "xpathregexp": {
+                    "pattern": "cn=AGRIFRPP,ou=payment,o=bank,o=swift",
+                    "xpath":"//*[local-name()='Header']/*[local-name()='Message']/*[local-name()='Sender']/*[local-name()='DN']"
+                }
+            }, {
+                "comment": "Check Receiver/DN=CPMEFRPPXXX",
+                "xpathregexp":{
+                    "pattern": "CPMEFRPPXXX",
+                    "xpath":"//*[local-name()='To']/*[local-name()='FIId']/*[local-name()='FinInstnId']/*[local-name()='BICFI']"
+                }
+            }
+            ],
+            "map": [
+                {
+                    "destination": "destination_agri",
+                    "comment": "ACK",
+                    "transform": "ack.php",
+                    "delay": "1"
+                },
+                {
+                    "destination": "destination_agri",
+                    "comment": "xmit report",
+                    "transform": "xmitrpt.php",
+                    "delay": "1"
+                },
+                {
+                    "destination": "destination_cpme",
+                    "comment": "Deliver the actual payload",
+                    "transform": "swap.php"
+                },
+                {
+                    "destination": "destination_agri",
+                    "comment": "Delivery notification",
+                    "transform": "delivnotif.php",
+                    "delay": "1"
+                },
+                {
+                    "destination": "destination_agri",
+                    "comment": "pacs2 incoming",
+                    "transformUrl": "http://horus/horusRecurse.php?section=datapdu"
+                }
+            ]
+        },
+        {
             "source": "destination_a",
             "comment": "Regular round trip",
-            "preTransform": "http://horus/horusNews.php",
+            "preTransformUrl": "http://horus/horusNews.php",
             "filter": [
                 {
                     "xpathregexp": {
                         "pattern": "SAADBEBBXXX",
                         "xpath": "//*[local-name()='Sender']/*[local-name() = 'X1']"
                     },
-                    "filterAgainst": "transformed"
+                    "filterAgainst": "transformed",
+                    "negate": true
                 },
                 {
                     "namespace": "setr.016",
@@ -59,6 +121,31 @@
             ]
         },
         {
+            "source": "destination_json",
+            "comment": "Default JSON Case",
+            "filter": [
+                {
+                    "jsonkeyexists": "testkey1"
+                },
+                {
+                    "jsonkey": "testkey2",
+                    "jsonpattern": "AZERTY" 
+                }
+            ],
+            "map": [
+                {
+                    "destination": "destination_b",
+                    "comment": "Primary destination",
+                    "transform": "transform1.php"
+                },
+                {
+                    "destination": "destination_a",
+                    "comment": "Return KO",
+                    "transformUrl": "http://horus/HorusNew.php"
+                }
+            ]
+        },
+        {
             "comment": "Catch all",
             "customRoadmap": "mapperSample1.php"
         }
@@ -67,6 +154,9 @@
         {
             "name": "destination_a",
             "comment": "Default Source"
+        },{
+            "name": "destination_agri",
+            "comment": "AGRIFRPPXXX"
         }
     ],
     "destinations": [
@@ -79,7 +169,19 @@
         {
             "name": "destination_b",
             "comment": "Default Destination",
+            "destTransformScript": "transform1.php",
             "url": "http://horus/HorusNew.php"
+        },
+        {
+            "name": "destination_agri",
+            "comment": "AGRIFRPPXXX",
+            "url": "http://127.0.0.1/HorusNew.php"
+        },
+
+        {
+            "name": "destination_cpme",
+            "comment": "CPMEFRPPXXX",
+            "url": "http://127.0.0.1/HorusNew.php"
         },
         {
             "name": "destination_c",

@@ -101,7 +101,11 @@ class HorusXml
         return $vars;
     }
 
-    public function getXpathVariable($xml, $xpath)
+    public function getXpathVariable($xml, $xpath){
+        return HorusXml::getXpathValue($xml, $xpath);
+    }
+
+    public static function getXpathValue($xml, $xpath)
     {
         $rr = $xml->xpath($xpath);
         if (($rr !== false) && (!empty($rr))) {

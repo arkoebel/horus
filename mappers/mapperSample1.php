@@ -14,20 +14,26 @@ class MapperSample1 implements HorusMapperInterface {
        "transform" (optional) : name of a php file in the ./transforms folder used to transform a given input
        "transformUrl" (optional) : URL the input can be POSTed to, to transform the given input
    */
-    static function doMap(string $input, string $source, array $destinations): array {
+    public static function doMap(
+        string $input,
+        string $source,
+        array $destinations,
+        array $headers,
+        array $queryparams
+        ): array {
 
         $result = array();
 
         $result[] = array(
-            "destination" => "A",
+            "destination" => "destination_a",
             "comment" => "sample roadmap A=>B=>C Step A"
         );
         $result[] = array(
-            "destination" => "B",
+            "destination" => "destination_b",
             "comment" => "sample roadmap A=>B=>C Step B"
         );
         $result[] = array(
-            "destination" => "C",
+            "destination" => "destination_c",
             "comment" => "sample roadmap A=>B=>C Step C"
         );
 

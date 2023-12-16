@@ -296,7 +296,7 @@ class HorusBusiness
             if (array_key_exists('delayafter', $destination)) {
                 $this->tracer->logSpan($routeSpan, 'Start delay ' . $destination['delayafter'] . 's');
                 $this->common->mlog('Waiting ' . $destination['delayafter'] . 'sec for next destination', 'INFO');
-                sleep($destination['delayafter']);
+                //sleep($destination['delayafter']);
                 $this->tracer->logSpan($routeSpan, 'End delay');
             }
             $this->tracer->closeSpan($routeSpan);

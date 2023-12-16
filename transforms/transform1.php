@@ -3,10 +3,11 @@
 /* Sample transformer class. The class MUST implement HorusTransformerInterface.
 Do try to have different names for all transformer classes.
 If two different files use the same class names and are used within the same request, bad things will happen!
+We can't recover from FATAL errors, so use clean code!
 */
 class MyClass implements HorusTransformerInterface {
 
-    public static function doTransform(string $toTransform): string {
+    public static function doTransform(string $toTransform, array $headers, array $queryparams): string {
 
         $aa = simplexml_load_string($toTransform);
 
@@ -14,6 +15,13 @@ class MyClass implements HorusTransformerInterface {
         $aa->registerXPathNamespace('doc', 'urn:swift:xsd:swift.if.ia$setr.016.001.02');
 
         $u = $aa->xpath('/saa:DataPDU/saa:Message/saa:MessageText/doc:Document');
-        return $u[0]->asXML();
+
+        // We're testing whether the xpath did produce something,
+        // because if not we're generating a FATAL error we can't recover from
+        if($u[0]!==null){
+            return $u[0]->asXML();
+        }else{
+            return '';
+        }
     }
 }

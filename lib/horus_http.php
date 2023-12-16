@@ -42,6 +42,18 @@ class HorusHttp
         $this->headerInt = $headerImpl;
     }
 
+    public static function addHeaderIfEmpty(array $headers, string $inHeader, string $inValue){
+        foreach ($headers as $id => $value){
+            //error_log('AAAA ' . $id . ' / ' . var_dump($value, true));
+            $keys = explode(':', $value);
+            if ($inHeader === $id || $inHeader === $keys[0]){
+                //error_log('AAAA Exit');
+                return $headers;
+            }
+        }
+        return array_merge($headers, array($inHeader . ': ' . $inValue));
+    }
+
     /**
      * function formMultiPart
      * Generate a HTTP MultiPart section
@@ -159,7 +171,9 @@ class HorusHttp
 
     public static function formatOutHeaders($inHeaders, $rfhprefix = 'rfh2-', $mqmdprefix = 'mqmd-')
     {
+        $toExclude = array('host'=>1, 'user-agent'=>1, 'accept'=>1, 'content-length'=>1);
         $outHeaders = array();
+        $hh = array();
         foreach ($inHeaders as $key => $value) {
             if (HorusHttp::DELETE_TAG !== $value) {
                 if (is_int($key)) {
@@ -182,11 +196,13 @@ class HorusHttp
                         (preg_match('/^' . HorusCommon::ENC_PREFIX . '/', $b) === false)) {
                     $b = HorusCommon::ENC_PREFIX . base64_encode($a . HorusCommon::ENC_SEP . $b);
                 }
-                if (HorusHttp::DELETE_TAG!==$b) {
+                if (!array_key_exists($a, $toExclude) && !array_key_exists($a,$hh) && HorusHttp::DELETE_TAG!==$b) {
+                    $hh[$a] = 1;
                     $outHeaders[] = $a . ': ' . $b;
                 }
             }
         }
+        //('UUUUUUUUU ' . print_r($outHeaders, true));
         return $outHeaders;
     }
 
@@ -276,7 +292,7 @@ class HorusHttp
         }
 
         if ($exitafter === true) {
-            //TODO : investigate
+            //investigate
             exit;
         }
     }
@@ -481,6 +497,16 @@ class HorusHttp
             $this->tracer->setAttribute('path', $query['url']);
             $this->tracer->setAttribute('method', $query['method']);
             $query['headers'] = $this->tracer->getB3Headers($span[$id]);
+            $query['headers'] = HorusHttp::formatOutHeaders(
+                HorusHttp::addHeaderIfEmpty(
+                    $query['headers'],
+                    'Content-Length',
+                    strlen($query['data'])),
+                $rfhprefix,
+                $mqmdprefix);
+
+            //error_log('ZZZZZZZZZZ1  ' . print_r($query['headers'], true));
+
             $this->common->mlog('Generate Curl call for ' . $query['method'] . ' ' . $query['url'], 'INFO');
             $ch[$id] = $this->curl->curl_init($query['url']);
 
@@ -495,7 +521,8 @@ class HorusHttp
                 $this->curl->curl_setopt(
                     $ch[$id],
                     CURLOPT_HTTPHEADER,
-                    HorusHttp::formatOutHeaders($query['headers'], $rfhprefix, $mqmdprefix)
+                    $query['headers']
+                    //HorusHttp::formatOutHeaders($query['headers'], $rfhprefix, $mqmdprefix)
                 );
                 $this->common->mlog(
                     'Actual headers passed to the next query : ' . print_r(
@@ -574,10 +601,12 @@ class HorusHttp
         $mqmdprefix = 'mqmd-'
         )
     {
-
+        //error_log('ZZZZZZZZZZ3  ' . print_r($headers, true));
         $this->tracer->logSpan($currentSpan, 'Forward Http Query');
         $headers = array_merge($headers, $this->tracer->getB3Headers($currentSpan));
-
+        $headers = HorusHttp::addHeaderIfEmpty($headers, 'Content-Length', strlen($data));
+        $headers = HorusHttp::addHeaderIfEmpty($headers, 'Expect', '');
+        //error_log('ZZZZZZZZZZ2  ' . print_r($headers, true));
         $handle = $this->curl->curl_init($destUrl);
         $headersout = array();
         $this->curl->curl_setopt($handle, CURLOPT_URL, $destUrl);
@@ -629,7 +658,6 @@ class HorusHttp
             $this->common->mlog('Return Headers : ' . implode("\n", $headersout) . "\n", 'DEBUG');
             //$this->tracer->closeSpan($currentSpan);
         }
-
         return array('body' => $response, 'headers' => $headersout);
     }
 

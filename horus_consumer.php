@@ -37,26 +37,31 @@ $conf->set('enable.partition.eof', 'true');
 
 $consumer = new RdKafka\KafkaConsumer($conf);
 
-$topics = array();
+//error_log($argv[1]);
+//$topics = array($argv[1]);
 
+$topics = array();
 $roadmaps = json_decode(file_get_contents('conf/horusRoadmap.json'), true);
 foreach ($roadmaps['destinations'] as $destination ) {
     $topics[] = $destination['name'];
 }
+
 // Subscribe to topics
 $consumer->subscribe($topics);
 while (true) {
-    $message = $consumer->consume(120*1000);
+    $message = $consumer->consume(5*1000);
     switch ($message->err) {
+        
         case RD_KAFKA_RESP_ERR_NO_ERROR:
             $headers = $message->headers;
-            error_log('incoming message headers : ' . print_r($headers, true));
+            $pwd = explode('/',$_SERVER['PWD']);
             $tracer = new HorusTracing(
                 'WHITE_CONSUMER',
-                array_pop(explode('/',$_SERVER['PWD'])),
+                array_pop($pwd),
                 $message->topic_name . ' consume',
                 $headers
             );
+
             $rootSpan = $tracer->getCurrentSpan();
             $span = $tracer->newSpan($message->topic_name . ' process', $rootSpan);
             $tracer->addAttribute($span,'span.kind','CONSUMER');
@@ -70,7 +75,6 @@ while (true) {
             $tracer->addAttribute($span,'businessId',$headers['businessId']);
             $tracer->addAttribute($span,'source',$headers['source']);
             
-            
             $common = new HorusCommon($headers['businessId'], $loglocation, 'WHITE');
             $common->mlog(
                 'Got new message for destination '
@@ -83,11 +87,15 @@ while (true) {
             try{
                 $res = $http->forwardSingleHttpQuery(
                     $headers['destinationUrl'],
-                    array($common::TID_HEADER => $headers['businessId']),
+                    array_merge(array(
+                            $common::TID_HEADER => $headers['businessId']),
+                            HorusCommon::explodeAssArray($headers['httpheaders'],'##','||')
+                            ,array('Expect: ', 'Content-Length: ' . strlen($message->payload))
+                        ),
                     $message->payload,
                     'POST',
                     $span);
-                    $tracer->addAttribute($span,'destination',$headers['destinationUrl']);
+                $tracer->addAttribute($span,'destination',$headers['destinationUrl']);
             
             } catch (Exception $e){
                 $common->mlog(
@@ -97,6 +105,7 @@ while (true) {
                     . $e->getMessage(),
                     'ERROR');
             }
+            $consumer->commit($message);
             $tracer->closeSpan($span);
             $tracer->forceFlush();
             $tracer->finishAll();

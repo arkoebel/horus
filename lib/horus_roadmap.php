@@ -50,6 +50,11 @@ class HorusRoadmap
             throw new \RuntimeException('Was unable to flush, messages might be lost!');
             } else {
             // message successfully delivered
+
+            $span = $this->tracer->getCurrentSpan();
+            $this->tracer->addAttribute($span,'messaging.destination.name',$message->topic_name);
+            $this->tracer->addAttribute($span,'messaging.kafka.partition',$message->partition);
+            $this->tracer->addAttribute($span,'messaging.kafka.message.offset',$message->offset);
             }
         });
  
@@ -69,6 +74,22 @@ class HorusRoadmap
             }
         }
         throw new HorusException("Plugin $plugin doesn't implement interface $interface");
+    }
+
+
+    public function testContentTypeFilter($contentType, $headers)
+    {
+        if (array_key_exists(
+                'Content-Type', $headers)
+                && (strpos($headers['Content-Type'],$contentType)!==false)){
+            return false;
+        } elseif (array_key_exists(
+            'CONTENT-TYPE', $headers)
+            && (strpos($headers['CONTENT-TYPE'], $contentType)!==false)){ 
+            return false;
+        } else {
+            return true;
+        }
     }
 
     public function testNamespaceFilter($namespace, $input, $negate)
@@ -109,14 +130,12 @@ class HorusRoadmap
                 $xpath['xpath'],
                 $xpath['pattern']
             )){
-                error_log('regex ' . $xpath['pattern'] . ' match');
                 $rr = false;
             }else{
-                error_log('regex ' . $xpath['pattern'] . ' no match');
                 $rr = true;
             }
         }
-
+//  TRGTXECMXXX at node \/\/*[local-name()='To']\/*[local-name()='FIId']\/*[local-name()='FinInstnId']\/*[local-name()='BICFI']"}
         if($rr){
             $this->common->mlog('Failed regex filter', 'DEBUG');
         }
@@ -133,12 +152,15 @@ class HorusRoadmap
             $filter,
             'DEBUG');
         require_once 'filters/' . $filter;
+        $reason = '';
         $object = HorusRoadmap::getObjectInstance('HorusFilterInterface',$filter);
-        $rr = !$object->doFilter($input, $source, $headers, $queryparams);
+        $rr = !$object->doFilter($input, $source, $headers, $queryparams, $reason);
         unset($object);
 
         if (!$rr){
-            $this->common->mlog('Failed custom filter ' . $filter, 'DEBUG');
+            $this->common->mlog('Passed custom filter ' . $filter . ', reason=' . $reason, 'DEBUG');
+        }else{
+            $this->common->mlog('Failed custom filter ' . $filter . ', reason=' . $reason, 'DEBUG');
         }
         if($negate==='true'){
             $rr = !$rr;
@@ -296,7 +318,10 @@ class HorusRoadmap
                         $negate = array_key_exists('negate', $filter) ? $filter['negate'] : 'false';
                         $rr = false;
 
-                        if (array_key_exists('namespace', $filter)) {
+                        if(array_key_exists('contenttype',$filter)){
+                            $rr = $this->testContentTypeFilter($filter['contenttype'],$headers);
+                            $this->common->mlog('Roadmap ' . $roadmap['comment'] . ' contenttype= ' . print_r($headers,true), 'DEBUG');
+                        } elseif (array_key_exists('namespace', $filter)) {
                             $rr = $this->testNameSpaceFilter($filter['namespace'], $selectedInput, $negate);
                         } elseif (array_key_exists('xpathregexp', $filter)) {
                             $rr = $this->testXpathRegexpFilter(
@@ -324,6 +349,7 @@ class HorusRoadmap
 
                         if ($rr)
                         {
+                            $this->common->mlog('Roadmap ' . $roadmap['comment'] . ' failed criteria ' . print_r($filter,true), 'DEBUG');
                             $matchFilter = false;
                             break;
                         }
@@ -331,7 +357,7 @@ class HorusRoadmap
                 }
                 if ($matchFilter) {
                     $this->common->mlog('Roadmap ' . $roadmap['comment'] . ' matched', 'INFO');
-                    return $id;
+                    return array('id'=>$id, 'transformedInput'=>$transformed);
                 }
 
             } else {
@@ -340,7 +366,7 @@ class HorusRoadmap
                     $roadmap['comment'] .
                     ' always matches',
                     'INFO');
-                return $id;
+                return array('id'=>$id, 'transformedInput'=>null);
             }
         }
         return null;
@@ -368,6 +394,7 @@ class HorusRoadmap
         // Set the topic configuration:
         $topicConfig = new RdKafka\TopicConf();
         $topicConfig->set('message.timeout.ms', 1000);
+        $topicConfig->setPartitioner(RD_KAFKA_MSG_PARTITIONER_CONSISTENT_RANDOM);
         
         $topic = $this->producer->newTopic($dest['name'], $topicConfig);
         $headers = $this->tracer->getB3Headers($nspan);
@@ -375,31 +402,20 @@ class HorusRoadmap
         $headers['destinationUrl'] = HorusCommon::formatQueryString($dest['url'], $queryparams, true);
         $headers['source'] = $source;
         $headers['httpheaders'] = HorusCommon::implodeAssArray($inheaders,'##','||');
-        $topic->producev(RD_KAFKA_MSG_PARTITIONER_CONSISTENT_RANDOM, 0, $data, $businessId, $headers);
+        $topic->producev(RD_KAFKA_PARTITION_UA, 0, $data, $businessId, $headers);
         $this->producer->poll(-1);
 
-        /*
-        for ($flushRetries = 0; $flushRetries < 10; $flushRetries++) {
-            $result = $this->producer->flush(10000);
-            if (RD_KAFKA_RESP_ERR_NO_ERROR === $result) {
-                break;
-            }
-        }*/
-
-        /*if (RD_KAFKA_RESP_ERR_NO_ERROR !== $result) {
-            $this->tracer->closeSpan($nspan);
-            throw new \RuntimeException('Was unable to flush, messages might be lost!');
-        }*/
         $this->tracer->closeSpan($nspan);
     }
 
-    public function generateParts($source, $input, $mapId, $businessId, $span, $headers, $queryparams)
+    public function generateParts($source, $input, $mapId, $businessId, $span, $headers, $queryparams, $transformedOrigin = null)
     {
         $this->common->mlog('Generating parts', 'DEBUG');
         $roadmap = $this->conf['roadmaps'][$mapId];
 
         $nMess = 0;
 
+        
         $destinations = $this->conf['destinations'];
         if (array_key_exists('customRoadmap', $roadmap)) {
             $this->common->mlog('Applying custom roadmap', 'DEBUG');
@@ -407,7 +423,7 @@ class HorusRoadmap
             require_once 'mappers/' . $roadmap['customRoadmap'];
             try{
                 $object = HorusRoadmap::getObjectInstance('HorusMapperInterface', $roadmap['customRoadmap']);
-                $steps = $object->doMap($input, $source, $destinations, $headers, $queryparams);
+                $steps = $object->doMap($input, $source, $destinations, $headers, $queryparams, $transformed);
                 unset($object);
             }catch(Exception $e){
                 $this->common->mlog('Error while generating roadmap : ' . $e->getMessage(), 'ERROR');
@@ -422,6 +438,8 @@ class HorusRoadmap
                 'Sending message ' . $id . ' to ' . $dest['destination'] . ' : ' . $dest['comment'], 'INFO');
             $transformed = '';
             $dd = $this->findDest($dest['destination'], $destinations);
+            
+            $totransform = (array_key_exists("transformAgainst", $dest) && ($dest['transformAgainst']==='transformed')) ? $transformedOrigin : $input;
 
             if (array_key_exists('transformUrl', $dest)) {
                 $url = HorusCommon::formatQueryString($dest['transformUrl'], $queryparams, true);
@@ -432,7 +450,7 @@ class HorusRoadmap
                     $res = $this->http->forwardSingleHttpQuery(
                         $url,
                         array_merge(array($this->common::TID_HEADER => $businessId), $headers),
-                        $input,
+                        $totransform,
                         'POST',
                         $span);
                     $transformed = $res['body'];
@@ -443,19 +461,17 @@ class HorusRoadmap
 
             } elseif (array_key_exists('transform', $dest)) {
                 $this->tracer->logSpan($span, 'Transform body ' . $id . ' local call ' . $dest['transform']);
-                error_log(' To transform for ' . $dest['transform'] . ' : ' . $input);
                 require_once 'transforms/' . $dest['transform'];
                 $object = HorusRoadmap::getObjectInstance('HorusTransformerInterface',  $dest['transform']);
                 try{
-                    $transformed = $object->doTransform($input, $headers, $queryparams);
-                    error_log(' Transformed : ' . $transformed);
+                    $transformed = $object->doTransform($totransform, $headers, $queryparams);
                     unset($object);
                 }catch(Exception $e){
                     $this->common->mlog('Unable to transform input (custom) : ' . $e->getMessage(), 'ERROR');
                     $transformed = '';
                 }
             } else {
-                $transformed = $input;
+                $transformed = $totransform;
             }
 
             $this->tracer->logSpan($span, 'Put body ' . $id . ' in queue ' . $dd['name']);

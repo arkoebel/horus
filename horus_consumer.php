@@ -46,6 +46,7 @@ foreach ($roadmaps['destinations'] as $destination ) {
     $topics[] = $destination['name'];
 }
 
+var_dump($topics);
 // Subscribe to topics
 $consumer->subscribe($topics);
 while (true) {
@@ -89,7 +90,11 @@ while (true) {
                     $headers['destinationUrl'],
                     array_merge(array(
                             $common::TID_HEADER => $headers['businessId']),
-                            HorusCommon::explodeAssArray($headers['httpheaders'],'##','||')
+                            HorusCommon::explodeAssArray(
+                                array_key_exists('httpheaders',$headers) ? $headers['httpheaders'] : '',
+                                '##',
+                                '||'
+                            )
                             ,array('Expect: ', 'Content-Length: ' . strlen($message->payload))
                         ),
                     $message->payload,

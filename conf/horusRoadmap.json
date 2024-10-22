@@ -6,6 +6,10 @@
             "preTransformUrl":  "http://horus/horusRecurse.php?section=datapdu",
             "filter": [
             {
+                "contenttype": "application/xml",
+                "comment": "Looking for xml input"
+            },
+            {
                 "namespace": "camt.998.001.02",
                 "negate": "true",
                 "filterAgainst": "transformed",
@@ -60,6 +64,91 @@
                     "transformUrl": "http://horus/horusRecurse.php?section=datapdu"
                 }
             ]
+        }, {
+            "source": "multipart",
+            "comment": "multipart Pacs",
+            "preTransform": "fileactjoin.php",
+            "filter": [
+                {
+                    "contenttype": "multipart",
+                    "comment": "Looking for multipart message"
+                },{
+                    "namespace": "colr.xxx.creditclaimsfile",
+                    "filterAgainst": "transformed",
+                    "comment": "Looking for a colr creditclaimsfile"
+                },{
+                    "namespace": "saa.2.0",
+                    "filterAgainst": "transformed",
+                    "comment": "Should be enclosed in a DataPDU"
+                }, {
+                    "comment": "Check Sender/DN = GSCF",
+                    "filterAgainst": "transformed",
+                    "xpathregexp": {
+                        "pattern": "ou=gscf,ou=ecm,o=gscffr22,o=swift",
+                        "xpath":"//*[local-name()='Header']/*[local-name()='Message']/*[local-name()='Sender']/*[local-name()='DN']"
+                    }
+                }, {
+                    "comment": "Check Receiver BIC",
+                    "filterAgainst": "transformed",
+                    "xpathregexp":{
+                        "pattern": "TRGTXECMXXX",
+                        "xpath":"//*[local-name()='To']/*[local-name()='FIId']/*[local-name()='FinInstnId']/*[local-name()='BICFI']"
+                    }
+                }
+            ],
+            "map": [
+                {
+                    "destination": "destination_gscf",
+                    "comment": "ACK",
+                    "transformAgainst": "transformed",
+                    "transform": "ack.php",
+                    "delay": "1"
+                },
+                {
+                    "destination": "destination_gscf",
+                    "comment": "xmit report",
+                    "transformAgainst": "transformed",
+                    "transform": "xmitrpt.php",
+                    "delay": "1"
+                },
+                {
+                    "destination": "destination_gscf",
+                    "comment": "delivery notification",
+                    "transformAgainst": "transformed",
+                    "transform": "delivnotif.php",
+                    "delay": "1"
+                },
+                {
+                    "destination": "destination_cpme",
+                    "comment": "business message split into chunks",
+                    "transformAgainst": "transformed",
+                    "transformUrl": "http://horus/horusRecurse.php?section=datapdu",
+                    "delay": "1"
+
+                }
+
+            ]
+
+        },{
+            "source": "anything_goes",
+            "comment": "Looking good!",
+            "filter": [
+                {
+                    "contenttype": "application/xml",
+                    "comment": "Looking for xml input"
+                },
+                {
+                "customFilter": "validateDataPduFilter.php"
+                },
+                {
+                    "xpathregexp": {
+                        "pattern": "cn=AGRIFRPP,ou=payment,o=bank,o=swift",
+                        "xpath":"//*[local-name()='Header']/*[local-name()='Message']/*[local-name()='Sender']/*[local-name()='DN']"
+                    },
+                    "comment": "Should have sender=AGRIFRPP"
+                }
+            ],
+            "customRoadmap": "dynamicMapper.php"
         },
         {
             "source": "destination_a",
@@ -182,6 +271,19 @@
             "name": "destination_cpme",
             "comment": "CPMEFRPPXXX",
             "url": "http://127.0.0.1/HorusNew.php"
+        },
+        {
+            "name": "destination_gscf",
+            "comment": "GSCFFR22XXX",
+            "url": "http://127.0.0.1/HorusNew.php"
+        },
+        {
+            "name": "destination_ecms_chunked",
+            "comment": "TRGTXECMXXX with transform",
+            "destTransformScript": "split.php",
+            "destTransformHeader": "Content-Type: multipart/form-data; boundary=AZERTY",
+            "url": "http://horus/HorusNew.php"
+
         },
         {
             "name": "destination_c",

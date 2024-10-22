@@ -35,7 +35,8 @@ class DynamicMapper implements HorusMapperInterface {
         string $source,
         array $destinations,
         array $headers,
-        array $queryparams
+        array $queryparams,
+        string $transformed = null
         ): array {
 
         $result = array();
@@ -59,7 +60,7 @@ class DynamicMapper implements HorusMapperInterface {
             // Let's extract the values which determine the actual roadmap
             // -M0T0D0C0-1645191
             $res = preg_match(
-                '/-([MTDC][012]){0,1}([MTDC][012]){0,1}([MTDC][012]){0,1}([MTDC][012]){0,1}-/',
+                '/-([MTDC][012])?([MTDC][012])?([MTDC][012])?([MTDC][012])?-/',
                 $roadmapSelectorField,
                 $roadmapSelector
             );
@@ -68,7 +69,7 @@ class DynamicMapper implements HorusMapperInterface {
                 while($rr = array_shift($roadmapSelector)){
                     if(array_key_exists($rr, self::MSG_MATRIX)){
                         // Select the case we're working on
-                        $parm = self::MSG_MATRIX[$rr];;
+                        $parm = self::MSG_MATRIX[$rr];
                         // We generate a response using a custom transformer
                         if(
                                 count($parm)==2

@@ -87,8 +87,8 @@ class HorusHttp
             $name = $file['name'];
             $cc .= "Content-Disposition: form-data; name=\"$name\"; filename=\"$name\"" . $eol;
             $cc .= 'Content-Type: ' . $contentType . $eol;
-            $cc .= 'Content-Transfer-Encoding: base64' . $eol;
-            $cc .= $content;
+            $cc .= 'Content-Transfer-Encoding: base64' . $eol . $eol;
+            $cc .= $content . $eol;
         }
         return $cc . '--' . $boundary . '--';
     }
@@ -496,7 +496,7 @@ class HorusHttp
             }
             $this->tracer->setAttribute('path', $query['url']);
             $this->tracer->setAttribute('method', $query['method']);
-            $query['headers'] = $this->tracer->getB3Headers($span[$id]);
+            $query['headers'] = array_merge($query['headers'], $this->tracer->getB3Headers($span[$id]));
             $query['headers'] = HorusHttp::formatOutHeaders(
                 HorusHttp::addHeaderIfEmpty(
                     $query['headers'],

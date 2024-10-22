@@ -1,12 +1,13 @@
 <?php
 
 // Let's try to get rid of INDIGO boxes just to validate an incoming DataPDU fragment
-class ValidateDataPduFilter implements HorusFilterInterface 
+class ValidateDataPduFilter implements HorusFilterInterface
 {
     // Try not to presume the actual namespaces
     const APP_HDR_XPATH = "//*[local-name()='Body']/*[local-name()='AppHdr']";
     const DOCUMENT_XPATH = "//*[local-name()='Body']/*[local-name()='Document']";
-    const SERVICE_XPATH = "//*[local-name()='Header']/*[local-name()='Message']/*[local-name()='NetworkInfo']/*[local-name()='Service']";
+    const SERVICE_XPATH = "//*[local-name()='Header']/*[local-name()='Message']"
+                            . "/*[local-name()='NetworkInfo']/*[local-name()='Service']";
     const SERVICE_TO_SYSTEM = array('esmig.t2.iast!pu'=>'RTGS','test'=>'ANOTHER_SYSTEM');
     const SAA_XSD = 'xsd/saa.2.0.13.xsd';
 
@@ -32,27 +33,37 @@ class ValidateDataPduFilter implements HorusFilterInterface
 
             // Tests if the schema is present
             if (!file_exists($head_schema)){
+                error_log('filter: schema ' . $head_schema . ' not found');
                 return false;
             }
 
             // Perform the schema validation
+            error_log('filter: Validating');
             return $fragdoc->schemaValidate($head_schema);
 
         }else{
             // XPath not found
+            error_log('filter: Xpath Not Found');
             return false;
         }
     }
 
-    public function doFilter($input, $source, $headers, $queryparams): bool
+    /* Tests input for patterns (in this case, looking for a valid DataPDU document with version 2.0.13),
+            using the original query param "source", incoming http headers, other query params.
+        After testing the input, an optional reason can be given for success/failure. That reason will be logged.
+        The function MUST return either true on success, or false on failure
+            (meaning the input didn't match the requested conditions)
+    */
+    public function doFilter($input, $source, $headers, $queryparams, &$reasonFailed = null): bool
     {
 
-        // Load the incoming XML. We don't need to 
+        // Load the incoming XML. We don't need to
         // set up namespaces since our XPaths are all relative.
         $xml = simplexml_load_string($input);
 
         // If xml isn't well-formed, we can fail here.
         if ($xml === false){
+            $reasonFailed = 'input not XML';
             return false;
         }
 
@@ -65,6 +76,7 @@ class ValidateDataPduFilter implements HorusFilterInterface
 
         // Fail if we didn't validate the SAA Schema
         if(!$domdoc->schemaValidate(self::SAA_XSD)) {
+            $reasonFailed = 'input didn\'t validate SAA schema';
             return false;
         }
 
@@ -73,19 +85,23 @@ class ValidateDataPduFilter implements HorusFilterInterface
 
         if (!array_key_exists($service, self::SERVICE_TO_SYSTEM)){
             // Either we didn't have the right configuration or the incoming document has the wrong system
+            $reasonFailed = 'Service not found';
             return false;
         }
 
         // Test AppHdr
         if(!$this->isXmlFragmentValid($xml,self::APP_HDR_XPATH, $service)){
+            $reasonFailed = 'AppHdr not valid';
             return false;
         }
        
         // Test Document
         if(!$this->isXmlFragmentValid($xml,self::DOCUMENT_XPATH, $service)){
+            $reasonFailed = 'Document not valid';
             return false;
         }
 
+        $reasonFailed = 'Passed';
         return true;
     }
 

@@ -19,7 +19,8 @@ class MapperSample1 implements HorusMapperInterface {
         string $source,
         array $destinations,
         array $headers,
-        array $queryparams
+        array $queryparams,
+        string $transformed = null
         ): array {
 
         $result = array();

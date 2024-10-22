@@ -231,14 +231,14 @@ class HorusTracing implements HorusTracingInterface
 
     public function setAttribute($key, $value)
     {
-        $obj = $this->tree->searchValueInTree($this->lastSpan, $this->tree->root());
-        $this->addAttribute($obj, $key, $value);
+        //$obj = $this->tree->searchValueInTree($this->lastSpan, $this->tree->root());
+        $this->addAttribute($this->lastSpan, $key, $value);
     }
 
     public function log($log)
     {
-        $obj = $this->tree->searchValueInTree($this->lastSpan, $this->tree->root());
-        $this->logSpan($obj, $log, null);
+        //$obj = $this->tree->searchValueInTree($this->lastSpan, $this->tree->root());
+        $this->logSpan($this->lastSpan, $log, null);
     }
 
     public function getCurrentSpan()

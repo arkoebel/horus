@@ -273,7 +273,12 @@ class HorusRecurse
             $node->appendChild($domElement);
         }
 
-        return array('xml' => $dom->saveXml(), 'headers' => $headers);
+        $outxml = $dom->saveXML();
+        if (array_key_exists('signature',$section)){
+            $outxml = HorusXml::sign($outxml, $section['signature']);
+        }
+
+        return array('xml' => $outxml, 'headers' => $headers);
     }
 
     public function doRecurseJson($reqBody, $matches, $queryParams)

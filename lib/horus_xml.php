@@ -11,9 +11,13 @@ class HorusXml
     public const XMLENVSIG = "http://www.w3.org/2000/09/xmldsig#enveloped-signature";
     public const XMLC14N = "http://www.w3.org/2001/10/xml-exc-c14n#";
     public const XMLAES = "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256";
+    public const XMLHMAC = "http://www.w3.org/2001/04/xmldsig-more#hmac-sha256";
     public const XMLDSIGNS = "http://www.w3.org/2000/09/xmldsig#";
+    public const XMLSHA256 = "http://www.w3.org/2001/04/xmlenc#sha256";
     public const X509HEADER = "-----BEGIN CERTIFICATE-----\n";
     public const X509FOOTER = "\n-----END CERTIFICATE-----\n";
+    public const PKHEADER = "-----BEGIN PRIVATE KEY-----\n";
+    public const PKFOOTER = "\n-----END PRIVATE KEY-----\n";
     public const DSIGELT = '/ds:Signature';
     public const DSIGSIELT = '/ds:SignedInfo';
     public const DSIGSVELT = '/ds:SignatureValue';
@@ -101,7 +105,8 @@ class HorusXml
         return $vars;
     }
 
-    public function getXpathVariable($xml, $xpath){
+    public function getXpathVariable($xml, $xpath)
+    {
         return HorusXml::getXpathValue($xml, $xpath);
     }
 
@@ -186,13 +191,13 @@ class HorusXml
     {
         $url = $proxyMode;
         if ($url !== ''
-                && $forwardparams !== null
-                && $forwardparams != ""
-                && is_array($forwardparams)
-                && (count($forwardparams) == 1)
-                    && is_array($forwardparams[0])
-                    && (count($forwardparams[0]) > 0)
-                ) {
+            && $forwardparams !== null
+            && $forwardparams != ""
+            && is_array($forwardparams)
+            && (count($forwardparams) == 1)
+            && is_array($forwardparams[0])
+            && (count($forwardparams[0]) > 0)
+        ) {
             $this->common->mlog('params forward : ' . print_r($forwardparams, true), 'INFO');
             $fwdParams = array();
             if (is_array($forwardparams[0])) {
@@ -235,12 +240,12 @@ class HorusXml
                 $url .= implode('&', $vv);
             }
         } elseif ($url === ''
-                && $forwardparams !== null
-                && $forwardparams != ""
-                && is_array($forwardparams)
-                && (count($forwardparams) == 1)
-                && is_array($forwardparams[0])
-                && count($forwardparams[0]) > 0) {
+            && $forwardparams !== null
+            && $forwardparams != ""
+            && is_array($forwardparams)
+            && (count($forwardparams) == 1)
+            && is_array($forwardparams[0])
+            && count($forwardparams[0]) > 0) {
             $this->common->mlog('return headers : ' . print_r($forwardparams, true), 'INFO');
             $fwdParams = array();
             if (is_array($forwardparams[0])) {
@@ -273,7 +278,7 @@ class HorusXml
                 if (strpos($key, 'x-horus-') === 0) {
                     $key2 = $key;
                 } else {
-                     $key2 = 'x-horus-' . $key;
+                    $key2 = 'x-horus-' . $key;
                 }
 
                 if (!array_key_exists($key2, $fwdParams)) {
@@ -312,9 +317,9 @@ class HorusXml
                     'Found too many elements named ' . $elementName . ' (' . $list->length . ')',
                     'DEBUG'
                 );
-                for ($i=0; $i<$list->length; $i++) {
+                for ($i = 0; $i < $list->length; $i++) {
                     $this->common->mlog(
-                        'Possible NS: ' . $list->item($i)->namespaceURI . ($i==0 ?' (SELECTED)=':''),
+                        'Possible NS: ' . $list->item($i)->namespaceURI . ($i == 0 ? ' (SELECTED)=' : ''),
                         'DEBUG'
                     );
                 }
@@ -341,12 +346,12 @@ class HorusXml
                     $query->registerXPathNamespace($ns['prefix'], $elementns);
                     $this->common->mlog(
                         'Registering extra namespace '
-                            . $ns['prefix']
-                            . ', '
-                            . $elementns
-                            . ' ('
-                            . $ns['element']
-                            . ')',
+                        . $ns['prefix']
+                        . ', '
+                        . $elementns
+                        . ' ('
+                        . $ns['element']
+                        . ')',
                         'INFO'
                     );
                 }
@@ -362,49 +367,48 @@ class HorusXml
         return str_replace('<' . $pattern . '>', '<' . $pattern . ' xmlns="' . $destinationNameSpace . '">', $input);
     }
 
-    static function insertXmlElement(
+    public static function insertXmlElement(
         $input,
         $destinationNameSpace,
         $elementName,
         $elementLocation
-    ){
+    ) {
 
         // Simple implementation for now
-        if('/' === $elementLocation){
-            $decl = strpos($input,'?>');
-            if ($decl>0) {
-                $input = substr($input,$decl+2);
+        if ('/' === $elementLocation) {
+            $decl = strpos($input, '?>');
+            if ($decl > 0) {
+                $input = substr($input, $decl + 2);
             }
 
             $header = '<' . $elementName;
             if ($destinationNameSpace !== null) {
                 $header .= ' xmlns="' . $destinationNameSpace . '">';
-            }else{
+            } else {
                 $header .= '>';
             }
             return $header . $input . '</' . $elementName . '>';
         }
     }
 
-    static function removeXmlElement(
+    public static function removeXmlElement(
         $input,
         $sourceNameSpace,
         $sourceNSPrefix,
         $elementLocation,
         $destination
-    ){
+    ) {
         // Simple implementation for now
-        if('/' === $destination){
+        if ('/' === $destination) {
             $xml = simplexml_load_string($input);
             $xml->registerXPathNamespace($sourceNSPrefix, $sourceNameSpace);
             $xpath = $xml->xpath($elementLocation . '/*');
-            if (is_array($xpath) && count($xpath)==1){
+            if (is_array($xpath) && count($xpath) == 1) {
                 $ret = $xpath[0];
                 return $ret->asXML();
             }
         }
     }
-
 
     public function doInject(
         $reqbody,
@@ -418,8 +422,7 @@ class HorusXml
         $defaultNamespace = '',
         $rootSpan = null,
         $start = 0
-        )
-    {
+    ) {
         $input = $this->business->extractPayload($contentType, $reqbody, $genericError, $preferredType, $rootSpan);
         libxml_use_internal_errors(true);
         $this->tracer->logSpan($rootSpan, 'Validating XML Input');
@@ -431,7 +434,6 @@ class HorusXml
 
             throw new HorusException($ret);
         }
-
 
         $namespaces = $this->getRootNamespace($query, $defaultNamespace);
         $query->registerXPathNamespace('u', $namespaces);
@@ -546,33 +548,32 @@ class HorusXml
             }
             $forwardData = $this->formOutQuery($forwardparams, $proxyMode, $vars);
 
-
             if ($multiple || ($mimeBoundary !== 'single')) {
                 error_log('multiple');
                 $response = '';
-                if(is_array($resp) && (count($resp)>1)){
-                foreach ($resp as $i => $r) {
-                    $response .= $this->http->formMultiPart(
-                        'response_' .  $start . '_' . $i,
-                        $r['data'],
+                if (is_array($resp) && (count($resp) > 1)) {
+                    foreach ($resp as $i => $r) {
+                        $response .= $this->http->formMultiPart(
+                            'response_' . $start . '_' . $i,
+                            $r['data'],
+                            $mimeBoundary,
+                            $eol,
+                            $preferredType,
+                            $r['headers']
+                        );
+                    }
+                    $response .= '--' . $mimeBoundary . "--\r\n\r\n";
+                } else {
+                    $response .= $this->http->formMultipart(
+                        'response_' . $start,
+                        $resp[0],
                         $mimeBoundary,
                         $eol,
                         $preferredType,
-                        $r['headers']
+                        $vars
                     );
+                    $response .= '--' . $mimeBoundary . "--\r\n\r\n";
                 }
-                $response .= '--' . $mimeBoundary . "--\r\n\r\n";
-            } else {
-                $response .= $this->http->formMultipart(
-                    'response_' . $start,
-                    $resp[0],
-                    $mimeBoundary,
-                    $eol,
-                    $preferredType,
-                    $vars
-                );
-                $response .= '--' . $mimeBoundary . "--\r\n\r\n";
-            }
                 $ret = null;
                 if ('' === $proxyMode) {
                     $ret = $this->http->returnWithContentType(
@@ -643,7 +644,7 @@ class HorusXml
         $xpath = new DOMXPath($xml);
         $xpath->registerNamespace('ds', HorusXml::XMLDSIGNS);
         $signature = $xpath->query($signatureXpath);
-        
+
         if ($signature->length == 1) {
             $signedInfo = $xpath->query('.' . HorusXML::DSIGSIELT, $signature->item(0));
             if ($signedInfo->length == 1) {
@@ -671,8 +672,7 @@ class HorusXml
         $digestAlgorithm,
         $namespaces,
         $removeSignature = false
-        )
-    {
+    ) {
         $xml = new DOMDocument();
         $xml->preserveWhiteSpace = true;
         $xml->formatOutput = false;
@@ -725,7 +725,8 @@ class HorusXml
         return $doc->saveXML();
     }
 
-    private static function validateHMACSignature($document, $headers, $definition, $conf){
+    private static function validateHMACSignature($document, $headers, $definition, $conf)
+    {
         $totest = '';
         foreach ($definition['parameters'] as $field) {
             if ('Document' === $field) {
@@ -761,252 +762,254 @@ class HorusXml
 
     private static function validateXMLDSIGSignature($document, $definition)
     {
-            // Load original document, preserving its format.
-            $xml = new DOMDocument();
-            $xml->preserveWhiteSpace = true;
-            $xml->formatOutput = false;
-            $xml->loadXML($document);
+        // Load original document, preserving its format.
+        $xml = new DOMDocument();
+        $xml->preserveWhiteSpace = true;
+        $xml->formatOutput = false;
+        $xml->loadXML($document);
 
-            $xpath = new DOMXPath($xml);
-            $xpath->registerNamespace('ds', HorusXml::XMLDSIGNS);
-            if ((array_key_exists('documentNSPrefix', $definition))
-                && (array_key_exists('documentNSURI', $definition))) {
-                $xpath->registerNamespace($definition['documentNSPrefix'], $definition['documentNSURI']);
+        $xpath = new DOMXPath($xml);
+        $xpath->registerNamespace('ds', HorusXml::XMLDSIGNS);
+        if ((array_key_exists('documentNSPrefix', $definition))
+            && (array_key_exists('documentNSURI', $definition))) {
+            $xpath->registerNamespace($definition['documentNSPrefix'], $definition['documentNSURI']);
+        } else {
+            $xpath->registerNamespace('u', $xml->namespaceURI);
+        }
+        if (array_key_exists('documentns', $definition)) {
+            foreach ($definition['documentns'] as $prefix => $ns) {
+                $xpath->registerNamespace($prefix, $ns);
+            }
+        }
+
+        // Lookup the XMLDSIG Signature Element
+        if (array_key_exists('destinationXPath', $definition)) {
+            $sig = $xpath->query($definition['destinationXPath'] . HorusXML::DSIGELT);
+        } else {
+            $sig = $xml->getElementsByTagNameNS(HorusXml::XMLDSIGNS, 'Signature');
+        }
+
+        if ($sig->length == 0) {
+            throw new HorusException('Document doesn\'t appear to be signed');
+        }
+
+        // Lookup the XMLDSIG SignedInfo Element
+
+        /** @var DOMDocument $dd **/
+        $dd = $sig->item(0);
+        $signedInfo = $dd->getElementsByTagNameNS(HorusXML::XMLDSIGNS, 'SignedInfo');
+        if ($signedInfo->length == 0) {
+            throw new HorusException('Malformed Signature (missing SignedInfo)');
+        }
+
+        // While the signature is still there, canonicalize the SignedInfo and extract the Digest value
+        $canonical2 = $signedInfo->item(0)->c14N(true, false, null, array('ds'));
+
+        /** @var DOMDocument $dd **/
+        $dd = $signedInfo->item(0);
+        $digest = $dd->getElementsByTagNameNS(HorusXML::XMLDSIGNS, 'DigestValue');
+        if ($digest->length == 0) {
+            throw new HorusException('Malformed Signature (missing DigestValue)');
+        }
+        $digestValue = $digest->item(0)->nodeValue;
+
+        // While the signature is still there, extract its value
+        /** @var DOMDocument $dd **/
+        $dd = $sig->item(0);
+        $signature = $dd->getElementsByTagNameNS(HorusXML::XMLDSIGNS, 'SignatureValue');
+        if ($signature->length == 0) {
+            throw new HorusException('Malformed Signature (missing SignatureValue)');
+        }
+        $signatureValue = $signature->item(0)->nodeValue;
+
+        // Remove the Signature elt from the original XML (http://www.w3.org/2000/09/xmldsig#enveloped-signature)
+        $sig->item(0)->parentNode->removeChild($sig->item(0));
+
+        // Canonicalize the original document without the signature (http://www.w3.org/2001/10/xml-exc-c14n#)
+        $canonical1 = $xml->c14N(true, false);
+
+        error_log('canonical 1 = ' . "\n" . $canonical1 . "\n");
+        error_log('md5=' . md5($canonical1));
+        // Calculate the digest for the whole document
+        $digest = base64_encode(openssl_digest($canonical1, $definition['digestAlgorithm'], true));
+        if ($digest !== $digestValue) {
+            throw new HorusException('Wrong Digest. Found: ' . $digestValue . ', Computed: ' . $digest);
+        }
+
+        // Calculate the signature using the supplied Key and algorithm.
+        if (preg_match('/^RSA/', $definition['signatureAlgorithm'])) {
+            // If we had the private key
+            if (array_key_exists('key', $definition)) {
+                $private = openssl_pkey_get_private($definition['key'], $definition['passphrase']);
+                openssl_sign($canonical2, $computedSignature, $private, $definition['signatureAlgorithm']);
+                $computedSignature = base64_encode($computedSignature);
             } else {
-                $xpath->registerNamespace('u', $xml->namespaceURI);
-            }
-            if (array_key_exists('documentns', $definition)) {
-                foreach ($definition['documentns'] as $prefix => $ns) {
-                    $xpath->registerNamespace($prefix, $ns);
-                }
-            }
-
-            // Lookup the XMLDSIG Signature Element
-            if (array_key_exists('destinationXPath', $definition)) {
-                $sig = $xpath->query($definition['destinationXPath'] . HorusXML::DSIGELT);
-            } else {
-                $sig = $xml->getElementsByTagNameNS(HorusXml::XMLDSIGNS, 'Signature');
-            }
-            
-            if ($sig->length == 0) {
-                throw new HorusException('Document doesn\'t appear to be signed');
-            }
-
-            // Lookup the XMLDSIG SignedInfo Element
-            
-            /** @var DOMDocument $dd **/
-            $dd = $sig->item(0);
-            $signedInfo = $dd->getElementsByTagNameNS(HorusXML::XMLDSIGNS, 'SignedInfo');
-            if ($signedInfo->length == 0) {
-                throw new HorusException('Malformed Signature (missing SignedInfo)');
-            }
-
-            // While the signature is still there, canonicalize the SignedInfo and extract the Digest value
-            $canonical2 = $signedInfo->item(0)->c14N(true, false, null, array('ds'));
-            
-            /** @var DOMDocument $dd **/
-            $dd = $signedInfo->item(0);
-            $digest = $dd->getElementsByTagNameNS(HorusXML::XMLDSIGNS, 'DigestValue');
-            if ($digest->length == 0) {
-                throw new HorusException('Malformed Signature (missing DigestValue)');
-            }
-            $digestValue = $digest->item(0)->nodeValue;
-
-            // While the signature is still there, extract its value
-            /** @var DOMDocument $dd **/
-            $dd = $sig->item(0);
-            $signature = $dd->getElementsByTagNameNS(HorusXML::XMLDSIGNS, 'SignatureValue');
-            if ($signature->length == 0) {
-                throw new HorusException('Malformed Signature (missing SignatureValue)');
-            }
-            $signatureValue = $signature->item(0)->nodeValue;
-
-            // Remove the Signature elt from the original XML (http://www.w3.org/2000/09/xmldsig#enveloped-signature)
-            $sig->item(0)->parentNode->removeChild($sig->item(0));
-
-            // Canonicalize the original document without the signature (http://www.w3.org/2001/10/xml-exc-c14n#)
-            $canonical1 = $xml->c14N(true, false);
-
-            // Calculate the digest for the whole document
-            $digest = base64_encode(openssl_digest($canonical1, $definition['digestAlgorithm'], true));
-            if ($digest !== $digestValue) {
-                throw new HorusException('Wrong Digest. Found: ' . $digestValue . ', Computed: ' . $digest);
-            }
-
-            // Calculate the signature using the supplied Key and algorithm.
-            if (preg_match('/^RSA/', $definition['signatureAlgorithm'])) {
-                // If we had the private key
-                if (array_key_exists('key', $definition)) {
-                    $private = openssl_pkey_get_private($definition['key'], $definition['passphrase']);
-                    openssl_sign($canonical2, $computedSignature, $private, $definition['signatureAlgorithm']);
-                    $computedSignature = base64_encode($computedSignature);
-                } else {
-                    /** @var DOMDocument $dd **/
-                    $dd = $sig->item(0);
-                    $key = $dd->getElementsByTagNameNS(HorusXML::XMLDSIGNS, 'X509Data');
-                    if ($key->length !== 0) {
-                        $cert = HorusXml::generatePEMFromString($key->item(0)->nodeValue);
-                        $pubkey = openssl_pkey_get_public($cert);
-                        if ($pubkey === false) {
-                            throw new HorusException('Incorrect Cert Found' . openssl_error_string());
-                        }
-                        if (1 !== openssl_verify(
-                            $canonical2,
-                            base64_decode($signatureValue),
-                            $pubkey,
-                            $definition['signatureAlgorithm']
-                            )
-                            ) {
-                            throw new HorusException('Mismatched signature ' . openssl_error_string());
-                        }
+                /** @var DOMDocument $dd **/
+                $dd = $sig->item(0);
+                $key = $dd->getElementsByTagNameNS(HorusXML::XMLDSIGNS, 'X509Data');
+                if ($key->length !== 0) {
+                    $cert = HorusXml::generatePEMFromString($key->item(0)->nodeValue);
+                    $pubkey = openssl_pkey_get_public($cert);
+                    if ($pubkey === false) {
+                        throw new HorusException('Incorrect Cert Found' . openssl_error_string());
+                    }
+                    if (1 !== openssl_verify(
+                        $canonical2,
+                        base64_decode($signatureValue),
+                        $pubkey,
+                        $definition['signatureAlgorithm']
+                    )
+                    ) {
+                        throw new HorusException('Mismatched signature ' . openssl_error_string());
                     }
                 }
-            } else {
-                $computedSignature = base64_encode(hash_hmac(
-                    $definition['signatureAlgorithm'],
-                    $canonical2,
-                    $definition['key'],
-                    true
-                    )
-                );
             }
-            if ($signatureValue !== $computedSignature) {
-                throw new HorusException(
-                    'Wrong Signature (Found: ' . $signatureValue . ', Computed: ' . $computedSignature);
-            }
+        } else {
+            $computedSignature = base64_encode(hash_hmac(
+                $definition['signatureAlgorithm'],
+                $canonical2,
+                $definition['key'],
+                true
+            )
+            );
+        }
+        if ($signatureValue !== $computedSignature) {
+            throw new HorusException(
+                'Wrong Signature (Found: ' . $signatureValue . ', Computed: ' . $computedSignature);
+        }
     }
 
     private static function validateSWIFTLAUSignature($document, $definition, $conf)
     {
-                    // Load original document, preserving its format.
-                    $xml = new DOMDocument();
-                    $xml->preserveWhiteSpace = true;
-                    $xml->formatOutput = false;
-                    $xml->loadXML($document);
-        
-                    $xpath = new DOMXPath($xml);
-                    $xpath->registerNamespace('ds', HorusXml::XMLDSIGNS);
-                    if ((array_key_exists('documentNSPrefix', $definition))
-                            && (array_key_exists('documentNSURI', $definition))) {
-                        $xpath->registerNamespace($definition['documentNSPrefix'], $definition['documentNSURI']);
-                    } else {
-                        $xpath->registerNamespace('u', $xml->namespaceURI);
-                    }
-        
-                    if (array_key_exists('documentns', $definition)) {
-                        foreach ($definition['documentns'] as $prefix => $ns) {
-                            $xpath->registerNamespace($prefix, $ns);
-                        }
-                    }
-        
-                    // Lookup the XMLDSIG Signature Element
-                    if (array_key_exists('destinationXPath', $definition)) {
-                        $sig = $xpath->query($definition['destinationXPath'] . HorusXML::DSIGELT);
-                    } else {
-                        $sig = $xml->getElementsByTagNameNS(HorusXml::XMLDSIGNS, 'Signature');
-                    }
-        
-                    if ($sig->length == 0) {
-                        throw new HorusException('Document doesn\'t appear to be LAU-signed');
-                    }
-        
-                    // Lookup the XMLDSIG SignedInfo Element
-                    /** @var DOMDocument $dd **/
-                    $dd = $sig->item(0);
-                    $signedInfo = $dd->getElementsByTagNameNS(HorusXML::XMLDSIGNS, 'SignedInfo');
-                    if ($signedInfo->length == 0) {
-                        throw new HorusException('Malformed LAU Signature (missing SignedInfo)');
-                    }
-        
-                    // While the signature is still there, canonicalize the SignedInfo and extract the Digest value
-                    $canonical2 = $signedInfo->item(0)->c14N(true, false, null, array('ds'));
-                    
-                    /** @var DOMDocument $dd **/
-                    $dd = $signedInfo->item(0);
-                    $digest = $dd->getElementsByTagNameNS(HorusXML::XMLDSIGNS, 'DigestValue');
-                    if ($digest->length == 0) {
-                        throw new HorusException('Malformed LAU Signature (missing DigestValue)');
-                    }
-                    $digestValue = $digest->item(0)->nodeValue;
-        
-                    // While the signature is still there, extract its value
-                    /** @var DOMDocument $dd **/
-                    $dd = $sig->item(0);
-                    $signature = $dd->getElementsByTagNameNS(HorusXML::XMLDSIGNS, 'SignatureValue');
-                    if ($signature->length == 0) {
-                        throw new HorusException('Malformed LAU Signature (missing SignatureValue)');
-                    }
-                    $signatureValue = $signature->item(0)->nodeValue;
+        // Load original document, preserving its format.
+        $xml = new DOMDocument();
+        $xml->preserveWhiteSpace = true;
+        $xml->formatOutput = false;
+        $xml->loadXML($document);
 
-                    if (preg_match('/^RSA/', $definition['signatureAlgorithm'])) {
-                        /** @var DOMDocument $dd **/
-                        $dd = $sig->item(0);
-                        $key = $dd->getElementsByTagNameNS(HorusXML::XMLDSIGNS, 'X509Data');
-                        if ($key->length !== 0) {
-                            $rsakey = $key->item(0)->nodeValue;
-                        }
-                    }
-        
-                    // Remove the Signature element from the original XML
-                    // (http://www.w3.org/2000/09/xmldsig#enveloped-signature)
-                    // LAU-Specific : also remove ds:Signature's parent because of reasons...
-                    $sig->item(0)->parentNode->parentNode->removeChild($sig->item(0)->parentNode);
-        
-                    // Canonicalize the original document without the signature (http://www.w3.org/2001/10/xml-exc-c14n#)
-                    $canonical1 = $xml->c14N(true, false);
-        
-                    // Calculate the digest for the whole document
-                    $digest = base64_encode(openssl_digest($canonical1, $definition['digestAlgorithm'], true));
-                    if ($digest !== $digestValue) {
-                        throw new HorusException('Wrong LAU Digest (Found: ' . $digestValue . ', Computed: ' . $digest);
-                    }
-        
-                    // Calculate the signature using the supplied Key and algorithm.
-                    if (preg_match('/^RSA/', $definition['signatureAlgorithm'])) {
-                        // If we had the private key
-                        if (array_key_exists('key', $definition)) {
-                            $private = openssl_pkey_get_private($definition['key'], $definition['passphrase']);
-                            openssl_sign($canonical2, $computedSignature, $private, $definition['signatureAlgorithm']);
-                            $computedSignature = base64_encode($computedSignature);
-                        } else {
-                            $cert = HorusXml::generatePEMFromString($rsakey);
-                            $pubkey = openssl_pkey_get_public($cert);
-                            if ($pubkey === false) {
-                                throw new HorusException('Incorrect Cert Found' . openssl_error_string());
-                            }
-                            if (1 !== openssl_verify(
-                                    $canonical2,
-                                    base64_decode($signatureValue),
-                                    $pubkey,
-                                    $definition['signatureAlgorithm']
-                                )) {
-                                throw new HorusException('Mismatched signature ' . openssl_error_string());
-                            }
-                            $computedSignature = $signatureValue;
-                        }
-                    } else {
-                        $computedSignature = base64_encode(hash_hmac(
-                            $definition['signatureAlgorithm'],
-                            $canonical2,
-                            $definition['key'],
-                            true
-                        ));
-                    }
-                    if ($signatureValue !== $computedSignature) {
-                        throw new HorusException(
-                            'Wrong LAU Signature (Found: '
-                            . $signatureValue
-                            . ', Computed: '
-                            . $computedSignature
-                        );
-                    }
-                    HorusCommon::logger(
-                        'LAU Signature validated with bogus algorithm',
-                        'DEBUG',
-                        'TXT',
-                        'GREEN',
-                        $conf['business_id']
-                    );
+        $xpath = new DOMXPath($xml);
+        $xpath->registerNamespace('ds', HorusXml::XMLDSIGNS);
+        if ((array_key_exists('documentNSPrefix', $definition))
+            && (array_key_exists('documentNSURI', $definition))) {
+            $xpath->registerNamespace($definition['documentNSPrefix'], $definition['documentNSURI']);
+        } else {
+            $xpath->registerNamespace('u', $xml->namespaceURI);
+        }
+
+        if (array_key_exists('documentns', $definition)) {
+            foreach ($definition['documentns'] as $prefix => $ns) {
+                $xpath->registerNamespace($prefix, $ns);
+            }
+        }
+
+        // Lookup the XMLDSIG Signature Element
+        if (array_key_exists('destinationXPath', $definition)) {
+            $sig = $xpath->query($definition['destinationXPath'] . HorusXML::DSIGELT);
+        } else {
+            $sig = $xml->getElementsByTagNameNS(HorusXml::XMLDSIGNS, 'Signature');
+        }
+
+        if ($sig->length == 0) {
+            throw new HorusException('Document doesn\'t appear to be LAU-signed');
+        }
+
+        // Lookup the XMLDSIG SignedInfo Element
+        /** @var DOMDocument $dd **/
+        $dd = $sig->item(0);
+        $signedInfo = $dd->getElementsByTagNameNS(HorusXML::XMLDSIGNS, 'SignedInfo');
+        if ($signedInfo->length == 0) {
+            throw new HorusException('Malformed LAU Signature (missing SignedInfo)');
+        }
+
+        // While the signature is still there, canonicalize the SignedInfo and extract the Digest value
+        $canonical2 = $signedInfo->item(0)->c14N(true, false, null, array('ds'));
+
+        /** @var DOMDocument $dd **/
+        $dd = $signedInfo->item(0);
+        $digest = $dd->getElementsByTagNameNS(HorusXML::XMLDSIGNS, 'DigestValue');
+        if ($digest->length == 0) {
+            throw new HorusException('Malformed LAU Signature (missing DigestValue)');
+        }
+        $digestValue = $digest->item(0)->nodeValue;
+
+        // While the signature is still there, extract its value
+        /** @var DOMDocument $dd **/
+        $dd = $sig->item(0);
+        $signature = $dd->getElementsByTagNameNS(HorusXML::XMLDSIGNS, 'SignatureValue');
+        if ($signature->length == 0) {
+            throw new HorusException('Malformed LAU Signature (missing SignatureValue)');
+        }
+        $signatureValue = $signature->item(0)->nodeValue;
+
+        if (preg_match('/^RSA/', $definition['signatureAlgorithm'])) {
+            /** @var DOMDocument $dd **/
+            $dd = $sig->item(0);
+            $key = $dd->getElementsByTagNameNS(HorusXML::XMLDSIGNS, 'X509Data');
+            if ($key->length !== 0) {
+                $rsakey = $key->item(0)->nodeValue;
+            }
+        }
+
+        // Remove the Signature element from the original XML
+        // (http://www.w3.org/2000/09/xmldsig#enveloped-signature)
+        // LAU-Specific : also remove ds:Signature's parent because of reasons...
+        $sig->item(0)->parentNode->parentNode->removeChild($sig->item(0)->parentNode);
+
+        // Canonicalize the original document without the signature (http://www.w3.org/2001/10/xml-exc-c14n#)
+        $canonical1 = $xml->c14N(true, false);
+
+        // Calculate the digest for the whole document
+        $digest = base64_encode(openssl_digest($canonical1, $definition['digestAlgorithm'], true));
+        if ($digest !== $digestValue) {
+            throw new HorusException('Wrong LAU Digest (Found: ' . $digestValue . ', Computed: ' . $digest);
+        }
+
+        // Calculate the signature using the supplied Key and algorithm.
+        if (preg_match('/^RSA/', $definition['signatureAlgorithm'])) {
+            // If we had the private key
+            if (array_key_exists('key', $definition)) {
+                $private = openssl_pkey_get_private($definition['key'], $definition['passphrase']);
+                openssl_sign($canonical2, $computedSignature, $private, $definition['signatureAlgorithm']);
+                $computedSignature = base64_encode($computedSignature);
+            } else {
+                $cert = HorusXml::generatePEMFromString($rsakey);
+                $pubkey = openssl_pkey_get_public($cert);
+                if ($pubkey === false) {
+                    throw new HorusException('Incorrect Cert Found' . openssl_error_string());
+                }
+                if (1 !== openssl_verify(
+                    $canonical2,
+                    base64_decode($signatureValue),
+                    $pubkey,
+                    $definition['signatureAlgorithm']
+                )) {
+                    throw new HorusException('Mismatched signature ' . openssl_error_string());
+                }
+                $computedSignature = $signatureValue;
+            }
+        } else {
+            $computedSignature = base64_encode(hash_hmac(
+                $definition['signatureAlgorithm'],
+                $canonical2,
+                $definition['key'],
+                true
+            ));
+        }
+        if ($signatureValue !== $computedSignature) {
+            throw new HorusException(
+                'Wrong LAU Signature (Found: '
+                . $signatureValue
+                . ', Computed: '
+                . $computedSignature
+            );
+        }
+        HorusCommon::logger(
+            'LAU Signature validated with bogus algorithm',
+            'DEBUG',
+            'TXT',
+            'GREEN',
+            $conf['business_id']
+        );
     }
 
     private static function validateDATAPDUSignature($logLocation, $document, $definition, $conf)
@@ -1059,7 +1062,7 @@ class HorusXml
         $ss->loadXML($savedSign);
         $xpathsign = new DOMXpath($ss);
         $xpathsign->registerNamespace('ds', HorusXML::XMLDSIGNS);
-        
+
         // Test digests
 
         foreach ($definition['references'] as $reference) {
@@ -1097,7 +1100,7 @@ class HorusXml
                 $conf['business_id'],
                 $logLocation
             );
-        
+
             // Digest
             $dgst = base64_encode(openssl_digest($c14, $definition['digestAlgorithm'], true));
 
@@ -1181,7 +1184,7 @@ class HorusXml
                 $conf['business_id'],
                 $logLocation
             );
-        }    
+        }
     }
 
     public static function validateSignature($document, $headers, $definition, $conf)
@@ -1200,5 +1203,132 @@ class HorusXml
         } elseif ('DATAPDUSIG' === $definition['method']) {
             HorusXML::validateDATAPDUSignature($logLocation, $document, $definition, $conf);
         }
+    }
+
+    public static function sign($document, $definition)
+    {
+
+        // Load original document, preserving its format if needed.
+        $xml = new DOMDocument();
+
+        if (array_key_exists('preserveFormat', $definition) && (strtoupper($definition['preserveFormat']) == 'FALSE')) {
+            $xml->preserveWhiteSpace = false;
+        } else {
+            $xml->preserveWhiteSpace = true;
+        }
+        $xml->formatOutput = false;
+        $xml->loadXML($document);
+
+        // If the signature already exists, remove it.
+
+        $oldSignatures = $xml->getElementsByTagNameNS(HorusXML::XMLDSIGNS, 'Signature');
+        $oldSignatures->item(0)->remove();
+
+        // Create basic signature elements
+        $signature = $xml->createElementNS(HorusXML::XMLDSIGNS,'Signature');
+        $signedInfo = $xml->createElementNS(HorusXML::XMLDSIGNS,'SignedInfo');
+        $signature->append($signedInfo);
+       
+        $cm = $xml->createElementNS(HorusXML::XMLDSIGNS,'CannonicalizationMethod');
+        $cm->setAttribute('Algorithm', HorusXML::XMLC14N);
+        
+        $signedInfo->append($cm);
+        $sm = $xml->createElementNS(HorusXML::XMLDSIGNS, 'SignatureMethod');
+        if (array_key_exists('signatureMethod', $definition) && ($definition['signatureMethod'] == 'RSA')) {
+            $sm->setAttribute('Algorithm', HorusXML::XMLAES);
+        } else {
+            $sm->setAttribute('Algorithm', HorusXML::XMLHMAC);
+        }
+        $signedInfo->append($sm);
+
+        $xpath = new DOMXPath(($xml));
+        // Loop over all digests
+        foreach ($definition['digests'] as $digestElement) {
+            $targetURI = $digestElement['targetURI'];
+            $sourceXpath = $digestElement['sourceXpath'];
+            $refElt = $xml->createElementNS(HorusXML::XMLDSIGNS, 'Reference');
+            if ($targetURI !== 'NO_URI') {
+                $refElt->setAttribute('URI', $targetURI);
+            }
+
+            // Add reference basic elements
+            $signedInfo->append($refElt);
+            $transforms = $xml->createElementNS(HorusXML::XMLDSIGNS, 'Transforms');
+            $refElt->append($transforms);
+
+            $trsig = $xml->createElementNS(HorusXML::XMLDSIGNS,'Transform');
+            $trsig->setAttribute('Algorithm', HorusXML::XMLENVSIG);
+            $transforms->append($trsig);
+
+            $trcan = $xml->createElementNS(HorusXML::XMLDSIGNS,'Transform');
+            $trcan->setAttribute('Algorithm', HorusXML::XMLC14N);
+            $transforms->append($trcan);
+
+            $refdm = $xml->createElementNS(HorusXML::XMLDSIGNS,'DigestMethod');
+            $refdm->setAttribute('Algorithm', HorusXML::XMLSHA256);
+            $refElt->append($refdm);
+           
+            // Extract XML fragment from sourceXpath
+            $referenceXpath = $xpath->query($sourceXpath);
+            if (!is_null($referenceXpath)) {
+                $referenceXml = $referenceXpath->item(0);
+                $c14 = $referenceXml->C14N(true, false, null, array('ds'));
+                $digest = base64_encode(openssl_digest($c14, 'SHA256', true));
+                $refElt->append($xml->createElementNS(HorusXML::XMLDSIGNS,'DigestValue', $digest));
+
+            }
+
+        }
+
+        // Compute the final signature using the generated SignedInfo
+        $signedInfoC14 = $signedInfo->C14N(true, false, null, array('ds'));
+        
+        if (array_key_exists('signatureMethod', $definition) && ($definition['signatureMethod'] == 'HMAC')) {
+            $key = $definition['key'];
+            $signatureValue = base64_encode(hash_hmac($definition['algorithm'], $signedInfoC14, $key, true));
+            $signature->append($xml->createElementNS(HorusXML::XMLDSIGNS,'SignatureValue', $signatureValue));
+        } elseif (array_key_exists('signatureMethod', $definition) && ($definition['signatureMethod'] == 'RSA')){
+            $pk = openssl_get_privatekey(
+                HorusXML::PKHEADER . 
+                implode("\n",str_split($definition['key'],64)) . 
+                HorusXML::PKFOOTER
+            );
+            $ss = '';
+            openssl_sign($signedInfoC14, $ss, $pk, OPENSSL_ALGO_SHA256);
+            $signatureValue = base64_encode($ss);
+            $signature->append($xml->createElementNS(HorusXML::XMLDSIGNS,'SignatureValue', $signatureValue));
+            $keyInfo = $xml->createElementNS(HorusXml::XMLDSIGNS, 'KeyInfo');
+            $keyInfo->setAttribute('Id', 'mykeyinfo');
+            $x509data = $xml->createElementNS(HorusXML::XMLDSIGNS, 'X509Data');
+            $x509 = $xml->createElementNS(HorusXML::XMLDSIGNS, 'X509Certificate', $definition['certificate']);
+            $x509data->append($x509);
+            $keyInfo->append($x509data);
+
+            $signature->append($keyInfo);
+
+        }
+
+        if(!array_key_exists('createTargetElement', $definition)){
+            $targetElementList = $xpath->query($definition['targetXpath']);
+
+            if (!is_null($targetElementList)){
+                $xml->importNode($signature);
+                $targetElementList->item(0)->appendChild($signature);
+                return $xml->saveXML();
+            }
+        } else {
+             $parent = $definition['createTargetElement']['parentXpath'];
+             $element = $definition['createTargetElement']['elementName'];
+             $elementNS = $definition['createTargetElement']['elementNameSpace'];
+             $parentElementList = $xpath->query($parent);
+             if (!is_null($parentElementList)){
+                $newTargetElement = $xml->createElementNS($elementNS, $element);
+                $xml->importNode($signature);
+                $newTargetElement->appendChild($signature);
+                $parentElementList->item(0)->appendChild($newTargetElement);
+                return $xml->saveXML();
+             }
+        }
+
     }
 }

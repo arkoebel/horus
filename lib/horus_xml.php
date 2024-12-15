@@ -148,7 +148,15 @@ class HorusXml
                 } else {
                     $response[] = null;
                 }
-            } elseif ('' === $output) {
+            } elseif ('novalidation' === $formats[$nrep]) {
+                // Special case for empty xsd
+                $this->common->mlog('Response is not validated by xsd', 'INFO');
+                if ($multiple) {
+                    $response[] = array("data" => $output, "headers" => $vars);
+                } else {
+                    $response[] = $output;
+                }
+            }elseif ('' === $output) {
                 // Special case for empty responses
                 $this->common->mlog('Response is empty', 'INFO');
                 if ($multiple) {
@@ -156,6 +164,7 @@ class HorusXml
                 }
                 $response[] = null;
             } else {
+                $this->common->mlog('Effective body before validation : ' . $output, 'INFO');
                 $outputxml = new DOMDocument();
                 $outputxml->loadXML(preg_replace('/\s*(<[^>]*>)\s*/', '$1', $output));
                 if ($outputxml->schemaValidate('xsd/' . $formats[$nrep]) !== true) {
@@ -442,7 +451,7 @@ class HorusXml
         $selectedXsd = $this->findSchema($query, $defaultNamespace);
 
         if ('' !== $selectedXsd) {
-            $selected = $this->business->locate($matches, $selectedXsd, $input);
+            $selected = $this->business->locate($matches, $selectedXsd, $input, $queryParams);
             if ($selected == -1) {
                 $errorMessage = "Found match, but filtered out\n";
                 $errorMessage .= "XSD = $selectedXsd";

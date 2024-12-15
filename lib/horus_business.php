@@ -48,7 +48,7 @@ class HorusBusiness
         return false;
     }
 
-    public function locate($matches, $found, $value)
+    public function locate($matches, $found, $value, $queryParams = array())
     {
         $selected = -1;
 
@@ -59,15 +59,23 @@ class HorusBusiness
         foreach ($matches as $id => $match) {
             if (array_key_exists('query', $match) && ($match['query'] === $found)) {
                 if (array_key_exists('queryMatch', $match) && $match['queryMatch'] != '') {
-                    if (preg_match('/' . $match['queryMatch'] . '/', $value) === 1) {
+                    $mm = $match['queryMatch'];
+                    if (preg_match_all('/\$\{(.*?)}/',$mm)) {
+                        $mm1 = preg_replace_callback('/\${(.*?)}/', function($matches) use ($queryParams) {
+                            $key = $matches[1]; // The captured key inside the ${}
+                            return isset($queryParams[$key]) ? $queryParams[$key] : '${' . $key . '}';
+                        }, $mm);
+                        if ($mm1 !== $mm){
+                            $this->common->mlog('Current queryMatch: ' . $mm . ' was converted to ' . $mm1, 'DEBUG');
+                            $mm = $mm1;
+                        }
+                    }
+                    if (preg_match('/' . $mm. '/', $value) === 1) {
                         $selected = $id;
-                        $this->common->mlog(
-                           'Current match: ' . $match['comment'] . ' ' . $match['queryMatch'],
-                           'DEBUG'
-                        );
+                        $this->common->mlog('Current match: ' . $match['comment'] . ' ' . $mm, 'DEBUG');
                     } else {
-                        //for later $this->common->mlog('QueryMatch failed for param line #' . $id, 'DEBUG');
-                        //for later $this->common->mlog($match['comment'] . ' ' . $match['queryMatch'],'DEBUG');
+                        $this->common->mlog('QueryMatch failed for param line #' . $id, 'DEBUG');
+                        $this->common->mlog($match['comment'] . ' ' . $mm,'DEBUG');
                     }
                 } else {
                     $this->common->mlog('Param line #' . $id . ' could be selected (if last).', 'DEBUG');

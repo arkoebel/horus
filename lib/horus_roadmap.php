@@ -33,7 +33,8 @@ class HorusRoadmap
             $this->common->mlog('Invalid configuration file', 'FATAL');
             throw new HorusException('Invalid configuration file');
         }
-        $kafkaCnf = new RdKafka\Conf();
+        
+        $kafkaCnf = new RdKafka\Conf(); // @ignore
         $kafkaCnf->set('metadata.broker.list', $this->common->cnf['broker.list']);
         // we can also set the buffering time, so we dispatch asap:
         $kafkaCnf->set('queue.buffering.max.ms', 1);

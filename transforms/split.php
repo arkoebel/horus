@@ -37,7 +37,7 @@ class DataPduSwap implements HorusTransformerInterface
         // Remove the Body element from xml
 
         $doc = dom_import_simplexml($xml);
-        $bodyxpath = new DOMXPath($doc,false);
+        $bodyxpath = new DOMXPath($doc->ownerDocument,false);
         $bodylist = reset($bodyxpath->query("//*[local-name()='Body']"));
         $body = $bodylist[0];
         $body->remove();

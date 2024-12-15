@@ -46,7 +46,8 @@ class HorusBusinessTest extends HorusTestCase
                                 {"query":"value10","queryMatch":"value20","comment":"line2"},
                                 {"query":"value10","queryMatch":"value21","comment":"line3"},
                                 {"query":"zip","comment":"line4"},
-                                {"query":"zip","comment":"line5"}]',
+                                {"query":"zip","comment":"line5"},
+                                {"query": "xxx", "queryMatch": "${myparam}", "comment": "line6"}]',
                             true
                         );
         $this::assertEquals($horus->locate($params, 'value1', 'isthisokforvalue2or not?'), 0);
@@ -59,6 +60,8 @@ class HorusBusinessTest extends HorusTestCase
         $this::assertEquals($horus->locate('', 'AAA', 'BBB'), -1);
         $this::assertEquals($horus->locate($params, null, 'BBB'), -1);
         $this::assertEquals($horus->locate($params, 'zip', null), -1);
+        $this::assertEquals($horus->locate($params, 'zxxx', 'AAA', array('test'=>'value')), -1);
+        $this::assertEquals($horus->locate($params, 'xxx', 'AAAxvaluey', array('myparam'=>'value')), 5);
     }
 
     public function testLocateJson(): void

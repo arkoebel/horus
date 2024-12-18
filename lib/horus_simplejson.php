@@ -1,5 +1,7 @@
 <?php
 
+use Flow\JSONPath\JSONPath;
+
 class HorusSimpleJson
 {
 
@@ -61,6 +63,19 @@ class HorusSimpleJson
             )!=="") {
             foreach ($this->business->findMatch($this->simpleJsonMatches, $selected, 'parameters') as $param => $path) {
                 $vars[$param] = $input[$path];
+            }
+        }
+        if ($this->business->findMatch(
+            $this->simpleJsonMatches,
+            $selected,
+            'jsonpathparameters'
+            )!=="") {
+            foreach ($this->business->findMatch($this->simpleJsonMatches, $selected, 'jsonpathparameters') as $param => $path) {
+                $rr = (new JSONPath($input))->find($path)->getData();
+                if (is_array($rr)&&(count($rr)==1)){
+                    $vars[$param] = $rr[0];
+                }
+                
             }
         }
 

@@ -13,7 +13,7 @@ class HorusSimplejsonTest extends HorusTestCase
 
     public function testSelectionEmptyBody(): void
     {
-        $simplejson = new HorusSimpleJson("mybusinessid", null, null, self::$tracer);
+        $simplejson = new HorusSimpleJson("mybusinessid", null, null, self::$tracing);
 
         $json = '{';
         json_decode($json, true);
@@ -47,7 +47,7 @@ class HorusSimplejsonTest extends HorusTestCase
             ]',
             true
         );
-        $simplejson = new HorusSimpleJson("mybusinessid", null, $matches, self::$tracer);
+        $simplejson = new HorusSimpleJson("mybusinessid", null, $matches, self::$tracing);
         $input = json_decode('{"nothing": "to decode"}', true);
 
         try {
@@ -82,7 +82,7 @@ class HorusSimplejsonTest extends HorusTestCase
             ]',
             true
         );
-        $simplejson = new HorusSimpleJson("mybusinessid", null, $matches, self::$tracer);
+        $simplejson = new HorusSimpleJson("mybusinessid", null, $matches, self::$tracing);
         $input = json_decode('{"key1": "value1","key2":"matched"}', true);
 
         try {
@@ -120,7 +120,7 @@ class HorusSimplejsonTest extends HorusTestCase
             true
         );
 
-        $simplejson = new HorusSimpleJson("mybusinessid", null, $matches, self::$tracer);
+        $simplejson = new HorusSimpleJson("mybusinessid", null, $matches, self::$tracing);
         $input = json_decode(
             '{"key1": "value1","key2":"matched", "value1": "returnvalue1","value2":"returnvalue2"}',
             true
@@ -157,7 +157,7 @@ class HorusSimplejsonTest extends HorusTestCase
             true
         );
 
-        $simplejson = new HorusSimpleJson("mybusinessid", null, $matches, self::$tracer);
+        $simplejson = new HorusSimpleJson("mybusinessid", null, $matches, self::$tracing);
         $input = json_decode(
             '{"key1": "value1","key2":"matched", "value1": "returnvalue1","value2":"returnvalue2"}',
             true
@@ -192,7 +192,7 @@ class HorusSimplejsonTest extends HorusTestCase
             ]',
             true
         );
-        $simplejson = new HorusSimpleJson("mybusinessid", null, $matches, self::$tracer);
+        $simplejson = new HorusSimpleJson("mybusinessid", null, $matches, self::$tracing);
         $input = '{"key1": "value1","key2":"matched"}';
 
         try {
@@ -229,7 +229,7 @@ class HorusSimplejsonTest extends HorusTestCase
             true
         );
 
-        $simplejson = new HorusSimpleJson("mybusinessid", null, $matches, self::$tracer);
+        $simplejson = new HorusSimpleJson("mybusinessid", null, $matches, self::$tracing);
         $input = '{"key1":"value1", "key2":"matched", "ipsystem":"returnvalue1", "ipparticipant":"returnvalue2"}';
         $res = $simplejson->doInject(
             $input,
@@ -265,7 +265,7 @@ class HorusSimplejsonTest extends HorusTestCase
             true
         );
 
-        $simplejson = new HorusSimpleJson("mybusinessid", null, $matches, self::$tracer);
+        $simplejson = new HorusSimpleJson("mybusinessid", null, $matches, self::$tracing);
         $input = '{"key1":"value1", "key2":"matched", "ipsystem":"returnvalue1", "ipparticipant":"returnvalue2"}';
         $res = $simplejson->doInject(
             $input,
@@ -287,4 +287,43 @@ class HorusSimplejsonTest extends HorusTestCase
         $this::assertEquals('returnvalue3', $outres['msgRef'], 'Compare to expected result');
         $this::assertEquals('returnvalue4', $outres['IPAccountId'], 'Compare to expected result');
     }
+
+    public function testSelectionJsonPath(): void
+    {
+        $matches = json_decode(
+            '[
+            {"query": {"key": "key1", "value": "value1"}},
+            {"query": {"key": "key1", "value": "value1"}, "queryMatch": "match",
+                "responseTemplate":"position_msg_response.json",
+                "responseFormat":"application/json",
+                "jsonpathparameters": {"var1":"$.branch1.value1","var2":"$.branch2[1].value2"}},
+            {"query": {"key": "key1", "value": "value1", "queryKey": "qkey1", ' .
+            '"queryValue": "qvalue1"}},
+            {"query": {"key": "key1", "value": "value1", "queryKey": "qkey1", ' .
+            '"queryValue": "qvalue1"},"queryMatch": "match"},
+            {"query": {"key": "key1", "value": "value1", "queryKey": "qkey1", ' .
+            '"queryValue": "qvalue1"},"queryMatch": "match"},
+            {"query": {"key": "zip"},"queryMatch": "match3"},
+            {"query": {"key": "zip"}}
+            ]',
+            true
+        );
+
+        $simplejson = new HorusSimpleJson("mybusinessid", null, $matches, self::$tracing);
+        $input = json_decode(
+            '{"key1": "value1","key2":"matched", "branch1": {"value1": "returnvalue1"},"branch2": [{"value2": "nope"},{"value2":"returnvalue2"}]}',
+            true
+        );
+        $expected = array(
+            'templates' => array('position_msg_response.json'),
+            'formats' => array('application/json'),
+            'variables' => array('var1' => 'returnvalue1', 'var2' => 'returnvalue2'),
+            'multiple' => false
+        );
+        $res = $simplejson->selection($input, HorusCommon::JS_CT, '', HorusCommon::JS_CT, self::$rootSpan);
+        $this::assertNotNull($res, 'Should return something');
+        $this::assertTrue(is_array($res), 'Should return an array');
+        $this::assertEquals($expected, $res, 'Compare to expected result');
+    }
+
 }

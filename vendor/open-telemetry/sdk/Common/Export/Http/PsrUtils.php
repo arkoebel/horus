@@ -75,7 +75,7 @@ final class PsrUtils
 
             try {
                 $value = $encoder($value);
-            } catch (Throwable $e) {
+            } catch (Throwable) {
                 unset($encodings[$i]);
             }
         }
@@ -87,9 +87,14 @@ final class PsrUtils
 
     /**
      * @param list<string> $encodings
+     * @psalm-suppress InvalidArrayOffset
      */
     public static function decode(string $value, array $encodings): string
     {
+        if ($value === '') {
+            return $value;
+        }
+
         for ($i = count($encodings); --$i >= 0;) {
             if (strcasecmp($encodings[$i], 'identity') === 0) {
                 continue;
@@ -102,6 +107,24 @@ final class PsrUtils
         }
 
         return $value;
+    }
+
+    /**
+     * Resolve an array or CSV of compression types to a list
+     */
+    public static function compression($compression): array
+    {
+        if (is_array($compression)) {
+            return $compression;
+        }
+        if (!$compression) {
+            return [];
+        }
+        if (!str_contains((string) $compression, ',')) {
+            return [$compression];
+        }
+
+        return array_map('trim', explode(',', (string) $compression));
     }
 
     private static function encoder(string $encoding): ?callable

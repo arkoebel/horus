@@ -11,10 +11,6 @@ class TraceContextValidator
     public const TRACE_FLAG_LENGTH = 2;
     public const TRACE_VERSION_REGEX = '/^(?!ff)[\da-f]{2}$/';
 
-    /**
-     * @param string $traceVersion
-     * @return bool Returns a value that indicates whether a trace version is valid.
-     */
     public static function isValidTraceVersion(string $traceVersion): bool
     {
         return 1 === preg_match(self::TRACE_VERSION_REGEX, $traceVersion);
@@ -24,7 +20,7 @@ class TraceContextValidator
      * @return bool Returns a value that indicates whether trace flag is valid
      * TraceFlags must be exactly 1 bytes (1 char) representing a bit field
      */
-    public static function isValidTraceFlag($traceFlag): bool
+    public static function isValidTraceFlag(string $traceFlag): bool
     {
         return ctype_xdigit($traceFlag) && strlen($traceFlag) === self::TRACE_FLAG_LENGTH;
     }

@@ -10,6 +10,7 @@ use OpenTelemetry\API\Trace\SpanContextInterface;
 use OpenTelemetry\Context\Context;
 use OpenTelemetry\Context\ContextInterface;
 use OpenTelemetry\SDK\Common\Attribute\AttributesInterface;
+use OpenTelemetry\SDK\Common\Attribute\LogRecordAttributeValidator;
 use OpenTelemetry\SDK\Common\Instrumentation\InstrumentationScopeInterface;
 use OpenTelemetry\SDK\Resource\ResourceInfo;
 
@@ -19,16 +20,14 @@ use OpenTelemetry\SDK\Resource\ResourceInfo;
  */
 class ReadableLogRecord extends LogRecord
 {
-    private InstrumentationScopeInterface $scope;
-    private LoggerSharedState $loggerSharedState;
     protected AttributesInterface $convertedAttributes;
     protected SpanContextInterface $spanContext;
 
-    public function __construct(InstrumentationScopeInterface $scope, LoggerSharedState $loggerSharedState, LogRecord $logRecord)
-    {
-        $this->scope = $scope;
-        $this->loggerSharedState = $loggerSharedState;
-
+    public function __construct(
+        private readonly InstrumentationScopeInterface $scope,
+        private readonly LoggerSharedState $loggerSharedState,
+        LogRecord $logRecord,
+    ) {
         parent::__construct($logRecord->body);
         $this->timestamp = $logRecord->timestamp;
         $this->observedTimestamp = $logRecord->observedTimestamp
@@ -43,7 +42,7 @@ class ReadableLogRecord extends LogRecord
         $this->convertedAttributes = $this->loggerSharedState
             ->getLogRecordLimits()
             ->getAttributeFactory()
-            ->builder($logRecord->attributes)
+            ->builder($logRecord->attributes, new LogRecordAttributeValidator())
             ->build();
     }
 

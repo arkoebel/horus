@@ -7,19 +7,19 @@ namespace OpenTelemetry\SDK\Common\Configuration\Resolver;
 use OpenTelemetry\SDK\Common\Configuration\Configuration;
 
 /**
- * @interal
+ * @internal
  */
 class CompositeResolver
 {
-    // @var array<ResolverInterface>
+    /** @var list<ResolverInterface> */
     private array $resolvers = [];
 
     public static function instance(): self
     {
         static $instance;
         $instance ??= new self([
-            new PhpIniResolver(),
             new EnvironmentResolver(),
+            new PhpIniResolver(),
         ]);
 
         return $instance;

@@ -17,25 +17,7 @@ class ResourceInfoFactory
 {
     use LogsMessagesTrait;
 
-    /**
-     * Merges resources into a new one.
-     *
-     * @deprecated Use `ResourceInfo::merge($resource)`
-     * @phan-suppress PhanDeprecatedFunction
-     * @see https://github.com/open-telemetry/opentelemetry-specification/blob/v1.20.0/specification/resource/sdk.md#merge
-     */
-    public static function merge(ResourceInfo ...$resources): ResourceInfo
-    {
-        $attributes = [];
-
-        foreach ($resources as $resource) {
-            $attributes += $resource->getAttributes()->toArray();
-        }
-
-        $schemaUrl = self::mergeSchemaUrl(...$resources);
-
-        return ResourceInfo::create(Attributes::create($attributes), $schemaUrl);
-    }
+    private static ?ResourceInfo $emptyResource = null;
 
     public static function defaultResource(): ResourceInfo
     {
@@ -60,6 +42,10 @@ class ResourceInfoFactory
 
         foreach ($detectors as $detector) {
             switch ($detector) {
+                case Values::VALUE_DETECTORS_SERVICE:
+                    $resourceDetectors[] = new Detectors\Service();
+
+                    break;
                 case Values::VALUE_DETECTORS_ENVIRONMENT:
                     $resourceDetectors[] = new Detectors\Environment();
 
@@ -110,23 +96,10 @@ class ResourceInfoFactory
 
     public static function emptyResource(): ResourceInfo
     {
-        return ResourceInfo::create(Attributes::create([]));
-    }
-
-    /**
-     * @deprecated
-     */
-    private static function mergeSchemaUrl(ResourceInfo ...$resources): ?string
-    {
-        $schemaUrl = null;
-        foreach ($resources as $resource) {
-            if ($schemaUrl !== null && $resource->getSchemaUrl() !== null && $schemaUrl !== $resource->getSchemaUrl()) {
-                // stop the merging if non-empty conflicting schemas are detected
-                return null;
-            }
-            $schemaUrl ??= $resource->getSchemaUrl();
+        if (null === self::$emptyResource) {
+            self::$emptyResource = ResourceInfo::create(Attributes::create([]));
         }
 
-        return $schemaUrl;
+        return self::$emptyResource;
     }
 }

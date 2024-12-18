@@ -34,30 +34,24 @@ use DOMDocument;
  */
 abstract class XML
 {
+    use UriTrait;
+
     /**
      * Make a string valid to XML::anyURI spec - best-effort.
      *
      * Complete and failsafe implementation is pretty context-dependent.
      * Best-effort solution: replacement & drop every URI that is not well-formed already.
      *
-     * @see http://www.w3.org/TR/xmlschema-2/#anyURI
-     * @see http://www.datypic.com/sc/xsd/t-xsd_anyURI.html
+     * @see UriTrait::fixUriBE
+     * @see filterAnyUri
      *
      * @return string|null string on success; null if encoding failed, or input was null
      */
     public static function encodeAnyUriBE(?string $uri): ?string
     {
-        if (null === $uri) {
-            return null;
-        }
+        $uri = self::fixUriBE($uri);
 
-        $uri = str_replace(
-            [' ', '[', ']', '<', '>', '{', '}'],
-            ['%20', '%5B', '%5D', '%3C', '%3E', '%7B', '%7D'],
-            $uri
-        );
-
-        return self::filterAnyUri($uri)
+        return null === $uri || self::filterAnyUri($uri)
             ? $uri
             : null; // @codeCoverageIgnore
     }

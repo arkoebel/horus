@@ -9,28 +9,37 @@ use function count;
 use function is_array;
 use function is_string;
 use function mb_substr;
+use OpenTelemetry\API\Behavior\LogsMessagesTrait;
 
 /**
  * @internal
  */
 final class AttributesBuilder implements AttributesBuilderInterface
 {
-    private array $attributes;
-    private ?int $attributeCountLimit;
-    private ?int $attributeValueLengthLimit;
-    private int $droppedAttributesCount;
+    use LogsMessagesTrait;
 
-    public function __construct(array $attributes, ?int $attributeCountLimit, ?int $attributeValueLengthLimit, int $droppedAttributesCount)
+    public function __construct(private array $attributes, private ?int $attributeCountLimit, private ?int $attributeValueLengthLimit, private int $droppedAttributesCount, private AttributeValidatorInterface $attributeValidator = new AttributeValidator())
     {
-        $this->attributes = $attributes;
-        $this->attributeCountLimit = $attributeCountLimit;
-        $this->attributeValueLengthLimit = $attributeValueLengthLimit;
-        $this->droppedAttributesCount = $droppedAttributesCount;
     }
 
     public function build(): AttributesInterface
     {
         return new Attributes($this->attributes, $this->droppedAttributesCount);
+    }
+
+    public function merge(AttributesInterface $old, AttributesInterface $updating): AttributesInterface
+    {
+        $new = $old->toArray();
+        $dropped = $old->getDroppedAttributesCount() + $updating->getDroppedAttributesCount();
+        foreach ($updating->toArray() as $key => $value) {
+            if (count($new) === $this->attributeCountLimit && !array_key_exists($key, $new)) {
+                $dropped++;
+            } else {
+                $new[$key] = $value;
+            }
+        }
+
+        return new Attributes($new, $dropped);
     }
 
     public function offsetExists($offset): bool
@@ -41,8 +50,7 @@ final class AttributesBuilder implements AttributesBuilderInterface
     /**
      * @phan-suppress PhanUndeclaredClassAttribute
      */
-    #[\ReturnTypeWillChange]
-    public function offsetGet($offset)
+    public function offsetGet($offset): mixed
     {
         return $this->attributes[$offset] ?? null;
     }
@@ -50,14 +58,19 @@ final class AttributesBuilder implements AttributesBuilderInterface
     /**
      * @phan-suppress PhanUndeclaredClassAttribute
      */
-    #[\ReturnTypeWillChange]
-    public function offsetSet($offset, $value)
+    public function offsetSet($offset, $value): void
     {
         if ($offset === null) {
             return;
         }
         if ($value === null) {
             unset($this->attributes[$offset]);
+
+            return;
+        }
+        if (!$this->attributeValidator->validate($value)) {
+            self::logWarning($this->attributeValidator->getInvalidMessage() . ': ' . $offset);
+            $this->droppedAttributesCount++;
 
             return;
         }
@@ -76,8 +89,7 @@ final class AttributesBuilder implements AttributesBuilderInterface
     /**
      * @phan-suppress PhanUndeclaredClassAttribute
      */
-    #[\ReturnTypeWillChange]
-    public function offsetUnset($offset)
+    public function offsetUnset($offset): void
     {
         unset($this->attributes[$offset]);
     }

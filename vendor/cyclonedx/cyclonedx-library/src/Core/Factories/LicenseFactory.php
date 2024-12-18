@@ -29,12 +29,13 @@ use CycloneDX\Core\Models\License\NamedLicense;
 use CycloneDX\Core\Models\License\SpdxLicense;
 use CycloneDX\Core\Spdx\LicenseIdentifiers;
 use DomainException;
+use InvalidArgumentException;
 
 class LicenseFactory
 {
     public function __construct(
         private readonly LicenseIdentifiers $licenseIdentifiers = new LicenseIdentifiers(),
-        private readonly SpdxLicenses $spdxLicenses = new SpdxLicenses()
+        private readonly SpdxLicenses $spdxLicenses = new SpdxLicenses(),
     ) {
     }
 
@@ -52,12 +53,12 @@ class LicenseFactory
     {
         try {
             return $this->makeSpdxLicense($license);
-        } catch (\DomainException) {
+        } catch (DomainException) {
             /* pass */
         }
         try {
             return $this->makeExpression($license);
-        } catch (\DomainException) {
+        } catch (DomainException) {
             /* pass */
         }
 
@@ -68,7 +69,7 @@ class LicenseFactory
     {
         try {
             return $this->makeSpdxLicense($license);
-        } catch (\DomainException) {
+        } catch (DomainException) {
             return $this->makeNamedLicense($license);
         }
     }
@@ -80,7 +81,7 @@ class LicenseFactory
     {
         try {
             $valid = $this->spdxLicenses->validate($license);
-        } catch (\InvalidArgumentException) {
+        } catch (InvalidArgumentException) {
             $valid = false;
         }
         if ($valid) {

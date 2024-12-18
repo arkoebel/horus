@@ -4,6 +4,120 @@ All notable changes to this project will be documented in this file.
 
 ## unreleased
 
+<!-- add unreleased items here -->
+
+* Style
+  * Applied latest PHP Coding Standards (via [#507])
+
+[#507]: https://github.com/CycloneDX/cyclonedx-php-composer/pull/507
+
+## 5.2.0 - 2024-04-30
+
+* Added
+  * Declared licenses are marked as such ([#474] via [#479]) 
+* Dependencies
+  * Raised dependency `cyclonedx/cyclonedx-library:^3.3`, was `:^3.2` (via [#479])
+
+[#474]: https://github.com/CycloneDX/cyclonedx-php-composer/issues/474
+[#479]: https://github.com/CycloneDX/cyclonedx-php-composer/pull/479
+
+## 5.1.0 - 2024-04-23
+
+Added _basic_ support for [_CycloneDX_ Specification-1.6](https://github.com/CycloneDX/specification/releases/tag/1.6).
+
+* Changed
+  * This tool supports _CycloneDX_ Specification-1.6 now (via [#477])
+* Added
+  * CLI switch `--spec-version` now supports value `1.6` to reflect _CycloneDX_ Specification-1.6 (via [#477])  
+    Default value for that switch is unchanged - still `1.5`.
+* Style
+  * Applied latest PHP Coding Standards (via [#469])
+* Dependencies
+  * Raised dependency `cyclonedx/cyclonedx-library:^3.2`, was `:^3.1` (via [#477])
+
+[#469]: https://github.com/CycloneDX/cyclonedx-php-composer/pull/469
+[#477]: https://github.com/CycloneDX/cyclonedx-php-composer/pull/477
+
+## 5.0.1 - 2024-02-05
+
+* Style
+  * Applied latest PHP Coding Standards (via [#451], [#459])
+
+[#451]: https://github.com/CycloneDX/cyclonedx-php-composer/pull/451
+[#459]: https://github.com/CycloneDX/cyclonedx-php-composer/pull/459
+
+## 5.0.0 - 2023-12-03
+
+* BREAKING changes
+  * CLI switch `--spec-version` defaults to `1.5`, was `1.4` ([#442] via [#441])
+* Dependencies
+  * Raised dependency `cyclonedx/cyclonedx-library:^3.1`, was `:^2.3 || ^3.0` (via [#441])
+
+[#441]: https://github.com/CycloneDX/cyclonedx-php-composer/pull/441
+[#442]: https://github.com/CycloneDX/cyclonedx-php-composer/issues/442
+
+## 4.2.3 - 2023-11-27
+
+Maintenance release.
+
+* Misc
+  * Officially support PHP 8.3 (via [#342])
+
+[#342]: https://github.com/CycloneDX/cyclonedx-php-composer/pull/342
+
+## 4.2.2 - 2023-11-05
+
+* Added
+  * SBOM results might have the `externalReferences[].comment` populated (via [#432])
+* Fixed
+  * SBOM results might have the `externalReferences[].hashes` populated ([#430] via [#432])  
+    The hashes might have wrongly appeared as `components[].hashes` before.
+
+[#430]: https://github.com/CycloneDX/cyclonedx-php-composer/issues/430
+[#432]: https://github.com/CycloneDX/cyclonedx-php-composer/pull/432
+
+## 4.2.1 - 2023-10-27
+
+* Docs
+  * Moved all non-public API into a sub-namespace called `_internal`, so that its reliability is obvious. (via [#427])
+
+[#427]: https://github.com/CycloneDX/cyclonedx-php-composer/pull/427
+
+## 4.2.0 - 2023-09-04
+
+* Added
+  * SBOM result might have additional items in `metadata.tools` populated ([#402] via [#403]; [#404] via [#405])
+
+[#402]: https://github.com/CycloneDX/cyclonedx-php-composer/issues/402
+[#403]: https://github.com/CycloneDX/cyclonedx-php-composer/pull/403
+[#404]: https://github.com/CycloneDX/cyclonedx-php-composer/issues/404
+[#405]: https://github.com/CycloneDX/cyclonedx-php-composer/pull/405
+
+## 4.1.1 - 2023-08-28
+
+* Dependencies
+  * Requires `cyclonedx/cyclonedx-library:^2.3||^3.0`, was `:^2.3` (via [#398])
+* Style
+  * Applied latest PHP Coding Standards (via [#395])
+
+[#395]: https://github.com/CycloneDX/cyclonedx-php-composer/pull/395
+[#398]: https://github.com/CycloneDX/cyclonedx-php-composer/pull/398
+
+## 4.1.0 - 2023-07-04
+
+Added support for [_CycloneDX_ Specification-1.5](https://github.com/CycloneDX/specification/releases/tag/1.5).
+
+* Changed
+  * This tool supports _CycloneDX_ Specification-1.5 now ([#380] via [#383])
+* Added
+  * CLI switch `--spec-version` now supports value `1.5` to reflect _CycloneDX_ Specification-1.5 ([#380] via [#383])  
+    Default value for that switch is unchanged - still `1.4`.
+* Dependencies
+  * Requires `cyclonedx/cyclonedx-library:^2.3`, was `:^2.1` ([#380] via [#383])
+
+[#380]: https://github.com/CycloneDX/cyclonedx-php-composer/issues/380
+[#383]: https://github.com/CycloneDX/cyclonedx-php-composer/pull/383
+
 ## 4.0.2 - 2023-04-30
 
 * Fixed
@@ -36,7 +150,7 @@ Affective changes based on these SCVS SBOM criteria:
 ### 4.0.0 - Details
 
 * BREAKING changes
-* Removed support for PHP `<8.1` ([#91], [#128] via [#250])
+  * Removed support for PHP `<8.1` ([#91], [#128] via [#250])
   * Removed support for Composer `<2.3` ([#153] via [#250])
   * CLI
     * Removed deprecated composer command `make-bom`, call `composer CycloneDX:make-sbom` instead ([#293] via [#309])
@@ -109,8 +223,8 @@ Maintenance Release.
 
 ## 3.10.0 - 2022-04-02
 
-* Changed
-  * Raised dependency `cyclonedx/cyclonedx-library:^1.4.2`, was `cyclonedx/cyclonedx-library:^1.3.1`. (via [#192])
+* Dependencies
+  * Raised dependency `cyclonedx/cyclonedx-library:^1.4.2`, was `:^1.3.1`. (via [#192])
 * Misc
   * Adjusted internal typing and typehints. (via [#192])
   * Improved compatibility to Composer v2.3 (via [#212])

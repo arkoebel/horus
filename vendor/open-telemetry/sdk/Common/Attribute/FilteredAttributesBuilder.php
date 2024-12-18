@@ -11,17 +11,15 @@ use function in_array;
  */
 final class FilteredAttributesBuilder implements AttributesBuilderInterface
 {
-    private AttributesBuilderInterface $builder;
-    private array $rejectedKeys;
     private int $rejected = 0;
 
     /**
      * @param list<string> $rejectedKeys
      */
-    public function __construct(AttributesBuilderInterface $builder, array $rejectedKeys)
-    {
-        $this->builder = $builder;
-        $this->rejectedKeys = $rejectedKeys;
+    public function __construct(
+        private AttributesBuilderInterface $builder,
+        private readonly array $rejectedKeys,
+    ) {
     }
 
     public function __clone()
@@ -37,6 +35,11 @@ final class FilteredAttributesBuilder implements AttributesBuilderInterface
         return new Attributes($attributes->toArray(), $dropped);
     }
 
+    public function merge(AttributesInterface $old, AttributesInterface $updating): AttributesInterface
+    {
+        return $this->builder->merge($old, $updating);
+    }
+
     public function offsetExists($offset): bool
     {
         return $this->builder->offsetExists($offset);
@@ -45,8 +48,7 @@ final class FilteredAttributesBuilder implements AttributesBuilderInterface
     /**
      * @phan-suppress PhanUndeclaredClassAttribute
      */
-    #[\ReturnTypeWillChange]
-    public function offsetGet($offset)
+    public function offsetGet(mixed $offset): mixed
     {
         return $this->builder->offsetGet($offset);
     }
@@ -54,8 +56,7 @@ final class FilteredAttributesBuilder implements AttributesBuilderInterface
     /**
      * @phan-suppress PhanUndeclaredClassAttribute
      */
-    #[\ReturnTypeWillChange]
-    public function offsetSet($offset, $value)
+    public function offsetSet($offset, $value): void
     {
         if ($value !== null && in_array($offset, $this->rejectedKeys, true)) {
             $this->rejected++;
@@ -69,8 +70,7 @@ final class FilteredAttributesBuilder implements AttributesBuilderInterface
     /**
      * @phan-suppress PhanUndeclaredClassAttribute
      */
-    #[\ReturnTypeWillChange]
-    public function offsetUnset($offset)
+    public function offsetUnset($offset): void
     {
         $this->builder->offsetUnset($offset);
     }

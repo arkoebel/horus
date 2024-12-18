@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace OpenTelemetry\SDK\Metrics;
 
+use function assert;
 use OpenTelemetry\API\Metrics\ObservableCallbackInterface;
 use OpenTelemetry\SDK\Metrics\MetricRegistry\MetricWriterInterface;
 
@@ -12,17 +13,13 @@ use OpenTelemetry\SDK\Metrics\MetricRegistry\MetricWriterInterface;
  */
 final class ObservableCallback implements ObservableCallbackInterface
 {
-    private MetricWriterInterface $writer;
-    private ReferenceCounterInterface $referenceCounter;
-    private ?int $callbackId;
-    private ?ObservableCallbackDestructor $callbackDestructor;
-
-    public function __construct(MetricWriterInterface $writer, ReferenceCounterInterface $referenceCounter, int $callbackId, ?ObservableCallbackDestructor $callbackDestructor)
-    {
-        $this->writer = $writer;
-        $this->referenceCounter =  $referenceCounter;
-        $this->callbackId = $callbackId;
-        $this->callbackDestructor = $callbackDestructor;
+    public function __construct(
+        private readonly MetricWriterInterface $writer,
+        private readonly ReferenceCounterInterface $referenceCounter,
+        private ?int $callbackId,
+        private readonly ?ObservableCallbackDestructor $callbackDestructor,
+        private ?object $target,
+    ) {
     }
 
     public function detach(): void
@@ -35,9 +32,14 @@ final class ObservableCallback implements ObservableCallbackInterface
         $this->referenceCounter->release();
         if ($this->callbackDestructor !== null) {
             unset($this->callbackDestructor->callbackIds[$this->callbackId]);
+            if (!$this->callbackDestructor->callbackIds) {
+                assert($this->target !== null);
+                unset($this->callbackDestructor->destructors[$this->target]);
+            }
         }
 
         $this->callbackId = null;
+        $this->target = null;
     }
 
     public function __destruct()

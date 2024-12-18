@@ -9,22 +9,20 @@ namespace OpenTelemetry\SDK\Common\Attribute;
  */
 final class AttributesFactory implements AttributesFactoryInterface
 {
-    private ?int $attributeCountLimit;
-    private ?int $attributeValueLengthLimit;
-
-    public function __construct(?int $attributeCountLimit = null, ?int $attributeValueLengthLimit = null)
-    {
-        $this->attributeCountLimit = $attributeCountLimit;
-        $this->attributeValueLengthLimit = $attributeValueLengthLimit;
+    public function __construct(
+        private readonly ?int $attributeCountLimit = null,
+        private readonly ?int $attributeValueLengthLimit = null,
+    ) {
     }
 
-    public function builder(iterable $attributes = []): AttributesBuilderInterface
+    public function builder(iterable $attributes = [], ?AttributeValidatorInterface $attributeValidator = null): AttributesBuilderInterface
     {
         $builder = new AttributesBuilder(
             [],
             $this->attributeCountLimit,
             $this->attributeValueLengthLimit,
             0,
+            $attributeValidator ?? new AttributeValidator(),
         );
         foreach ($attributes as $key => $value) {
             $builder[$key] = $value;

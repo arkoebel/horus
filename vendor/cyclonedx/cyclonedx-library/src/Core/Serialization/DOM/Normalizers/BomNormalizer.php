@@ -37,6 +37,7 @@ use DOMElement;
  */
 class BomNormalizer extends _BaseNormalizer
 {
+    /** @var string */
     private const XML_NAMESPACE_PATTERN = 'http://cyclonedx.org/schema/bom/%s';
 
     public function normalize(Bom $bom): DOMElement
@@ -45,7 +46,7 @@ class BomNormalizer extends _BaseNormalizer
         $document = $factory->getDocument();
 
         $element = $document->createElementNS(
-            sprintf(self::XML_NAMESPACE_PATTERN, $factory->getSpec()->getVersion()->value),
+            \sprintf(self::XML_NAMESPACE_PATTERN, $factory->getSpec()->getVersion()->value),
             'bom' // no namespace = defaultNS - so children w/o NS fall under this NS
         );
         SimpleDOM::setAttributes(

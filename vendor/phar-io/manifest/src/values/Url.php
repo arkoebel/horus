@@ -28,11 +28,9 @@ class Url {
     }
 
     /**
-     * @param string $url
-     *
      * @throws InvalidUrlException
      */
-    private function ensureUrlIsValid($url): void {
+    private function ensureUrlIsValid(string $url): void {
         if (filter_var($url, FILTER_VALIDATE_URL) === false) {
             throw new InvalidUrlException;
         }

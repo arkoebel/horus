@@ -10,6 +10,7 @@ use OpenTelemetry\API\Trace\Span;
 use OpenTelemetry\API\Trace\SpanContext;
 use OpenTelemetry\API\Trace\SpanContextInterface;
 use OpenTelemetry\API\Trace\SpanContextValidator;
+use OpenTelemetry\API\Trace\TraceFlags;
 use OpenTelemetry\Context\Context;
 use OpenTelemetry\Context\ContextInterface;
 use OpenTelemetry\Context\Propagation\ArrayAccessGetterSetter;
@@ -54,7 +55,7 @@ final class B3SinglePropagator implements TextMapPropagatorInterface
     }
 
     /** {@inheritdoc} */
-    public function inject(&$carrier, PropagationSetterInterface $setter = null, ContextInterface $context = null): void
+    public function inject(&$carrier, ?PropagationSetterInterface $setter = null, ?ContextInterface $context = null): void
     {
         $setter ??= ArrayAccessGetterSetter::getInstance();
         $context ??= Context::getCurrent();
@@ -77,7 +78,7 @@ final class B3SinglePropagator implements TextMapPropagatorInterface
     }
 
     /** {@inheritdoc} */
-    public function extract($carrier, PropagationGetterInterface $getter = null, ContextInterface $context = null): ContextInterface
+    public function extract($carrier, ?PropagationGetterInterface $getter = null, ?ContextInterface $context = null): ContextInterface
     {
         $getter ??= ArrayAccessGetterSetter::getInstance();
         $context ??= Context::getCurrent();
@@ -96,15 +97,15 @@ final class B3SinglePropagator implements TextMapPropagatorInterface
             return null;
         }
 
-        if (strtolower($value) === self::IS_DEBUG) {
+        if (strtolower((string) $value) === self::IS_DEBUG) {
             return (int) self::IS_SAMPLED;
         }
 
-        if (in_array(strtolower($value), self::VALID_SAMPLED)) {
+        if (in_array(strtolower((string) $value), self::VALID_SAMPLED)) {
             return (int) self::IS_SAMPLED;
         }
 
-        if (in_array(strtolower($value), self::VALID_NON_SAMPLED)) {
+        if (in_array(strtolower((string) $value), self::VALID_NON_SAMPLED)) {
             return (int) self::IS_NOT_SAMPLED;
         }
 
@@ -170,12 +171,12 @@ final class B3SinglePropagator implements TextMapPropagatorInterface
         }
 
         $sampled = self::processSampledValue($samplingState);
-        $isSampled = ($sampled === SpanContextInterface::TRACE_FLAG_SAMPLED);
+        $isSampled = ($sampled === TraceFlags::SAMPLED);
 
         return SpanContext::createFromRemoteParent(
             $traceId,
             $spanId,
-            $isSampled ? SpanContextInterface::TRACE_FLAG_SAMPLED : SpanContextInterface::TRACE_FLAG_DEFAULT
+            $isSampled ? TraceFlags::SAMPLED : TraceFlags::DEFAULT
         );
     }
 }

@@ -23,19 +23,17 @@ declare(strict_types=1);
 
 namespace CycloneDX\Core\Validation;
 
-use CycloneDX\Core\Spec\Spec;
+use CycloneDX\Core\Spec\_SpecProtocol as Spec;
 
 /**
  * @author jkowalleck
  */
 abstract class BaseValidator implements Validator
 {
-    /** @TODO in next major version: use `\CycloneDX\Core\Enums\Version` */
-    private readonly Spec $spec;
-
-    public function __construct(Spec $spec)
-    {
-        $this->spec = $spec;
+    public function __construct(
+        /* @TODO in next major version: use `\CycloneDX\Core\Enums\Version` instead of `Spec` */
+        private readonly Spec $spec,
+    ) {
     }
 
     public function getSpec(): Spec

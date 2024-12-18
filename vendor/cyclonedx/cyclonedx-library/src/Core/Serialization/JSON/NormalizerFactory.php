@@ -23,8 +23,8 @@ declare(strict_types=1);
 
 namespace CycloneDX\Core\Serialization\JSON;
 
+use CycloneDX\Core\Spec\_SpecProtocol as Spec;
 use CycloneDX\Core\Spec\Format;
-use CycloneDX\Core\Spec\Spec;
 use DomainException;
 
 /**
@@ -35,6 +35,7 @@ use DomainException;
  */
 class NormalizerFactory
 {
+    /** @var Format */
     public const FORMAT = Format::JSON;
 
     private readonly Spec $spec;

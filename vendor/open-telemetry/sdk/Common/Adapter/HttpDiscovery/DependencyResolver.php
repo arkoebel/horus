@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace OpenTelemetry\SDK\Common\Adapter\HttpDiscovery;
 
 use Http\Client\HttpAsyncClient;
-use Http\Client\HttpClient;
 use OpenTelemetry\SDK\Common\Http\DependencyResolverInterface;
 use OpenTelemetry\SDK\Common\Http\HttpPlug\Client\ResolverInterface as HttpPlugClientResolverInterface;
 use OpenTelemetry\SDK\Common\Http\Psr\Client\ResolverInterface as PsrClientResolverInterface;
@@ -20,14 +19,14 @@ use Psr\Http\Message\UriFactoryInterface;
 
 final class DependencyResolver implements DependencyResolverInterface
 {
-    private MessageFactoryResolverInterface $messageFactoryResolver;
-    private PsrClientResolverInterface $psrClientResolver;
-    private HttpPlugClientResolverInterface $httpPlugClientResolver;
+    private readonly MessageFactoryResolverInterface $messageFactoryResolver;
+    private readonly PsrClientResolverInterface $psrClientResolver;
+    private readonly HttpPlugClientResolverInterface $httpPlugClientResolver;
 
     public function __construct(
         ?MessageFactoryResolverInterface $messageFactoryResolver = null,
         ?PsrClientResolverInterface $psrClientResolver = null,
-        ?HttpPlugClientResolverInterface $httpPlugClientResolver = null
+        ?HttpPlugClientResolverInterface $httpPlugClientResolver = null,
     ) {
         $this->messageFactoryResolver = $messageFactoryResolver ?? MessageFactoryResolver::create();
         $this->psrClientResolver = $psrClientResolver ?? PsrClientResolver::create();
@@ -37,7 +36,7 @@ final class DependencyResolver implements DependencyResolverInterface
     public static function create(
         ?MessageFactoryResolverInterface $messageFactoryResolver = null,
         ?PsrClientResolverInterface $psrClientResolver = null,
-        ?HttpPlugClientResolverInterface $httpPlugClientResolver = null
+        ?HttpPlugClientResolverInterface $httpPlugClientResolver = null,
     ): self {
         return new self($messageFactoryResolver, $psrClientResolver, $httpPlugClientResolver);
     }
@@ -70,11 +69,6 @@ final class DependencyResolver implements DependencyResolverInterface
     public function resolveUriFactory(): UriFactoryInterface
     {
         return $this->messageFactoryResolver->resolveUriFactory();
-    }
-
-    public function resolveHttpPlugClient(): HttpClient
-    {
-        return $this->httpPlugClientResolver->resolveHttpPlugClient();
     }
 
     public function resolveHttpPlugAsyncClient(): HttpAsyncClient

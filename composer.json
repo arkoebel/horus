@@ -20,7 +20,9 @@
         "nyholm/psr7": "^1.5",
         "psr/http-client": "1.0.x-dev",
         "open-telemetry/exporter-zipkin": "dev-main",
-        "open-telemetry/extension-propagator-b3": "dev-main"
+        "open-telemetry/extension-propagator-b3": "dev-main",
+        "softcreatr/jsonpath": "*",
+        "php-http/httplug": "2.x-dev"
     },
     "minimum-stability": "dev",
     "config": {
@@ -29,7 +31,8 @@
         },
         "allow-plugins": {
             "php-http/discovery": true,
-            "cyclonedx/cyclonedx-php-composer": true
+            "cyclonedx/cyclonedx-php-composer": true,
+            "tbachert/spi": true
         }
     }
 }

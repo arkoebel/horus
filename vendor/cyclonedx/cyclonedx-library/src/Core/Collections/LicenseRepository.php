@@ -30,17 +30,16 @@ use CycloneDX\Core\Models\License\SpdxLicense;
 
 /**
  * Unique collection of:
- * - {@see \CycloneDX\Core\Models\License\SpdxLicense}
- * - {@see \CycloneDX\Core\Models\License\NamedLicense}
- * - {@see \CycloneDX\Core\Models\License\LicenseExpression}
- * .
+ * - {@see SpdxLicense}
+ * - {@see NamedLicense}
+ * - {@see LicenseExpression}
  *
  * @author jkowalleck
  */
 class LicenseRepository implements Countable
 {
     /**
-     * @var SpdxLicense[]|NamedLicense[]|LicenseExpression[]
+     * @var (SpdxLicense|NamedLicense|LicenseExpression)[]
      *
      * @psalm-var list<SpdxLicense|NamedLicense|LicenseExpression>
      */

@@ -29,8 +29,9 @@ use CycloneDX\Core\Enums\HashAlgorithm;
 use CycloneDX\Core\Spdx\LicenseIdentifiers;
 
 /**
- * This class is not for public use.
- * See {@see \CycloneDX\Core\Spec\SpecFactory Specification Factory} to get prepared instances.
+ * This class is not intended to be public API.
+ *
+ * This is a helper to get the exact spec-versions implemented according to {@see _SpecProtocol Specification}.
  *
  * @internal as this class may be affected by breaking changes without notice
  *
@@ -40,7 +41,7 @@ use CycloneDX\Core\Spdx\LicenseIdentifiers;
  *
  * @author jkowalleck
  */
-class _Spec implements Spec
+class _Spec implements _SpecProtocol
 {
     /** @psalm-var list<string> */
     private array $lLicenseIdentifiers;
@@ -49,6 +50,7 @@ class _Spec implements Spec
      * @psalm-param list<Format> $lFormats
      * @psalm-param list<ComponentType> $lComponentTypes
      * @psalm-param list<HashAlgorithm> $lHashAlgorithms
+     * @psalm-param non-empty-string $sHashContentRegex
      * @psalm-param list<ExternalReferenceType> $lExternalReferenceTypes
      * @psalm-param list<Format> $lFormatsSupportingBomProperties
      *
@@ -73,7 +75,8 @@ class _Spec implements Spec
         private readonly bool $bComponentProperties,
         private readonly bool $bComponentEvidence,
         private readonly array $lFormatsSupportingBomProperties,
-        LicenseIdentifiers $licenseIdentifiers = new LicenseIdentifiers()
+        private readonly bool $bLicenseAcknowledgement,
+        LicenseIdentifiers $licenseIdentifiers = new LicenseIdentifiers(),
     ) {
         $this->lLicenseIdentifiers = $licenseIdentifiers->getKnownLicenses();
     }
@@ -171,5 +174,10 @@ class _Spec implements Spec
     public function supportsBomProperties(Format $format): bool
     {
         return \in_array($format, $this->lFormatsSupportingBomProperties, true);
+    }
+
+    public function supportsLicenseAcknowledgement(): bool
+    {
+        return $this->bLicenseAcknowledgement;
     }
 }

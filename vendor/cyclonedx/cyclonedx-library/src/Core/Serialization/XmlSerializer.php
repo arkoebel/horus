@@ -38,19 +38,11 @@ use DOMElement;
  */
 class XmlSerializer extends BaseSerializer
 {
-    private readonly DOM\NormalizerFactory $normalizerFactory;
-
-    private readonly string $xmlVersion;
-    private readonly string $xmlEncoding;
-
     public function __construct(
-        DOM\NormalizerFactory $normalizerFactory,
-        string $xmlVersion = '1.0',
-        string $xmlEncoding = 'UTF-8'
+        protected readonly DOM\NormalizerFactory $normalizerFactory,
+        protected readonly string $xmlVersion = '1.0',
+        protected readonly string $xmlEncoding = 'UTF-8',
     ) {
-        $this->normalizerFactory = $normalizerFactory;
-        $this->xmlVersion = $xmlVersion;
-        $this->xmlEncoding = $xmlEncoding;
     }
 
     protected function realNormalize(Bom $bom): DOMElement
@@ -74,7 +66,7 @@ class XmlSerializer extends BaseSerializer
             $document->formatOutput = $prettyPrint;
         }
 
-        // option LIBXML_NOEMPTYTAG might lead to errors in consumers, do not use it.
+        // option `LIBXML_NOEMPTYTAG` might lead to errors in consumers, do not use it.
         $xml = $document->saveXML();
         \assert(false !== $xml);
 

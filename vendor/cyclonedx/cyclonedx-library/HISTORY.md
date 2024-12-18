@@ -4,6 +4,199 @@ All notable changes to this project will be documented in this file.
 
 ## unreleased
 
+<!-- add unreleased items here -->
+
+## 3.5.1 - 2024-12-01
+
+* Docs
+  * Fixed the documentations of the `\CycloneDX\Core\Enums` classes (via [#490])
+* Style
+  * Applied latest PHP Coding Standards (via [#485])
+
+[#485]: https://github.com/CycloneDX/cyclonedx-php-library/pull/485
+[#490]: https://github.com/CycloneDX/cyclonedx-php-library/pull/490
+
+## 3.5.0 - 2024-11-18
+
+* Added
+  * Support CycloneDX 1.6.1 ([#483] via [#484])
+
+[#483]: https://github.com/CycloneDX/cyclonedx-php-library/issues/483
+[#484]: https://github.com/CycloneDX/cyclonedx-php-library/pull/484
+
+## 3.4.2 - 2024-10-24
+
+* Fixed
+  * Encode quotation mark in URLs (via [#477])
+
+[#477]: https://github.com/CycloneDX/cyclonedx-php-library/pull/477
+
+## 3.4.1 - 2024-08-31
+
+* Docs
+  * Fixed typos in DocBlocks (via [#466])
+* Style
+  * Applied latest PHP Coding Standards (via [#465])
+* Misc
+  * Fetched latest schema definition files for offline usage (via [#467])
+
+[#465]: https://github.com/CycloneDX/cyclonedx-php-library/pull/465
+[#466]: https://github.com/CycloneDX/cyclonedx-php-library/pull/466
+[#467]: https://github.com/CycloneDX/cyclonedx-php-library/pull/467
+
+## 3.4.0 - 2024-05-06
+
+* Changed
+  * Updated SPDX license list to `v3.24.0` (via [#439])
+
+[#439]: https://github.com/CycloneDX/cyclonedx-php-library/pull/439
+
+## 3.3.1 - 2024-05-06
+
+* Fixed
+  * JSON validator allow arbitrary `$schema` value ([#435] via [#436])
+
+[#435]: https://github.com/CycloneDX/cyclonedx-php-library/issues/435
+[#436]: https://github.com/CycloneDX/cyclonedx-php-library/pull/436
+
+## 3.3.0 - 2024-04-26
+
+* Changed
+  * Classes `\CycloneDX\Core\Serialization\{DOM,JSON}\Normalizers\LicenseNormalizer` support license acknowledgement now ([#428] via [#429])
+* Added
+  * Namespace `\CycloneDX\Core\Enums`
+    * New enum: `LicenseAcknowledgement` ([#428] via [#429])
+  * Namespace `\CycloneDX\Core\Models\License`
+    * New methods `LicenseExpression::{get,set}Acknowledgement()` ([#428] via [#429])
+    * New methods `NamedLicense::{get,set}Acknowledgement()` ([#428] via [#429])
+    * New methods `SpdxLicense::{get,set}Acknowledgement()` ([#428] via [#429])
+
+[#428]: https://github.com/CycloneDX/cyclonedx-php-library/issues/428
+[#429]: https://github.com/CycloneDX/cyclonedx-php-library/pull/429
+
+## 3.2.0 - 2024-04-10
+
+Added _basic_ support for [_CycloneDX_ Specification-1.6](https://github.com/CycloneDX/specification/releases/tag/1.6).
+
+* Changed
+  * Method `\CycloneDX\Core\Spec\SpecFactory::makeForVersion()` supports _CycloneDX_ Specification-1.6 now ([#421] via [#422])
+  * Classes `\CycloneDX\Core\Serialization\{DOM,JSON}\Normalizers\*` support _CycloneDX_ Specification-1.6 now ([#421] via [#422])
+  * Classes `\CycloneDX\Core\Validation\Validators\*` support _CycloneDX_ Specification-1.6 now ([#421] via [#422])
+* Added
+  * Namespace `\CycloneDX\Core\Enums`
+    * Enum `ComponentType` got new cases ([#421] via [#422])  
+      New: `CryptographicAsset`
+  * Enum `ExternalReferenceType` got new cases ([#421] via [#422])  
+    New: `SourceDistribution`, `ElectronicSignature`, `DigitalSignature`, `RFC9116`
+  * Namespace `\CycloneDX\Core\Spec`
+    * New method `SpecFactory::make1dot6()` to reflect _CycloneDX_ Specification-1.6 ([#421] via [#422])
+    * Enum `Version` got new case `v1dot6` to reflect _CycloneDX_ Specification-1.6 ([#421] via [#422])
+* Style
+  * Applied latest PHP Coding Standards (via [#415])
+
+[#415]: https://github.com/CycloneDX/cyclonedx-php-library/pull/415
+[#421]: https://github.com/CycloneDX/cyclonedx-php-library/issues/421
+[#422]: https://github.com/CycloneDX/cyclonedx-php-library/pull/422
+
+## 3.1.2 - 2024-03-18
+
+* Documentation
+  * Rendered (API) docs are hosted on [readthedocs](https://cyclonedx-php-library.readthedocs.io) ([#8] via [#414])
+
+[#8]: https://github.com/CycloneDX/cyclonedx-php-library/issues/8
+[#414]: https://github.com/CycloneDX/cyclonedx-php-library/pull/414
+
+## 3.1.1 - 2024-02-05
+
+* Style
+  * Applied latest PHP Coding Standards (via [#395], [#398], [#399], [#402])
+
+[#395]: https://github.com/CycloneDX/cyclonedx-php-library/pull/395
+[#398]: https://github.com/CycloneDX/cyclonedx-php-library/pull/398
+[#399]: https://github.com/CycloneDX/cyclonedx-php-library/pull/399
+[#402]: https://github.com/CycloneDX/cyclonedx-php-library/pull/402
+
+## 3.1.0 - 2023-12-02
+
+* Added
+  * Migration/fixup of URL(`iri-reference`) when normalizing to JSON (via [#380])
+
+[#380]: https://github.com/CycloneDX/cyclonedx-php-library/pull/380
+
+## 3.0.2 - 2023-11-27
+
+* Misc
+  * Officially support PHP 8.3 (via [#265])
+  * Integration tests compare against human-readable snapshots, for regression (via [#371], [#372])
+
+[#265]: https://github.com/CycloneDX/cyclonedx-php-library/pull/265
+[#371]: https://github.com/CycloneDX/cyclonedx-php-library/pull/371
+[#372]: https://github.com/CycloneDX/cyclonedx-php-library/pull/372
+
+## 3.0.1 - 2023-09-16
+
+* Fixed
+  * fixed a possible JSON schema validation issue regarding "version" property (via [#352])
+
+[#352]: https://github.com/CycloneDX/cyclonedx-php-library/pull/352
+
+## 3.0.0 - 2023-08-27
+
+* BREAKING
+  * Interface `\CycloneDX\Core\Spec\Spec` was removed from public API ([#344] via [#345])  
+    This is only a breaking change if you custom-implemented this interface downstream; internal usage is non-breaking.  
+    This change was necessary, so that implementing more spec-features cause no breaking changes.
+* Style
+  * Applied latest PHP Coding Standards (via [#341])
+
+[#341]: https://github.com/CycloneDX/cyclonedx-php-library/pull/341
+[#344]: https://github.com/CycloneDX/cyclonedx-php-library/issues/344
+[#345]: https://github.com/CycloneDX/cyclonedx-php-library/pull/345
+
+## 2.3.0 - 2023-06-27
+
+Added support for [_CycloneDX_ Specification-1.5](https://github.com/CycloneDX/specification/releases/tag/1.5).
+
+* Changed
+  * Method `\CycloneDX\Core\Spec\SpecFactory::makeForVersion()` supports _CycloneDX_ Specification-1.5 now ([#193] via [#255])
+  * Classes `\CycloneDX\Core\Serialization\{DOM,JSON}\Normalizers\*` support _CycloneDX_ Specification-1.5 now ([#193] via [#255])
+  * Classes `\CycloneDX\Core\Validation\Validators\*` support _CycloneDX_ Specification-1.5 now ([#193] via [#255])
+* Added
+  * Namespace `\CycloneDX\Core\Enums`
+    * Enum `ComponentType` got new cases ([#193] via [#255])  
+      New: `Data`, `DeviceDriver`, `MachineLearningModel`, `Platform`
+    * Enum `ExternalReferenceType` got new cases ([#193] via [#255])  
+      New: `AdversaryModel`, `Attestation`, `CertificationReport`, `CodifiedInfrastructure`, `ComponentAnalysisReport`, `Configuration`, `DistributionIntake`, `DynamicAnalysisReport`, `Evidence`, `ExploitabilityStatement`, `Formulation`, `Log`, `MaturityReport`, `ModelCard`, `POAM`, `PentestReport`, `QualityMetrics`, `RiskAssessment`, `RuntimeAnalysisReport`, `SecurityContact`, `StaticAnalysisReport`, `ThreatModel`, `VulnerabilityAssertion`
+  * Namespace `\CycloneDX\Core\Spec`
+    * New method `SpecFactory::make1dot5()` to reflect _CycloneDX_ Specification-1.5 ([#193] via [#255])
+    * Enum `Version` got new case `v1dot5` to reflect _CycloneDX_ Specification-1.5 ([#193] via [#255])
+* Misc
+  * Added functional and integration tests for _CycloneDX_ Specification-1.5 ([#193] via [#255])
+  * Fetched latest stable schema definition files for offline usage (via [#255])
+
+[#193]: https://github.com/CycloneDX/cyclonedx-php-library/issues/193
+[#255]: https://github.com/CycloneDX/cyclonedx-php-library/pull/255
+
+## 2.2.0 - 2023-06-02
+
+* Changed
+  * Class `\CycloneDX\Core\Serialization\JsonSerializer`
+    * Property `normalizerFactory` became protected readonly, was private readonly ([#305] via [#306])
+    * Property `jsonEncodeFlags`   became protected readonly, was private readonly ([#305] via [#306])
+  * Class `\CycloneDX\Core\Serialization\XmlSerializer`
+    * Property `normalizerFactory` became protected readonly, was private readonly ([#305] via [#306])
+    * Property `xmlVersion`        became protected readonly, was private readonly ([#305] via [#306])
+    * Property `xmlEncoding`       became protected readonly, was private readonly ([#305] via [#306])
+* Style
+  * Applied latest PHP Coding Standards (via [#302])  
+    Some parameters allow nullables implicitly, was explicitly.
+  * Wrote some class properties with constructor promotion (via [#309])
+
+[#302]: https://github.com/CycloneDX/cyclonedx-php-library/pull/302
+[#305]: https://github.com/CycloneDX/cyclonedx-php-library/issues/305
+[#306]: https://github.com/CycloneDX/cyclonedx-php-library/pull/306
+[#309]: https://github.com/CycloneDX/cyclonedx-php-library/pull/309
+
 ## 2.1.2 - 2023-04-05
 
 * Fixed

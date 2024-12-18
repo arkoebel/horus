@@ -41,11 +41,13 @@ class JsonSerializer extends BaseSerializer
     /**
      * List of allowed options for {@see jsonEncodeFlags}.
      *
-     * Bitmask consisting of JSON_*.
+     * Bit mask consisting of JSON_*.
      *
      * Some JSON flags could break the output, so they are not whitelisted.
      *
      * @see https://www.php.net/manual/en/json.constants.php
+     *
+     * @var int
      */
     private const JsonEncodeFlagsAllowedOptions = 0
         | \JSON_HEX_TAG
@@ -60,11 +62,13 @@ class JsonSerializer extends BaseSerializer
     /**
      * Defaults of {@see $jsonEncodeFlags}.
      *
-     * Bitmask consisting of JSON_*.
+     * Bit mask consisting of JSON_*.
      *
      * These defaults are required to have valid output in the end.
      *
      * @see https://www.php.net/manual/en/json.constants.php
+     *
+     * @var int
      */
     private const JsonEncodeFlagsDefaults = 0
         | \JSON_THROW_ON_ERROR // prevent unexpected data
@@ -74,33 +78,32 @@ class JsonSerializer extends BaseSerializer
     /**
      * List of mandatory options for $jsonEncodeFlags.
      *
-     * Bitmask consisting of JSON_*.
+     * Bit mask consisting of JSON_*.
      *
      * @see https://www.php.net/manual/en/json.constants.php
+     *
+     * @var int
      */
     private const JsonEncodeFlagsDefaultOptions = 0
         | \JSON_UNESCAPED_SLASHES // urls become shorter
     ;
 
-    private readonly JSON\NormalizerFactory $normalizerFactory;
-
     /**
      * Flags for {@see \json_encode()}.
      *
-     * Bitmask consisting of JSON_*.
+     * Bit mask consisting of JSON_*.
      *
      * @see https://www.php.net/manual/en/json.constants.php
      */
-    private readonly int $jsonEncodeFlags;
+    protected readonly int $jsonEncodeFlags;
 
     /**
      * @param int $jsonEncodeFlags Bitmask consisting of JSON_*. see {@see JsonEncodeFlagsAllowedOptions}
      */
     public function __construct(
-        JSON\NormalizerFactory $normalizerFactory,
-        int $jsonEncodeFlags = self::JsonEncodeFlagsDefaultOptions
+        protected readonly JSON\NormalizerFactory $normalizerFactory,
+        int $jsonEncodeFlags = self::JsonEncodeFlagsDefaultOptions,
     ) {
-        $this->normalizerFactory = $normalizerFactory;
         $this->jsonEncodeFlags = self::JsonEncodeFlagsDefaults
             | ($jsonEncodeFlags & self::JsonEncodeFlagsAllowedOptions);
     }

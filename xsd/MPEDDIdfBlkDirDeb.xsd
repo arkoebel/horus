@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- STEP2 SDD Schema, MPEDDIdfBlkDirDeb, Nov 6th 2023, Release March 2024 -->
+<!-- STEP2 SDD Shift camt.056 after pacs.003 in sequence, February 25th 2010 -->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:sw3="urn:iso:std:iso:20022:tech:xsd:pacs.003.001.08" xmlns:sw6="urn:iso:std:iso:20022:tech:xsd:camt.056.001.08" xmlns:sw2="urn:iso:std:iso:20022:tech:xsd:pacs.002.001.10" xmlns:sw7="urn:iso:std:iso:20022:tech:xsd:pacs.007.001.09" xmlns:sw4="urn:iso:std:iso:20022:tech:xsd:pacs.004.001.09" xmlns:sw6s2="urn:iso:std:iso:20022:tech:xsd:camt.056S2.001.01" xmlns:swA="urn:iso:std:iso:20022:tech:xsd:acmt.022.001.02" xmlns:S2SDDIdf="urn:S2SDDIdf:xsd:$MPEDDIdfBlkDirDeb" targetNamespace="urn:S2SDDIdf:xsd:$MPEDDIdfBlkDirDeb" elementFormDefault="qualified">
+	<xs:import namespace="urn:iso:std:iso:20022:tech:xsd:pacs.003.001.08" schemaLocation="pacs.003.001.08.xsd"/>
+	<xs:import namespace="urn:iso:std:iso:20022:tech:xsd:pacs.002.001.10" schemaLocation="pacs.002.001.10.xsd"/>
+	<xs:import namespace="urn:iso:std:iso:20022:tech:xsd:pacs.007.001.09" schemaLocation="pacs.007.001.09.xsd"/>
+	<xs:import namespace="urn:iso:std:iso:20022:tech:xsd:pacs.004.001.09" schemaLocation="pacs.004.001.09.xsd"/>
+	<xs:import namespace="urn:iso:std:iso:20022:tech:xsd:camt.056.001.08" schemaLocation="camt.056.001.08.xsd"/>
+	<xs:import namespace="urn:iso:std:iso:20022:tech:xsd:acmt.022.001.02" schemaLocation="acmt.022.001.02.xsd"/>
+	<xs:import namespace="urn:iso:std:iso:20022:tech:xsd:camt.056S2.001.01" schemaLocation="camt.056S2.001.01.xsd"/>
+	<xs:element name="MPEDDIdfBlkDirDeb">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="SndgInst" type="sw6:BICFIDec2014Identifier"/>
+				<xs:element name="RcvgInst" type="sw3:BICFIDec2014Identifier"/>
+				<xs:element name="FileRef" type="S2SDDIdf:Max16Text"/>
+				<!-- changed from SrvcID to SrvcId, Febrary 12 2009 -->
+				<xs:element name="SrvcId" type="S2SDDIdf:SrvcID"/>
+				<xs:element name="TstCode" type="S2SDDIdf:TestCodeType"/>
+				<xs:element name="FType" type="S2SDDIdf:FType"/>
+				<xs:element name="FDtTm" type="sw3:ISODateTime"/>
+				<xs:element name="NumDDBlk" type="S2SDDIdf:Max8NumericText"/>
+				<xs:element name="NumPCRBlk" type="S2SDDIdf:Max8NumericText"/>
+				<xs:element name="NumREJBlk" type="S2SDDIdf:Max8NumericText"/>
+				<xs:element name="NumRVSBlk" type="S2SDDIdf:Max8NumericText"/>
+				<xs:element name="NumRFRBlk" type="S2SDDIdf:Max8NumericText"/>
+				<!--NumRRVBlk Forced to be zero, January 30 2009 -->
+				<xs:element name="NumRRVBlk" type="S2SDDIdf:Max8NumericText0V"/>
+				<xs:choice>
+					<xs:sequence>
+						<xs:element name="FIToFICstmrDrctDbt" type="sw3:SDDFIToFICustomerDirectDebitV08" minOccurs="0" maxOccurs="unbounded"/>
+						<!--camt.056.001.01 replace pacs.006.001.02, January 20th 2010 -->
+						<xs:element name="FIToFIPmtCxlReq" type="sw6:SDDFIToFIPaymentCancellationRequestV08" minOccurs="0" maxOccurs="unbounded"/>
+						<xs:element name="FIToFIPmtStsRpt" type="sw2:SDDFIToFIPaymentStatusReportV10" minOccurs="0" maxOccurs="unbounded"/>
+						<xs:element name="FIToFIPmtRvsl" type="sw7:SDDFIToFIPaymentReversalV09" minOccurs="0" maxOccurs="unbounded"/>
+						<xs:element name="PmtRtr" type="sw4:SDDPaymentReturnV09" minOccurs="0" maxOccurs="unbounded"/>
+						<xs:element name="IdModAdvc" type="swA:S2SDDIdentificationModificationAdviceV02" minOccurs="0" maxOccurs="unbounded"/>
+					</xs:sequence>
+					<xs:sequence>
+						<xs:element name="FIToFIPmtCxlReqS2" type="sw6s2:S2SDDFIToFIPaymentCancellationRequestV01" maxOccurs="unbounded"/>
+					</xs:sequence>
+				</xs:choice>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:simpleType name="Max16Text">
+		<xs:restriction base="xs:string">
+			<xs:pattern value="[0-9A-Z]{16,16}"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="SrvcID">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="COR"/>
+			<xs:enumeration value="B2B"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="FType">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="IDF"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="TestCodeType">
+		<xs:restriction base="xs:string">
+			<xs:length value="1"/>
+			<xs:enumeration value="T"/>
+			<xs:enumeration value="P"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="Max8NumericText">
+		<xs:restriction base="xs:string">
+			<xs:pattern value="[0-9]{1,8}"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="Max8NumericText0V">
+		<xs:restriction base="xs:string">
+			<xs:pattern value="[0]{1,8}"/>
+		</xs:restriction>
+	</xs:simpleType>
+</xs:schema>

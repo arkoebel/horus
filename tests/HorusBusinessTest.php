@@ -14,14 +14,14 @@ require_once 'lib/horus_exception.php';
 require_once 'HorusTestCase.php';
 require_once 'HorusCurlMock.php';
 
-const TEST_OK = '{"test":"ok"}';
+const TEST_OK   = '{"test":"ok"}';
 const STATUS_OK = '{"Status":"OK"}';
 class HorusBusinessTest extends HorusTestCase
 {
 
     public function testFindMatch(): void
     {
-        $horus = new HorusBusiness('testFindMatch', null, 'XXXX', self::$tracing, new Horus_CurlMock());
+        $horus  = new HorusBusiness('testFindMatch', null, 'XXXX', self::$tracing, new Horus_CurlMock());
         $params = json_decode('[{"level1":"value1",
                                  "level2":"value2",
                                  "level3":{
@@ -30,44 +30,46 @@ class HorusBusinessTest extends HorusTestCase
                                 {"level1":"value10",
                                  "level2":"value20"},
                                 {"key3":"value3"}]',
-                                true
-                            );
+            true
+        );
         $this::assertEquals('value1', $horus->findMatch($params, 0, 'level1'));
         $this::assertEquals('value20', $horus->findMatch($params, 1, 'level2'));
-        $this::assertEquals(array('key1' => 'value1', 'key2' => 'value2'), $horus->findMatch($params, 0, 'level3'));
+        $this::assertEquals(['key1' => 'value1', 'key2' => 'value2'], $horus->findMatch($params, 0, 'level3'));
         $this::assertEquals('', $horus->findMatch($params, 0, 'levelX'));
         $this::assertEquals('', $horus->findMatch($params, 5, 'level1'));
     }
 
     public function testLocate(): void
     {
-        $horus = new HorusBusiness('testLocate', null, 'XXXX', self::$tracing, new Horus_CurlMock());
+        $horus  = new HorusBusiness('testLocate', null, 'XXXX', self::$tracing, new Horus_CurlMock());
         $params = json_decode('[{"query":"value1","queryMatch":"value2","comment":"line1"},
                                 {"query":"value10","queryMatch":"value20","comment":"line2"},
                                 {"query":"value10","queryMatch":"value21","comment":"line3"},
-                                {"query":"zip","comment":"line4"},
-                                {"query":"zip","comment":"line5"},
+                                {"query":"zip","comment":"line4", "selector":{"key":"aaa","value":"bbb"}},
+                                {"query":"zip","comment":"line5", "selector":{"key":"aaa","value":"ccc"}},
                                 {"query": "xxx", "queryMatch": "${myparam}", "comment": "line6"}]',
-                            true
-                        );
+            true
+        );
         $this::assertEquals($horus->locate($params, 'value1', 'isthisokforvalue2or not?'), 0);
         $this::assertEquals($horus->locate($params, 'value10', 'isthisokforvalue20or not?'), 1);
         $this::assertEquals($horus->locate($params, 'value10', 'isthisokforvalue21or not?'), 2);
         $this::assertEquals($horus->locate($params, 'value10', 'isthisokforvalueor not?'), -1);
-        $this::assertEquals($horus->locate($params, 'zip', 'isthisokforvalue2or not?'), 4);
+        $this::assertEquals($horus->locate($params, 'zip', 'isthisokforvalue2or not?', ['aaa' => 'ccc']), 4);
         $this::assertEquals($horus->locate(null, 'AAA', 'BBB'), -1);
-        $this::assertEquals($horus->locate(array(), 'AAA', 'BBB'), -1);
+        $this::assertEquals($horus->locate([], 'AAA', 'BBB'), -1);
         $this::assertEquals($horus->locate('', 'AAA', 'BBB'), -1);
         $this::assertEquals($horus->locate($params, null, 'BBB'), -1);
         $this::assertEquals($horus->locate($params, 'zip', null), -1);
-        $this::assertEquals($horus->locate($params, 'zxxx', 'AAA', array('test'=>'value')), -1);
-        $this::assertEquals($horus->locate($params, 'xxx', 'AAAxvaluey', array('myparam'=>'value')), 5);
+        $this::assertEquals($horus->locate($params, 'zxxx', 'AAA', ['test' => 'value']), -1);
+        $this::assertEquals($horus->locate($params, 'xxx', 'AAAxvaluey', ['myparam' => 'value']), 5);
+        $this::assertEquals(3, $horus->locate($params, 'zip', 'nomatter', ['aaa' => 'bbb']));
+        $this::assertEquals(4, $horus->locate($params, 'zip', 'nomatter', ['aaa' => 'ccc']));
     }
 
     public function testLocateJson(): void
     {
 
-        $horus = new HorusBusiness('testLocateJson', null, 'XXXX', self::$tracing, new Horus_CurlMock());
+        $horus  = new HorusBusiness('testLocateJson', null, 'XXXX', self::$tracing, new Horus_CurlMock());
         $params = json_decode('[
             {"query": {"key": "key1", "value": "value1"}},
             {"query": {"key": "key1", "value": "value1"}, "queryMatch": "match"},
@@ -78,14 +80,21 @@ class HorusBusinessTest extends HorusTestCase
             {"query": {"key": "key1", "value": "value1", "queryKey": "qkey1",
                 "queryValue": "qvalue1"},"queryMatch": "match"},
             {"query": {"key": "zip"},"queryMatch": "match3"},
+            {"query": {"jsonpath": "$.key2", "value": "toto"}},
+            {"query": {"jsonpath": "$.key2"},"queryMatch": "match4"},
+            {"query": {"jsonpath": "$.key2", "value": "toto", "queryKey": "qkey1", "queryValue": "qvalue1"}},
+            {"query": {"jsonpath": "$.key2","queryKey": "qkey1", "queryValue": "qvalue1"},"queryMatch": "match4"},
             {"query": {"key": "zip"}}
         ]',
-        true
-    );
-        $input1 = array('key1' => 'value1', 'someotherkey' => 'XXX', 'parttomatch' => 'true');
-        $input2 = array('key1' => 'value1', 'someotherkey' => 'XXX', 'part' => 'true');
-        $qparams1 = array('qkey1' => 'nope');
-        $qparams2 = array('qkey1' => 'qvalue1');
+            true
+        );
+        
+        $input1   = ['key1' => 'value1', 'someotherkey' => 'XXX', 'parttomatch' => 'true'];
+        $input2   = ['key1' => 'value1', 'someotherkey' => 'XXX', 'part' => 'true'];
+        $input3   = ['key2' => ['this', 'toto', 'nomatch4'], 'someotherkey' => 'XXX'];
+        $input4   = ['key2' => ['this', 'toto', 'nothing'], 'someotherkey' => 'XXX'];
+        $qparams1 = ['qkey1' => 'nope'];
+        $qparams2 = ['qkey1' => 'qvalue1'];
 
         $this::assertEquals($horus->locateJson($params, $input1, null), 1);
         $this::assertEquals($horus->locateJson($params, $input1, $qparams1), 1);
@@ -93,23 +102,27 @@ class HorusBusinessTest extends HorusTestCase
         $this::assertEquals($horus->locateJson($params, $input2, null), 0);
         $this::assertEquals($horus->locateJson($params, $input2, $qparams1), 0);
         $this::assertEquals($horus->locateJson($params, $input2, $qparams2), 2);
-        $this::assertEquals($horus->locateJson($params, array(), null), -1);
+        $this::assertEquals($horus->locateJson($params, [], null), -1);
         $this::assertEquals($horus->locateJson($params, null, null), -1);
-        $this::assertEquals($horus->locateJson(null, array(), null), -1);
+        $this::assertEquals($horus->locateJson(null, [], null), -1);
+        $this::assertEquals($horus->locateJson($params, $input3), 7);
+        $this::assertEquals($horus->locateJson($params, $input4), 6);
+        $this::assertEquals($horus->locateJson($params, $input3, $qparams2), 9);
+        $this::assertEquals($horus->locateJson($params, $input4, $qparams2), 8);
     }
 
     public function testPerformRoutingError(): void
     {
         $horus = new HorusBusiness('testPerformRoutingError', null, 'OOOO', self::$tracing, new Horus_CurlMock());
         $this->expectException(HorusException::class);
-        $horus->performRouting(null, HorusCommon::JS_CT, HorusCommon::JS_CT, TEST_OK, array(), self::$rootSpan);
+        $horus->performRouting(null, HorusCommon::JS_CT, HorusCommon::JS_CT, TEST_OK, [], self::$rootSpan);
     }
 
     public function testPerformRoutingStandard(): void
     {
         $rootSpan = self::$tracing->newSpan('Test Business');
-        $horus = new HorusBusiness('testPerformRouting', null, 'PPPP', self::$tracing, new Horus_CurlMock());
-        $route = json_decode('{
+        $horus    = new HorusBusiness('testPerformRouting', null, 'PPPP', self::$tracing, new Horus_CurlMock());
+        $route    = json_decode('{
 			"source": "singlesource",
 			"parameters": [{
 					"key": "param1",
@@ -142,77 +155,77 @@ class HorusBusinessTest extends HorusTestCase
 				}
 			]
         }',
-        true
-    );
+            true
+        );
 
-        self::$curls[] = array('url' => 'https://www.xxx.com',
-            'options' => array(
+        self::$curls[] = ['url' => 'https://www.xxx.com',
+            'options'                    => [
                 CURLOPT_RETURNTRANSFER => 1,
-                CURLOPT_HTTPHEADER => array(
+                CURLOPT_HTTPHEADER     => [
                     'Content-type: application/json',
                     'Accept: application/json',
                     'Expect:',
-                    'X-Business-Id: testHorusHttp'),
+                    'X-Business-Id: testHorusHttp'],
                 CURLOPT_SSL_VERIFYPEER => false,
-                CURLOPT_VERBOSE => true,
-                CURLOPT_HEADER => true,
-                CURLINFO_HEADER_OUT => true),
-            'data' => "HTTP/1.1 200 OK\n" .
-                        "Date: Thu, 08 Aug 2019 20:22:04 GMT\n" .
-                        "Expires: -1\n" .
-                        "Cache-Control: private, max-age=0\n" .
-                        "Content-Type: text/html; charset=ISO-8859-1\n" .
-                        "Accept-Ranges: none\n" .
-                        "Vary: Accept-Encoding\n" .
-                        "Transfer-Encoding: chunked\n" .
-                        "\n" .
-                        STATUS_OK,
-            'returnHeaders' => array(
-                CURLINFO_HTTP_CODE => 200,
+                CURLOPT_VERBOSE        => true,
+                CURLOPT_HEADER         => true,
+                CURLINFO_HEADER_OUT    => true],
+            'data'                       => "HTTP/1.1 200 OK\n" .
+            "Date: Thu, 08 Aug 2019 20:22:04 GMT\n" .
+            "Expires: -1\n" .
+            "Cache-Control: private, max-age=0\n" .
+            "Content-Type: text/html; charset=ISO-8859-1\n" .
+            "Accept-Ranges: none\n" .
+            "Vary: Accept-Encoding\n" .
+            "Transfer-Encoding: chunked\n" .
+            "\n" .
+            STATUS_OK,
+            'returnHeaders'              => [
+                CURLINFO_HTTP_CODE   => 200,
                 CURLINFO_HEADER_SIZE => 212,
 
-            ),
-            'returnCode' => 400,
-            'errorMessage' => '',
-            'returnBody' => STATUS_OK);
-        self::$curls[] = array('url' => 'https://www.yyy.com',
-            'options' => array(
+            ],
+            'returnCode'                 => 400,
+            'errorMessage'               => '',
+            'returnBody'                 => STATUS_OK];
+        self::$curls[] = ['url' => 'https://www.yyy.com',
+            'options'                    => [
                 CURLOPT_RETURNTRANSFER => 1,
-                CURLOPT_HTTPHEADER => array(
+                CURLOPT_HTTPHEADER     => [
                     'Content-type: application/json',
                     'Accept: application/json',
                     'Expect:',
-                    'X-Business-Id: testHorusHttp'
-                ),
+                    'X-Business-Id: testHorusHttp',
+                ],
                 CURLOPT_SSL_VERIFYPEER => false,
-                CURLOPT_VERBOSE => true,
-                CURLOPT_HEADER => true,
-                CURLINFO_HEADER_OUT => true),
-            'data' => "HTTP/1.1 200 OK\n" .
-                        "Date: Thu, 08 Aug 2019 20:22:04 GMT\n" .
-                        "Expires: -1\n" .
-                        "Cache-Control: private, max-age=0\n" .
-                        "Content-Type: text/html; charset=ISO-8859-1\n" .
-                        "Accept-Ranges: none\n" .
-                        "Vary: Accept-Encoding\n" .
-                        "Transfer-Encoding: chunked\n" .
-                        "\n" .
-                        STATUS_OK,
-            'returnHeaders' => array(
-                CURLINFO_HTTP_CODE => 200,
+                CURLOPT_VERBOSE        => true,
+                CURLOPT_HEADER         => true,
+                CURLINFO_HEADER_OUT    => true],
+            'data'                       => "HTTP/1.1 200 OK\n" .
+            "Date: Thu, 08 Aug 2019 20:22:04 GMT\n" .
+            "Expires: -1\n" .
+            "Cache-Control: private, max-age=0\n" .
+            "Content-Type: text/html; charset=ISO-8859-1\n" .
+            "Accept-Ranges: none\n" .
+            "Vary: Accept-Encoding\n" .
+            "Transfer-Encoding: chunked\n" .
+            "\n" .
+            STATUS_OK,
+            'returnHeaders'              => [
+                CURLINFO_HTTP_CODE   => 200,
                 CURLINFO_HEADER_SIZE => 212,
 
-            ),
-            'returnCode' => 400,
-            'errorMessage' => '',
-            'returnBody' => '{"Status":"OK"}');
+            ],
+            'returnCode'                 => 400,
+            'errorMessage'               => '',
+            'returnBody'                 => '{"Status":"OK"}'];
 
         $res = $horus->performRouting(
             $route,
             HorusCommon::JS_CT,
             HorusCommon::JS_CT,
             TEST_OK,
-            array(),
+            [],
             $rootSpan
         );
         self::$tracing->closeSpan($rootSpan);
@@ -255,16 +268,16 @@ class HorusBusinessTest extends HorusTestCase
 				}
 			]
         }',
-        true
-    );
+            true
+        );
 
-        $mock = new Horus_CurlMock();
-        $options = array(
-            CURLOPT_URL => 'https://www.xxx.com',
+        $mock    = new Horus_CurlMock();
+        $options = [
+            CURLOPT_URL            => 'https://www.xxx.com',
             CURLOPT_RETURNTRANSFER => 1,
             CURLOPT_SSL_VERIFYPEER => false,
-            CURLOPT_VERBOSE => true,
-            CURLOPT_HEADER => true);
+            CURLOPT_VERBOSE        => true,
+            CURLOPT_HEADER         => true];
         $mock->setResponse(
             "HTTP/1.1 400 OK\n" .
             "Date: Thu, 08 Aug 2019 20:22:04 GMT\n" .
@@ -278,18 +291,18 @@ class HorusBusinessTest extends HorusTestCase
             "{\"Status\":\"KO\"}",
             $options
         );
-        $mock->setInfo(array(
-            CURLINFO_HTTP_CODE => 400,
+        $mock->setInfo([
+            CURLINFO_HTTP_CODE   => 400,
             CURLINFO_HEADER_SIZE => 212,
-            CURLINFO_HEADER_OUT => true,
-        ), $options);
+            CURLINFO_HEADER_OUT  => true,
+        ], $options);
 
-        $options2 = array(
-            CURLOPT_URL => 'https://www.yyy.com',
+        $options2 = [
+            CURLOPT_URL            => 'https://www.yyy.com',
             CURLOPT_RETURNTRANSFER => 1,
             CURLOPT_SSL_VERIFYPEER => false,
-            CURLOPT_VERBOSE => true,
-            CURLOPT_HEADER => true);
+            CURLOPT_VERBOSE        => true,
+            CURLOPT_HEADER         => true];
         $mock->setResponse(
             "HTTP/1.1 400 OK\n" .
             "Date: Thu, 08 Aug 2019 20:22:04 GMT\n" .
@@ -303,11 +316,11 @@ class HorusBusinessTest extends HorusTestCase
             "{\"Status\":\"KO\"}",
             $options2
         );
-        $mock->setInfo(array(
-            CURLINFO_HTTP_CODE => 400,
+        $mock->setInfo([
+            CURLINFO_HTTP_CODE   => 400,
             CURLINFO_HEADER_SIZE => 212,
-            CURLINFO_HEADER_OUT => true,
-        ), $options2);
+            CURLINFO_HEADER_OUT  => true,
+        ], $options2);
 
         $headerImpl = new Horus_HeaderMock();
         $this->http->setCurlImpl($mock);
@@ -319,7 +332,7 @@ class HorusBusinessTest extends HorusTestCase
             HorusCommon::JS_CT,
             HorusCommon::JS_CT,
             TEST_OK,
-            array(),
+            [],
             self::$rootSpan
         );
 
@@ -359,16 +372,16 @@ class HorusBusinessTest extends HorusTestCase
 				}
 			]
         }',
-        true
-    );
+            true
+        );
 
-        $mock = new Horus_CurlMock();
-        $options = array(
-            CURLOPT_URL => 'http://proxy/horus/horus.php',
+        $mock    = new Horus_CurlMock();
+        $options = [
+            CURLOPT_URL            => 'http://proxy/horus/horus.php',
             CURLOPT_RETURNTRANSFER => 1,
             CURLOPT_SSL_VERIFYPEER => false,
-            CURLOPT_VERBOSE => true,
-            CURLOPT_HEADER => true);
+            CURLOPT_VERBOSE        => true,
+            CURLOPT_HEADER         => true];
         $mock->setResponse(
             "HTTP/1.1 200 OK\n" .
             "Date: Thu, 08 Aug 2019 20:22:04 GMT\n" .
@@ -382,11 +395,11 @@ class HorusBusinessTest extends HorusTestCase
             "{\"Status\":\"KO\"}",
             $options
         );
-        $mock->setInfo(array(
-            CURLINFO_HTTP_CODE => 200,
+        $mock->setInfo([
+            CURLINFO_HTTP_CODE   => 200,
             CURLINFO_HEADER_SIZE => 212,
-            CURLINFO_HEADER_OUT => true,
-        ), $options);
+            CURLINFO_HEADER_OUT  => true,
+        ], $options);
 
         $horus = new HorusBusiness('testPerformRouting', null, 'QQQQ', self::$tracing, $mock);
         $horus->performRouting(
@@ -394,7 +407,7 @@ class HorusBusinessTest extends HorusTestCase
             HorusCommon::JS_CT,
             HorusCommon::JS_CT,
             TEST_OK,
-            array('repeat' => '3', 'extra' => 'true'),
+            ['repeat' => '3', 'extra' => 'true'],
             self::$rootSpan
         );
 
@@ -411,10 +424,10 @@ class HorusBusinessTest extends HorusTestCase
         $template1 = 'azer${test1}${test2}.ccc';
         $template2 = 'azer${test1}${test3}.ccc';
         $template3 = 'azer.ccc';
-        $variables = array('test1' => '123', 'test2' => '456');
+        $variables = ['test1' => '123', 'test2' => '456'];
         $this::assertEquals('azer123456.ccc', HorusBusiness::getTemplateName($template1, $variables));
         $this::assertEquals('azer123.ccc', HorusBusiness::getTemplateName($template2, $variables));
         $this::assertEquals('azer.ccc', HorusBusiness::getTemplateName($template3, $variables));
-        $this::assertEquals('azer.ccc', HorusBusiness::getTemplateName($template1, array()));
+        $this::assertEquals('azer.ccc', HorusBusiness::getTemplateName($template1, []));
     }
 }

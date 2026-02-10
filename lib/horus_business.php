@@ -1,11 +1,13 @@
 <?php
 
+use Flow\JSONPath\JSONPath;
+
 class HorusBusiness
 {
 
-    public $common = '';
-    public $http = '';
-    private $businessId = '';
+    public $common                        = '';
+    public $http                          = '';
+    private $businessId                   = '';
     public ?HorusTracingInterface $tracer = null;
 
     public function __construct(
@@ -13,15 +15,14 @@ class HorusBusiness
         $logLocation,
         $colour,
         HorusTracingInterface $tracer,
-        Horus_CurlInterface $httpImpl = null
-        )
-    {
+        ?Horus_CurlInterface $httpImpl = null
+    ) {
         $this->businessId = $businessId;
-        $this->common = new HorusCommon($businessId, $logLocation, $colour);
+        $this->common     = new HorusCommon($businessId, $logLocation, $colour);
         if (is_null($httpImpl)) {
             $httpImpl = new Horus_Curl();
         }
-        $this->http = new HorusHttp($businessId, $logLocation, $colour, $tracer, $httpImpl);
+        $this->http   = new HorusHttp($businessId, $logLocation, $colour, $tracer, $httpImpl);
         $this->tracer = $tracer;
     }
 
@@ -48,34 +49,46 @@ class HorusBusiness
         return false;
     }
 
-    public function locate($matches, $found, $value, $queryParams = array())
+    public function locate($matches, $found, $value, $queryParams = [])
     {
         $selected = -1;
 
-        if (is_null($matches) || !is_array($matches) || (count($matches) == 0) || is_null($found) || is_null($value)) {
+        if (is_null($matches) || ! is_array($matches) || (count($matches) == 0) || is_null($found) || is_null($value)) {
             return $selected;
         }
 
         foreach ($matches as $id => $match) {
+            if (array_key_exists('selector', $match)) {
+                if (! array_key_exists($match['selector']['key'], $queryParams)) {
+                    $this->common->mlog('Selector : key not found in url params - no match for param line #' . $id . ' (' . $match['comment'] . ')', 'DEBUG');
+                    continue;
+                }
+                if (array_key_exists($match['selector']['key'], $queryParams) && ($match['selector']['value'] !== $queryParams[$match['selector']['key']])) {
+                    $this->common->mlog('Selector not matched for param line #' . $id . ' (' . $match['comment'] . ')', 'DEBUG');
+                    continue;
+                }
+            } else {
+                //$this->common->mlog('Selector matched for param line #'.$id,'DEBUG');770163
+            }
             if (array_key_exists('query', $match) && ($match['query'] === $found)) {
                 if (array_key_exists('queryMatch', $match) && $match['queryMatch'] != '') {
                     $mm = $match['queryMatch'];
-                    if (preg_match_all('/\$\{(.*?)}/',$mm)) {
-                        $mm1 = preg_replace_callback('/\${(.*?)}/', function($matches) use ($queryParams) {
+                    if (preg_match_all('/\$\{(.*?)}/', $mm)) {
+                        $mm1 = preg_replace_callback('/\${(.*?)}/', function ($matches) use ($queryParams) {
                             $key = $matches[1]; // The captured key inside the ${}
                             return isset($queryParams[$key]) ? $queryParams[$key] : '${' . $key . '}';
                         }, $mm);
-                        if ($mm1 !== $mm){
+                        if ($mm1 !== $mm) {
                             $this->common->mlog('Current queryMatch: ' . $mm . ' was converted to ' . $mm1, 'DEBUG');
                             $mm = $mm1;
                         }
                     }
-                    if (preg_match('/' . $mm. '/', $value) === 1) {
+                    if (preg_match('/' . $mm . '/', $value) === 1) {
                         $selected = $id;
                         $this->common->mlog('Current match: ' . $match['comment'] . ' ' . $mm, 'DEBUG');
                     } else {
                         $this->common->mlog('QueryMatch failed for param line #' . $id, 'DEBUG');
-                        $this->common->mlog($match['comment'] . ' ' . $mm,'DEBUG');
+                        $this->common->mlog($match['comment'] . ' ' . $mm, 'DEBUG');
                     }
                 } else {
                     $this->common->mlog('Param line #' . $id . ' could be selected (if last).', 'DEBUG');
@@ -90,7 +103,7 @@ class HorusBusiness
         return $selected;
     }
 
-    public function locateJson($matches, $input, $queryParams = array())
+    public function locateJson($matches, $input, $queryParams = [])
     {
         $selected = -1;
         if (is_null($input) ||
@@ -102,11 +115,55 @@ class HorusBusiness
         }
 
         if (is_null($queryParams)) {
-            $queryParams = array();
+            $queryParams = [];
         }
 
         foreach ($matches as $id => $match) {
-            if (array_key_exists($match['query']['key'], $input)) {
+            if (array_key_exists('jsonpath', $match['query'])) {
+                if (
+                    array_key_exists('queryKey', $match['query']) &&
+                    array_key_exists('queryValue', $match['query']) &&
+                    !(
+                        array_key_exists($match['query']['queryKey'], $queryParams) &&
+                        ($match['query']['queryValue'] === $queryParams[$match['query']['queryKey']])
+                    )
+                ) {
+                    $this->common->mlog($id . ': query param present, but didn\'t match', 'DEBUG');
+                    continue;
+                } else {
+                    array_key_exists('queryKey', $match) ? 
+                        $this->common->mlog($id . ': query param ' . $match['query']['queryKey'] . ' matched', 'DEBUG')
+                        :  $this->common->mlog($id . ': no query param to match', 'DEBUG');
+                }
+                if (array_key_exists('value', $match['query']) || array_key_exists('queryMatch', $match)) {
+                    $rr = (new JSONPath($input))->find($match['query']['jsonpath'])->getData();
+                    if (is_array($rr) && (count($rr) > 0)) {
+                        $this->common->mlog('jsonpath found ' . count($rr) . ' elements', 'DEBUG');
+                        if(is_array($rr[0]))
+                            $loop = $rr[0];
+                        else
+                            $loop = $rr;
+                        foreach ($loop as $tries) {
+                            if (
+                                (
+                                    array_key_exists('queryMatch', $match)
+                                    && (preg_match('/' . $match['queryMatch'] . '/', $tries))
+                                ) || (
+                                    array_key_exists('value', $match['query'])
+                                    && ($tries === $match['query']['value'])
+                                )
+                            ) {
+                                $this->common->mlog(
+                                    $id . ': jsonpath '
+                                    . $match['query']['jsonpath'] . ' element ' . $tries . ' matched '
+                                    . (array_key_exists('queryMatch', $match) ? $match['queryMatch'] : $match['query']['value'])
+                                    , 'DEBUG');
+                                $selected = $id;
+                            }
+                        }
+                    }
+                }
+            } elseif (array_key_exists($match['query']['key'], $input)) {
                 if (array_key_exists('queryKey', $match['query'])) {
                     if (
                         array_key_exists($match['query']['queryKey'], $queryParams) &&
@@ -183,7 +240,7 @@ class HorusBusiness
         $errorOutput = ob_get_contents();
         ob_end_clean();
 
-        $ret = $this->http->returnWithContentType($errorOutput, $format, 400, $forward, true, 'POST', array(), $span);
+        $ret = $this->http->returnWithContentType($errorOutput, $format, 400, $forward, true, 'POST', [], $span);
         if ('' === $forward) {
             return $ret;
         }
@@ -199,14 +256,14 @@ class HorusBusiness
         ob_end_clean();
 
         $this->common->mlog($errorOutput, 'DEBUG', 'JSON');
-        return $this->http->returnWithContentType($errorOutput, $format, 400, $forward, true, 'POST', array(), $span);
+        return $this->http->returnWithContentType($errorOutput, $format, 400, $forward, true, 'POST', [], $span);
     }
 
     public function transformGetParams($inParams)
     {
-        $outParams = array();
+        $outParams = [];
         foreach ($inParams as $key => $value) {
-            $outParams[] = array('key' => $key, 'value' => $value);
+            $outParams[] = ['key' => $key, 'value' => $value];
         }
         return $outParams;
     }
@@ -229,7 +286,7 @@ class HorusBusiness
         }
     }
 
-    public function performRouting($route, $contentType, $accept, $data, $queryParams = array(), $span = null)
+    public function performRouting($route, $contentType, $accept, $data, $queryParams = [], $span = null)
     {
         if (is_null($route) || $route === false) {
             $this->common->mlog('No route found with provided source value', 'WARNING');
@@ -238,9 +295,9 @@ class HorusBusiness
 
         $followOnError = array_key_exists('followOnError', $route) ? $route['followOnError'] : true;
         $this->common->mlog("FollowOnError $followOnError", "INFO");
-        $globalParams = array_key_exists('parameters', $route) ? $route['parameters'] : array();
+        $globalParams = array_key_exists('parameters', $route) ? $route['parameters'] : [];
         $globalParams = array_merge($this->transformGetParams($queryParams), $globalParams);
-        $responses = array();
+        $responses    = [];
 
         $ii = 0;
 
@@ -250,21 +307,20 @@ class HorusBusiness
             $routeSpan = $this->tracer->newSpan('Destination ' . $destination['comment']);
             $this->common->mlog("Destination : $ii " . $destination['comment'] . "\n", "INFO");
 
-
             $destParams = array_key_exists('destParameters', $destination)
-                ? $destination['destParameters']
-                : array();
+            ? $destination['destParameters']
+            : [];
             $proxyParams = array_key_exists('proxyParameters', $destination)
-                ? $destination['proxyParameters']
-                : array();
+            ? $destination['proxyParameters']
+            : [];
 
             $destinationUrl = HorusCommon::formatQueryString(
                 $destination['destination'],
                 array_merge($globalParams, $destParams),
                 true);
             $proxyUrl = array_key_exists('proxy', $destination)
-                ? HorusCommon::formatQueryString($destination['proxy'], array_merge($globalParams, $proxyParams), true)
-                : '';
+            ? HorusCommon::formatQueryString($destination['proxy'], array_merge($globalParams, $proxyParams), true)
+            : '';
 
             $this->common->mlog("Send http request to " . $proxyUrl . "\n", 'DEBUG');
             $this->common->mlog("Final destination : " . $destinationUrl . "\n", 'DEBUG');
@@ -275,25 +331,25 @@ class HorusBusiness
             $this->tracer->addAttribute($routeSpan, 'content-type', $contentType);
             $this->tracer->addAttribute($routeSpan, 'accept', $accept);
 
-            $headers = array(
+            $headers = [
                 'Content-type: ' . $contentType,
                 'Accept: ' . $accept,
                 'Expect: ',
-                'X-Business-Id: ' . $this->businessId
-            );
+                'X-Business-Id: ' . $this->businessId,
+            ];
 
-            if (!array_key_exists('proxy', $destination)) {
+            if (! array_key_exists('proxy', $destination)) {
                 $destUrl = $destinationUrl;
             } else {
-                $destUrl = $proxyUrl;
+                $destUrl   = $proxyUrl;
                 $headers[] = 'X_DESTINATION_URL: ' . $destinationUrl;
             }
 
             try {
                 $response = $this->http->forwardSingleHttpQuery($destUrl, $headers, $data, 'POST', $routeSpan);
             } catch (HorusException $e) {
-                $response = json_encode(array("error" => $e->getMessage()));
-                if (!$followOnError) {
+                $response = json_encode(["error" => $e->getMessage()]);
+                if (! $followOnError) {
                     $this->tracer->closeSpan($routeSpan);
                     throw new HorusException('Flow interrupted after error ' . $e->getMessage(), 503);
                 }

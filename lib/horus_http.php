@@ -17,7 +17,7 @@ class HorusHttp
         $logLocation,
         $colour,
         HorusTracingInterface $tracer,
-        Horus_CurlInterface $curl = null
+        ?Horus_CurlInterface $curl = null
     )
     {
         $this->common = new HorusCommon($businessId, $logLocation, $colour);
@@ -45,7 +45,7 @@ class HorusHttp
     public static function addHeaderIfEmpty(array $headers, string $inHeader, string $inValue){
         foreach ($headers as $id => $value){
             //error_log('AAAA ' . $id . ' / ' . var_dump($value, true));
-            $keys = explode(':', $value);
+            $keys = explode(':', (string) $value);
             if ($inHeader === $id || $inHeader === $keys[0]){
                 //error_log('AAAA Exit');
                 return $headers;
@@ -74,7 +74,7 @@ class HorusHttp
             }
         }
         $cc .= $eol;
-        return $cc . chunk_split(base64_encode($data)) . $eol;
+        return $cc . chunk_split(base64_encode((string)$data)) . $eol;
     }
 
     public static function rebuildMultipart($files, $boundary, $eol)
@@ -497,14 +497,15 @@ class HorusHttp
             $this->tracer->setAttribute('path', $query['url']);
             $this->tracer->setAttribute('method', $query['method']);
             $query['headers'] = array_merge($query['headers'], $this->tracer->getB3Headers($span[$id]));
-            $query['headers'] = HorusHttp::formatOutHeaders(
+            if(array_key_exists('data', $query) && $query['data'] !== null){
+               $query['headers'] = HorusHttp::formatOutHeaders(
                 HorusHttp::addHeaderIfEmpty(
                     $query['headers'],
                     'Content-Length',
                     strlen($query['data'])),
                 $rfhprefix,
                 $mqmdprefix);
-
+            }
             //error_log('ZZZZZZZZZZ1  ' . print_r($query['headers'], true));
 
             $this->common->mlog('Generate Curl call for ' . $query['method'] . ' ' . $query['url'], 'INFO');
@@ -604,7 +605,9 @@ class HorusHttp
         //error_log('ZZZZZZZZZZ3  ' . print_r($headers, true));
         $this->tracer->logSpan($currentSpan, 'Forward Http Query');
         $headers = array_merge($headers, $this->tracer->getB3Headers($currentSpan));
-        $headers = HorusHttp::addHeaderIfEmpty($headers, 'Content-Length', strlen($data));
+        if($data !== null ){
+            $headers = HorusHttp::addHeaderIfEmpty($headers, 'Content-Length', strlen($data));
+        }
         $headers = HorusHttp::addHeaderIfEmpty($headers, 'Expect', '');
         //error_log('ZZZZZZZZZZ2  ' . print_r($headers, true));
         $handle = $this->curl->curl_init($destUrl);

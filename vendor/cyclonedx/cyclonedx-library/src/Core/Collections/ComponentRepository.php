@@ -25,6 +25,7 @@ namespace CycloneDX\Core\Collections;
 
 use Countable;
 use CycloneDX\Core\Models\Component;
+use Override;
 
 /**
  * Unique collection of {@see Component}.
@@ -73,6 +74,7 @@ class ComponentRepository implements Countable
     /**
      * @psalm-return 0|positive-int
      */
+    #[Override]
     public function count(): int
     {
         return \count($this->items);
@@ -89,13 +91,12 @@ class ComponentRepository implements Countable
             $group = null;
         }
 
+        $isItem = static fn (Component $component): bool => $component->getName() === $name && $component->getGroup() === $group;
+
         return array_values(
             array_filter(
                 $this->items,
-                static function (Component $component) use ($name, $group): bool {
-                    return $component->getName() === $name
-                        && $component->getGroup() === $group;
-                }
+                $isItem
             )
         );
     }

@@ -367,6 +367,10 @@ class HorusNodeList
         $this->setChildren($children);
     }
 
+    public function __toString(): string
+    {
+        return (string) $this->getValue();
+    }
     public function setValue($value)
     {
         $this->value = $value;

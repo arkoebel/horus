@@ -1,0 +1,1 @@
+{"node1": "<?= $vars['node1'] ?>", "node2": "<?= $vars['node2'] ?>"}

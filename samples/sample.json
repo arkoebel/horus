@@ -1,0 +1,14 @@
+{
+    "node": [
+        {
+            "value": "value1"
+        },
+        {
+            "value": "value2"
+        },
+        {
+            "value": "value3"
+        }
+    ],
+    "dummy": "dummyvalue"
+}

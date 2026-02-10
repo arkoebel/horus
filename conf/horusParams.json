@@ -2,6 +2,18 @@
     "errorTemplate": "genericError.xml",
     "errorFormat": "application/xml",
     "pacsDefaultOutputContentType": "application/xml",
+    "simplejson": [{
+        "query": {
+            "key": "dummy",
+            "value": "dummyvalue"
+          },
+        "responseTemplate": "jsonresponse.json",
+        "errorTemplate": "error_template.json",
+        "jsonpathparameters": {
+          "node1": "$.node[0].value",
+          "node2": "$.node[1].value"
+        }
+      }],
     "pacs": [
         {
             "query": "head.001.001.01.xsd",
@@ -32,6 +44,56 @@
         },
         {
             "query": "RTGS_pacs.008.001.08.xsd",
+            "queryMatch": "ZZZZZZ",
+            "comment": "Pacs8 to Pacs2",
+            "responseFormat": "RTGS_pacs.002.001.10.xsd",
+            "responseTemplate": "pacs2from8.xml",
+            "errorTemplate": "errorTemplate.xml",
+            "parameters": {
+                "msgid": "/u:Document/u:FIToFICstmrCdtTrf/u:GrpHdr/u:MsgId",
+                "instrid": "/u:Document/u:FIToFICstmrCdtTrf/u:CdtTrfTxInf/u:PmtId/u:InstrId",
+                "endtoendid": "/u:Document/u:FIToFICstmrCdtTrf/u:CdtTrfTxInf/u:PmtId/u:EndToEndId",
+                "UETR": "/u:Document/u:FIToFICstmrCdtTrf/u:CdtTrfTxInf/u:PmtId/u:UETR"
+            }
+        },
+        {
+            "query": "RTGS_pacs.008.001.08.xsd",
+            "comment": "Cas defaut reponse pacs.008 : pacs.002 RJCT",
+            "responseTemplate": "pacs.002_RJCT.xml",
+            "responseFormat": "novalidation",
+            "errorTemplate": "errorTemplate.xml",
+            "destParameters": [
+                {
+                    "key": "source",
+                    "value": "router1"
+                }
+            ],
+            "parameters": {
+                "id": "/u:Document/u:FIToFICstmrCdtTrf/u:GrpHdr/u:MsgId",
+                "endtoendid": "/u:Document/u:FIToFICstmrCdtTrf/u:CdtTrfTxInf/u:PmtId/u:EndToEndId"
+            }
+        },
+        {
+            "query": "RTGS_pacs.008.001.08.xsd",
+            "comment": "Cas defaut reponse pacs.008 : pacs.002 ACCP",
+            "queryMatch": "test${tutu}to${toto}",
+            "responseTemplate": "pacs.002_ACCP.xml",
+            "responseFormat": "novalidation",
+            "errorTemplate": "errorTemplate.xml",
+            "destParameters": [
+                {
+                    "key": "source",
+                    "value": "router1"
+                }
+            ],
+            "parameters": {
+                "id": "/u:Document/u:FIToFICstmrCdtTrf/u:GrpHdr/u:MsgId",
+                "endtoendid": "/u:Document/u:FIToFICstmrCdtTrf/u:CdtTrfTxInf/u:PmtId/u:EndToEndId"
+            }
+        },
+        {
+            "query": "RTGS_pacs.008.001.08.xsd",
+            "queryMatch": "AAAAAAA",
             "comment": "Pacs8 to Pacs2",
             "responseFormat": "RTGS_pacs.002.001.10.xsd",
             "responseTemplate": "pacs2from8.xml",

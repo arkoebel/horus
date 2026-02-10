@@ -324,6 +324,7 @@ class HorusSimplejsonTest extends HorusTestCase
         $this::assertNotNull($res, 'Should return something');
         $this::assertTrue(is_array($res), 'Should return an array');
         $this::assertEquals($expected, $res, 'Compare to expected result');
+        
     }
 
 }

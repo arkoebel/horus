@@ -78,7 +78,7 @@ $proxyMode = HorusHttp::extractHeader('x_destination_url');
 $accept = HorusHttp::extractHeader('Accept');
 
 if ("inject" === $requestType) {
-    $tracer->logSpan($rootSpan, 'message', array('Starting Injector mode', 'path' => $path, 'BOX' => $colour));
+    $tracer->logSpan($rootSpan, 'message', array('Starting Injector mode', 'path' => HorusCommon::getPath($_SERVER), 'BOX' => $colour));
     $common->mlog('+++++ BEGIN INJECTOR MODE +++++', 'INFO');
     $injector = new HorusInjector($businessId, $loglocation, $tracer);
     $common->mlog("Request : " . print_r($_SERVER, true) . "\n", 'DEBUG');
@@ -96,7 +96,7 @@ if ("inject" === $requestType) {
     }
     $common->mlog('+++++ END INJECTOR MODE +++++', 'INFO');
 } elseif (("simplejson" === $requestType) && ("application/json" === substr($contentType, 0, 16))) {
-    $tracer->logSpan($rootSpan, 'Starting Json mode', array('path' => $path, 'BOX' => $colour));
+    $tracer->logSpan($rootSpan, 'Starting Json mode', array('path' => HorusCommon::getPath($_SERVER), 'BOX' => $colour));
     $common->mlog('+++++ BEGIN SIMPLEJSON MODE +++++', 'INFO');
     $injector = new HorusSimpleJson($businessId, $loglocation, $simpleJsonMatches, $tracer);
 

@@ -5,12 +5,12 @@
       <CreDtTm><?= gmdate("Y-m-d\TH:i:s")?></CreDtTm>
       <InstgAgt>
         <FinInstnId>
-          <BIC><?= substr($vars["frombic"],0,8)?></BIC>
+          <BIC><?= array_key_exists('frombic',$vars) ? substr($vars["frombic"],0,8) : 'BNPAFRPPXXX'?></BIC>
         </FinInstnId>
       </InstgAgt>
       <InstdAgt>
         <FinInstnId>
-          <BIC><?= substr($vars["tobic"],0,80)?></BIC>
+          <BIC><?= array_key_exists('tobic',$vars) ? substr($vars["tobic"],0,8) : 'AGRIFRPPXXX'?></BIC>
         </FinInstnId>
       </InstdAgt>
     </GrpHdr>
@@ -24,10 +24,10 @@
       </StsRsnInf>
     </OrgnlGrpInfAndSts>
     <TxInfAndSts>
-      <StsId><?= $vars["txid"] ?></StsId>
+      <StsId><?= array_key_exists('txid',$vars) ? substr($vars["txid"],0,8) : '123456'?></StsId>
       <OrgnlEndToEndId><?= $vars["endtoendid"]?></OrgnlEndToEndId>
-      <OrgnlTxId><?= $vars["txid"] ?></OrgnlTxId>
-      <AccptncDtTm><?= $vars["txdt"] ?></AccptncDtTm>
+      <OrgnlTxId><?= array_key_exists('txid',$vars) ? substr($vars["txid"],0,8) : '123456'?><</OrgnlTxId>
+      <AccptncDtTm><?= array_key_exists('txdt',$vars) ? substr($vars["txdt"],0,8) : '2024-11-30'?><</AccptncDtTm>
       <OrgnlTxRef>
         <PmtTpInf>
           <SvcLvl>
@@ -42,7 +42,7 @@
         </PmtTpInf>
         <DbtrAgt>
           <FinInstnId>
-            <BIC><?= $vars["frombic"]?></BIC>
+            <BIC><?= array_key_exists('frombic',$vars) ? substr($vars["frombic"],0,8) : 'BNPAFRPPXXX'?></BIC>
           </FinInstnId>
         </DbtrAgt>
       </OrgnlTxRef>

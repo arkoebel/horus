@@ -22,7 +22,7 @@ class HorusXml
     public const DSIGSIELT = '/ds:SignedInfo';
     public const DSIGSVELT = '/ds:SignatureValue';
 
-    public function __construct($businessId, $logLocation, $colour = 'GREEN', HorusTracingInterface $tracer = null)
+    public function __construct($businessId, $logLocation, $colour = 'GREEN', ?HorusTracingInterface $tracer = null)
     {
         $this->common = new HorusCommon($businessId, $logLocation, $colour);
         $this->http = new HorusHttp($businessId, $logLocation, $colour, $tracer);
@@ -1231,8 +1231,9 @@ class HorusXml
         // If the signature already exists, remove it.
 
         $oldSignatures = $xml->getElementsByTagNameNS(HorusXML::XMLDSIGNS, 'Signature');
-        $oldSignatures->item(0)->remove();
-
+        if ($oldSignatures->count()!=0) {
+            $oldSignatures->item(0)->remove();
+        }
         // Create basic signature elements
         $signature = $xml->createElementNS(HorusXML::XMLDSIGNS,'Signature');
         $signedInfo = $xml->createElementNS(HorusXML::XMLDSIGNS,'SignedInfo');

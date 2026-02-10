@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?><Saa:DataPDU xmlns:Saa="urn:swift:xsd:saa.mxs.01">
+	<Saa:Message>
+		<Saa:MessageFormat>MX</Saa:MessageFormat>
+		<Saa:MessageSubFormat>Input</Saa:MessageSubFormat>
+		<Saa:Sender>
+			<Saa:X1>SAADBEBBXXX</Saa:X1>
+		</Saa:Sender>
+		<Saa:Receiver>
+			<Saa:FullName>
+				<Saa:X1>SAADBEBBXXX</Saa:X1>
+			</Saa:FullName>
+		</Saa:Receiver>
+		<Saa:MessageNature>FinancialNature</Saa:MessageNature>
+		<Saa:MessageLPI>
+			<Saa:NetworkAttribute>
+				<Saa:SWIFTNetRequestAttribute>
+					<Saa:RequestorDN>o=saadbebb,o=swift</Saa:RequestorDN>
+					<Saa:ResponderDN>o=saadbebb,o=swift</Saa:ResponderDN>
+					<Saa:Service>swift.if.ia</Saa:Service>
+					<Saa:RequestType>setr.016.001.02</Saa:RequestType>
+					<Saa:NRIndicator>true</Saa:NRIndicator>
+				</Saa:SWIFTNetRequestAttribute>
+			</Saa:NetworkAttribute>
+			<Saa:SecurityAttribute>
+ 			<Saa:SWIFTNetSecurityAttribute>
+			  <Saa:SigningRequired>true</Saa:SigningRequired>
+	 		</Saa:SWIFTNetSecurityAttribute>
+			</Saa:SecurityAttribute>
+		</Saa:MessageLPI>
+		<Saa:MessageTPI>
+			<Saa:NetworkDelivNotify>false</Saa:NetworkDelivNotify>
+			<Saa:NetworkPriority>Normal</Saa:NetworkPriority>
+		</Saa:MessageTPI>
+		<Saa:MessageSRI>
+			<Saa:UserReference>Sample-XMLv1-0609141402</Saa:UserReference>
+		</Saa:MessageSRI>
+		<Saa:MessageText>
+			<AppHdr xmlns="urn:swift:xsd:$ahV10">
+				<MsgRef>Sample-XMLv1-0609141402</MsgRef>
+				<CrDate>2006-09-14T02:02:11.414</CrDate>
+			</AppHdr>
+<Document xmlns="urn:swift:xsd:swift.if.ia$setr.016.001.02">
+	<setr.016.001.02>
+		<RltdRef>
+			<Ref>Ref123-1</Ref> 
+		</RltdRef>
+		<IndvOrdrDtlsRpt>
+			<Sts>PACK</Sts> 
+			<OrdrRef>Ref123-1</OrdrRef> 
+		</IndvOrdrDtlsRpt>
+	</setr.016.001.02>
+</Document>
+		</Saa:MessageText>
+	</Saa:Message>
+<LAU><Signature xmlns="http://www.w3.org/2000/09/xmldsig#"><SignedInfo><CanonicalizationMethod Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/><SignatureMethod Algorithm="http://www.w3.org/2001/04/xmldsig-more#hmac-sha256"/><Reference URI=""><Transforms><Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature"/><Transform Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/></Transforms><DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/><DigestValue>IYu1UDLi3S1qRuZTC+nf84v0pcyd091In/yHviOYlic=</DigestValue></Reference></SignedInfo><SignatureValue>2689AiBK1YxdgLpW6GRRjID4889ynCnFExdnBlTRWx0=</SignatureValue></Signature></LAU></Saa:DataPDU>

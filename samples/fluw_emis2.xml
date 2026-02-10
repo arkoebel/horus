@@ -1,0 +1,1066 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<S2SDDIdf:MPEDDIdfBlkDirDeb xmlns:S2SDDIdf="urn:S2SDDIdf:xsd:$MPEDDIdfBlkDirDeb" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="urn:S2SDDIdf:xsd:$MPEDDIdfBlkDirDeb MPEDDIdfBlkDirDeb.xsd">
+	<S2SDDIdf:SndgInst>ZYDQFRP0</S2SDDIdf:SndgInst>
+	<S2SDDIdf:RcvgInst>ZYDOFRP0</S2SDDIdf:RcvgInst>
+	<S2SDDIdf:FileRef>324061740991539I</S2SDDIdf:FileRef>
+	<S2SDDIdf:SrvcId>COR</S2SDDIdf:SrvcId>
+	<S2SDDIdf:TstCode>T</S2SDDIdf:TstCode>
+	<S2SDDIdf:FType>IDF</S2SDDIdf:FType>
+	<S2SDDIdf:FDtTm>2024-11-19T06:17:40</S2SDDIdf:FDtTm>
+	<S2SDDIdf:NumDDBlk>1</S2SDDIdf:NumDDBlk>
+	<S2SDDIdf:NumPCRBlk>0</S2SDDIdf:NumPCRBlk>
+	<S2SDDIdf:NumREJBlk>0</S2SDDIdf:NumREJBlk>
+	<S2SDDIdf:NumRVSBlk>0</S2SDDIdf:NumRVSBlk>
+	<S2SDDIdf:NumRFRBlk>0</S2SDDIdf:NumRFRBlk>
+	<S2SDDIdf:NumRRVBlk>0</S2SDDIdf:NumRRVBlk>
+	<S2SDDIdf:FIToFICstmrDrctDbt xmlns="urn:iso:std:iso:20022:tech:xsd:pacs.003.001.08">
+		<GrpHdr>
+			<MsgId>202411190617409922604</MsgId>
+			<CreDtTm>2024-11-19T06:17:40</CreDtTm>
+			<NbOfTxs>10</NbOfTxs>
+			<TtlIntrBkSttlmAmt Ccy="EUR">150</TtlIntrBkSttlmAmt>
+			<IntrBkSttlmDt>2024-11-20</IntrBkSttlmDt>
+			<SttlmInf>
+				<SttlmMtd>CLRG</SttlmMtd>
+				<ClrSys>
+					<Prtry>ST2</Prtry>
+				</ClrSys>
+			</SttlmInf>
+			<InstgAgt>
+				<FinInstnId>
+					<BICFI>ZYDQFRP0</BICFI>
+				</FinInstnId>
+			</InstgAgt>
+		</GrpHdr>
+		<DrctDbtTxInf>
+			<PmtId>
+				<InstrId>E04-T061732-D0R0-SDD-ST2-01</InstrId>
+				<EndToEndId>E04-T061732-SDD-ST2-01</EndToEndId>
+				<TxId>E04-T061732-SDD-ST2-01</TxId>
+			</PmtId>
+			<PmtTpInf>
+				<SvcLvl>
+					<Cd>SEPA</Cd>
+				</SvcLvl>
+				<LclInstrm>
+					<Cd>CORE</Cd>
+				</LclInstrm>
+				<SeqTp>FRST</SeqTp>
+				<CtgyPurp>
+					<Cd>WHLD</Cd>
+				</CtgyPurp>
+			</PmtTpInf>
+			<IntrBkSttlmAmt Ccy="EUR">15</IntrBkSttlmAmt>
+			<ChrgBr>SLEV</ChrgBr>
+			<ReqdColltnDt>2024-11-20</ReqdColltnDt>
+			<DrctDbtTx>
+				<MndtRltdInf>
+					<MndtId>REFER MANDAT20161201 10000000001</MndtId>
+					<DtOfSgntr>2015-05-04</DtOfSgntr>
+					<AmdmntInd>false</AmdmntInd>
+					<AmdmntInfDtls>
+						<OrgnlMndtId>(AT-19 Identifiant mandat original)</OrgnlMndtId>
+					</AmdmntInfDtls>
+					<ElctrncSgntr>ATURE</ElctrncSgntr>
+				</MndtRltdInf>
+				<CdtrSchmeId>
+					<Id>
+						<PrvtId>
+							<Othr>
+								<Id>FR50ZZZ463255</Id>
+								<SchmeNm>
+									<Prtry>SchmeNmPrtry</Prtry>
+								</SchmeNm>
+							</Othr>
+						</PrvtId>
+					</Id>
+				</CdtrSchmeId>
+			</DrctDbtTx>
+			<Cdtr>
+				<Nm>(AT-03 Nom donneur d ordre complet-----------------------------------)</Nm>
+				<PstlAdr>
+					<Ctry>FR</Ctry>
+					<AdrLine>(AT-05 Adresse du creancier - ligne 1--------------------------------)</AdrLine>
+					<AdrLine>(AT-05 Adresse du creancier ligne 2----------------------------------)</AdrLine>
+				</PstlAdr>
+			</Cdtr>
+			<CdtrAcct>
+				<Id>
+					<IBAN>FR7630001140171000000000001</IBAN>
+				</Id>
+			</CdtrAcct>
+			<CdtrAgt>
+				<FinInstnId>
+					<BICFI>ZYDQFRP0XXX</BICFI>
+				</FinInstnId>
+			</CdtrAgt>
+			<UltmtCdtr>
+				<Nm>(AT-38 Nom du creancier final----------------------------------------)</Nm>
+			</UltmtCdtr>
+			<Dbtr>
+				<Nm>(AT-14 Nom du debiteur complet---------------------------------------)</Nm>
+				<PstlAdr>
+					<Ctry>FR</Ctry>
+					<AdrLine>( AT-09 Adresse du debiteur Ligne 1----------------------------------)</AdrLine>
+					<AdrLine>( AT-09 Adresse du debiteur Ligne 2----------------------------------)</AdrLine>
+				</PstlAdr>
+				<Id>
+					<OrgId>
+						<Othr>
+							<Id>(Taxe Identification--------------)</Id>
+							<SchmeNm>
+								<Prtry>TaxIdentificationNumber</Prtry>
+							</SchmeNm>
+						</Othr>
+					</OrgId>
+				</Id>
+			</Dbtr>
+			<DbtrAcct>
+				<Id>
+					<IBAN>DE7630047140171000000000195</IBAN>
+				</Id>
+			</DbtrAcct>
+			<DbtrAgt>
+				<FinInstnId>
+					<BICFI>ABANSI2XXXX</BICFI>
+				</FinInstnId>
+			</DbtrAgt>
+			<UltmtDbtr>
+				<Nm>(AT-15 Nom du debiteur final-----------------------------------------)</Nm>
+			</UltmtDbtr>
+			<Purp>
+				<Cd>XXXX</Cd>
+			</Purp>
+			<RmtInf>
+				<Ustrd>(AT-22 Libelle 1-----------------------------------------------------)(AT-22 Libelle 2-----------------------------------------------------)</Ustrd>
+			</RmtInf>
+		</DrctDbtTxInf>
+		<DrctDbtTxInf>
+			<PmtId>
+				<InstrId>E04-T061732-D0R0-SDD-ST2-02</InstrId>
+				<EndToEndId>E04-T061732-SDD-ST2-02</EndToEndId>
+				<TxId>E04-T061732-SDD-ST2-02</TxId>
+			</PmtId>
+			<PmtTpInf>
+				<SvcLvl>
+					<Cd>SEPA</Cd>
+				</SvcLvl>
+				<LclInstrm>
+					<Cd>CORE</Cd>
+				</LclInstrm>
+				<SeqTp>FRST</SeqTp>
+				<CtgyPurp>
+					<Cd>WHLD</Cd>
+				</CtgyPurp>
+			</PmtTpInf>
+			<IntrBkSttlmAmt Ccy="EUR">15</IntrBkSttlmAmt>
+			<ChrgBr>SLEV</ChrgBr>
+			<ReqdColltnDt>2024-11-20</ReqdColltnDt>
+			<DrctDbtTx>
+				<MndtRltdInf>
+					<MndtId>REFER MANDAT20161201 10000000001</MndtId>
+					<DtOfSgntr>2015-05-04</DtOfSgntr>
+					<AmdmntInd>false</AmdmntInd>
+					<AmdmntInfDtls>
+						<OrgnlMndtId>(AT-19 Identifiant mandat original)</OrgnlMndtId>
+					</AmdmntInfDtls>
+					<ElctrncSgntr>ATURE</ElctrncSgntr>
+				</MndtRltdInf>
+				<CdtrSchmeId>
+					<Id>
+						<PrvtId>
+							<Othr>
+								<Id>FR50ZZZ463255</Id>
+								<SchmeNm>
+									<Prtry>SchmeNmPrtry</Prtry>
+								</SchmeNm>
+							</Othr>
+						</PrvtId>
+					</Id>
+				</CdtrSchmeId>
+			</DrctDbtTx>
+			<Cdtr>
+				<Nm>(AT-03 Nom donneur d ordre complet-----------------------------------)</Nm>
+				<PstlAdr>
+					<Ctry>FR</Ctry>
+					<AdrLine>(AT-05 Adresse du creancier - ligne 1--------------------------------)</AdrLine>
+					<AdrLine>(AT-05 Adresse du creancier ligne 2----------------------------------)</AdrLine>
+				</PstlAdr>
+			</Cdtr>
+			<CdtrAcct>
+				<Id>
+					<IBAN>FR7630001140171000000000001</IBAN>
+				</Id>
+			</CdtrAcct>
+			<CdtrAgt>
+				<FinInstnId>
+					<BICFI>ZYDQFRP0XXX</BICFI>
+				</FinInstnId>
+			</CdtrAgt>
+			<UltmtCdtr>
+				<Nm>(AT-38 Nom du creancier final----------------------------------------)</Nm>
+			</UltmtCdtr>
+			<Dbtr>
+				<Nm>(AT-14 Nom du debiteur complet---------------------------------------)</Nm>
+				<PstlAdr>
+					<Ctry>FR</Ctry>
+					<AdrLine>( AT-09 Adresse du debiteur Ligne 1----------------------------------)</AdrLine>
+					<AdrLine>( AT-09 Adresse du debiteur Ligne 2----------------------------------)</AdrLine>
+				</PstlAdr>
+				<Id>
+					<OrgId>
+						<Othr>
+							<Id>(Taxe Identification--------------)</Id>
+							<SchmeNm>
+								<Prtry>TaxIdentificationNumber</Prtry>
+							</SchmeNm>
+						</Othr>
+					</OrgId>
+				</Id>
+			</Dbtr>
+			<DbtrAcct>
+				<Id>
+					<IBAN>DE7630047140171000000000195</IBAN>
+				</Id>
+			</DbtrAcct>
+			<DbtrAgt>
+				<FinInstnId>
+					<BICFI>ABANSI2XXXX</BICFI>
+				</FinInstnId>
+			</DbtrAgt>
+			<UltmtDbtr>
+				<Nm>(AT-15 Nom du debiteur final-----------------------------------------)</Nm>
+			</UltmtDbtr>
+			<Purp>
+				<Cd>XXXX</Cd>
+			</Purp>
+			<RmtInf>
+				<Ustrd>(AT-22 Libelle 1-----------------------------------------------------)(AT-22 Libelle 2-----------------------------------------------------)</Ustrd>
+			</RmtInf>
+		</DrctDbtTxInf>
+		<DrctDbtTxInf>
+			<PmtId>
+				<InstrId>E04-T061732-D0R0-SDD-ST2-03</InstrId>
+				<EndToEndId>E04-T061732-SDD-ST2-03</EndToEndId>
+				<TxId>E04-T061732-SDD-ST2-03</TxId>
+			</PmtId>
+			<PmtTpInf>
+				<SvcLvl>
+					<Cd>SEPA</Cd>
+				</SvcLvl>
+				<LclInstrm>
+					<Cd>CORE</Cd>
+				</LclInstrm>
+				<SeqTp>FRST</SeqTp>
+				<CtgyPurp>
+					<Cd>WHLD</Cd>
+				</CtgyPurp>
+			</PmtTpInf>
+			<IntrBkSttlmAmt Ccy="EUR">14</IntrBkSttlmAmt>
+			<ChrgBr>SLEV</ChrgBr>
+			<ReqdColltnDt>2024-11-20</ReqdColltnDt>
+			<DrctDbtTx>
+				<MndtRltdInf>
+					<MndtId>REFER MANDAT20161201 10000000001</MndtId>
+					<DtOfSgntr>2015-05-04</DtOfSgntr>
+					<AmdmntInd>false</AmdmntInd>
+					<AmdmntInfDtls>
+						<OrgnlMndtId>(AT-19 Identifiant mandat original)</OrgnlMndtId>
+					</AmdmntInfDtls>
+					<ElctrncSgntr>ATURE</ElctrncSgntr>
+				</MndtRltdInf>
+				<CdtrSchmeId>
+					<Id>
+						<PrvtId>
+							<Othr>
+								<Id>FR50ZZZ463255</Id>
+								<SchmeNm>
+									<Prtry>SchmeNmPrtry</Prtry>
+								</SchmeNm>
+							</Othr>
+						</PrvtId>
+					</Id>
+				</CdtrSchmeId>
+			</DrctDbtTx>
+			<Cdtr>
+				<Nm>(AT-03 Nom donneur d ordre complet-----------------------------------)</Nm>
+				<PstlAdr>
+					<Ctry>FR</Ctry>
+					<AdrLine>(AT-05 Adresse du creancier - ligne 1--------------------------------)</AdrLine>
+					<AdrLine>(AT-05 Adresse du creancier ligne 2----------------------------------)</AdrLine>
+				</PstlAdr>
+			</Cdtr>
+			<CdtrAcct>
+				<Id>
+					<IBAN>FR7630001140171000000000001</IBAN>
+				</Id>
+			</CdtrAcct>
+			<CdtrAgt>
+				<FinInstnId>
+					<BICFI>ZYDQFRP0XXX</BICFI>
+				</FinInstnId>
+			</CdtrAgt>
+			<UltmtCdtr>
+				<Nm>(AT-38 Nom du creancier final----------------------------------------)</Nm>
+			</UltmtCdtr>
+			<Dbtr>
+				<Nm>(AT-14 Nom du debiteur complet---------------------------------------)</Nm>
+				<PstlAdr>
+					<Ctry>FR</Ctry>
+					<AdrLine>( AT-09 Adresse du debiteur Ligne 1----------------------------------)</AdrLine>
+					<AdrLine>( AT-09 Adresse du debiteur Ligne 2----------------------------------)</AdrLine>
+				</PstlAdr>
+				<Id>
+					<OrgId>
+						<Othr>
+							<Id>(Taxe Identification--------------)</Id>
+							<SchmeNm>
+								<Prtry>TaxIdentificationNumber</Prtry>
+							</SchmeNm>
+						</Othr>
+					</OrgId>
+				</Id>
+			</Dbtr>
+			<DbtrAcct>
+				<Id>
+					<IBAN>DE7630047140171000000000195</IBAN>
+				</Id>
+			</DbtrAcct>
+			<DbtrAgt>
+				<FinInstnId>
+					<BICFI>ABANSI2XXXX</BICFI>
+				</FinInstnId>
+			</DbtrAgt>
+			<UltmtDbtr>
+				<Nm>(AT-15 Nom du debiteur final-----------------------------------------)</Nm>
+			</UltmtDbtr>
+			<Purp>
+				<Cd>XXXX</Cd>
+			</Purp>
+			<RmtInf>
+				<Ustrd>(AT-22 Libelle 1-----------------------------------------------------)(AT-22 Libelle 2-----------------------------------------------------)</Ustrd>
+			</RmtInf>
+		</DrctDbtTxInf>
+		<DrctDbtTxInf>
+			<PmtId>
+				<InstrId>E04-T061732-D0R0-SDD-ST2-04</InstrId>
+				<EndToEndId>E04-T061732-SDD-ST2-04</EndToEndId>
+				<TxId>E04-T061732-SDD-ST2-04</TxId>
+			</PmtId>
+			<PmtTpInf>
+				<SvcLvl>
+					<Cd>SEPA</Cd>
+				</SvcLvl>
+				<LclInstrm>
+					<Cd>CORE</Cd>
+				</LclInstrm>
+				<SeqTp>FRST</SeqTp>
+				<CtgyPurp>
+					<Cd>WHLD</Cd>
+				</CtgyPurp>
+			</PmtTpInf>
+			<IntrBkSttlmAmt Ccy="EUR">16</IntrBkSttlmAmt>
+			<ChrgBr>SLEV</ChrgBr>
+			<ReqdColltnDt>2024-11-20</ReqdColltnDt>
+			<DrctDbtTx>
+				<MndtRltdInf>
+					<MndtId>REFER MANDAT20161201 10000000001</MndtId>
+					<DtOfSgntr>2015-05-04</DtOfSgntr>
+					<AmdmntInd>false</AmdmntInd>
+					<AmdmntInfDtls>
+						<OrgnlMndtId>(AT-19 Identifiant mandat original)</OrgnlMndtId>
+					</AmdmntInfDtls>
+					<ElctrncSgntr>ATURE</ElctrncSgntr>
+				</MndtRltdInf>
+				<CdtrSchmeId>
+					<Id>
+						<PrvtId>
+							<Othr>
+								<Id>FR50ZZZ463255</Id>
+								<SchmeNm>
+									<Prtry>SchmeNmPrtry</Prtry>
+								</SchmeNm>
+							</Othr>
+						</PrvtId>
+					</Id>
+				</CdtrSchmeId>
+			</DrctDbtTx>
+			<Cdtr>
+				<Nm>(AT-03 Nom donneur d ordre complet-----------------------------------)</Nm>
+				<PstlAdr>
+					<Ctry>FR</Ctry>
+					<AdrLine>(AT-05 Adresse du creancier - ligne 1--------------------------------)</AdrLine>
+					<AdrLine>(AT-05 Adresse du creancier ligne 2----------------------------------)</AdrLine>
+				</PstlAdr>
+			</Cdtr>
+			<CdtrAcct>
+				<Id>
+					<IBAN>FR7630001140171000000000001</IBAN>
+				</Id>
+			</CdtrAcct>
+			<CdtrAgt>
+				<FinInstnId>
+					<BICFI>ZYDQFRP0XXX</BICFI>
+				</FinInstnId>
+			</CdtrAgt>
+			<UltmtCdtr>
+				<Nm>(AT-38 Nom du creancier final----------------------------------------)</Nm>
+			</UltmtCdtr>
+			<Dbtr>
+				<Nm>(AT-14 Nom du debiteur complet---------------------------------------)</Nm>
+				<PstlAdr>
+					<Ctry>FR</Ctry>
+					<AdrLine>( AT-09 Adresse du debiteur Ligne 1----------------------------------)</AdrLine>
+					<AdrLine>( AT-09 Adresse du debiteur Ligne 2----------------------------------)</AdrLine>
+				</PstlAdr>
+				<Id>
+					<OrgId>
+						<Othr>
+							<Id>(Taxe Identification--------------)</Id>
+							<SchmeNm>
+								<Prtry>TaxIdentificationNumber</Prtry>
+							</SchmeNm>
+						</Othr>
+					</OrgId>
+				</Id>
+			</Dbtr>
+			<DbtrAcct>
+				<Id>
+					<IBAN>DE7630047140171000000000195</IBAN>
+				</Id>
+			</DbtrAcct>
+			<DbtrAgt>
+				<FinInstnId>
+					<BICFI>ABANSI2XXXX</BICFI>
+				</FinInstnId>
+			</DbtrAgt>
+			<UltmtDbtr>
+				<Nm>(AT-15 Nom du debiteur final-----------------------------------------)</Nm>
+			</UltmtDbtr>
+			<Purp>
+				<Cd>XXXX</Cd>
+			</Purp>
+			<RmtInf>
+				<Ustrd>(AT-22 Libelle 1-----------------------------------------------------)(AT-22 Libelle 2-----------------------------------------------------)</Ustrd>
+			</RmtInf>
+		</DrctDbtTxInf>
+		<DrctDbtTxInf>
+			<PmtId>
+				<InstrId>E04-T061732-D0R0-SDD-ST2-05</InstrId>
+				<EndToEndId>E04-T061732-SDD-ST2-05</EndToEndId>
+				<TxId>E04-T061732-SDD-ST2-05</TxId>
+			</PmtId>
+			<PmtTpInf>
+				<SvcLvl>
+					<Cd>SEPA</Cd>
+				</SvcLvl>
+				<LclInstrm>
+					<Cd>CORE</Cd>
+				</LclInstrm>
+				<SeqTp>FRST</SeqTp>
+				<CtgyPurp>
+					<Cd>WHLD</Cd>
+				</CtgyPurp>
+			</PmtTpInf>
+			<IntrBkSttlmAmt Ccy="EUR">15</IntrBkSttlmAmt>
+			<ChrgBr>SLEV</ChrgBr>
+			<ReqdColltnDt>2024-11-20</ReqdColltnDt>
+			<DrctDbtTx>
+				<MndtRltdInf>
+					<MndtId>REFER MANDAT20161201 10000000001</MndtId>
+					<DtOfSgntr>2015-05-04</DtOfSgntr>
+					<AmdmntInd>false</AmdmntInd>
+					<AmdmntInfDtls>
+						<OrgnlMndtId>(AT-19 Identifiant mandat original)</OrgnlMndtId>
+					</AmdmntInfDtls>
+					<ElctrncSgntr>ATURE</ElctrncSgntr>
+				</MndtRltdInf>
+				<CdtrSchmeId>
+					<Id>
+						<PrvtId>
+							<Othr>
+								<Id>FR50ZZZ463255</Id>
+								<SchmeNm>
+									<Prtry>SchmeNmPrtry</Prtry>
+								</SchmeNm>
+							</Othr>
+						</PrvtId>
+					</Id>
+				</CdtrSchmeId>
+			</DrctDbtTx>
+			<Cdtr>
+				<Nm>(AT-03 Nom donneur d ordre complet-----------------------------------)</Nm>
+				<PstlAdr>
+					<Ctry>FR</Ctry>
+					<AdrLine>(AT-05 Adresse du creancier - ligne 1--------------------------------)</AdrLine>
+					<AdrLine>(AT-05 Adresse du creancier ligne 2----------------------------------)</AdrLine>
+				</PstlAdr>
+			</Cdtr>
+			<CdtrAcct>
+				<Id>
+					<IBAN>FR7630001140171000000000001</IBAN>
+				</Id>
+			</CdtrAcct>
+			<CdtrAgt>
+				<FinInstnId>
+					<BICFI>ZYDQFRP0XXX</BICFI>
+				</FinInstnId>
+			</CdtrAgt>
+			<UltmtCdtr>
+				<Nm>(AT-38 Nom du creancier final----------------------------------------)</Nm>
+			</UltmtCdtr>
+			<Dbtr>
+				<Nm>(AT-14 Nom du debiteur complet---------------------------------------)</Nm>
+				<PstlAdr>
+					<Ctry>FR</Ctry>
+					<AdrLine>( AT-09 Adresse du debiteur Ligne 1----------------------------------)</AdrLine>
+					<AdrLine>( AT-09 Adresse du debiteur Ligne 2----------------------------------)</AdrLine>
+				</PstlAdr>
+				<Id>
+					<OrgId>
+						<Othr>
+							<Id>(Taxe Identification--------------)</Id>
+							<SchmeNm>
+								<Prtry>TaxIdentificationNumber</Prtry>
+							</SchmeNm>
+						</Othr>
+					</OrgId>
+				</Id>
+			</Dbtr>
+			<DbtrAcct>
+				<Id>
+					<IBAN>DE7630047140171000000000195</IBAN>
+				</Id>
+			</DbtrAcct>
+			<DbtrAgt>
+				<FinInstnId>
+					<BICFI>ABANSI2XXXX</BICFI>
+				</FinInstnId>
+			</DbtrAgt>
+			<UltmtDbtr>
+				<Nm>(AT-15 Nom du debiteur final-----------------------------------------)</Nm>
+			</UltmtDbtr>
+			<Purp>
+				<Cd>XXXX</Cd>
+			</Purp>
+			<RmtInf>
+				<Ustrd>(AT-22 Libelle 1-----------------------------------------------------)(AT-22 Libelle 2-----------------------------------------------------)</Ustrd>
+			</RmtInf>
+		</DrctDbtTxInf>
+		<DrctDbtTxInf>
+			<PmtId>
+				<InstrId>E04-T061732-D0R0-SDD-ST2-06</InstrId>
+				<EndToEndId>E04-T061732-SDD-ST2-06</EndToEndId>
+				<TxId>E04-T061732-SDD-ST2-06</TxId>
+			</PmtId>
+			<PmtTpInf>
+				<SvcLvl>
+					<Cd>SEPA</Cd>
+				</SvcLvl>
+				<LclInstrm>
+					<Cd>CORE</Cd>
+				</LclInstrm>
+				<SeqTp>FRST</SeqTp>
+				<CtgyPurp>
+					<Cd>WHLD</Cd>
+				</CtgyPurp>
+			</PmtTpInf>
+			<IntrBkSttlmAmt Ccy="EUR">15</IntrBkSttlmAmt>
+			<ChrgBr>SLEV</ChrgBr>
+			<ReqdColltnDt>2024-11-20</ReqdColltnDt>
+			<DrctDbtTx>
+				<MndtRltdInf>
+					<MndtId>REFER MANDAT20161201 10000000001</MndtId>
+					<DtOfSgntr>2015-05-04</DtOfSgntr>
+					<AmdmntInd>false</AmdmntInd>
+					<AmdmntInfDtls>
+						<OrgnlMndtId>(AT-19 Identifiant mandat original)</OrgnlMndtId>
+					</AmdmntInfDtls>
+					<ElctrncSgntr>ATURE</ElctrncSgntr>
+				</MndtRltdInf>
+				<CdtrSchmeId>
+					<Id>
+						<PrvtId>
+							<Othr>
+								<Id>FR50ZZZ463255</Id>
+								<SchmeNm>
+									<Prtry>SchmeNmPrtry</Prtry>
+								</SchmeNm>
+							</Othr>
+						</PrvtId>
+					</Id>
+				</CdtrSchmeId>
+			</DrctDbtTx>
+			<Cdtr>
+				<Nm>(AT-03 Nom donneur d ordre complet-----------------------------------)</Nm>
+				<PstlAdr>
+					<Ctry>FR</Ctry>
+					<AdrLine>(AT-05 Adresse du creancier - ligne 1--------------------------------)</AdrLine>
+					<AdrLine>(AT-05 Adresse du creancier ligne 2----------------------------------)</AdrLine>
+				</PstlAdr>
+			</Cdtr>
+			<CdtrAcct>
+				<Id>
+					<IBAN>FR7630001140171000000000001</IBAN>
+				</Id>
+			</CdtrAcct>
+			<CdtrAgt>
+				<FinInstnId>
+					<BICFI>ZYDQFRP0XXX</BICFI>
+				</FinInstnId>
+			</CdtrAgt>
+			<UltmtCdtr>
+				<Nm>(AT-38 Nom du creancier final----------------------------------------)</Nm>
+			</UltmtCdtr>
+			<Dbtr>
+				<Nm>(AT-14 Nom du debiteur complet---------------------------------------)</Nm>
+				<PstlAdr>
+					<Ctry>FR</Ctry>
+					<AdrLine>( AT-09 Adresse du debiteur Ligne 1----------------------------------)</AdrLine>
+					<AdrLine>( AT-09 Adresse du debiteur Ligne 2----------------------------------)</AdrLine>
+				</PstlAdr>
+				<Id>
+					<OrgId>
+						<Othr>
+							<Id>(Taxe Identification--------------)</Id>
+							<SchmeNm>
+								<Prtry>TaxIdentificationNumber</Prtry>
+							</SchmeNm>
+						</Othr>
+					</OrgId>
+				</Id>
+			</Dbtr>
+			<DbtrAcct>
+				<Id>
+					<IBAN>DE7630047140171000000000195</IBAN>
+				</Id>
+			</DbtrAcct>
+			<DbtrAgt>
+				<FinInstnId>
+					<BICFI>ABANSI2XXXX</BICFI>
+				</FinInstnId>
+			</DbtrAgt>
+			<UltmtDbtr>
+				<Nm>(AT-15 Nom du debiteur final-----------------------------------------)</Nm>
+			</UltmtDbtr>
+			<Purp>
+				<Cd>XXXX</Cd>
+			</Purp>
+			<RmtInf>
+				<Ustrd>(AT-22 Libelle 1-----------------------------------------------------)(AT-22 Libelle 2-----------------------------------------------------)</Ustrd>
+			</RmtInf>
+		</DrctDbtTxInf>
+		<DrctDbtTxInf>
+			<PmtId>
+				<InstrId>E04-T061732-D0R0-SDD-ST2-07</InstrId>
+				<EndToEndId>E04-T061732-SDD-ST2-07</EndToEndId>
+				<TxId>E04-T061732-SDD-ST2-07</TxId>
+			</PmtId>
+			<PmtTpInf>
+				<SvcLvl>
+					<Cd>SEPA</Cd>
+				</SvcLvl>
+				<LclInstrm>
+					<Cd>CORE</Cd>
+				</LclInstrm>
+				<SeqTp>FRST</SeqTp>
+				<CtgyPurp>
+					<Cd>WHLD</Cd>
+				</CtgyPurp>
+			</PmtTpInf>
+			<IntrBkSttlmAmt Ccy="EUR">15</IntrBkSttlmAmt>
+			<ChrgBr>SLEV</ChrgBr>
+			<ReqdColltnDt>2024-11-20</ReqdColltnDt>
+			<DrctDbtTx>
+				<MndtRltdInf>
+					<MndtId>REFER MANDAT20161201 10000000001</MndtId>
+					<DtOfSgntr>2015-05-04</DtOfSgntr>
+					<AmdmntInd>false</AmdmntInd>
+					<AmdmntInfDtls>
+						<OrgnlMndtId>(AT-19 Identifiant mandat original)</OrgnlMndtId>
+					</AmdmntInfDtls>
+					<ElctrncSgntr>ATURE</ElctrncSgntr>
+				</MndtRltdInf>
+				<CdtrSchmeId>
+					<Id>
+						<PrvtId>
+							<Othr>
+								<Id>FR50ZZZ463255</Id>
+								<SchmeNm>
+									<Prtry>SchmeNmPrtry</Prtry>
+								</SchmeNm>
+							</Othr>
+						</PrvtId>
+					</Id>
+				</CdtrSchmeId>
+			</DrctDbtTx>
+			<Cdtr>
+				<Nm>(AT-03 Nom donneur d ordre complet-----------------------------------)</Nm>
+				<PstlAdr>
+					<Ctry>FR</Ctry>
+					<AdrLine>(AT-05 Adresse du creancier - ligne 1--------------------------------)</AdrLine>
+					<AdrLine>(AT-05 Adresse du creancier ligne 2----------------------------------)</AdrLine>
+				</PstlAdr>
+			</Cdtr>
+			<CdtrAcct>
+				<Id>
+					<IBAN>FR7630001140171000000000001</IBAN>
+				</Id>
+			</CdtrAcct>
+			<CdtrAgt>
+				<FinInstnId>
+					<BICFI>ZYDQFRP0XXX</BICFI>
+				</FinInstnId>
+			</CdtrAgt>
+			<UltmtCdtr>
+				<Nm>(AT-38 Nom du creancier final----------------------------------------)</Nm>
+			</UltmtCdtr>
+			<Dbtr>
+				<Nm>(AT-14 Nom du debiteur complet---------------------------------------)</Nm>
+				<PstlAdr>
+					<Ctry>FR</Ctry>
+					<AdrLine>( AT-09 Adresse du debiteur Ligne 1----------------------------------)</AdrLine>
+					<AdrLine>( AT-09 Adresse du debiteur Ligne 2----------------------------------)</AdrLine>
+				</PstlAdr>
+				<Id>
+					<OrgId>
+						<Othr>
+							<Id>(Taxe Identification--------------)</Id>
+							<SchmeNm>
+								<Prtry>TaxIdentificationNumber</Prtry>
+							</SchmeNm>
+						</Othr>
+					</OrgId>
+				</Id>
+			</Dbtr>
+			<DbtrAcct>
+				<Id>
+					<IBAN>DE7630047140171000000000195</IBAN>
+				</Id>
+			</DbtrAcct>
+			<DbtrAgt>
+				<FinInstnId>
+					<BICFI>ABANSI2XXXX</BICFI>
+				</FinInstnId>
+			</DbtrAgt>
+			<UltmtDbtr>
+				<Nm>(AT-15 Nom du debiteur final-----------------------------------------)</Nm>
+			</UltmtDbtr>
+			<Purp>
+				<Cd>XXXX</Cd>
+			</Purp>
+			<RmtInf>
+				<Ustrd>(AT-22 Libelle 1-----------------------------------------------------)(AT-22 Libelle 2-----------------------------------------------------)</Ustrd>
+			</RmtInf>
+		</DrctDbtTxInf>
+		<DrctDbtTxInf>
+			<PmtId>
+				<InstrId>E04-T061732-D0R0-SDD-ST2-08</InstrId>
+				<EndToEndId>E04-T061732-SDD-ST2-08</EndToEndId>
+				<TxId>E04-T061732-SDD-ST2-08</TxId>
+			</PmtId>
+			<PmtTpInf>
+				<SvcLvl>
+					<Cd>SEPA</Cd>
+				</SvcLvl>
+				<LclInstrm>
+					<Cd>CORE</Cd>
+				</LclInstrm>
+				<SeqTp>FRST</SeqTp>
+				<CtgyPurp>
+					<Cd>WHLD</Cd>
+				</CtgyPurp>
+			</PmtTpInf>
+			<IntrBkSttlmAmt Ccy="EUR">15</IntrBkSttlmAmt>
+			<ChrgBr>SLEV</ChrgBr>
+			<ReqdColltnDt>2024-11-20</ReqdColltnDt>
+			<DrctDbtTx>
+				<MndtRltdInf>
+					<MndtId>REFER MANDAT20161201 10000000001</MndtId>
+					<DtOfSgntr>2015-05-04</DtOfSgntr>
+					<AmdmntInd>false</AmdmntInd>
+					<AmdmntInfDtls>
+						<OrgnlMndtId>(AT-19 Identifiant mandat original)</OrgnlMndtId>
+					</AmdmntInfDtls>
+					<ElctrncSgntr>ATURE</ElctrncSgntr>
+				</MndtRltdInf>
+				<CdtrSchmeId>
+					<Id>
+						<PrvtId>
+							<Othr>
+								<Id>FR50ZZZ463255</Id>
+								<SchmeNm>
+									<Prtry>SchmeNmPrtry</Prtry>
+								</SchmeNm>
+							</Othr>
+						</PrvtId>
+					</Id>
+				</CdtrSchmeId>
+			</DrctDbtTx>
+			<Cdtr>
+				<Nm>(AT-03 Nom donneur d ordre complet-----------------------------------)</Nm>
+				<PstlAdr>
+					<Ctry>FR</Ctry>
+					<AdrLine>(AT-05 Adresse du creancier - ligne 1--------------------------------)</AdrLine>
+					<AdrLine>(AT-05 Adresse du creancier ligne 2----------------------------------)</AdrLine>
+				</PstlAdr>
+			</Cdtr>
+			<CdtrAcct>
+				<Id>
+					<IBAN>FR7630001140171000000000001</IBAN>
+				</Id>
+			</CdtrAcct>
+			<CdtrAgt>
+				<FinInstnId>
+					<BICFI>ZYDQFRP0XXX</BICFI>
+				</FinInstnId>
+			</CdtrAgt>
+			<UltmtCdtr>
+				<Nm>(AT-38 Nom du creancier final----------------------------------------)</Nm>
+			</UltmtCdtr>
+			<Dbtr>
+				<Nm>(AT-14 Nom du debiteur complet---------------------------------------)</Nm>
+				<PstlAdr>
+					<Ctry>FR</Ctry>
+					<AdrLine>( AT-09 Adresse du debiteur Ligne 1----------------------------------)</AdrLine>
+					<AdrLine>( AT-09 Adresse du debiteur Ligne 2----------------------------------)</AdrLine>
+				</PstlAdr>
+				<Id>
+					<OrgId>
+						<Othr>
+							<Id>(Taxe Identification--------------)</Id>
+							<SchmeNm>
+								<Prtry>TaxIdentificationNumber</Prtry>
+							</SchmeNm>
+						</Othr>
+					</OrgId>
+				</Id>
+			</Dbtr>
+			<DbtrAcct>
+				<Id>
+					<IBAN>DE7630047140171000000000195</IBAN>
+				</Id>
+			</DbtrAcct>
+			<DbtrAgt>
+				<FinInstnId>
+					<BICFI>ABANSI2XXXX</BICFI>
+				</FinInstnId>
+			</DbtrAgt>
+			<UltmtDbtr>
+				<Nm>(AT-15 Nom du debiteur final-----------------------------------------)</Nm>
+			</UltmtDbtr>
+			<Purp>
+				<Cd>XXXX</Cd>
+			</Purp>
+			<RmtInf>
+				<Ustrd>(AT-22 Libelle 1-----------------------------------------------------)(AT-22 Libelle 2-----------------------------------------------------)</Ustrd>
+			</RmtInf>
+		</DrctDbtTxInf>
+		<DrctDbtTxInf>
+			<PmtId>
+				<InstrId>E04-T061732-D0R0-SDD-ST2-09</InstrId>
+				<EndToEndId>E04-T061732-SDD-ST2-09</EndToEndId>
+				<TxId>E04-T061732-SDD-ST2-09</TxId>
+			</PmtId>
+			<PmtTpInf>
+				<SvcLvl>
+					<Cd>SEPA</Cd>
+				</SvcLvl>
+				<LclInstrm>
+					<Cd>CORE</Cd>
+				</LclInstrm>
+				<SeqTp>FRST</SeqTp>
+				<CtgyPurp>
+					<Cd>WHLD</Cd>
+				</CtgyPurp>
+			</PmtTpInf>
+			<IntrBkSttlmAmt Ccy="EUR">15</IntrBkSttlmAmt>
+			<ChrgBr>SLEV</ChrgBr>
+			<ReqdColltnDt>2024-11-20</ReqdColltnDt>
+			<DrctDbtTx>
+				<MndtRltdInf>
+					<MndtId>REFER MANDAT20161201 10000000001</MndtId>
+					<DtOfSgntr>2015-05-04</DtOfSgntr>
+					<AmdmntInd>false</AmdmntInd>
+					<AmdmntInfDtls>
+						<OrgnlMndtId>(AT-19 Identifiant mandat original)</OrgnlMndtId>
+					</AmdmntInfDtls>
+					<ElctrncSgntr>ATURE</ElctrncSgntr>
+				</MndtRltdInf>
+				<CdtrSchmeId>
+					<Id>
+						<PrvtId>
+							<Othr>
+								<Id>FR50ZZZ463255</Id>
+								<SchmeNm>
+									<Prtry>SchmeNmPrtry</Prtry>
+								</SchmeNm>
+							</Othr>
+						</PrvtId>
+					</Id>
+				</CdtrSchmeId>
+			</DrctDbtTx>
+			<Cdtr>
+				<Nm>(AT-03 Nom donneur d ordre complet-----------------------------------)</Nm>
+				<PstlAdr>
+					<Ctry>FR</Ctry>
+					<AdrLine>(AT-05 Adresse du creancier - ligne 1--------------------------------)</AdrLine>
+					<AdrLine>(AT-05 Adresse du creancier ligne 2----------------------------------)</AdrLine>
+				</PstlAdr>
+			</Cdtr>
+			<CdtrAcct>
+				<Id>
+					<IBAN>FR7630001140171000000000001</IBAN>
+				</Id>
+			</CdtrAcct>
+			<CdtrAgt>
+				<FinInstnId>
+					<BICFI>ZYDQFRP0XXX</BICFI>
+				</FinInstnId>
+			</CdtrAgt>
+			<UltmtCdtr>
+				<Nm>(AT-38 Nom du creancier final----------------------------------------)</Nm>
+			</UltmtCdtr>
+			<Dbtr>
+				<Nm>(AT-14 Nom du debiteur complet---------------------------------------)</Nm>
+				<PstlAdr>
+					<Ctry>FR</Ctry>
+					<AdrLine>( AT-09 Adresse du debiteur Ligne 1----------------------------------)</AdrLine>
+					<AdrLine>( AT-09 Adresse du debiteur Ligne 2----------------------------------)</AdrLine>
+				</PstlAdr>
+				<Id>
+					<OrgId>
+						<Othr>
+							<Id>(Taxe Identification--------------)</Id>
+							<SchmeNm>
+								<Prtry>TaxIdentificationNumber</Prtry>
+							</SchmeNm>
+						</Othr>
+					</OrgId>
+				</Id>
+			</Dbtr>
+			<DbtrAcct>
+				<Id>
+					<IBAN>DE7630047140171000000000195</IBAN>
+				</Id>
+			</DbtrAcct>
+			<DbtrAgt>
+				<FinInstnId>
+					<BICFI>ABANSI2XXXX</BICFI>
+				</FinInstnId>
+			</DbtrAgt>
+			<UltmtDbtr>
+				<Nm>(AT-15 Nom du debiteur final-----------------------------------------)</Nm>
+			</UltmtDbtr>
+			<Purp>
+				<Cd>XXXX</Cd>
+			</Purp>
+			<RmtInf>
+				<Ustrd>(AT-22 Libelle 1-----------------------------------------------------)(AT-22 Libelle 2-----------------------------------------------------)</Ustrd>
+			</RmtInf>
+		</DrctDbtTxInf>
+		<DrctDbtTxInf>
+			<PmtId>
+				<InstrId>E04-T061732-D0R0-SDD-ST2-10</InstrId>
+				<EndToEndId>E04-T061732-SDD-ST2-10</EndToEndId>
+				<TxId>E04-T061732-SDD-ST2-10</TxId>
+			</PmtId>
+			<PmtTpInf>
+				<SvcLvl>
+					<Cd>SEPA</Cd>
+				</SvcLvl>
+				<LclInstrm>
+					<Cd>CORE</Cd>
+				</LclInstrm>
+				<SeqTp>FRST</SeqTp>
+				<CtgyPurp>
+					<Cd>WHLD</Cd>
+				</CtgyPurp>
+			</PmtTpInf>
+			<IntrBkSttlmAmt Ccy="EUR">15</IntrBkSttlmAmt>
+			<ChrgBr>SLEV</ChrgBr>
+			<ReqdColltnDt>2024-11-20</ReqdColltnDt>
+			<DrctDbtTx>
+				<MndtRltdInf>
+					<MndtId>REFER MANDAT20161201 10000000001</MndtId>
+					<DtOfSgntr>2015-05-04</DtOfSgntr>
+					<AmdmntInd>false</AmdmntInd>
+					<AmdmntInfDtls>
+						<OrgnlMndtId>(AT-19 Identifiant mandat original)</OrgnlMndtId>
+					</AmdmntInfDtls>
+					<ElctrncSgntr>ATURE</ElctrncSgntr>
+				</MndtRltdInf>
+				<CdtrSchmeId>
+					<Id>
+						<PrvtId>
+							<Othr>
+								<Id>FR50ZZZ463255</Id>
+								<SchmeNm>
+									<Prtry>SchmeNmPrtry</Prtry>
+								</SchmeNm>
+							</Othr>
+						</PrvtId>
+					</Id>
+				</CdtrSchmeId>
+			</DrctDbtTx>
+			<Cdtr>
+				<Nm>(AT-03 Nom donneur d ordre complet-----------------------------------)</Nm>
+				<PstlAdr>
+					<Ctry>FR</Ctry>
+					<AdrLine>(AT-05 Adresse du creancier - ligne 1--------------------------------)</AdrLine>
+					<AdrLine>(AT-05 Adresse du creancier ligne 2----------------------------------)</AdrLine>
+				</PstlAdr>
+			</Cdtr>
+			<CdtrAcct>
+				<Id>
+					<IBAN>FR7630001140171000000000001</IBAN>
+				</Id>
+			</CdtrAcct>
+			<CdtrAgt>
+				<FinInstnId>
+					<BICFI>ZYDQFRP0XXX</BICFI>
+				</FinInstnId>
+			</CdtrAgt>
+			<UltmtCdtr>
+				<Nm>(AT-38 Nom du creancier final----------------------------------------)</Nm>
+			</UltmtCdtr>
+			<Dbtr>
+				<Nm>(AT-14 Nom du debiteur complet---------------------------------------)</Nm>
+				<PstlAdr>
+					<Ctry>FR</Ctry>
+					<AdrLine>( AT-09 Adresse du debiteur Ligne 1----------------------------------)</AdrLine>
+					<AdrLine>( AT-09 Adresse du debiteur Ligne 2----------------------------------)</AdrLine>
+				</PstlAdr>
+				<Id>
+					<OrgId>
+						<Othr>
+							<Id>(Taxe Identification--------------)</Id>
+							<SchmeNm>
+								<Prtry>TaxIdentificationNumber</Prtry>
+							</SchmeNm>
+						</Othr>
+					</OrgId>
+				</Id>
+			</Dbtr>
+			<DbtrAcct>
+				<Id>
+					<IBAN>DE7630047140171000000000195</IBAN>
+				</Id>
+			</DbtrAcct>
+			<DbtrAgt>
+				<FinInstnId>
+					<BICFI>ABANSI2XXXX</BICFI>
+				</FinInstnId>
+			</DbtrAgt>
+			<UltmtDbtr>
+				<Nm>(AT-15 Nom du debiteur final-----------------------------------------)</Nm>
+			</UltmtDbtr>
+			<Purp>
+				<Cd>XXXX</Cd>
+			</Purp>
+			<RmtInf>
+				<Ustrd>(AT-22 Libelle 1-----------------------------------------------------)(AT-22 Libelle 2-----------------------------------------------------)</Ustrd>
+			</RmtInf>
+		</DrctDbtTxInf>
+	</S2SDDIdf:FIToFICstmrDrctDbt>
+</S2SDDIdf:MPEDDIdfBlkDirDeb>

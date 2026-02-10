@@ -6,6 +6,27 @@ All notable changes to this project will be documented in this file.
 
 <!-- add unreleased items here -->
 
+## 3.5.3 - 2025-02-19
+
+* Added
+  * Officially support PHP 8.4 ([#464] via [#488])
+* Misc
+  * Added`Override` markers where needed (via [#508])  
+    See also: <https://wiki.php.net/rfc/marking_overriden_methods>
+
+[#464]: https://github.com/CycloneDX/cyclonedx-php-library/issues/464
+[#488]: https://github.com/CycloneDX/cyclonedx-php-library/pull/488
+[#508]: https://github.com/CycloneDX/cyclonedx-php-library/pull/508
+
+## 3.5.2 - 2025-01-27
+
+* Style
+  * Applied latest PHP Coding Standards (via [#495])
+* Misc
+  * Various refactors 
+
+[#495]: https://github.com/CycloneDX/cyclonedx-php-library/pull/495
+
 ## 3.5.1 - 2024-12-01
 
 * Docs

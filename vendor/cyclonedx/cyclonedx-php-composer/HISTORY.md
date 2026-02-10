@@ -6,10 +6,32 @@ All notable changes to this project will be documented in this file.
 
 <!-- add unreleased items here -->
 
+## 5.2.2 - 2025-02-18
+
+* Added
+  * Officially support PHP 8.4 ([#500] via [#522])
+* Misc
+  * Added`Override` markers where needed (via [#531])  
+    See also: <https://wiki.php.net/rfc/marking_overriden_methods>
+
+[#500]: https://github.com/CycloneDX/cyclonedx-php-composer/issues/500
+[#522]: https://github.com/CycloneDX/cyclonedx-php-composer/pull/522
+[#531]: https://github.com/CycloneDX/cyclonedx-php-composer/pull/531
+
+## 5.2.1 - 2025-01-27
+
+* Added
+  * Officially support Composer 2.8 ([#520] via [#523])
+  * Officially support Composer 2.7 ([#521] via [#523])
 * Style
   * Applied latest PHP Coding Standards (via [#507])
+* Misc
+  * Various refactors
 
 [#507]: https://github.com/CycloneDX/cyclonedx-php-composer/pull/507
+[#520]: https://github.com/CycloneDX/cyclonedx-php-composer/issues/520
+[#521]: https://github.com/CycloneDX/cyclonedx-php-composer/issues/521
+[#523]: https://github.com/CycloneDX/cyclonedx-php-composer/pull/523
 
 ## 5.2.0 - 2024-04-30
 

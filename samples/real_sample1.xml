@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Saa:DataPDU xmlns:Saa="urn:swift:saa:xsd:saa.2.0" xmlns:Sw="urn:swift:snl:ns.Sw" xmlns:SwInt="urn:swift:snl:ns.SwInt" xmlns:SwGbl="urn:swift:snl:ns.SwGbl" xmlns:SwSec="urn:swift:snl:ns.SwSec"><Saa:Revision>2.0.11</Saa:Revision><Saa:Header><Saa:Message><Saa:SenderReference>OSWHTBEB3XXX008$210810510225</Saa:SenderReference><Saa:MessageIdentifier>pacs.008.001.08</Saa:MessageIdentifier><Saa:Format>MX</Saa:Format><Saa:SubFormat>Output</Saa:SubFormat><Saa:Sender><Saa:DN>cn=rtgs,ou=tst2,o=swhtbeb3,o=swift</Saa:DN><Saa:FullName><Saa:X1>SWHTBEB3XXX</Saa:X1><Saa:X2>tst2</Saa:X2></Saa:FullName></Saa:Sender><Saa:Receiver><Saa:DN>cn=esmig,ou=test,o=psstfrpp,o=swift</Saa:DN><Saa:FullName><Saa:X1>PSSTFRPPXXX</Saa:X1><Saa:X2>test</Saa:X2></Saa:FullName></Saa:Receiver><Saa:InterfaceInfo><Saa:MessageCreator>SWIFTNetInterface</Saa:MessageCreator><Saa:MessageContext>Original</Saa:MessageContext><Saa:MessageNature>Financial</Saa:MessageNature><Saa:Sumid>1EEDEA6DFFF836EE</Saa:Sumid><Saa:MessageTypeURI>mp/mx/_bicnIEFXEei166Gk6ZGJ0A/_ZfnKQRswEemTyYOOlfF45A</Saa:MessageTypeURI><Saa:MessageProperties><Saa:MessageProperty><Saa:MessagePropertyName>T2CommunicationId</Saa:MessagePropertyName><Saa:MessagePropertyValue>swi00005-2021-08-09T13:03:36.9014.062884Z</Saa:MessagePropertyValue></Saa:MessageProperty></Saa:MessageProperties></Saa:InterfaceInfo><Saa:NetworkInfo><Saa:Priority>Normal</Saa:Priority><Saa:IsPossibleDuplicate>false</Saa:IsPossibleDuplicate><Saa:Service>swift.tst2.iast!p</Saa:Service><Saa:Network>SWIFTNet</Saa:Network><Saa:SessionNr>000008</Saa:SessionNr><Saa:SeqNr>000000004</Saa:SeqNr><Saa:SWIFTNetNetworkInfo><Saa:RequestType>pacs.008.001.08</Saa:RequestType><Saa:SWIFTRef>swi00005-2021-08-09T13:03:36.9014.062884Z</Saa:SWIFTRef><Saa:SNLRef>SNL00377-2021-08-09T13:03:36.9984.171969Z</Saa:SNLRef><Saa:Reference>61f14ee0-06aa-47cb-bd54-f822296a856e</Saa:Reference><Saa:SnFQueueName>psstfrpp_iast2!p</Saa:SnFQueueName><Saa:SnFInputTime>0102:2021-08-09T13:03:36</Saa:SnFInputTime><Saa:SnFDeliveryTime>2021-08-10T05:54:27Z</Saa:SnFDeliveryTime></Saa:SWIFTNetNetworkInfo></Saa:NetworkInfo><Saa:SecurityInfo><Saa:SWIFTNetSecurityInfo><Saa:SignerDN>cn=rtgs,ou=tst2,o=swhtbeb3,o=swift</Saa:SignerDN><Saa:SignatureResult>Success</Saa:SignatureResult><Saa:SignatureValue><SwSec:Signature><SwSec:SignedInfo><Sw:Reference><Sw:DigestValue>vIxPL9n8JiGPvtM6H1R9geFkQS1dWCN52rctXH8U8hc=</Sw:DigestValue></Sw:Reference></SwSec:SignedInfo><SwSec:SignatureValue>PEMF@Proc-Type: 4,MIC-ONLY
+Content-Domain: RFC822
+EntrustFile-Version: 2.0
+Originator-DN: cn=rtgs,ou=tst2,o=swhtbeb3,o=swift
+Orig-SN: 1617525250
+MIC-Info: SHA256, RSA,
+ HAYe5XM5Q26UlC7FC9HTZE1AgXEbvrLKlURihpPUTV7UKv1/hNvF6nROKpzUnbLA
+ 9/I5QqGl79aWFEVRIy3zeFYWDHRSY7bvDTwnWItAg9DTlBIVdy7ZbtWhmwN1Py9p
+ g+PRhvjB4Lgk0YGAQVoElQ89TfM1PSgsMDoJI41sEdrkTjYZXV9GWqOjQH5NAx+S
+ nPaqUnj+FCAU8fp+WEpLRcyrLfBV4W55rpK1/xYA6cvWAH6goyxpIrUJLv2meNM5
+ JuQcr7tSujI84F1DXvtjMMcDMHywXMhSHli/NhquOcJwQatm70cg0ZaQKnPw+YUS
+ zQQ7g7hnCCdRdlYHzmypKg==
+</SwSec:SignatureValue><SwSec:KeyInfo><SwSec:SignDN>cn=rtgs,ou=tst2,o=swhtbeb3,o=swift</SwSec:SignDN><SwSec:CertPolicyId>1.3.21.6.2</SwSec:CertPolicyId></SwSec:KeyInfo><SwSec:Manifest><Sw:Reference><Sw:DigestRef>Sw.RequestHeader</Sw:DigestRef><Sw:DigestValue>0z1nXAPHnetmy/g/yDz/ngFLz76Pmv0hAVZThFgEeY0=</Sw:DigestValue></Sw:Reference><Sw:Reference><Sw:DigestRef>Sw.RequestPayload</Sw:DigestRef><Sw:DigestValue>eVlG5QTy5+tBqi7/2oQNDjS7foifUcFzmNVLhYON1Co=</Sw:DigestValue></Sw:Reference><Sw:Reference><Sw:DigestRef>Sw.E2S</Sw:DigestRef><Sw:DigestValue>QYLBRRkpYvtVz5Kn33gP42j/e2GPLuLKP4D/m3wav/I=</Sw:DigestValue></Sw:Reference></SwSec:Manifest></SwSec:Signature></Saa:SignatureValue></Saa:SWIFTNetSecurityInfo></Saa:SecurityInfo><Saa:ExpiryDateTime>20210830055427</Saa:ExpiryDateTime></Saa:Message></Saa:Header><Saa:Body><AppHdr xmlns="urn:iso:std:iso:20022:tech:xsd:head.001.001.01" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <Fr>
+        <FIId>
+            <FinInstnId>
+                <BICFI>TSPABEBBXXX</BICFI>
+            </FinInstnId>
+        </FIId>
+    </Fr>
+    <To>
+        <FIId>
+            <FinInstnId>
+                <BICFI>PSSTFRPPXXX</BICFI>
+            </FinInstnId>
+        </FIId>
+    </To>
+    <BizMsgIdr>REF/c14e3d39765446a3bc73e43063689d8</BizMsgIdr>
+    <MsgDefIdr>pacs.008.001.08</MsgDefIdr>
+    <CreDt>2021-08-09T13:03:25Z</CreDt>
+<Sgntr><ds:Signature xmlns:ds="http://www.w3.org/2000/09/xmldsig#"><ds:SignedInfo><ds:CanonicalizationMethod Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/><ds:SignatureMethod Algorithm="http://www.w3.org/2001/04/xmldsig-more#rsa-sha256"/><ds:Reference URI=""><ds:Transforms><ds:Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature"/><ds:Transform Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/></ds:Transforms><ds:DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/><ds:DigestValue>z56trBJ99qMlPXt9spEg5eCOIbIW6NMZF/Ytavk+Gi4=</ds:DigestValue></ds:Reference><ds:Reference><ds:Transforms><ds:Transform Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/></ds:Transforms><ds:DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/><ds:DigestValue>cMs+G+y5g+jx7yNz1M6uvue3FIJKCMuC9i6xkr7POs4=</ds:DigestValue></ds:Reference><ds:Reference URI="#SW_KeyInfo-b998-919f02a0-d6a9113d-209d120f-0044"><ds:Transforms><ds:Transform Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/></ds:Transforms><ds:DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/><ds:DigestValue>kzkAp4Q6UuQv/OKz54iN51CzYx8N2Wc6I5FQmjG2lGg=</ds:DigestValue></ds:Reference></ds:SignedInfo><ds:SignatureValue>gESzeYOXHrFrl2Eve4hqj2162M+gSsvCTY6f2PVnxv7kC7LiuDOnVe/qcQjfsLAjzko15Jv1XFBlVe1JYUNUeq5E6J077Vbr8q2VR03p5P3gkedxgpC5BwN7BXSnbNqQ+Fnh98rr3Yl4gXKUb+RW8SPYhbUbH9tzEXr2+0YNL2NIta0p66yaPl2qGNRnW15TVU4tL7Wu9F7eezl90RYQhO92e9LTwHfyWQ1hWK60vvIu5uM5wIFCrKVXl0k8q6oBK6qOtEIAGjqtLGI2bbswwbx81UcnaD2VKw+JUhcSW352sxb5Dk5RAC60q364LZJTTQukrtORxIPNTq50jOuyyw==</ds:SignatureValue><ds:KeyInfo Id="SW_KeyInfo-b998-919f02a0-d6a9113d-209d120f-0044"><ds:X509Data><ds:X509Certificate>MIIE3DCCAsSgAwIBAgIEYGl6AjANBgkqhkiG9w0BAQsFADAQMQ4wDAYDVQQKEwVTV0lGVDAeFw0yMTA1MjAwNjQ4MjFaFw0yMzA1MjAwNzE4MjFaMEExDjAMBgNVBAoTBXN3aWZ0MREwDwYDVQQKEwhzd2h0YmViMzENMAsGA1UECxMEdHN0MjENMAsGA1UEAxMEcnRnczCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBALcuSaNaWz6UxbdbcxHH71MkD8TmE5Mm+X+Q9ArQCHYEC1RO2tOAkfJtVjtwSBFraHrw7ax3QxguTFeQQwRgRGIs8jL9bGXq7HPM6eiA40vwC/JE0s4sEf5SJj12EHP+EOwWbN4eyrAWAjePAGTCIesyUk2rCHddO3SS3VYrOoe4Kx2u4s/d2n3baU+RzV5obs2iL/cBdMdZab+Aynrch7gU+ZGXKZkyvTALX4vLfDxvgO2rbiwOcoW39Jd/ySaMDWJQGobA/ptGGNVf9pWqYeMpFNioMFJWDPWH9v0XvDOe7MAeLU9bo7c+IYUptGgTByEtPV6v3eDvxHrp3Kkgy8ECAwEAAaOCAQswggEHMAsGA1UdDwQEAwIGwDARBgNVHSAECjAIMAYGBCsVBgIwGwYDVR0JBBQwEjAQBgkqhkiG9n0HRB0xAwIBDzA1BgNVHR8ELjAsMCqgKKAmpCQwIjEOMAwGA1UEChMFU1dJRlQxEDAOBgNVBAMTB0NSTDQyOTkwKwYDVR0QBCQwIoAPMjAyMTA1MjAwNjQ4MjFagQ8yMDIyMTExODE5MTgyMVowHwYDVR0jBBgwFoAUUqMBKGDZlSdB4hCeCZ+rg9DxlkIwHQYDVR0OBBYEFGNS/RRl0xdB0eFnysKtVf5/algPMAkGA1UdEwQCMAAwGQYJKoZIhvZ9B0EABAwwChsEVjguMgMCBLAwDQYJKoZIhvcNAQELBQADggIBAK7YYCXsc37LUSpEj4+6HZ1DWo5xxwIQLwUDAnqDdOWgwsS+Ovj1gfjjfiWkKTZCUBjc7H8TuKlaqdyAzvVJ+CW/eV2YgfBZq6sWIYOJIeyNGY6lYcIg0Qy6dB4CPCxFN6IpsBkG6b8MPfpXBk00B3HizkY6JL6ehN3brui9Mml+GlnM6/rBTX/T6krUTIcM3NNr1IwoBGlRicBo1PyxwO40NdYtiBZc7W4K1p91CKGzl3jYF0qofFRN8T30PXcRXNcvi4MwhjFDbGXkWQdKJrrMcOPwXs/c6ic7z7/PSOyBOs5U/UPvMkkZ5egH517/Zm4s7IhdoX3YNeFNRZ5DfD6udFG6Rox5F70uywVLt03GtI3uzHuVirrBhs78RdhV7XL6Yt31WZrwYycwE7JP59H0+gbjciAysTGw1vtA9H6twmTCpqEyCYwJzFjb+AbILcIhDrJfFchlYy7zMNFQp3Ds99D0y9LgzpMFRuaAwz0pD5rJQJ0sckv6GKzUoUMZXWXSoyR2FV0wSC/gsVOKjKqVvQxUh+5UGAFpHYi3X0U7qu+EHBSBM/6pQHAqLyZHrsUXppB5dofln7vtTDPCs7AbfojkeeqOl4v0oljVFwxv5p3No/uV2UKIWBllkLbT0rEwX9dY0yN1DeRdBZ47nhCJ66yAHCmw9eChOH5X5VTT</ds:X509Certificate></ds:X509Data></ds:KeyInfo></ds:Signature></Sgntr></AppHdr><Document xmlns="urn:iso:std:iso:20022:tech:xsd:pacs.008.001.08" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <FIToFICstmrCdtTrf>
+        <GrpHdr>
+            <MsgId>NONREF</MsgId>
+            <CreDtTm>2021-08-09T15:03:25.747+02:00</CreDtTm>
+            <NbOfTxs>1</NbOfTxs>
+            <SttlmInf>
+                <SttlmMtd>CLRG</SttlmMtd>
+                <ClrSys>
+                    <Cd>TGT</Cd>
+                </ClrSys>
+            </SttlmInf>
+        </GrpHdr>
+        <CdtTrfTxInf>
+            <PmtId>
+                <InstrId>3801.0/7a8708b51</InstrId>
+                <EndToEndId>E2E/3801.0/7a870</EndToEndId>
+                <UETR>133e7c9f-e8ad-4676-8116-db42ff90c3b2</UETR>
+                <ClrSysRef>CSR/3801.0/7a870</ClrSysRef>
+            </PmtId>
+            <PmtTpInf>
+                <SvcLvl>
+                    <Cd>G001</Cd>
+                </SvcLvl>
+            </PmtTpInf>
+            <IntrBkSttlmAmt Ccy="EUR">3801.0</IntrBkSttlmAmt>
+            <IntrBkSttlmDt>2021-08-09</IntrBkSttlmDt>
+            <SttlmTmIndctn>
+                <CdtDtTm>2021-08-09T15:03:25.747+02:00</CdtDtTm>
+            </SttlmTmIndctn>
+            <InstdAmt Ccy="EUR">3801.0</InstdAmt>
+            <ChrgBr>SHAR</ChrgBr>
+            <ChrgsInf>
+                <Amt Ccy="EUR">0.0</Amt>
+                <Agt>
+                    <FinInstnId>
+                        <BICFI>TSPABEBBXXX</BICFI>
+                    </FinInstnId>
+                </Agt>
+            </ChrgsInf>
+            <InstgAgt>
+                <FinInstnId>
+                    <BICFI>TSPABEBBXXX</BICFI>
+                </FinInstnId>
+            </InstgAgt>
+            <InstdAgt>
+                <FinInstnId>
+                    <BICFI>PSSTFRPPXXX</BICFI>
+                </FinInstnId>
+            </InstdAgt>
+            <Dbtr>
+                <Nm>The King and G1</Nm>
+                <Id>
+                    <OrgId>
+                        <AnyBIC>PSSTFRPPXXX</AnyBIC>
+                    </OrgId>
+                </Id>
+            </Dbtr>
+            <DbtrAcct>
+                <Id>
+                    <IBAN>FR3320041000017799029L02055</IBAN>
+                </Id>
+            </DbtrAcct>
+            <DbtrAgt>
+                <FinInstnId>
+                    <BICFI>TSPABEBBXXX</BICFI>
+                </FinInstnId>
+            </DbtrAgt>
+            <CdtrAgt>
+                <FinInstnId>
+                    <BICFI>PSSTFRPPXXX</BICFI>
+                </FinInstnId>
+            </CdtrAgt>
+            <Cdtr>
+                <Id>
+                    <OrgId>
+                        <AnyBIC>PSSTFRPPXXX</AnyBIC>
+                    </OrgId>
+                </Id>
+            </Cdtr>
+            <CdtrAcct>
+                <Id>
+                    <IBAN>FR4120041000017799032P02002</IBAN>
+                </Id>
+            </CdtrAcct>
+            <RmtInf>
+                <Ustrd>TC3801 Unstructured Remittance Information 140 CHAR unchanged</Ustrd>
+            </RmtInf>
+        </CdtTrfTxInf>
+    </FIToFICstmrCdtTrf>
+</Document>
+</Saa:Body></Saa:DataPDU>

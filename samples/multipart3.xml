@@ -1,0 +1,29 @@
+<Document xmlns="urn:swift:xsd:colr.xxx.creditclaimsfile">
+    <CrdtClms>
+            <GrpHdr>
+                    <MsgId>FR159682023000042</MsgId>
+                    <CreDtTm>2023-12-15T11:59:02.000</CreDtTm>
+                    <SttlmDt>2023-12-15</SttlmDt>
+                    <CptyRiad>FR15968</CptyRiad>
+                    <MsgPgntn>
+                            <PgNb>1</PgNb>
+                            <LastPgInd>true</LastPgInd>
+                    </MsgPgntn>
+                    <NbOfCCR>0</NbOfCCR>
+                    <NbOfCCU>0</NbOfCCU>
+                    <NbOfCCOAU>1</NbOfCCOAU>
+                    <NbOfRR>0</NbOfRR>
+                    <NbOfRU>0</NbOfRU>
+                    <NbOfMob>0</NbOfMob>
+                    <NbOfDemob>0</NbOfDemob>
+            </GrpHdr>
+            <Ccru>
+                    <OpeTp>CCOAU</OpeTp>
+                    <CCRef>CCDPREF0214934-RT-FIBEN03</CCRef>
+                    <ECMSCCId>FRCC20490000003</ECMSCCId>
+                    <InstrId>231215AEGQHQ12UX</InstrId>
+                    <OutstdAmt Ccy="EUR">3333.00</OutstdAmt>
+                    <UpdateDt>2023-12-15</UpdateDt>
+            </Ccru>
+    </CrdtClms>
+</Document>

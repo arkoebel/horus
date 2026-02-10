@@ -3,7 +3,7 @@
         'name' => 'worldline/horus',
         'pretty_version' => 'dev-master',
         'version' => 'dev-master',
-        'reference' => 'f8a5558297b16a177d5da41e0e8bedcb9ef48fcc',
+        'reference' => '0842099e5d7eb24c6b461c25ebef39ce5034cbda',
         'type' => 'library',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -11,9 +11,9 @@
     ),
     'versions' => array(
         'brick/math' => array(
-            'pretty_version' => '0.12.1',
-            'version' => '0.12.1.0',
-            'reference' => 'f510c0a40911935b77b86859eb5223d58d660df1',
+            'pretty_version' => '0.12.3',
+            'version' => '0.12.3.0',
+            'reference' => '866551da34e9a618e64a819ee1e01c20d8a588ba',
             'type' => 'library',
             'install_path' => __DIR__ . '/../brick/math',
             'aliases' => array(),
@@ -44,7 +44,7 @@
         'cyclonedx/cyclonedx-library' => array(
             'pretty_version' => 'dev-master',
             'version' => 'dev-master',
-            'reference' => 'aa47fa89faa3fb74ff7494a48d90fedd8b9f50d5',
+            'reference' => '9bf6ab0b78b1fea5523bab33bdaf21a8c2755527',
             'type' => 'library',
             'install_path' => __DIR__ . '/../cyclonedx/cyclonedx-library',
             'aliases' => array(
@@ -55,7 +55,7 @@
         'cyclonedx/cyclonedx-php-composer' => array(
             'pretty_version' => 'dev-master',
             'version' => 'dev-master',
-            'reference' => '64ca5b4fba25ca8eff13a6690f3538cbb88a1767',
+            'reference' => '6a8957d4584bc63e51cf34b35e5355527f5f0fa2',
             'type' => 'composer-plugin',
             'install_path' => __DIR__ . '/../cyclonedx/cyclonedx-php-composer',
             'aliases' => array(
@@ -66,7 +66,7 @@
         'doctrine/instantiator' => array(
             'pretty_version' => '2.0.x-dev',
             'version' => '2.0.9999999.9999999-dev',
-            'reference' => '139dfa4ac9355bc99d37ae9f94c268f3bcb0c8c1',
+            'reference' => '32877dd24a4a2b324698e07b2d3285fb44e627c6',
             'type' => 'library',
             'install_path' => __DIR__ . '/../doctrine/instantiator',
             'aliases' => array(),
@@ -79,9 +79,9 @@
             ),
         ),
         'guzzlehttp/promises' => array(
-            'pretty_version' => '1.5.x-dev',
-            'version' => '1.5.9999999.9999999-dev',
-            'reference' => '67ab6e18aaa14d753cc148911d273f6e6cb6721e',
+            'pretty_version' => '2.0.x-dev',
+            'version' => '2.0.9999999.9999999-dev',
+            'reference' => '90c5be4a7c8374e8079c06232b07eb6e5cbbfdf3',
             'type' => 'library',
             'install_path' => __DIR__ . '/../guzzlehttp/promises',
             'aliases' => array(),
@@ -90,16 +90,16 @@
         'myclabs/deep-copy' => array(
             'pretty_version' => '1.x-dev',
             'version' => '1.9999999.9999999.9999999-dev',
-            'reference' => '4764e040f8743e92b86c36f488f32d0265dd1dae',
+            'reference' => '024473a478be9df5fdaca2c793f2232fe788e414',
             'type' => 'library',
             'install_path' => __DIR__ . '/../myclabs/deep-copy',
             'aliases' => array(),
             'dev_requirement' => true,
         ),
         'nikic/php-parser' => array(
-            'pretty_version' => 'v5.3.1',
-            'version' => '5.3.1.0',
-            'reference' => '8eea230464783aa9671db8eea6f8c6ac5285794b',
+            'pretty_version' => 'v5.4.0',
+            'version' => '5.4.0.0',
+            'reference' => '447a020a1f875a434d62f2a401f53b82a396e494',
             'type' => 'library',
             'install_path' => __DIR__ . '/../nikic/php-parser',
             'aliases' => array(),
@@ -126,14 +126,12 @@
             'dev_requirement' => false,
         ),
         'open-telemetry/api' => array(
-            'pretty_version' => 'dev-main',
-            'version' => 'dev-main',
-            'reference' => '04c85a1e41a3d59fa9bdc801a5de1df6624b95ed',
+            'pretty_version' => '1.2.3',
+            'version' => '1.2.3.0',
+            'reference' => '199d7ddda88f5f5619fa73463f1a5a7149ccd1f1',
             'type' => 'library',
             'install_path' => __DIR__ . '/../open-telemetry/api',
-            'aliases' => array(
-                0 => '1.1.x-dev',
-            ),
+            'aliases' => array(),
             'dev_requirement' => false,
         ),
         'open-telemetry/context' => array(
@@ -168,9 +166,9 @@
             'dev_requirement' => false,
         ),
         'open-telemetry/sdk' => array(
-            'pretty_version' => '1.1.2',
-            'version' => '1.1.2.0',
-            'reference' => 'fb0ff8d8279a3776bd604791e2531dd0cc147e8b',
+            'pretty_version' => '1.2.2',
+            'version' => '1.2.2.0',
+            'reference' => '37eec0fe47ddd627911f318f29b6cd48196be0c0',
             'type' => 'library',
             'install_path' => __DIR__ . '/../open-telemetry/sdk',
             'aliases' => array(),
@@ -179,7 +177,7 @@
         'open-telemetry/sem-conv' => array(
             'pretty_version' => 'dev-main',
             'version' => 'dev-main',
-            'reference' => 'cf4083a5329b5d64b368c2164d24c1e938cc5f0a',
+            'reference' => '4178c9f390da8e4dbca9b181a9d1efd50cf7ee0a',
             'type' => 'library',
             'install_path' => __DIR__ . '/../open-telemetry/sem-conv',
             'aliases' => array(
@@ -190,7 +188,7 @@
         'opis/json-schema' => array(
             'pretty_version' => 'dev-master',
             'version' => 'dev-master',
-            'reference' => 'd1389724c96f31335045c799207c79621268f177',
+            'reference' => 'b20e989dce3a7d25e477236fe81d11bf31d47599',
             'type' => 'library',
             'install_path' => __DIR__ . '/../opis/json-schema',
             'aliases' => array(
@@ -201,7 +199,7 @@
         'opis/string' => array(
             'pretty_version' => 'dev-master',
             'version' => 'dev-master',
-            'reference' => '9ebf1a1f873f502f6859d11210b25a4bf5d141e7',
+            'reference' => '391130a366760f3ff6e19b023027d003c9d311ae',
             'type' => 'library',
             'install_path' => __DIR__ . '/../opis/string',
             'aliases' => array(
@@ -212,7 +210,7 @@
         'opis/uri' => array(
             'pretty_version' => 'dev-master',
             'version' => 'dev-master',
-            'reference' => '0f3ca49ab1a5e4a6681c286e0b2cc081b93a7d5a',
+            'reference' => 'aa3fd486ccbf1deb7a5b4c63fafae2165b2f1535',
             'type' => 'library',
             'install_path' => __DIR__ . '/../opis/uri',
             'aliases' => array(
@@ -353,7 +351,7 @@
         'phpunit/phpunit' => array(
             'pretty_version' => '9.6.x-dev',
             'version' => '9.6.9999999.9999999-dev',
-            'reference' => 'f80235cb4d3caa59ae09be3adf1ded27521d1a9c',
+            'reference' => '7fcb3793ca4cf63ad51605747e52b32ad788f61c',
             'type' => 'library',
             'install_path' => __DIR__ . '/../phpunit/phpunit',
             'aliases' => array(),
@@ -434,9 +432,9 @@
             'dev_requirement' => false,
         ),
         'ramsey/collection' => array(
-            'pretty_version' => '2.0.0',
-            'version' => '2.0.0.0',
-            'reference' => 'a4b48764bfbb8f3a6a4d1aeb1a35bb5e9ecac4a5',
+            'pretty_version' => '2.1.0',
+            'version' => '2.1.0.0',
+            'reference' => '3c5990b8a5e0b79cd1cf11c2dc1229e58e93f109',
             'type' => 'library',
             'install_path' => __DIR__ . '/../ramsey/collection',
             'aliases' => array(),
@@ -635,53 +633,37 @@
             'dev_requirement' => false,
         ),
         'symfony/http-client' => array(
-            'pretty_version' => '5.4.x-dev',
-            'version' => '5.4.9999999.9999999-dev',
-            'reference' => 'd77d8e212cde7b5c4a64142bf431522f19487c28',
+            'pretty_version' => '7.3.x-dev',
+            'version' => '7.3.9999999.9999999-dev',
+            'reference' => 'c64af9f3f76017ecd8ec4add9e9371badded8370',
             'type' => 'library',
             'install_path' => __DIR__ . '/../symfony/http-client',
             'aliases' => array(),
             'dev_requirement' => false,
         ),
         'symfony/http-client-contracts' => array(
-            'pretty_version' => '2.5.x-dev',
-            'version' => '2.5.9999999.9999999-dev',
-            'reference' => '48ef1d0a082885877b664332b9427662065a360c',
+            'pretty_version' => 'dev-main',
+            'version' => 'dev-main',
+            'reference' => 'd8d46d0f605337624f8b28fc4acf346c5156533b',
             'type' => 'library',
             'install_path' => __DIR__ . '/../symfony/http-client-contracts',
-            'aliases' => array(),
+            'aliases' => array(
+                0 => '3.6.x-dev',
+            ),
             'dev_requirement' => false,
         ),
         'symfony/http-client-implementation' => array(
             'dev_requirement' => false,
             'provided' => array(
-                0 => '2.4',
+                0 => '3.0',
             ),
         ),
         'symfony/polyfill-mbstring' => array(
             'pretty_version' => '1.x-dev',
             'version' => '1.9999999.9999999.9999999-dev',
-            'reference' => '2369cb908b33d7b7518cce042615de430142497f',
+            'reference' => '6d857f4d76bd4b343eac26d6b539585d2bc56493',
             'type' => 'library',
             'install_path' => __DIR__ . '/../symfony/polyfill-mbstring',
-            'aliases' => array(),
-            'dev_requirement' => false,
-        ),
-        'symfony/polyfill-php73' => array(
-            'pretty_version' => '1.x-dev',
-            'version' => '1.9999999.9999999.9999999-dev',
-            'reference' => '0f68c03565dcaaf25a890667542e8bd75fe7e5bb',
-            'type' => 'library',
-            'install_path' => __DIR__ . '/../symfony/polyfill-php73',
-            'aliases' => array(),
-            'dev_requirement' => false,
-        ),
-        'symfony/polyfill-php80' => array(
-            'pretty_version' => '1.x-dev',
-            'version' => '1.9999999.9999999.9999999-dev',
-            'reference' => '60328e362d4c2c802a54fcbf04f9d3fb892b4cf8',
-            'type' => 'library',
-            'install_path' => __DIR__ . '/../symfony/polyfill-php80',
             'aliases' => array(),
             'dev_requirement' => false,
         ),
@@ -726,7 +708,7 @@
         'worldline/horus' => array(
             'pretty_version' => 'dev-master',
             'version' => 'dev-master',
-            'reference' => 'f8a5558297b16a177d5da41e0e8bedcb9ef48fcc',
+            'reference' => '0842099e5d7eb24c6b461c25ebef39ce5034cbda',
             'type' => 'library',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),

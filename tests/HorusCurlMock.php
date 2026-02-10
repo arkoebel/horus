@@ -2,6 +2,9 @@
 
 class Horus_Curl_Handle
 {
+    /**
+     * @var string[string] $options
+     */
     public $options;
 }
 

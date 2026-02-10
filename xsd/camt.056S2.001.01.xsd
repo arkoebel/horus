@@ -1,0 +1,755 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- STEP2 SDD Schema, camt.056.001.01, Nov 6th 2023, Release March 2024 -->
+<!-- STEP2 BIC from ISO shema 2019 -->
+<!-- STEP2 SDD Schema, camt.056.001.01, Dec 4th 2015, Release November 2016 -->
+<!-- STEP2 Add costraints to Amount for CR 3534, Dec 4th 2015 -->
+<!-- STEP2 RuleBbok 2016 for CR 3593, Dec 4th 2015 -->
+<!-- STEP2 Add NURG to Service Level Code, March 17th 2014 -->
+<!-- STEP2 Spaces allowed in Original Creditor Identifier field, May 25th 2012 -->
+<!-- STEP2 Spaces allowed in Creditor Identifier field, March 23th 2012 -->
+<!-- STEP2 The Postal address country is optional in S2SDDPostalAddress1, Jun16th 2010 -->
+<!-- STEP2 Remove reason codes CUST AGNT CURR UPAY CUTA from CancellationReason4Code, May24th 2010 -->
+<!-- STEP2 The Originator Name is limited to 70 characters in S2SDDId5, May24th 2010 -->
+<!-- STEP2 Add Clearing system, February 24th 2010 -->
+<!-- STEP2 ISODate with pattern restriction YYYY-MM-DD, January 26th 2010 -->
+<!-- STEP2 ISODateTime with pattern restriction YYYY-MM-DDThh:mm:dd..., January 26th 2010 -->
+<!-- STEP2 String with whiteSpace collapse and pattern restriction "\S+.*", January 26th 2010 -->
+<!-- STEP2 Modified the Mandate Original Debtor Agent Identifier for ISO compatibility, March 04th 2010  -->
+<!-- STEP2 Modified the Nm of Dbtr, Cdtr, UltmtDbtr, UltmtCdtr from Max140Text to Max70Text , April 01th 2010  -->
+<!-- STEP2 CancellationReason CUST AGNT CURR UPAY CUTA added from Cd to prtry, September 28th 2010 -->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns="urn:iso:std:iso:20022:tech:xsd:camt.056S2.001.01" targetNamespace="urn:iso:std:iso:20022:tech:xsd:camt.056S2.001.01" elementFormDefault="qualified">
+	<xs:element name="Document" type="Document"/>
+	<!-- STEP2 SDD Schema, new name FIToFIPmtCxlReq, January 20th 2010 -->
+	<xs:complexType name="Document">
+		<xs:sequence>
+			<xs:element name="FIToFIPmtCxlReqS2" type="S2SDDFIToFIPaymentCancellationRequestV01"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="S2SDDFIToFIPaymentCancellationRequestV01">
+		<xs:sequence>
+			<xs:element name="Assgnmt" type="S2SDDCaseAssignment2"/>
+			<xs:element name="CtrlData" type="ControlData1"/>
+			<xs:element name="Undrlyg" type="S2SDDUnderlyingTransaction2"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="S2SDDAccountIdentification4Choice">
+		<xs:sequence>
+			<xs:element name="IBAN" type="IBAN2007Identifier"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:simpleType name="S2SDDCurrencyAndAmount_SimpleType">
+		<xs:restriction base="xs:decimal">
+			<xs:minInclusive value="0"/>
+			<xs:fractionDigits value="2"/>
+			<xs:totalDigits value="18"/>
+			<xs:pattern value="[0-9]{0,15}([\.]([0-9]{0,2})){0,1}"/>
+			<!--xs:pattern added on 29-11-07-->
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:complexType name="S2SDDCurrencyAndAmount">
+		<xs:simpleContent>
+			<xs:extension base="S2SDDCurrencyAndAmount_SimpleType">
+				<xs:attribute name="Ccy" type="S2SDDCurrencyCode" use="required"/>
+			</xs:extension>
+		</xs:simpleContent>
+	</xs:complexType>
+	<xs:simpleType name="S2SDDCurrencyCode">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="EUR"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<!-- STEP2 BIC from ISO shema 2019 -->
+	<xs:simpleType name="AnyBICDec2014Identifier">
+		<xs:restriction base="xs:string">
+			<xs:pattern value="[A-Z0-9]{4,4}[A-Z]{2,2}[A-Z0-9]{2,2}([A-Z0-9]{3,3}){0,1}"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<!-- STEP2 BIC from ISO shema 2019 -->
+	<xs:simpleType name="BICFIDec2014Identifier">
+		<xs:restriction base="xs:string">
+			<xs:pattern value="[A-Z0-9]{4,4}[A-Z]{2,2}[A-Z0-9]{2,2}([A-Z0-9]{3,3}){0,1}"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:complexType name="S2SDDBranchAndFinancialInstitutionIdentification4">
+		<xs:sequence>
+			<xs:element name="FinInstnId" type="S2SDDFinancialInstitutionIdentification7"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="CancellationReason2Choice">
+		<xs:sequence>
+			<xs:choice>
+				<xs:element name="Cd" type="CancellationReason4Code"/>
+				<xs:element name="Prtry" type="Max35Text"/>
+			</xs:choice>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:simpleType name="CancellationReason4Code">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="AGNT"/>
+			<xs:enumeration value="CURR"/>
+			<xs:enumeration value="CUST"/>
+			<xs:enumeration value="CUTA"/>
+			<xs:enumeration value="DUPL"/>
+			<xs:enumeration value="UPAY"/>
+			<!-- Add ISO codes, September 28th 2010 -->
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:complexType name="S2SDDCancellationReasonInformation3">
+		<xs:sequence>
+			<xs:element name="Orgtr" type="S2SDDId5"/>
+			<xs:element name="Rsn" type="CancellationReason2Choice"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="S2SDDCaseAssignment2">
+		<xs:sequence>
+			<xs:element name="Id" type="Max35Text"/>
+			<xs:element name="Assgnr" type="S2SDDParty7Choice"/>
+			<xs:element name="Assgne" type="S2SDDParty7Choice"/>
+			<xs:element name="CreDtTm" type="ISODateTime"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="S2SDDCashAccount16">
+		<xs:sequence>
+			<xs:element name="Id" type="S2SDDAccountIdentification4Choice"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="ControlData1">
+		<xs:sequence>
+			<xs:element name="NbOfTxs" type="Max15NumericText"/>
+			<xs:element name="CtrlSum" type="S2SDDCurrencyAndAmount_SimpleType" minOccurs="0"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:simpleType name="CountryCode">
+		<xs:restriction base="xs:string">
+			<xs:pattern value="[A-Z]{2,2}"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:complexType name="DateAndPlaceOfBirth">
+		<xs:sequence>
+			<xs:element name="BirthDt" type="ISODate"/>
+			<xs:element name="PrvcOfBirth" type="Max35Text" minOccurs="0"/>
+			<xs:element name="CityOfBirth" type="Max35Text"/>
+			<xs:element name="CtryOfBirth" type="CountryCode"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:simpleType name="ExternalCategoryPurpose1Code">
+		<xs:restriction base="xs:string">
+			<xs:minLength value="1"/>
+			<xs:maxLength value="4"/>
+			<xs:pattern value="(\s*[^\s]\s*)+"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="ExternalLocalInstrument1Code">
+		<xs:restriction base="xs:string">
+			<xs:minLength value="1"/>
+			<xs:maxLength value="35"/>
+			<xs:pattern value="(\s*[^\s]\s*)+"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="S2SDDExternalServiceLevel1Code">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="SEPA"/>
+			<xs:enumeration value="NURG"/>
+			<!--added NURG, March 17th 2014 -->
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:complexType name="S2SDDFinancialInstitutionIdentification7">
+		<xs:sequence>
+			<xs:element name="BIC" type="BICFIDec2014Identifier"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="GenericPersonIdentification1">
+		<xs:sequence>
+			<xs:element name="Id" type="Max35Text"/>
+			<xs:element name="SchmeNm" type="FinancialIdentificationSchemeName2"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="S2SDDPersonIdentificationSchemeName1Choice">
+		<xs:sequence>
+			<xs:choice>
+				<xs:element name="Cd" type="S2SDDExternalPersonIdentification1Code"/>
+				<xs:element name="Prtry" type="Max35Text"/>
+			</xs:choice>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:simpleType name="S2SDDExternalPersonIdentification1Code">
+		<xs:restriction base="xs:string">
+			<xs:minLength value="1"/>
+			<xs:maxLength value="4"/>
+			<xs:pattern value="(\s*[^\s]\s*)+"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="IBAN2007Identifier">
+		<xs:restriction base="xs:string">
+			<xs:pattern value="[A-Z]{2,2}[0-9]{2,2}[a-zA-Z0-9]{1,30}"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="ISODate">
+		<xs:restriction base="xs:date">
+			<xs:pattern value="[0-9]{4,4}\-[0-9]{2,2}\-[0-9]{2,2}"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="ISODateTime">
+		<xs:restriction base="xs:dateTime">
+			<xs:pattern value="[0-9]{4,4}\-[0-9]{2,2}\-[0-9]{2,2}[T][0-9]{2,2}:[0-9]{2,2}:[0-9]{2,2}[\S]*"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:complexType name="S2SDDLocalInstrument2Choice">
+		<xs:sequence>
+			<!-- 20100222 - Changed Local Instrument Type -->
+			<!-- 20100222 - Removed Collapse White Spaces -->
+			<xs:element name="Cd" type="ExternalLocalInstrument1Code"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:simpleType name="Max140Text">
+		<xs:restriction base="xs:string">
+			<xs:minLength value="1"/>
+			<xs:maxLength value="140"/>
+			<xs:pattern value="(\s*[^\s]\s*)+"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="Max15NumericText">
+		<xs:restriction base="xs:string">
+			<xs:pattern value="[0-9]{1,15}"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<!-- STEP2 RuleBbok 2016 for CR 3593, Dec 4th 2015 -->
+	<xs:simpleType name="Max34Text">
+		<xs:restriction base="xs:string">
+			<xs:minLength value="1"/>
+			<xs:maxLength value="34"/>
+			<xs:pattern value="(\s*[^\s]\s*)+"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="Max35Text">
+		<xs:restriction base="xs:string">
+			<xs:minLength value="1"/>
+			<xs:maxLength value="35"/>
+			<xs:pattern value="(\s*[^\s]\s*)+"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="Max4Text">
+		<xs:restriction base="xs:string">
+			<xs:minLength value="1"/>
+			<xs:maxLength value="4"/>
+			<xs:pattern value="(\s*[^\s]\s*)+"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="Max70Text">
+		<xs:restriction base="xs:string">
+			<xs:minLength value="1"/>
+			<xs:maxLength value="70"/>
+			<xs:pattern value="(\s*[^\s]\s*)+"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:complexType name="S2SDDOrganisationIdentification41">
+		<xs:sequence>
+			<xs:choice>
+				<xs:element name="BICOrBEI" type="AnyBICDec2014Identifier"/>
+				<xs:element name="Othr" type="S2SDDGenericOrganisationIdentification1"/>
+			</xs:choice>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="S2SDDGenericOrganisationIdentification1">
+		<xs:sequence>
+			<xs:element name="Id" type="Max35Text"/>
+			<xs:element name="SchmeNm" type="S2SDDOrganisationIdentificationSchemeName1Choice" minOccurs="0"/>
+			<xs:element name="Issr" type="Max35Text" minOccurs="0"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="S2SDDOrganisationIdentificationSchemeName1Choice">
+		<xs:sequence>
+			<xs:choice>
+				<xs:element name="Cd" type="S2SDDExternalOrganisationIdentification1Code"/>
+				<xs:element name="Prtry" type="Max35Text"/>
+			</xs:choice>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:simpleType name="S2SDDExternalOrganisationIdentification1Code">
+		<xs:restriction base="xs:string">
+			<xs:minLength value="1"/>
+			<xs:maxLength value="4"/>
+			<xs:pattern value="(\s*[^\s]\s*)+"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:complexType name="S2SDDOrganisationIdentification4">
+		<xs:sequence>
+			<xs:element name="BICOrBEI" type="AnyBICDec2014Identifier"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:simpleType name="S2SDDId7">
+		<xs:restriction base="xs:string">
+			<xs:pattern value="([A-Za-z0-9]|[+|\?|/|\-|:|\(|\)|\.|,|']){1,35}"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:complexType name="S2SDDOriginalGroupInformation3">
+		<xs:sequence>
+			<xs:element name="OrgnlMsgId" type="Max35Text"/>
+			<xs:element name="OrgnlMsgNmId" type="Max35Text"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="S2SDDOriginalTransactionReference13"/>
+	<xs:complexType name="Party6Choice">
+		<xs:sequence>
+			<xs:element name="PrvtId" type="PersonIdentification5"/>
+		</xs:sequence>
+	</xs:complexType>
+	<!-- 20100302 - sub-fields of OrgId and PrvtId are set to mandatory in order to avoid empty tags -->
+	<xs:complexType name="S2SDDParty6Choice">
+		<xs:sequence>
+			<xs:choice>
+				<xs:element name="OrgId" type="S2SDDOrganisationIdentification41"/>
+				<xs:element name="PrvtId" type="S2SDDPersonIdentification5"/>
+			</xs:choice>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="S2SDDParty6Choice2">
+		<xs:sequence>
+			<xs:element name="OrgId" type="S2SDDOrganisationIdentification4"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="S2SDDParty7Choice">
+		<xs:sequence>
+			<xs:element name="Agt" type="S2SDDBranchAndFinancialInstitutionIdentification4"/>
+		</xs:sequence>
+	</xs:complexType>
+	<!-- Spaces allowed in Creditor Identifier field, 2012-03-23 -->
+	<xs:complexType name="S2SDDCdtrSchmeId">
+		<xs:sequence>
+			<xs:element name="Id" type="S2SDDPrivateIdentification2"/>
+		</xs:sequence>
+	</xs:complexType>
+	<!-- Added new type S2SDDPrivateIdentification2 on 2012-03-23-->
+	<xs:complexType name="S2SDDPrivateIdentification2">
+		<xs:sequence>
+			<xs:element name="PrvtId" type="S2SDDPrty2"/>
+		</xs:sequence>
+	</xs:complexType>
+	<!-- STEP2 SDD Schema, new struct OthrId, 2012-03-23 -->
+	<xs:complexType name="S2SDDPrty2">
+		<xs:sequence>
+			<xs:element name="Othr" type="S2SDDId10"/>
+		</xs:sequence>
+	</xs:complexType>
+	<!-- Added new type S2SDDId10 on 2012-03-23-->
+	<xs:complexType name="S2SDDId10">
+		<xs:sequence>
+			<xs:element name="Id" type="S2SDDId8"/>
+			<xs:element name="SchmeNm" type="FinancialIdentificationSchemeName2"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="PartyIdentification32">
+		<xs:sequence>
+			<xs:element name="Id" type="Party6Choice"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="S2SDDPartyIdentification32">
+		<xs:sequence>
+			<xs:element name="Nm" type="Max70Text" minOccurs="0"/>
+			<xs:element name="PstlAdr" type="S2SDDPostalAddress1" minOccurs="0"/>
+			<xs:element name="Id" type="S2SDDParty6Choice" minOccurs="0"/>
+			<xs:element name="CtryOfRes" type="CountryCode" minOccurs="0"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="S2SDDPartyIdentification34">
+		<xs:sequence>
+			<!-- STEP2 Modified the Nm of Cdtr from Max140Text to Max70Text , April 01th 2010  -->
+			<xs:element name="Nm" type="Max70Text"/>
+			<xs:element name="PstlAdr" type="S2SDDPostalAddress1" minOccurs="0"/>
+			<xs:element name="CtryOfRes" type="CountryCode" minOccurs="0"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="S2SDDPartyIdentification35">
+		<xs:sequence>
+			<!-- STEP2 Modified the Nm of Dbtr from Max140Text to Max70Text , April 01th 2010  -->
+			<xs:element name="Nm" type="Max70Text"/>
+			<xs:element name="PstlAdr" type="S2SDDPostalAddress1" minOccurs="0"/>
+			<xs:element name="Id" type="S2SDDParty6Choice" minOccurs="0"/>
+			<xs:element name="CtryOfRes" type="CountryCode" minOccurs="0"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="S2SDDPostalAddress1">
+		<xs:sequence>
+			<xs:element name="Ctry" type="CountryCode" minOccurs="0"/>
+			<xs:element name="AdrLine" type="Max70Text" minOccurs="0" maxOccurs="2"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="S2SDDId5">
+		<xs:sequence>
+			<xs:choice>
+				<!-- 20100222 - The elements are mandatory - Removed minoccurs = 0 -->
+				<xs:element name="Nm" type="Max70Text"/>
+				<xs:element name="Id" type="S2SDDParty6Choice2"/>
+			</xs:choice>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="S2SDDPaymentTransactionInformation31">
+		<xs:sequence>
+			<xs:element name="CxlId" type="S2SDDId7"/>
+			<xs:element name="OrgnlGrpInf" type="S2SDDOriginalGroupInformation3"/>
+			<xs:element name="OrgnlInstrId" type="S2SDDId7" minOccurs="0"/>
+			<xs:element name="OrgnlEndToEndId" type="Max35Text"/>
+			<xs:element name="OrgnlTxId" type="S2SDDId7"/>
+			<xs:element name="OrgnlIntrBkSttlmAmt">
+				<xs:complexType>
+					<xs:simpleContent>
+						<xs:restriction base="S2SDDCurrencyAndAmount">
+							<xs:minInclusive value="0.01"/>
+							<xs:maxInclusive value="999999999.99"/>
+						</xs:restriction>
+						<!-- STEP2 Add costraints to Amount for CR 3534, Dec 4th 2015 -->
+					</xs:simpleContent>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="OrgnlIntrBkSttlmDt" type="ISODate"/>
+			<xs:element name="Assgnr" type="S2SDDBranchAndFinancialInstitutionIdentification4" minOccurs="0"/>
+			<xs:element name="CxlRsnInf" type="S2SDDCancellationReasonInformation3"/>
+			<xs:element name="OrgnlTxRef">
+				<xs:complexType>
+					<xs:complexContent>
+						<xs:extension base="S2SDDOriginalTransactionReference13">
+							<xs:sequence>
+								<xs:element name="ReqdColltnDt" type="ISODate"/>
+								<!-- Spaces allowed in Creditor Identifier field, 2012-03-23 -->
+								<xs:element name="CdtrSchmeId" type="S2SDDCdtrSchmeId"/>
+								<xs:element name="SttlmInf" type="S2SDDSettlementInformation13"/>
+								<xs:element name="PmtTpInf" type="S2SDDPaymentTypeInformation22"/>
+								<xs:element name="MndtRltdInf" type="S2SDDMandateRelatedInformation1"/>
+								<xs:element name="RmtInf" type="S2SDDRemittanceInformation5" minOccurs="0"/>
+								<xs:element name="UltmtDbtr" type="S2SDDPartyIdentification32" minOccurs="0"/>
+								<xs:element name="Dbtr" type="S2SDDPartyIdentification35"/>
+								<xs:element name="DbtrAcct" type="S2SDDCashAccount16"/>
+								<xs:element name="DbtrAgt" type="S2SDDBranchAndFinancialInstitutionIdentification4"/>
+								<xs:element name="CdtrAgt" type="S2SDDBranchAndFinancialInstitutionIdentification4"/>
+								<xs:element name="Cdtr" type="S2SDDPartyIdentification34"/>
+								<xs:element name="CdtrAcct" type="S2SDDCashAccount16"/>
+								<xs:element name="UltmtCdtr" type="S2SDDPartyIdentification32" minOccurs="0"/>
+							</xs:sequence>
+						</xs:extension>
+					</xs:complexContent>
+				</xs:complexType>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="S2SDDMandateRelatedInformation1">
+		<xs:sequence>
+			<xs:element name="MndtId" type="Max35Text"/>
+			<!--DtOfSgntr made mandatory on 08-03-07-->
+			<xs:element name="DtOfSgntr" type="ISODate"/>
+			<xs:element name="AmdmntInd" type="TrueFalseIndicator" minOccurs="0"/>
+			<xs:element name="AmdmntInfDtls" type="S2SDDAmendmentInformationDetails1" minOccurs="0"/>
+			<xs:element name="ElctrncSgntr" type="Max1025Text" minOccurs="0"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="S2SDDAmendmentInformationDetails1">
+		<xs:sequence>
+			<xs:element name="OrgnlMndtId" type="Max35Text" minOccurs="0"/>
+			<xs:element name="OrgnlCdtrSchmeId" type="S2SDDCdtrSchmeId1" minOccurs="0"/>
+			<!-- STEP2 RuleBbok 2016 for CR 3593, Dec 4th 2015 -->
+			<xs:element name="OrgnlDbtrAcct" type="S2SDDCashAccount8" minOccurs="0"/>
+			<xs:element name="OrgnlDbtrAgt" type="S2SDDOrgnlDbtrAgt" minOccurs="0"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="S2SDDOrgnlDbtrAgt">
+		<xs:sequence>
+			<xs:element name="FinInstnId" type="S2SDDOrgnlDbtrAgt1"/>
+		</xs:sequence>
+	</xs:complexType>
+	<!-- STEP2 RuleBbok 2016 for CR 3593, Dec 4th 2015 -->
+	<xs:complexType name="S2SDDOrgnlDbtrAgt1">
+		<xs:choice>
+			<xs:element name="BIC" type="BICFIDec2014Identifier"/>
+			<xs:element name="Othr" type="S2SDDOrgnlDbtrAgtOther2"/>
+		</xs:choice>
+	</xs:complexType>
+	<!-- STEP2 RuleBbok 2016 for CR 3593, Dec 4th 2015 -->
+	<xs:complexType name="S2SDDOrgnlDbtrAcctOther2">
+		<xs:sequence>
+			<xs:element name="Id" type="Max34Text"/>
+		</xs:sequence>
+	</xs:complexType>
+	<!-- insert for ISO compatibility, March 04th 2010  -->
+	<xs:complexType name="S2SDDOrgnlDbtrAgtOther2">
+		<xs:sequence>
+			<xs:element name="Id" type="Max35Text"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="S2SDDCashAccount7">
+		<xs:sequence>
+			<xs:element name="Id" type="S2SDDAccountIdentification3Choice"/>
+		</xs:sequence>
+	</xs:complexType>
+	<!-- STEP2 RuleBbok 2016 for CR 3593, Dec 4th 2015 -->
+	<xs:complexType name="S2SDDCashAccount8">
+		<xs:sequence>
+			<xs:element name="Id" type="S2SDDAccountIdentification5Choice"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="S2SDDAccountIdentification3Choice">
+		<xs:sequence>
+			<xs:element name="IBAN" type="IBANIdentifier"/>
+		</xs:sequence>
+	</xs:complexType>
+	<!-- STEP2 RuleBbok 2016 for CR 3593, Dec 4th 2015 -->
+	<xs:complexType name="S2SDDAccountIdentification5Choice">
+		<xs:choice>
+			<xs:element name="IBAN" type="IBANIdentifier"/>
+			<xs:element name="Othr" type="S2SDDOrgnlDbtrAcctOther2"/>
+		</xs:choice>
+	</xs:complexType>
+	<xs:simpleType name="IBANIdentifier">
+		<xs:restriction base="xs:string">
+			<xs:pattern value="[a-zA-Z]{2,2}[0-9]{2,2}[a-zA-Z0-9]{1,30}"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:complexType name="S2SDDCdtrSchmeId1">
+		<xs:sequence>
+			<xs:element name="Nm" type="Max70Text" minOccurs="0"/>
+			<xs:element name="Id" type="S2SDDPrivateIdentification" minOccurs="0"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="S2SDDPrivateIdentification">
+		<xs:sequence>
+			<xs:element name="PrvtId" type="S2SDDPrty1"/>
+		</xs:sequence>
+	</xs:complexType>
+	<!-- STEP2 SDD Schema, new struct OthrId, December 21th 2009 -->
+	<xs:complexType name="S2SDDPrty1">
+		<xs:sequence>
+			<xs:element name="Othr" type="S2SDDId4"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="S2SDDId4">
+		<xs:sequence>
+			<!-- STEP2 Spaces allowed in Original Creditor Identifier field, May 25th 2012 -->
+			<xs:element name="Id" type="S2SDDId8"/>
+			<!--IdTp modified to SEPA content only on 08-03-07-->
+			<xs:element name="SchmeNm" type="FinancialIdentificationSchemeName2"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="FinancialIdentificationSchemeName2">
+		<xs:sequence>
+			<xs:element name="Prtry" type="S2SDDId9"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:simpleType name="S2SDDId9">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="SEPA"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="TrueFalseIndicator">
+		<xs:restriction base="xs:boolean"/>
+	</xs:simpleType>
+	<xs:simpleType name="Max1025Text">
+		<xs:restriction base="xs:string">
+			<xs:minLength value="1"/>
+			<xs:maxLength value="1025"/>
+			<xs:pattern value="(\s*[^\s]\s*)+"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:complexType name="S2SDDPaymentTypeInformation22">
+		<xs:sequence>
+			<xs:element name="SvcLvl" type="S2SDDServiceLevel8Choice"/>
+			<xs:element name="LclInstrm" type="S2SDDLocalInstrument2Choice"/>
+			<xs:element name="SeqTp" type="SequenceType1Code"/>
+			<xs:element name="CtgyPurp" type="S2SDDCategoryPurpose1Choice" minOccurs="0"/>
+		</xs:sequence>
+	</xs:complexType>
+	<!-- new S2SDDPaymentCategoryPurpose1Code datatype on 15-10-08-->
+	<xs:complexType name="S2SDDCategoryPurpose1Choice">
+		<xs:sequence>
+			<xs:choice>
+				<xs:element name="Cd" type="ExternalCategoryPurpose1Code"/>
+				<xs:element name="Prtry" type="Max35Text"/>
+			</xs:choice>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="PersonIdentification5">
+		<xs:sequence>
+			<xs:element name="Othr" type="GenericPersonIdentification1"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="S2SDDPersonIdentification5">
+		<xs:sequence>
+			<xs:choice>
+				<xs:element name="DtAndPlcOfBirth" type="DateAndPlaceOfBirth"/>
+				<xs:element name="Othr" type="S2SDDGenericPersonIdentification1"/>
+			</xs:choice>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="S2SDDGenericPersonIdentification1">
+		<xs:sequence>
+			<xs:element name="Id" type="Max35Text"/>
+			<xs:element name="SchmeNm" type="S2SDDPersonIdentificationSchemeName1Choice" minOccurs="0"/>
+			<xs:element name="Issr" type="Max35Text" minOccurs="0"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="S2SDDRemittanceInformation5">
+		<xs:sequence>
+			<xs:choice>
+				<xs:element name="Ustrd" type="Max140Text" maxOccurs="10"/>
+				<xs:element name="Strd" type="S2SDDStructuredRemittanceInformation6" maxOccurs="10"/>
+			</xs:choice>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:simpleType name="SequenceType1Code">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="FRST"/>
+			<xs:enumeration value="RCUR"/>
+			<xs:enumeration value="FNAL"/>
+			<xs:enumeration value="OOFF"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:complexType name="S2SDDServiceLevel8Choice">
+		<xs:sequence>
+			<xs:element name="Cd" type="S2SDDExternalServiceLevel1Code"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="S2SDDSettlementInformation13">
+		<xs:sequence>
+			<xs:element name="SttlmMtd" type="SettlementMethod1Code"/>
+			<!-- Add Clearing system, February 24th 2010 -->
+			<xs:element name="ClrSys" type="S2SCTClearingSystemIdentification1Choice"/>
+		</xs:sequence>
+	</xs:complexType>
+	<!-- Add Clearing system Prtry, February 24th 2010 -->
+	<xs:complexType name="S2SCTClearingSystemIdentification1Choice">
+		<xs:sequence>
+			<xs:element name="Prtry" type="Max35Text"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:simpleType name="SettlementMethod1Code">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="CLRG"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<!-- new Structured Remittance Information 2009-12-23 -->
+	<xs:complexType name="S2SDDStructuredRemittanceInformation6">
+		<xs:sequence>
+			<xs:element name="RfrdDocInf" type="S2SDDReferredDocumentInformation3" minOccurs="0"/>
+			<xs:element name="RfrdDocAmt" type="S2SDDReferredDocumentAmount1Choice" minOccurs="0"/>
+			<xs:element name="CdtrRefInf" type="S2SDDCreditorReferenceInformation2" minOccurs="0"/>
+			<xs:element name="Invcr" type="S2SDDPartyIdentification32" minOccurs="0"/>
+			<xs:element name="Invcee" type="S2SDDPartyIdentification32" minOccurs="0"/>
+			<xs:element name="AddtlRmtInf" type="Max140Text" minOccurs="0"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="S2SDDReferredDocumentInformation3">
+		<xs:sequence>
+			<xs:element name="Tp" type="S2SDDReferredDocumentType2" minOccurs="0"/>
+			<xs:element name="Nb" type="Max35Text" minOccurs="0"/>
+			<xs:element name="RltdDt" type="ISODate" minOccurs="0"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="S2SDDReferredDocumentType2">
+		<xs:sequence>
+			<xs:element name="CdOrPrtry" type="S2SDDReferredDocumentType1Choice"/>
+			<xs:element name="Issr" type="Max35Text" minOccurs="0"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="S2SDDReferredDocumentType1Choice">
+		<xs:sequence>
+			<xs:choice>
+				<xs:element name="Cd" type="S2SDDDocumentType5Code"/>
+				<xs:element name="Prtry" type="Max35Text"/>
+			</xs:choice>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:simpleType name="S2SDDDocumentType5Code">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="MSIN"/>
+			<xs:enumeration value="CNFA"/>
+			<xs:enumeration value="DNFA"/>
+			<xs:enumeration value="CINV"/>
+			<xs:enumeration value="CREN"/>
+			<xs:enumeration value="DEBN"/>
+			<xs:enumeration value="HIRI"/>
+			<xs:enumeration value="SBIN"/>
+			<xs:enumeration value="CMCN"/>
+			<xs:enumeration value="SOAC"/>
+			<xs:enumeration value="DISP"/>
+			<xs:enumeration value="BOLD"/>
+			<xs:enumeration value="VCHR"/>
+			<xs:enumeration value="AROI"/>
+			<xs:enumeration value="TSUT"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:complexType name="S2SDDReferredDocumentAmount1Choice">
+		<xs:sequence>
+			<xs:element name="DuePyblAmt" type="S2SDDCurrencyAndAmount" minOccurs="0"/>
+			<xs:element name="DscntApldAmt" type="S2SDDCurrencyAndAmount" minOccurs="0"/>
+			<xs:element name="CdtNoteAmt" type="S2SDDCurrencyAndAmount" minOccurs="0"/>
+			<xs:element name="TaxAmt" type="S2SDDCurrencyAndAmount" minOccurs="0"/>
+			<xs:element name="AdjstmntAmtAndRsn" type="S2SDDDocumentAdjustment1" minOccurs="0"/>
+			<xs:element name="RmtdAmt" type="S2SDDCurrencyAndAmount" minOccurs="0"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="S2SDDDocumentAdjustment1">
+		<xs:sequence>
+			<xs:element name="Amt" type="S2SDDCurrencyAndAmount"/>
+			<xs:element name="CdtDbtInd" type="S2SDDCreditDebitCode" minOccurs="0"/>
+			<xs:element name="Rsn" type="Max4Text" minOccurs="0"/>
+			<xs:element name="AddtlInf" type="Max140Text" minOccurs="0"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:simpleType name="S2SDDCreditDebitCode">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="CRDT"/>
+			<xs:enumeration value="DBIT"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:complexType name="S2SDDCreditorReferenceInformation2">
+		<xs:sequence>
+			<xs:element name="Tp" type="S2SDDCreditorReferenceType2"/>
+			<xs:element name="Ref" type="Max35Text"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="S2SDDCreditorReferenceType2">
+		<xs:sequence>
+			<xs:element name="CdOrPrtry" type="S2SDDCreditorReferenceType1Choice"/>
+			<xs:element name="Issr" type="Max35Text" minOccurs="0"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="S2SDDCreditorReferenceType1Choice">
+		<xs:sequence>
+			<xs:choice>
+				<xs:element name="Cd" type="S2SCTDocumentType3Code"/>
+				<xs:element name="Prtry" type="Max35Text"/>
+			</xs:choice>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:simpleType name="S2SCTDocumentType3Code">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="SCOR"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:complexType name="S2SDDUnderlyingTransaction2">
+		<xs:sequence>
+			<xs:choice>
+				<xs:element name="OrgnlGrpInfAndCxl" type="S2SDDOriginalGroupInformation23"/>
+				<xs:element name="TxInf" type="S2SDDPaymentTransactionInformation31" maxOccurs="unbounded"/>
+			</xs:choice>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="S2SDDOriginalGroupInformation23">
+		<xs:sequence>
+			<xs:element name="GrpCxlId" type="Max35Text"/>
+			<xs:element name="OrgnlMsgId" type="Max35Text"/>
+			<xs:element name="OrgnlMsgNmId" type="Max35Text"/>
+			<xs:element name="OrgnlCreDtTm" type="ISODateTime"/>
+			<xs:element name="NbOfTxs" type="Max15NumericText"/>
+			<xs:element name="CxlRsnInf" type="S2SDDCancellationReasonInformation4"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="S2SDDCancellationReasonInformation4">
+		<xs:sequence>
+			<xs:element name="Rsn" type="CancellationReason2Choice"/>
+		</xs:sequence>
+	</xs:complexType>
+	<!-- Added new type S2SDDId8 on 15-10-08-->
+	<xs:simpleType name="S2SDDId8">
+		<xs:restriction base="xs:string">
+			<xs:pattern value="([A-Za-z0-9]|[+|\?|/|\-|:|\(|\)|\.|,|'|\s]){1,35}"/>
+		</xs:restriction>
+	</xs:simpleType>
+</xs:schema>

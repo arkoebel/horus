@@ -1,0 +1,12 @@
+<AppHdr xmlns="urn:swift:xsd:iws.ApplicationHeader$ahV10" xsi:schemaLocation="urn:swift:xsd:iws.ApplicationHeader$ahV10 schema.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <From>
+        <Type>NAME</Type>
+        <Id>ASI</Id>
+    </From>
+    <To>
+        <Type>NAME</Type>
+        <Id>SFM</Id>
+    </To>
+    <MsgRef>string</MsgRef>
+    <CrDate>2009-11-08T00:34:05.110Z</CrDate>
+</AppHdr>

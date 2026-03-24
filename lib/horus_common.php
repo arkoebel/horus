@@ -24,7 +24,7 @@ class HorusCommon
         $this->log_location = $log_location;
         $this->business_id = $business_id;
         $this->colour = $colour;
-        $this->cnf = json_decode(file_get_contents('conf/horusConfig.json'),true);
+        $this->cnf = json_decode(file_get_contents('../conf/horusConfig.json'),true);
     }
 
     public static function getPath($vars){
@@ -35,7 +35,8 @@ class HorusCommon
     }
 
     public static function getTracer($config,$prefix,$path){
-        $cnf = json_decode(file_get_contents('conf/horusConfig.json'),true);
+        error_log(implode(',',scandir('../conf')));
+        $cnf = json_decode(file_get_contents('../conf/horusConfig.json'),true);
         $config = Jaeger\Config::getInstance();
         $config::$propagator = \Jaeger\Constants\PROPAGATOR_ZIPKIN;
         return $config->initTracer($prefix . '_' . $path,$cnf['tracerCollectorHost']);

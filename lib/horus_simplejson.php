@@ -30,13 +30,13 @@ class HorusSimpleJson
 
         if ($input === null) {
             $error_message = 'JSON Error ' . $this->common->decodeJsonError(json_last_error());
-            throw new HorusException($this->business->returnGenericJsonError($preferredType, 'templates/generic_error.json', $error_message,'',$span));
+            throw new HorusException($this->business->returnGenericJsonError($preferredType, '../templates/generic_error.json', $error_message,'',$span));
         }
 
         $selected = $this->business->locateJson($this->simpleJsonMatches, $input, $_GET);
         if ($selected == -1) {
             $error_message = 'No match found';
-            throw new HorusException($this->business->returnGenericJsonError($preferredType, 'templates/generic_error.json', $error_message, '',$span));
+            throw new HorusException($this->business->returnGenericJsonError($preferredType, '../templates/generic_error.json', $error_message, '',$span));
         } else {
             $this->common->mlog('Selected : ' . $selected, 'INFO');
         }
@@ -50,7 +50,7 @@ class HorusSimpleJson
 
         $errorTemplate = $this->business->findMatch($this->simpleJsonMatches, $selected, 'errorTemplate');
         $errorTemplate = (($errorTemplate == null) ? 'generic_error.json' : $errorTemplate);
-        $errorTemplate = 'templates/' . $errorTemplate;
+        $errorTemplate = '../templates/' . $errorTemplate;
         if ($this->business->findMatch($this->simpleJsonMatches, $selected, "displayError") === "On") {
             throw new HorusException($this->business->returnGenericJsonError($preferredType, $errorTemplate, "Requested error", $proxy_mode,$span));
         }
@@ -92,7 +92,7 @@ class HorusSimpleJson
         $nrep = 0;
         $response = '';
         foreach ($res['templates'] as $template) {
-            $respxml = 'templates/' . HorusBusiness::getTemplateName($template,$vars);
+            $respxml = '../templates/' . HorusBusiness::getTemplateName($template,$vars);
             $this->common->mlog("Using template " . $respxml, 'INFO');
             $injectSpan->log(['message'=>'Generate template ' . $respxml]);
 

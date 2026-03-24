@@ -1,13 +1,13 @@
 <?php
 
-require_once 'lib/horus_http.php';
-require_once 'lib/horus_common.php';
-require_once 'lib/horus_business.php';
-require_once 'lib/horus_inject.php';
-require_once 'lib/horus_simplejson.php';
-require_once 'lib/horus_xml.php';
-require_once 'lib/horus_exception.php';
-require_once 'vendor/autoload.php';
+require_once '../lib/horus_http.php';
+require_once '../lib/horus_common.php';
+require_once '../lib/horus_business.php';
+require_once '../lib/horus_inject.php';
+require_once '../lib/horus_simplejson.php';
+require_once '../lib/horus_xml.php';
+require_once '../lib/horus_exception.php';
+require_once '../vendor/autoload.php';
 
 use Jaeger\Config;
 
@@ -27,7 +27,7 @@ $colour = ("inject" === $request_type) ? 'YELLOW' : 'GREEN';
 $tracer = HorusCommon::getTracer(Config::getInstance(),$colour,HorusCommon::getPath($_SERVER));
 $rootSpan = HorusCommon::getStartSpan($tracer,apache_request_headers(),'Start Green/Yellow');
 
-$mmatches = json_decode(file_get_contents('conf/horusParams.json'), true);
+$mmatches = json_decode(file_get_contents('../conf/horusParams.json'), true);
 
 $common = new HorusCommon($business_id, $loglocation, $colour);
 
@@ -42,7 +42,7 @@ if (json_last_error() !== JSON_ERROR_NONE) {
     exit;
 }
 
-$genericError = 'templates/' . $mmatches["errorTemplate"];
+$genericError = '../templates/' . $mmatches["errorTemplate"];
 $errorFormat = $mmatches['errorFormat'];
 
 

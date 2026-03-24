@@ -1,0 +1,19 @@
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    #RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteRule ^black.php$ src/black.php [QSA,L]
+    RewriteRule ^check_signature.php$ src/check_signature.php [QSA,L]
+    RewriteRule ^database_oci.php$ src/database_oci.php [QSA,L]
+    RewriteRule ^database_pdo.php$ src/database_pdo.php [QSA,L]
+    RewriteRule ^finediff.php$ src/finediff.php [QSA,L]
+    RewriteRule ^getBroadcast.php$ src/getBroadcast.php [QSA,L]
+    RewriteRule ^getBroadcasts.php$ src/getBroadcasts.php [QSA,L]
+    RewriteRule ^getConf.php$ src/getConf.php [QSA,L]
+    RewriteRule ^getHorusDestinations.php$ src/getHorusDestinations.php [QSA,L]
+    RewriteRule ^hmacdiff.php$ src/hmacdiff.php [QSA,L]
+    RewriteRule ^horus.php$ src/HorusNew.php [QSA,L]
+    RewriteRule ^horusRecurse.php$ src/horusRecurse.php [QSA,L]
+    RewriteRule ^horusRouter.php$ src/horusRouter..php [QSA,L]
+    RewriteRule ^horusRouterNew.php$ src/horusRouterNew.php [QSA,L]
+    RewriteRule ^inject.php$ src/inject.php [QSA,L]
+</IfModule>

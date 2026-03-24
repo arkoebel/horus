@@ -1,14 +1,14 @@
 <?php
 
-require_once('lib/horus_http.php');
-require_once('lib/horus_common.php');
-require_once('lib/horus_business.php');
-require_once('lib/horus_inject.php');
-require_once('lib/horus_simplejson.php');
-require_once('lib/horus_xml.php');
-require_once('lib/horus_exception.php');
+require_once('../lib/horus_http.php');
+require_once('../lib/horus_common.php');
+require_once('../lib/horus_business.php');
+require_once('../lib/horus_inject.php');
+require_once('../lib/horus_simplejson.php');
+require_once('../lib/horus_xml.php');
+require_once('../lib/horus_exception.php');
 
-require_once('vendor/autoload.php');
+require_once('../vendor/autoload.php');
 
 $tracer = HorusCommon::getTracer($config,'ORANGE',HorusCommon::getPath($_SERVER));
 $rootSpan = HorusCommon::getStartSpan($tracer,apache_request_headers(),'Start Orange');
@@ -33,7 +33,7 @@ if (function_exists('apache_request_headers')) {
 
 $common->mlog('Destination is : ' . HorusHttp::extractHeader('x_destination_url'),'DEBUG');
 
-$params = json_decode(file_get_contents('conf/horusRouting.json'),true);
+$params = json_decode(file_get_contents('../conf/horusRouting.json'),true);
 
 if (json_last_error() !== JSON_ERROR_NONE) {
     header("HTTP/1.1 500 SERVER ERROR", true, 500);

@@ -472,7 +472,7 @@ else
 
 $colour = ("inject" === $request_type) ? 'YELLOW':'GREEN';
 $mmatches = json_decode(file_get_contents('conf/horusParams.json'),true);
-$genericError = 'templates/' . $mmatches["errorTemplate"];
+$genericError = '../templates/' . $mmatches["errorTemplate"];
 $errorFormat = $mmatches['errorFormat'];
 $preferredType = setReturnType($_SERVER['HTTP_ACCEPT'],$errorFormat);
 mlog("Preferred mime type : " . $preferredType,'DEBUG','TXT',$colour);
@@ -489,7 +489,7 @@ $proxy_mode = extractHeader('X_DESTINATION_URL');
 
 if ("inject" === $request_type){
     $reqparams = json_decode($reqbody,true);
-    $template = 'templates/' . $reqparams['template'];
+    $template = '../templates/' . $reqparams['template'];
     $vars=array();
     foreach($reqparams['attr'] as $key => $value)
         $vars[$key] = $value;
@@ -529,13 +529,13 @@ if ("inject" === $request_type){
     $input = extractSimpleJsonPayload($reqbody);
     if($input === null){
         $error_message = "JSON Error " . decodeJsonError(json_last_error());
-        returnGenericJsonError($preferredType,'templates/generic_error.json',$error_message,$proxy_mode);
+        returnGenericJsonError($preferredType,'../templates/generic_error.json',$error_message,$proxy_mode);
     }
     //error_log("XJSON=" . print_r($simpleJsonMatches,true));
     $selected = locateJson($simpleJsonMatches,$input,$_GET);
     if ($selected == -1){
         $error_message = "No match found";
-        returnGenericJsonError($preferredType,'templates/generic_error.json',$errorMessage,$proxy_mode);
+        returnGenericJsonError($preferredType,'../templates/generic_error.json',$errorMessage,$proxy_mode);
     }else{
         mlog('Selected : ' . $selected,'INFO');
     }
@@ -547,7 +547,7 @@ if ("inject" === $request_type){
 
     $errorTemplate = findMatch($simpleJsonMatches,$selected,"errorTemplate");
     $errorTemplate = ( ($errorTemplate==null) ? 'generic_error.json' : $errorTemplate);
-    $errorTemplate = 'templates/' . $errorTemplate;
+    $errorTemplate = '../templates/' . $errorTemplate;
     if(findMatch($simpleJsonMatches,$selected,"displayError")==="On"){
         //echo trim(preg_replace('/\s+/', ' ', $errorOutput));
         returnGenericJsonError($preferredType,$errorTemplate,"Requested error",$proxy_mode);
@@ -566,7 +566,7 @@ if ("inject" === $request_type){
     $mime_boundary=md5(time());
     $nrep = 0;
     foreach($templates as $template){
-        $respxml = 'templates/' . $template;
+        $respxml = '../templates/' . $template;
         ob_start();
         include $respxml;
         $output = ob_get_contents();
@@ -606,10 +606,10 @@ if ("inject" === $request_type){
 
     $valid = false;
     $selectedXsd = "";
-    foreach (scandir('xsd') as $schema){
+    foreach (scandir('../xsd') as $schema){
         if(!(strpos($schema,$namespace)===false)){
             libxml_use_internal_errors(true);
-            if($domdoc->schemaValidate('xsd/' . $schema)){
+            if($domdoc->schemaValidate('../xsd/' . $schema)){
                 //echo "matched $schema\n";
                 $valid = true;
                 $selectedXsd = $schema;
@@ -650,7 +650,7 @@ if ("inject" === $request_type){
 
         $errorTemplate = findMatch($matches,$selected,"errorTemplate");
         $errorTemplate = ( ($errorTemplate==null) ? $genericError : $errorTemplate);
-        $errorTemplate = 'templates/' . $errorTemplate;
+        $errorTemplate = '../templates/' . $errorTemplate;
         if(findMatch($matches,$selected,"displayError")==="On"){
             //echo trim(preg_replace('/\s+/', ' ', $errorOutput));
             returnGenericError($preferredType,$errorTemplate,"Requested error",$proxy_mode);
@@ -671,7 +671,7 @@ if ("inject" === $request_type){
         $mime_boundary=md5(time());
         $nrep = 0;
         foreach($templates as $template){
-            $respxml = 'templates/' . $template;
+            $respxml = '../templates/' . $template;
             ob_start();
             include $respxml;
             $output = ob_get_contents();
@@ -680,7 +680,7 @@ if ("inject" === $request_type){
             $outputxml->loadXML(preg_replace('/\s*(<[^>]*>)\s*/','$1',$output));
             // $outputxml->loadXML($output);
             // die(print_r($output,true));
-            if(!($outputxml->schemaValidate('xsd/' . $formats[$nrep]))){
+            if(!($outputxml->schemaValidate('../xsd/' . $formats[$nrep]))){
                 $errorMessage = "Could not validate output with " . $formats[$nrep] . "\n";
                 $errorMessage .= libxml_display_errors();
                 mlog($errorMessage . "\n",'ERROR');

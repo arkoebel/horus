@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 use PHPUnit\Framework\TestCase;
 
-require_once('lib/horus_http.php');
-require_once('lib/horus_common.php');
+require_once('../lib/horus_http.php');
+require_once('../lib/horus_common.php');
 require_once('HorusTestCase.php');
-require_once('lib/horus_exception.php');
+require_once('../lib/horus_exception.php');
 require_once('HorusCurlMock.php');
 
 class HorusHttpTest extends HorusTestCase

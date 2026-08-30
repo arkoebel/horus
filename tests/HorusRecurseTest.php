@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-require_once('lib/horus_http.php');
-require_once('lib/horus_common.php');
-require_once('lib/horus_xml.php');
-require_once('lib/horus_recurse.php');
+require_once('../lib/horus_http.php');
+require_once('../lib/horus_common.php');
+require_once('../lib/horus_xml.php');
+require_once('../lib/horus_recurse.php');
 require_once('HorusTestCase.php');
-require_once('lib/horus_exception.php');
+require_once('../lib/horus_exception.php');
 
 class HorusRecurseTest extends HorusTestCase
 {

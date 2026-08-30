@@ -253,7 +253,7 @@ class HorusTracing implements HorusTracingInterface
 
     public function getTracer($prefix, $path)
     {
-        $cnf = json_decode(file_get_contents('conf/horusConfig.json'), true);
+        $cnf = json_decode(file_get_contents('../conf/horusConfig.json'), true);
 
         $transport = PsrTransportFactory::discover()->create($cnf['zipkinUrl'], 'application/json');
         $zipkinExporter = new ZipkinExporter(

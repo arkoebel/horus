@@ -982,5 +982,4 @@
 	</xs:complexType>
 	<!-- Root element -->
 	<xs:element name="DataPDU" type="DataPDU"></xs:element>
-	<xs:element name="Header" type="Header"></xs:element>
 </xs:schema>

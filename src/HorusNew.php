@@ -1,16 +1,16 @@
 <?php
 
-require_once 'lib/horus_http.php';
-require_once 'lib/horus_common.php';
-require_once 'lib/horus_business.php';
-require_once 'lib/horus_inject.php';
-require_once 'lib/horus_simplejson.php';
-require_once 'lib/horus_xml.php';
-require_once 'lib/horus_exception.php';
-require_once 'lib/horus_utils.php';
-require_once 'lib/horus_curlInterface.php';
-require_once 'lib/horus_curl.php';
-require_once 'vendor/autoload.php';
+require_once '../lib/horus_http.php';
+require_once '../lib/horus_common.php';
+require_once '../lib/horus_business.php';
+require_once '../lib/horus_inject.php';
+require_once '../lib/horus_simplejson.php';
+require_once '../lib/horus_xml.php';
+require_once '../lib/horus_exception.php';
+require_once '../lib/horus_utils.php';
+require_once '../lib/horus_curlInterface.php';
+require_once '../lib/horus_curl.php';
+require_once '../vendor/autoload.php';
 
 $loglocation = HorusCommon::getConfValue('logLocation', HorusCommon::DEFAULT_LOG_LOCATION);
 
@@ -36,7 +36,7 @@ $tracer = new HorusTracing(
     );
 $rootSpan = $tracer->getCurrentSpan();
 
-$mmatches = json_decode(file_get_contents('conf/horusParams.json'), true);
+$mmatches = json_decode(file_get_contents('../conf/horusParams.json'), true);
 
 $common = new HorusCommon($businessId, $loglocation, $colour);
 
@@ -51,7 +51,7 @@ if (json_last_error() !== JSON_ERROR_NONE) {
     exit;
 }
 
-$genericError = 'templates/' . $mmatches["errorTemplate"];
+$genericError = '../templates/' . $mmatches["errorTemplate"];
 $errorFormat = $mmatches['errorFormat'];
 
 

@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-require_once('lib/horus_http.php');
-require_once('lib/horus_common.php');
-require_once('lib/horus_xml.php');
+require_once('../lib/horus_http.php');
+require_once('../lib/horus_common.php');
+require_once('../lib/horus_xml.php');
 require_once('HorusTestCase.php');
-require_once('lib/horus_exception.php');
+require_once('../lib/horus_exception.php');
 
 class HorusXmlTest extends HorusTestCase
 {
@@ -23,7 +23,7 @@ class HorusXmlTest extends HorusTestCase
                 array(),
                 HorusCommon::XML_CT,
                 array(),
-                'templates/genericError.xml',
+                '../templates/genericError.xml',
                 '',
                 self::$rootSpan
             );
@@ -73,7 +73,7 @@ class HorusXmlTest extends HorusTestCase
                 $matches,
                 HorusCommon::XML_CT,
                 array(),
-                'templates/genericError.xml',
+                '../templates/genericError.xml',
                 '',
                 self::$rootSpan
             );
@@ -210,7 +210,7 @@ class HorusXmlTest extends HorusTestCase
         $templates = array('pacs.002_ACCP.xml', 'pacs.002_RJCT.xml');
         $formats = array('pacs.002.001.03.xsd', 'pacs.002.001.03.xsd');
         $preferredType = HorusCommon::XML_CT;
-        $errorTemplate = 'templates/genericError.xml';
+        $errorTemplate = '../templates/genericError.xml';
 
         $this->expectException(HorusException::class);
 
@@ -231,7 +231,7 @@ class HorusXmlTest extends HorusTestCase
         $templates = array('pacs.002_ACCP.xml', 'pacs.002_RJCT.xml');
         $formats = array('pacs.002.001.03.xsd', 'pacs.002.001.03.xsd');
         $preferredType = HorusCommon::XML_CT;
-        $errorTemplate = 'templates/genericError.xml';
+        $errorTemplate = '../templates/genericError.xml';
 
         $r = $xmlinject->getResponses($templates, $vars, $formats, $preferredType, $errorTemplate, '', true);
 
@@ -324,7 +324,7 @@ class HorusXmlTest extends HorusTestCase
             $matches,
             HorusCommon::XML_CT,
             $queryParams,
-            'templates/genericError.xml',
+            '../templates/genericError.xml',
             '',
             self::$rootSpan
         );
@@ -437,7 +437,7 @@ class HorusXmlTest extends HorusTestCase
             json_decode($matches, true),
             HorusCommon::XML_CT,
             $queryParams,
-            'templates/genericError.xml',
+            '../templates/genericError.xml',
             '',
             self::$rootSpan
         );
@@ -579,7 +579,7 @@ class HorusXmlTest extends HorusTestCase
             $matches,
             HorusCommon::XML_CT,
             $queryParams,
-            'templates/genericError.xml',
+            '../templates/genericError.xml',
             '',
             self::$rootSpan
         );

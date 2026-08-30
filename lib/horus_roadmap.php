@@ -28,7 +28,7 @@ class HorusRoadmap
         }
         $this->http = new HorusHttp($businessId, $logLocation, $colour, $tracer, $httpImpl);
         $this->tracer = $tracer;
-        $this->conf = json_decode(file_get_contents('conf/horusRoadmap.json'), true);
+        $this->conf = json_decode(file_get_contents('../conf/horusRoadmap.json'), true);
         if ($this->conf === null) {
             $this->common->mlog('Invalid configuration file', 'FATAL');
             throw new HorusException('Invalid configuration file');

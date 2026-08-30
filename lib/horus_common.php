@@ -13,7 +13,7 @@ class HorusCommon
     public const ENC_PREFIX = 'B64PRF-';
     public const ENC_SEP = '#!#';
     public const DEFAULT_LOG_LOCATION = '/var/log/horus/horus_http.log';
-    public const HORUS_CONFIG = 'conf/horusConfig.json';
+    public const HORUS_CONFIG = '../conf/horusConfig.json';
     public const QUERY_PARAM_CUTOFF = 80;
     public const XML_CT = 'application/xml';
     public const JS_CT = 'application/json';

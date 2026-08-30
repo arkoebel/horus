@@ -1,15 +1,15 @@
 <?php
 
-require_once('lib/horus_http.php');
-require_once('lib/horus_common.php');
-require_once('lib/horus_business.php');
-require_once('lib/horus_inject.php');
-require_once('lib/horus_simplejson.php');
-require_once('lib/horus_xml.php');
-require_once('lib/horus_exception.php');
-require_once('lib/horus_curlInterface.php');
-require_once('lib/horus_curl.php');
-require_once('lib/horus_utils.php');
+require_once('../lib/horus_http.php');
+require_once('../lib/horus_common.php');
+require_once('../lib/horus_business.php');
+require_once('../lib/horus_inject.php');
+require_once('../lib/horus_simplejson.php');
+require_once('../lib/horus_xml.php');
+require_once('../lib/horus_exception.php');
+require_once('../lib/horus_curlInterface.php');
+require_once('../lib/horus_curl.php');
+require_once('../lib/horus_utils.php');
 
 require_once('vendor/autoload.php');
 
@@ -56,7 +56,7 @@ $destination = HorusHttp::extractHeader(HorusCommon::DEST_HEADER);
 $common->mlog('Destination is : ' . $destination, 'DEBUG');
 $tracer->addAttribute($rootSpan,'destination', $destination);
 
-$params = json_decode(file_get_contents('conf/horusFormating.json'), true);
+$params = json_decode(file_get_contents('../conf/horusFormating.json'), true);
 
 if (json_last_error() !== JSON_ERROR_NONE) {
     $headerInt->sendHeader("HTTP/1.1 500 SERVER ERROR", true, 500);

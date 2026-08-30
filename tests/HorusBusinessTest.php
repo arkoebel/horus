@@ -2,15 +2,15 @@
 
 declare (strict_types = 1);
 
-require_once "lib/horus_utils.php";
-require_once 'lib/horus_curlInterface.php';
-require_once 'lib/horus_curl.php';
-require_once 'lib/horus_http.php';
-require_once 'lib/horus_common.php';
+require_once "../lib/horus_utils.php";
+require_once '../lib/horus_curlInterface.php';
+require_once '../lib/horus_curl.php';
+require_once '../lib/horus_http.php';
+require_once '../lib/horus_common.php';
 
-require_once 'lib/horus_business.php';
-require_once 'lib/horus_common.php';
-require_once 'lib/horus_exception.php';
+require_once '../lib/horus_business.php';
+require_once '../lib/horus_common.php';
+require_once '../lib/horus_exception.php';
 require_once 'HorusTestCase.php';
 require_once 'HorusCurlMock.php';
 

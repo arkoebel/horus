@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 use PHPUnit\Framework\TestCase;
 
-require_once "lib/horus_utils.php";
-require_once('lib/horus_curlInterface.php');
-require_once('lib/horus_curl.php');
-require_once('lib/horus_http.php');
-require_once('lib/horus_common.php');
-require_once('vendor/autoload.php');
+require_once "../lib/horus_utils.php";
+require_once('../lib/horus_curlInterface.php');
+require_once('../lib/horus_curl.php');
+require_once('../lib/horus_http.php');
+require_once('../lib/horus_common.php');
+require_once('../vendor/autoload.php');
 
 
 class HorusTestCase extends TestCase

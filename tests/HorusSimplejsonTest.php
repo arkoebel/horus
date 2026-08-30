@@ -2,10 +2,10 @@
 
 declare (strict_types = 1);
 
-require_once 'lib/horus_http.php';
-require_once 'lib/horus_common.php';
-require_once 'lib/horus_inject.php';
-require_once 'lib/horus_exception.php';
+require_once '../lib/horus_http.php';
+require_once '../lib/horus_common.php';
+require_once '../lib/horus_inject.php';
+require_once '../lib/horus_exception.php';
 require_once 'HorusTestCase.php';
 
 class HorusSimplejsonTest extends HorusTestCase

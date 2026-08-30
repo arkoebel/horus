@@ -1,5 +1,5 @@
 <?php
-    $file = 'templates/' . $_GET['name'];
+    $file = '../templates/' . $_GET['name'];
 
     $contents = file_get_contents($file);
     $xml = simplexml_load_string($contents);

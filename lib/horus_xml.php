@@ -64,10 +64,10 @@ class HorusXml
 
         $selectedXsd = '';
 
-        foreach (scandir('xsd') as $schema) {
+        foreach (scandir('../xsd') as $schema) {
             if (strpos($schema, $namespace) !== false) {
                 libxml_use_internal_errors(true);
-                if (@$domdoc->schemaValidate('xsd/' . $schema)) {
+                if (@$domdoc->schemaValidate('../xsd/' . $schema)) {
                     $selectedXsd = $schema;
                 } else {
                     $this->common->mlog(
@@ -131,7 +131,7 @@ class HorusXml
         $nrep = 0;
 
         foreach ($templates as $template) {
-            $respxml = 'templates/' . HorusBusiness::getTemplateName($template, $vars);
+            $respxml = '../templates/' . HorusBusiness::getTemplateName($template, $vars);
             $vars['nb'] = $nrep;
             $this->common->mlog("Using template " . $respxml, 'INFO');
             ob_start();
@@ -167,7 +167,7 @@ class HorusXml
                 $this->common->mlog('Effective body before validation : ' . $output, 'INFO');
                 $outputxml = new DOMDocument();
                 $outputxml->loadXML(preg_replace('/\s*(<[^>]*>)\s*/', '$1', $output));
-                if ($outputxml->schemaValidate('xsd/' . $formats[$nrep]) !== true) {
+                if ($outputxml->schemaValidate('../xsd/' . $formats[$nrep]) !== true) {
                     $errorMessage = "Could not validate output with " . $formats[$nrep] . "\n";
                     $errorMessage .= $this->common->libxml_display_errors();
                     $this->common->mlog($errorMessage . "\n", 'ERROR');
@@ -513,7 +513,7 @@ class HorusXml
 
             $errorTemplate = $this->business->findMatch($matches, $selected, "errorTemplate");
             $errorTemplate = (($errorTemplate == null) ? $genericError : $errorTemplate);
-            $errorTemplate = 'templates/' . $errorTemplate;
+            $errorTemplate = '../templates/' . $errorTemplate;
             if ($this->business->findMatch($matches, $selected, "displayError") === "On") {
                 throw new HorusException($this->business->returnGenericError(
                     $preferredType,

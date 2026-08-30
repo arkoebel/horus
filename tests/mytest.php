@@ -1,8 +1,8 @@
 <?php
 
-require_once('lib/horus_curlInterface.php');
+require_once('../lib/horus_curlInterface.php');
 require_once('tests/HorusCurlMock.php');
-require_once('lib/horus_tracing.php');
+require_once('../lib/horus_tracing.php');
 
 $mockTracing = new HorusTracingMock('BOX', 'SERIAL', 'START', array());
 

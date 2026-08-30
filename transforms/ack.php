@@ -34,7 +34,7 @@ class DataPduAck implements HorusTransformerInterface
 
         $outputxml = new DOMDocument();
         $outputxml->loadXML(preg_replace('/\s*(<[^>]*>)\s*/', '$1', $template));
-        if ($outputxml->schemaValidate('xsd/saa.2.0.13.xsd') !== true) {
+        if ($outputxml->schemaValidate('../xsd/saa.2.0.13.xsd') !== true) {
             //Oops. Didn't validate...
             //Return error
             $errorMessage='ACK didn\'t pass XSD validation';

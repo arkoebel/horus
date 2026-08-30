@@ -9,7 +9,7 @@ class ValidateDataPduFilter implements HorusFilterInterface
     const SERVICE_XPATH = "//*[local-name()='Header']/*[local-name()='Message']"
                             . "/*[local-name()='NetworkInfo']/*[local-name()='Service']";
     const SERVICE_TO_SYSTEM = array('esmig.t2.iast!pu'=>'RTGS','test'=>'ANOTHER_SYSTEM');
-    const SAA_XSD = 'xsd/saa.2.0.13.xsd';
+    const SAA_XSD = '../xsd/saa.2.0.13.xsd';
 
 
     private function isXmlFragmentValid(SimpleXmlElement $xml, String $path, String $service): bool {
@@ -29,7 +29,7 @@ class ValidateDataPduFilter implements HorusFilterInterface
             $headns = array_pop($headns);
 
             // Build the schema name
-            $head_schema = 'xsd/' . self::SERVICE_TO_SYSTEM[$service] . '_' . $headns . '.xsd';
+            $head_schema = '../xsd/' . self::SERVICE_TO_SYSTEM[$service] . '_' . $headns . '.xsd';
 
             // Tests if the schema is present
             if (!file_exists($head_schema)){

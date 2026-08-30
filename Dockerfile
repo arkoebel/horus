@@ -1,4 +1,4 @@
-FROM php:8-apache
+FROM php:8.4-apache
 RUN apt-get update && apt-get install -y \
     && apt install -y libxml2-dev \
     && apt install -y librdkafka-dev \

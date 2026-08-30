@@ -31,7 +31,7 @@ class HorusSimpleJson
             throw new HorusException(
                 $this->business->returnGenericJsonError(
                     $preferredType,
-                    'templates/generic_error.json',
+                    '../templates/generic_error.json',
                     $errorMessage,
                     '',
                     $span
@@ -45,7 +45,7 @@ class HorusSimpleJson
             throw new HorusException(
                 $this->business->returnGenericJsonError(
                     $preferredType,
-                    'templates/generic_error.json',
+                    '../templates/generic_error.json',
                     $errorMessage,
                     '',
                     $span
@@ -81,7 +81,7 @@ class HorusSimpleJson
 
         $errorTemplate = $this->business->findMatch($this->simpleJsonMatches, $selected, 'errorTemplate');
         $errorTemplate = (($errorTemplate == null) ? 'generic_error.json' : $errorTemplate);
-        $errorTemplate = 'templates/' . $errorTemplate;
+        $errorTemplate = '../templates/' . $errorTemplate;
         if ($this->business->findMatch($this->simpleJsonMatches, $selected, "displayError") === "On") {
             throw new HorusException(
                 $this->business->returnGenericJsonError(
@@ -128,7 +128,7 @@ class HorusSimpleJson
         $nrep = 0;
         $response = '';
         foreach ($res['templates'] as $template) {
-            $respxml = 'templates/' . HorusBusiness::getTemplateName($template, $vars);
+            $respxml = '../templates/' . HorusBusiness::getTemplateName($template, $vars);
             $this->common->mlog("Using template " . $respxml, 'INFO');
             $this->tracer->logSpan($injectSpan, 'Generate template ' . $respxml);
 

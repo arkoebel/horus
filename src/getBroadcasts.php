@@ -1,8 +1,10 @@
 <?php
 
-$liste = glob('../broadcast_*.xml');
+require_once dirname(__DIR__) . '/lib/horus_common.php';
+
+$liste = glob(HorusCommon::horusPath('templates/broadcast_*.xml'));
 $newlst = array();
 foreach ($liste as $item) {
-    $newlst[]=array('name'=>preg_replace('/templates\//', '', $item));
+    $newlst[]=array('name'=>basename($item));
 }
 echo json_encode($newlst);

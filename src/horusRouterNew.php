@@ -1,16 +1,16 @@
 <?php
 
-require_once '../lib/horus_http.php';
-require_once '../lib/horus_common.php';
-require_once '../lib/horus_business.php';
-require_once '../lib/horus_inject.php';
-require_once '../lib/horus_simplejson.php';
-require_once '../lib/horus_xml.php';
-require_once '../lib/horus_exception.php';
-require_once '../lib/horus_curlInterface.php';
-require_once '../lib/horus_curl.php';
+require_once dirname(__DIR__) . '/lib/horus_common.php';
+require_once HorusCommon::horusPath('lib/horus_http.php');
+require_once HorusCommon::horusPath('lib/horus_business.php');
+require_once HorusCommon::horusPath('lib/horus_inject.php');
+require_once HorusCommon::horusPath('lib/horus_simplejson.php');
+require_once HorusCommon::horusPath('lib/horus_xml.php');
+require_once HorusCommon::horusPath('lib/horus_exception.php');
+require_once HorusCommon::horusPath('lib/horus_curlInterface.php');
+require_once HorusCommon::horusPath('lib/horus_curl.php');
 
-require_once '../vendor/autoload.php';
+require_once HorusCommon::horusPath('vendor/autoload.php');
 
 $tracer = new HorusTracing('ORANGE', HorusCommon::getPath($_SERVER), 'Start Orange', HorusCommon::getHttpHeaders());
 $rootSpan = $tracer->getCurrentSpan();
@@ -34,7 +34,7 @@ $common->mlog('Headers : ' . print_r(HorusCommon::getHttpHeaders(), true), 'DEBU
 
 $common->mlog('Destination is : ' . HorusHttp::extractHeader(HorusCommon::DEST_HEADER), 'DEBUG');
 
-$params = json_decode(file_get_contents('../conf/horusRouting.json'), true);
+$params = json_decode(HorusCommon::horusFileGetContents('conf/horusRouting.json'), true);
 
 if (json_last_error() !== JSON_ERROR_NONE) {
     $headerInt->sendHeader(HorusCommon::HTTP_500_RETURN, true, 500);

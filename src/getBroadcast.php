@@ -1,7 +1,7 @@
 <?php
-    $file = '../templates/' . $_GET['name'];
+    require_once dirname(__DIR__) . '/lib/horus_common.php';
 
-    $contents = file_get_contents($file);
+    $contents = HorusCommon::horusFileGetContents('templates/' . $_GET['name']);
     $xml = simplexml_load_string($contents);
     $resp = (string)$xml->ResponseType;
     $attr=array();

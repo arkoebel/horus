@@ -31,7 +31,7 @@ class HorusInjector
         for ($i = 0; $i < $reqparams['repeat']; $i++) {
             $lineSpan = $this->tracer->newSpan('Handle message ' . $i, $rootSpan);
             $vars['loop_index'] = $i;
-            $template = '../templates/' . HorusBusiness::getTemplateName($reqparams['template'], $vars);
+            $template = HorusCommon::horusPath('templates/' . HorusBusiness::getTemplateName($reqparams['template'], $vars));
             $this->common->mlog("Using template " . $template, 'INFO');
 
             $this->tracer->logSpan($lineSpan, 'Start template generation');

@@ -1,8 +1,8 @@
 <?php
 
-require_once '../lib/horus_common.php';
-require_once '../lib/horus_xml.php';
-require_once '../lib/horus_exception.php';
+require_once dirname(__DIR__) . '/lib/horus_common.php';
+require_once HorusCommon::horusPath('lib/horus_xml.php');
+require_once HorusCommon::horusPath('lib/horus_exception.php');
 
 $file = $argv[2];
 $mode = $argv[1];

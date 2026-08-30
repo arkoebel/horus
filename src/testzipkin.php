@@ -1,7 +1,8 @@
 <?php
 
 declare(strict_types=1);
-require __DIR__ . '/vendor/autoload.php';
+require_once dirname(__DIR__) . '/lib/horus_common.php';
+require HorusCommon::horusPath('vendor/autoload.php');
 
 /**
  * If you want to observe or debug the span data, which is sent to an exporter/collector,

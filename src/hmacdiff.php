@@ -23,6 +23,8 @@ del {color:red;background:#fdd;text-decoration:none}
 <h1>Check HMAC FIN Signature</h1>
 <div>
 <?php
+require_once dirname(__DIR__) . '/lib/horus_common.php';
+
 function stripslashesDeep(&$value)
 {
 	$value = is_array($value) ? array_map('stripslashesDeep', $value) : stripslashes($value);
@@ -50,7 +52,7 @@ function sign($input, $key)
     return $tosign . "{S:\r\n{MDG:" . strtoupper(bin2hex($res)) . "}}";
 }
 
-include_once 'finediff.php';
+include_once HorusCommon::horusPath('src/finediff.php');
 
 $granularity = 2;
 $fromText = '';

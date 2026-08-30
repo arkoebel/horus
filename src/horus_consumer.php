@@ -1,18 +1,18 @@
 <?php
 
-require_once '../lib/horus_http.php';
-require_once '../lib/horus_common.php';
-require_once '../lib/horus_business.php';
-require_once '../lib/horus_inject.php';
-require_once '../lib/horus_simplejson.php';
-require_once '../lib/horus_xml.php';
-require_once '../lib/horus_exception.php';
-require_once '../lib/horus_curlInterface.php';
-require_once '../lib/horus_curl.php';
-require_once '../lib/horus_utils.php';
-require_once '../lib/horus_tracing.php';
-require_once '../lib/horus_roadmap.php';
-require_once '../vendor/autoload.php';
+require_once dirname(__DIR__) . '/lib/horus_common.php';
+require_once HorusCommon::horusPath('lib/horus_http.php');
+require_once HorusCommon::horusPath('lib/horus_business.php');
+require_once HorusCommon::horusPath('lib/horus_inject.php');
+require_once HorusCommon::horusPath('lib/horus_simplejson.php');
+require_once HorusCommon::horusPath('lib/horus_xml.php');
+require_once HorusCommon::horusPath('lib/horus_exception.php');
+require_once HorusCommon::horusPath('lib/horus_curlInterface.php');
+require_once HorusCommon::horusPath('lib/horus_curl.php');
+require_once HorusCommon::horusPath('lib/horus_utils.php');
+require_once HorusCommon::horusPath('lib/horus_tracing.php');
+require_once HorusCommon::horusPath('lib/horus_roadmap.php');
+require_once HorusCommon::horusPath('vendor/autoload.php');
 
 const CONSUMER_GROUP='horus';
 
@@ -41,7 +41,7 @@ $consumer = new RdKafka\KafkaConsumer($conf);
 //$topics = array($argv[1]);
 
 $topics = array();
-$roadmaps = json_decode(file_get_contents('../conf/horusRoadmap.json'), true);
+$roadmaps = json_decode(HorusCommon::horusFileGetContents('conf/horusRoadmap.json'), true);
 foreach ($roadmaps['destinations'] as $destination ) {
     $topics[] = $destination['name'];
 }
